@@ -14,7 +14,7 @@ const theme = createMuiTheme({
 export default function AppContainer() {
   return (
     <MuiThemeProvider theme={theme}>
-      <Container maxWidth="lg">
+      <Container maxWidth="md">
         {/* Replace MainView completely with the real component. */}
         <MainView />
       </Container>
