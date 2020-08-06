@@ -2,8 +2,16 @@
 
 ## Install tools
 
-- Lets use yarn instead of npm, seems to be much faster
+### Misc
+
+- Use yarn instead of npm, seems to be much faster
 - Use VSCode for minimum friction
+
+### Firebase tools
+
+Firebase tools are used for managing the firebase app - database, auth etc.
+
+    yarn global add firebase-tools
 
 ## Start the app
 
