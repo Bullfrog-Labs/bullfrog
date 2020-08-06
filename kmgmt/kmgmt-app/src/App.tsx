@@ -3,11 +3,13 @@ import AppContainer from "./components/AppContainer";
 import SignIn from "./components/SignIn";
 import Logging from "./services/Logging";
 import Firebase from "./services/Firebase";
+import FirestoreDatabase from "./services/FirestoreDatabase";
 import * as log from "loglevel";
 import "./App.css";
 
 Logging.configure(log);
 const firebase = Firebase.init();
+const database = FirestoreDatabase.create();
 
 function App() {
   const logger = log.getLogger("App");
@@ -26,7 +28,7 @@ function App() {
   }
 
   if (userAuth) {
-    return <AppContainer />;
+    return <AppContainer database={database} />;
   } else {
     return <SignIn />;
   }
