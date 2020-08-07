@@ -2,6 +2,8 @@ import React from "react";
 import Typography from "@material-ui/core/Typography";
 import * as log from "loglevel";
 import { Database, NoteRecord } from "../services/Database";
+import { Container } from "@material-ui/core";
+import { Link } from "react-router-dom";
 
 export default function MainView(props: { database: Database }) {
   const logger = log.getLogger("MainView");
@@ -20,12 +22,14 @@ export default function MainView(props: { database: Database }) {
   }, [database, logger]);
 
   return (
-    <React.Fragment>
+    <Container maxWidth="md">
       <Typography variant="h1">Welcome to kmgmt-app</Typography>
       <Typography variant="body1">
-        Dummy note:{" "}
-        <b>{notes.length ? notes[0].text : "couldnt find any notes"}</b>
+        <Link to="notes/dummy-note">
+          Dummy note:{" "}
+          <b>{notes.length ? notes[0].text : "couldnt find any notes"}</b>
+        </Link>
       </Typography>
-    </React.Fragment>
+    </Container>
   );
 }
