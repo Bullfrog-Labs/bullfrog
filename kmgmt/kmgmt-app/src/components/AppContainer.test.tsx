@@ -2,7 +2,7 @@ import React from "react";
 import { render } from "@testing-library/react";
 import AppContainer from "./AppContainer";
 
-test("renders learn react link", () => {
+test("renders AppContainer", () => {
   const database = {
     getNotes: jest.fn(async () => [{ text: "Example note text" }]),
   };
