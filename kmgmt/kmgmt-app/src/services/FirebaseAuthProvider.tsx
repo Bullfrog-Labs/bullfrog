@@ -6,7 +6,6 @@ import { AuthProvider, OnAuthStateChangedHandle } from "./Auth";
 export default class FirebaseAuthProvider implements AuthProvider {
   logger = log.getLogger("FirebaseAuth");
   firebase: firebase.app.App;
-  userAuth: firebase.User | null = null;
 
   onAuthStateChanged: OnAuthStateChangedHandle = (authState) => {
     // no-op by default, needs to be set once the state update function is

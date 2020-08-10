@@ -5,7 +5,7 @@ import FirestoreDatabase from "./services/FirestoreDatabase";
 import FirebaseAuthProvider from "./services/FirebaseAuthProvider";
 import * as log from "loglevel";
 import "./App.css";
-import FirebaseAuthComponent from "./components/FirebaseAuthComponent";
+import { AuthContext } from "./services/Auth";
 
 Logging.configure(log);
 const database = FirestoreDatabase.create();
@@ -27,11 +27,11 @@ function App() {
     logger.debug(`Not logged in`);
   }
 
-  if (authState) {
-    return <AppContainer database={database} />;
-  } else {
-    return <FirebaseAuthComponent authProvider={authProvider} />;
-  }
+  return (
+    <AuthContext.Provider value={authState}>
+      <AppContainer database={database} authProvider={authProvider} />
+    </AuthContext.Provider>
+  );
 }
 
 export default App;

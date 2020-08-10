@@ -5,6 +5,9 @@ import MainView from "./MainView";
 import { Database } from "../services/Database";
 import { Switch, Route, BrowserRouter } from "react-router-dom";
 import NoteView from "./NoteView";
+import PrivateRoute from "../routing/PrivateRoute";
+import { AuthProvider } from "../services/Auth";
+import LoginView from "./LoginView";
 
 const theme = createMuiTheme({
   direction: "ltr",
@@ -13,18 +16,24 @@ const theme = createMuiTheme({
   },
 });
 
-export default function AppContainer(props: { database: Database }) {
+export default function AppContainer(props: {
+  database: Database;
+  authProvider: AuthProvider;
+}) {
   return (
     <MuiThemeProvider theme={theme}>
       <BrowserRouter>
         <Switch>
-          <Route path="/notes/:id">
-            <NoteView database={props.database} />
+          <Route path="/login">
+            <LoginView authProvider={props.authProvider} />
           </Route>
-          <Route path="/">
+          <PrivateRoute path="/notes/:id">
+            <NoteView database={props.database} />
+          </PrivateRoute>
+          <PrivateRoute path="/">
             {/* Replace MainView completely with the real component. */}
             <MainView database={props.database} />
-          </Route>
+          </PrivateRoute>
         </Switch>
       </BrowserRouter>
     </MuiThemeProvider>
