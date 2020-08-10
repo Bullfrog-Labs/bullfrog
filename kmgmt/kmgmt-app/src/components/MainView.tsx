@@ -13,21 +13,19 @@ export default function MainView(props: { database: Database }) {
   React.useEffect(() => {
     const loadNotes = async () => {
       logger.debug("fetching notes");
-      const notes = await database.getNotes();
-      console.dir(notes);
+      const notes = await database.getNotes("agrodellic@gmail.com");
       setNotes(notes);
-      logger.debug("done");
+      logger.debug("loaded notes");
     };
     loadNotes();
   }, [database, logger]);
 
   return (
     <Container maxWidth="md">
-      <Typography variant="h1">Welcome to kmgmt-app</Typography>
       <Typography variant="body1">
         <Link to="notes/dummy-note">
-          Dummy note:{" "}
-          <b>{notes.length ? notes[0].text : "couldnt find any notes"}</b>
+          Dummy note:
+          <b>{notes.length ? notes[0].body : "couldnt find any notes"}</b>
         </Link>
       </Typography>
     </Container>

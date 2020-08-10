@@ -3,6 +3,7 @@ import AppContainer from "./components/AppContainer";
 import SignIn from "./components/SignIn";
 import Logging from "./services/Logging";
 import Firebase from "./services/Firebase";
+import { str } from "./utils/Utils";
 import FirestoreDatabase from "./services/FirestoreDatabase";
 import * as log from "loglevel";
 import "./App.css";
@@ -22,9 +23,10 @@ function App() {
   });
 
   if (userAuth) {
-    logger.debug(`Logged in as ${userAuth.displayName}`);
+    logger.info(`Logged in as ${userAuth.displayName}`);
+    logger.debug(`User auth ${str(userAuth)}`);
   } else {
-    logger.debug(`Not logged in`);
+    logger.info(`Not logged in`);
   }
 
   if (userAuth) {
