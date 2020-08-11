@@ -12,10 +12,6 @@ import {
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import { createMuiTheme, fade, makeStyles } from "@material-ui/core/styles";
-import MainView from "./MainView";
-import { Database } from "../services/Database";
-import { Switch, Route, BrowserRouter } from "react-router-dom";
-import NoteView from "./NoteView";
 
 const theme = createMuiTheme({
   direction: "ltr",
@@ -103,7 +99,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function AppContainer(props: { children: React.ReactNode }) {
+export default function AppContainer(props: { children: React.ReactNode }) {
   const classes = useStyles();
   return (
     <MuiThemeProvider theme={theme}>
@@ -141,25 +137,5 @@ function AppContainer(props: { children: React.ReactNode }) {
         </Container>
       </div>
     </MuiThemeProvider>
-  );
-}
-
-export default function Router(props: { database: Database }) {
-  return (
-    <BrowserRouter>
-      <Switch>
-        <Route path="/notes/:id">
-          <AppContainer>
-            <NoteView database={props.database} />
-          </AppContainer>
-        </Route>
-        <Route path="/">
-          <AppContainer>
-            {/* Replace MainView completely with the real component. */}
-            <MainView database={props.database} />
-          </AppContainer>
-        </Route>
-      </Switch>
-    </BrowserRouter>
   );
 }

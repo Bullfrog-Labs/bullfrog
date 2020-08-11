@@ -3,10 +3,8 @@ import { render } from "@testing-library/react";
 import AppContainer from "./AppContainer";
 
 test("renders learn react link", () => {
-  const database = {
-    getNotes: jest.fn(async () => [{ text: "Example note text" }]),
-  };
-  const { getByText } = render(<AppContainer database={database} />);
-  const linkElement = getByText(/kmgmt-app/i);
-  expect(linkElement).toBeInTheDocument();
+  const ac = <AppContainer>text</AppContainer>;
+  const { getByText } = render(ac);
+  const typo = getByText(/kmgmt/i);
+  expect(typo).toBeInTheDocument();
 });

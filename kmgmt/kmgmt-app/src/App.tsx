@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import AppContainer from "./components/AppContainer";
+import Router from "./components/Router";
 import SignIn from "./components/SignIn";
 import Logging from "./services/Logging";
 import Firebase from "./services/Firebase";
@@ -30,7 +30,7 @@ function App() {
   }
 
   if (userAuth) {
-    return <AppContainer database={database} />;
+    return <Router database={database} />;
   } else {
     return <SignIn />;
   }
