@@ -19,6 +19,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+/**
+ * Very simple dummy implementation for note layout. Lays notes out top to
+ * bottom by always placing the next note in the smallest column.
+ * @param notes
+ */
+function createNoteLayout(notes: NoteRecord[]) {
+  const lengths: number[] = [0, 0, 0];
+  const columns: NoteRecord[][] = [[], [], []];
+  notes.forEach((note) => {
+    const i = lengths.indexOf(Math.min(...lengths));
+    columns[i].push(note);
+    lengths[i] = lengths[i] + note.body.length;
+  });
+  return columns;
+}
+
 function NoteColumn(props: { notes: NoteRecord[] }) {
   // eslint-disable-next-line
   const logger = log.getLogger("NoteColumn");
@@ -57,13 +73,7 @@ export default function MainView(props: { database: Database }) {
     loadNotes();
   }, [database, logger, authState.email]);
 
-  const lengths: number[] = [0, 0, 0];
-  const columns: NoteRecord[][] = [[], [], []];
-  notes.forEach((note) => {
-    const i = lengths.indexOf(Math.min(...lengths));
-    columns[i].push(note);
-    lengths[i] = lengths[i] + note.body.length;
-  });
+  const columns = createNoteLayout(notes);
 
   return (
     <Container maxWidth="md">
