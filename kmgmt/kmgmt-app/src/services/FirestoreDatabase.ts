@@ -8,7 +8,7 @@ export default class FirestoreDatabase {
 
   constructor(firestore: firebase.firestore.Firestore) {
     this.firestore = firestore;
-    this.logger.debug("creating FirestoreDatabase");
+    this.logger.debug("created FirestoreDatabase");
   }
 
   static create(): Database {

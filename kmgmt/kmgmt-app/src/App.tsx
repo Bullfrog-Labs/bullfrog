@@ -1,37 +1,37 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import AppContainer from "./components/AppContainer";
-import SignIn from "./components/SignIn";
 import Logging from "./services/Logging";
-import Firebase from "./services/Firebase";
 import FirestoreDatabase from "./services/FirestoreDatabase";
+import FirebaseAuthProvider from "./services/FirebaseAuthProvider";
 import * as log from "loglevel";
 import "./App.css";
+import { AuthContext } from "./services/Auth";
 
 Logging.configure(log);
-const firebase = Firebase.init();
 const database = FirestoreDatabase.create();
+const authProvider = FirebaseAuthProvider.create();
 
 function App() {
   const logger = log.getLogger("App");
-  const [userAuth, setUserAuth] = useState(firebase.auth().currentUser);
+  const [authState, setAuthState] = useState(
+    authProvider.getInitialAuthState()
+  );
 
   useEffect(() => {
-    firebase.auth().onAuthStateChanged((firebaseUserAuth) => {
-      setUserAuth(firebaseUserAuth);
-    });
-  });
+    authProvider.onAuthStateChanged = setAuthState;
+  }, []);
 
-  if (userAuth) {
-    logger.debug(`Logged in as ${userAuth.displayName}`);
+  if (authState) {
+    logger.debug(`Logged in as ${authState.displayName}`);
   } else {
     logger.debug(`Not logged in`);
   }
 
-  if (userAuth) {
-    return <AppContainer database={database} />;
-  } else {
-    return <SignIn />;
-  }
+  return (
+    <AuthContext.Provider value={authState}>
+      <AppContainer database={database} authProvider={authProvider} />
+    </AuthContext.Provider>
+  );
 }
 
 export default App;
