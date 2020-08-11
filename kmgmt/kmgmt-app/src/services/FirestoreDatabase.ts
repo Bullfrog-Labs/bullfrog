@@ -27,7 +27,7 @@ export default class FirestoreDatabase implements Database {
   async getNotes(userName: string): Promise<NoteRecord[]> {
     // Just using this dummy model for now. Lets replace it completely
     // once we know what we need.
-    const userDoc = this.firestore.collection("users").doc(userName);
+    const userDoc = this.firestore.collection(USERS_COLLECTION).doc(userName);
     const coll = await userDoc.collection(NOTES_COLLECTION).get();
     return coll.docs.map((doc) => {
       return {
@@ -45,8 +45,8 @@ export default class FirestoreDatabase implements Database {
   }
 
   async addNote(userName: string, noteRecord: NoteRecord) {
-    const userDoc = this.firestore.collection("users").doc(userName);
-    const noteDoc = await userDoc.collection("notes").doc();
+    const userDoc = this.firestore.collection(USERS_COLLECTION).doc(userName);
+    const noteDoc = await userDoc.collection(NOTES_COLLECTION).doc();
     noteDoc.set(noteRecord);
   }
 }
