@@ -4,7 +4,6 @@
 
 ### Misc
 
-- Use yarn instead of npm, seems to be much faster
 - Use VSCode for minimum friction
 
 ### Firebase tools
@@ -40,3 +39,19 @@ Install the following extentions:
 For Prettier, enable format on save to ensure the code stays formatted nicely:
 
     Preferences > Settings > Editor > Format On Save
+
+# Running tools
+
+Tools are located under `tools/`.
+
+To run tools you need to setup service account credentials as follows:
+
+1. Navigate to the firebase console > Project settings (the gear beside "Project Overview") > Service accounts.
+
+2. Hit "Generate new private key".
+
+3. Download the private key to `~/.gcp-creds`.
+
+4. In .env.admin, set `GOOGLE_APPLICATION_CREDENTIALS=<path to creds>`.
+
+5. Run tools with `npm run ts-node tools/...`

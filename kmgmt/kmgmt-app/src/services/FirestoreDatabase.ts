@@ -1,8 +1,11 @@
 import * as log from "loglevel";
 import Firebase from "./Firebase";
-import { Database } from "./Database";
+import { Database, UserRecord, NoteRecord } from "./Database";
 
-export default class FirestoreDatabase {
+const USERS_COLLECTION = "users";
+const NOTES_COLLECTION = "notes";
+
+export default class FirestoreDatabase implements Database {
   logger = log.getLogger("FirestoreDatabase");
   firestore: firebase.firestore.Firestore;
 
@@ -17,15 +20,33 @@ export default class FirestoreDatabase {
     return new FirestoreDatabase(firestore);
   }
 
-  async getNotes() {
+  static of(firestore: firebase.firestore.Firestore): Database {
+    return new FirestoreDatabase(firestore);
+  }
+
+  async getNotes(userName: string): Promise<NoteRecord[]> {
     // Just using this dummy model for now. Lets replace it completely
     // once we know what we need.
-    const coll = await this.firestore.collection("dummy_notes").get();
+    const userDoc = this.firestore.collection(USERS_COLLECTION).doc(userName);
+    const coll = await userDoc.collection(NOTES_COLLECTION).get();
     return coll.docs.map((doc) => {
-      const text = doc.data().text;
       return {
-        text: text,
+        title: doc.data().title,
+        body: doc.data().body,
       };
     });
+  }
+
+  async addUser(userRecord: UserRecord) {
+    const doc = this.firestore
+      .collection(USERS_COLLECTION)
+      .doc(userRecord.userName);
+    await doc.set(userRecord);
+  }
+
+  async addNote(userName: string, noteRecord: NoteRecord) {
+    const userDoc = this.firestore.collection(USERS_COLLECTION).doc(userName);
+    const noteDoc = await userDoc.collection(NOTES_COLLECTION).doc();
+    noteDoc.set(noteRecord);
   }
 }
