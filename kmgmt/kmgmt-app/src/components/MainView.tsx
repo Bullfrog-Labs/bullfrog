@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   noteGrid: {
-    "margin-top": "8px",
+    "margin-top": theme.spacing(1),
   },
   paper: {
     padding: theme.spacing(1),
