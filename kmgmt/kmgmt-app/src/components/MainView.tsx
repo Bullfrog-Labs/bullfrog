@@ -3,11 +3,13 @@ import Typography from "@material-ui/core/Typography";
 import * as log from "loglevel";
 import { Database, NoteRecord } from "../services/Database";
 import { Container, Grid, Paper, makeStyles } from "@material-ui/core";
-import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+  },
+  noteGrid: {
+    "margin-top": "8px",
   },
   paper: {
     padding: theme.spacing(1),
@@ -22,6 +24,7 @@ function NoteColumn(props: { notes: NoteRecord[] }) {
     return (
       <Grid item xs={12}>
         <Paper className={classes.paper}>
+          {!!note.title && <Typography variant="h6">{note.title}</Typography>}
           <Typography variant="body1">{note.body}</Typography>
         </Paper>
       </Grid>
@@ -36,6 +39,7 @@ function NoteColumn(props: { notes: NoteRecord[] }) {
 
 export default function MainView(props: { database: Database }) {
   const logger = log.getLogger("MainView");
+  const classes = useStyles();
   const [notes, setNotes] = React.useState<NoteRecord[]>([]);
   const { database } = props;
 
@@ -59,7 +63,12 @@ export default function MainView(props: { database: Database }) {
 
   return (
     <Container maxWidth="md">
-      <Grid container spacing={1} justify="flex-start">
+      <Grid
+        container
+        className={classes.noteGrid}
+        spacing={1}
+        justify="flex-start"
+      >
         <NoteColumn notes={columns[0]} />
         <NoteColumn notes={columns[1]} />
         <NoteColumn notes={columns[2]} />

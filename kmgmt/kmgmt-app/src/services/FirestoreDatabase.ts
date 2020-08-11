@@ -31,6 +31,7 @@ export default class FirestoreDatabase implements Database {
     const coll = await userDoc.collection(NOTES_COLLECTION).get();
     return coll.docs.map((doc) => {
       return {
+        title: doc.data().title,
         body: doc.data().body,
       };
     });
