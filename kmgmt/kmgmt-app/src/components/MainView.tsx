@@ -2,8 +2,37 @@ import React from "react";
 import Typography from "@material-ui/core/Typography";
 import * as log from "loglevel";
 import { Database, NoteRecord } from "../services/Database";
-import { Container } from "@material-ui/core";
+import { Container, Grid, Paper, makeStyles } from "@material-ui/core";
 import { Link } from "react-router-dom";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  paper: {
+    padding: theme.spacing(1),
+    textAlign: "center",
+    color: theme.palette.text.secondary,
+  },
+}));
+
+function NoteColumn(props: { notes: NoteRecord[] }) {
+  const classes = useStyles();
+  const items = props.notes.map((note: NoteRecord) => {
+    return (
+      <Grid item xs={12}>
+        <Paper className={classes.paper}>
+          <Typography variant="body1">{note.body}</Typography>
+        </Paper>
+      </Grid>
+    );
+  });
+  return (
+    <Grid container item xs={4} spacing={1} justify="flex-start">
+      {items}
+    </Grid>
+  );
+}
 
 export default function MainView(props: { database: Database }) {
   const logger = log.getLogger("MainView");
@@ -20,14 +49,21 @@ export default function MainView(props: { database: Database }) {
     loadNotes();
   }, [database, logger]);
 
+  const lengths: number[] = [0, 0, 0];
+  const columns: NoteRecord[][] = [[], [], []];
+  notes.forEach((note) => {
+    const i = lengths.indexOf(Math.min(...lengths));
+    columns[i].push(note);
+    lengths[i] = lengths[i] + note.body.length;
+  });
+
   return (
     <Container maxWidth="md">
-      <Typography variant="body1">
-        <Link to="notes/dummy-note">
-          Dummy note:
-          <b>{notes.length ? notes[0].body : "couldnt find any notes"}</b>
-        </Link>
-      </Typography>
+      <Grid container spacing={1} justify="flex-start">
+        <NoteColumn notes={columns[0]} />
+        <NoteColumn notes={columns[1]} />
+        <NoteColumn notes={columns[2]} />
+      </Grid>
     </Container>
   );
 }
