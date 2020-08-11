@@ -2,7 +2,6 @@ import React from "react";
 import Typography from "@material-ui/core/Typography";
 import * as log from "loglevel";
 import { Database, NoteRecord } from "../services/Database";
-import { str } from "../utils/Utils";
 import { Container, Grid, Paper, makeStyles } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
@@ -20,10 +19,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function NoteColumn(props: { notes: NoteRecord[] }) {
+  // eslint-disable-next-line
   const logger = log.getLogger("NoteColumn");
   const classes = useStyles();
   const items = props.notes.map((note: NoteRecord, index: number) => {
-    logger.debug(`note.body = ${note.body}`);
     return (
       <Grid key={index} item xs={12}>
         <Paper className={classes.paper}>
@@ -33,9 +32,8 @@ function NoteColumn(props: { notes: NoteRecord[] }) {
       </Grid>
     );
   });
-  logger.debug(`items = ${str(items.length)}`);
   return (
-    <Grid container item xs={4} spacing={1} justify="flex-start">
+    <Grid container item xs={4} spacing={1}>
       {items}
     </Grid>
   );
@@ -52,12 +50,10 @@ export default function MainView(props: { database: Database }) {
       logger.debug("fetching notes");
       const notes = await database.getNotes("agrodellic@gmail.com");
       setNotes(notes);
-      logger.debug("loaded notes");
+      logger.debug(`loaded ${notes.length} notes`);
     };
     loadNotes();
   }, [database, logger]);
-
-  logger.debug(`notes = ${str(notes)}`);
 
   const lengths: number[] = [0, 0, 0];
   const columns: NoteRecord[][] = [[], [], []];
@@ -67,16 +63,9 @@ export default function MainView(props: { database: Database }) {
     lengths[i] = lengths[i] + note.body.length;
   });
 
-  logger.debug(`columns = ${str(columns)}`);
-
   return (
     <Container maxWidth="md">
-      <Grid
-        container
-        className={classes.noteGrid}
-        spacing={1}
-        justify="flex-start"
-      >
+      <Grid container className={classes.noteGrid} spacing={1}>
         <NoteColumn notes={columns[0]} />
         <NoteColumn notes={columns[1]} />
         <NoteColumn notes={columns[2]} />
