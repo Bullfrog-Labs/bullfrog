@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import Typography from "@material-ui/core/Typography";
 import * as log from "loglevel";
 import { Database, NoteRecord } from "../services/Database";
 import { Container, Grid, Paper, makeStyles } from "@material-ui/core";
+import { AuthContext } from "../services/Auth";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -43,17 +44,18 @@ export default function MainView(props: { database: Database }) {
   const logger = log.getLogger("MainView");
   const classes = useStyles();
   const [notes, setNotes] = React.useState<NoteRecord[]>([]);
+  const authState = useContext(AuthContext);
   const { database } = props;
 
   React.useEffect(() => {
     const loadNotes = async () => {
-      logger.debug("fetching notes");
-      const notes = await database.getNotes("agrodellic@gmail.com");
+      logger.debug(`fetching notes for user ${authState.email}`);
+      const notes = await database.getNotes(authState.email);
       setNotes(notes);
       logger.debug(`loaded ${notes.length} notes`);
     };
     loadNotes();
-  }, [database, logger]);
+  }, [database, logger, authState.email]);
 
   const lengths: number[] = [0, 0, 0];
   const columns: NoteRecord[][] = [[], [], []];

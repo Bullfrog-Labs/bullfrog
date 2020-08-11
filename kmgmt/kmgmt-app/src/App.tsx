@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Router from "./components/Router";
 import Logging from "./services/Logging";
 import FirestoreDatabase from "./services/FirestoreDatabase";
@@ -17,12 +17,10 @@ function App() {
     authProvider.getInitialAuthState()
   );
 
-  useEffect(() => {
-    authProvider.onAuthStateChanged = setAuthState;
-  }, []);
+  authProvider.onAuthStateChanged = setAuthState;
 
   if (authState) {
-    logger.debug(`Logged in as ${authState.displayName}`);
+    logger.debug(`Logged in as ${authState.displayName} / ${authState.email}`);
   } else {
     logger.info(`Not logged in`);
   }

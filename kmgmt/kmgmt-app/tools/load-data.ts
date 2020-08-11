@@ -90,6 +90,9 @@ const notes: NoteRecord[] = [
 ];
 
 async function main() {
+  // Replace with your email.
+  const userName = "agrodellic@gmail.com";
+
   const logger = log.getLogger("load-data");
   logger.debug("load-data");
   const admin = FirebaseAdmin.init();
@@ -99,7 +102,7 @@ async function main() {
   const database = FirestoreDatabase.of(underlying);
 
   const userRecord: UserRecord = {
-    userName: "agrodellic@gmail.com",
+    userName: userName,
   };
   logger.debug(`adding user ${userRecord.userName}`);
   await database.addUser(userRecord);
