@@ -1,0 +1,65 @@
+import React from "react";
+import * as log from "loglevel";
+import { auth as FirebaseAppAuth, User as FirebaseAppUser } from "firebase/app";
+import { StyledFirebaseAuth } from "react-firebaseui";
+import firebaseui from "firebaseui";
+import FirebaseAuthProvider from "../services/FirebaseAuthProvider";
+import { useHistory, useLocation, Redirect } from "react-router-dom";
+import { AuthContext } from "../services/Auth";
+
+interface LocationState {
+  from: {
+    pathname: string;
+  };
+}
+
+export default function FirebaseAuthComponent(props: {
+  authProvider: FirebaseAuthProvider;
+}) {
+  let logger = log.getLogger("FirebaseAuthComponent");
+
+  let history = useHistory();
+  let location = useLocation<LocationState>();
+
+  // Determine where login was from, so we can redirect back there.
+  let redirectTo = location.state.from || { pathname: "/" };
+
+  return (
+    <AuthContext.Consumer>
+      {(authState) => {
+        if (authState) {
+          // short-circuit because authState has been populated and there is no
+          // need to get the user to authenticate manually via the auth component.
+          return <Redirect to={redirectTo.pathname} />;
+        } else {
+          let config: firebaseui.auth.Config = {
+            signInOptions: [FirebaseAppAuth.GoogleAuthProvider.PROVIDER_ID],
+            signInFlow: "popup",
+            callbacks: {
+              signInSuccessWithAuthResult: (
+                authResult: FirebaseAppUser,
+                redirectUrl
+              ) => {
+                logger.debug(
+                  `successful signin, got authResult = ${authResult}`
+                );
+                logger.debug(`redirecting to ${redirectTo.pathname}`);
+
+                history.replace(redirectTo);
+                return false;
+              },
+            },
+            signInSuccessUrl: redirectTo.pathname,
+          };
+
+          return (
+            <StyledFirebaseAuth
+              uiConfig={config}
+              firebaseAuth={props.authProvider.firebase.auth()}
+            />
+          );
+        }
+      }}
+    </AuthContext.Consumer>
+  );
+}

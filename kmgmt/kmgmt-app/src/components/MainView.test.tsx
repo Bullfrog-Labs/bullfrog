@@ -2,13 +2,13 @@ import * as log from "loglevel";
 import React from "react";
 import { render, waitForElement } from "@testing-library/react";
 import MainView from "./MainView";
-import { NoteRecord, UserRecord } from "../services/Database";
+import { Database, NoteRecord, UserRecord } from "../services/Database";
 import Logging from "../services/Logging";
 
 Logging.configure(log);
 
 test("renders single note", async () => {
-  const database = {
+  const database: Database = {
     getNotes: jest.fn(async () => [{ body: "Example note text" }]),
     addNote: jest.fn(async (userName: string, noteRecord: NoteRecord) => {}),
     addUser: jest.fn(async (userRecord: UserRecord) => {}),
@@ -27,5 +27,4 @@ test("renders single note", async () => {
   });
 
   expect(el).toBeInTheDocument();
-  await database.getNotes();
 });
