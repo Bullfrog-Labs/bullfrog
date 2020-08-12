@@ -1,26 +1,37 @@
-import React, { useState, useCallback, useMemo } from "react"
-import { ReactEditor, withReact, Slate, Editable, useSlate } from "slate-react"
-import { createEditor, Editor, Text, Transforms } from "slate"
-import { withHistory } from "slate-history"
-import isHotkey from "is-hotkey"
+import React, { useState, useCallback, useMemo } from "react";
+import { ReactEditor, withReact, Slate, Editable, useSlate } from "slate-react";
+import { createEditor, Editor, Text, Transforms } from "slate";
+import { withHistory } from "slate-history";
 
-import { Toolbar, Grid, Container, Divider, Typography } from '@material-ui/core'
-import FormatBoldIcon from '@material-ui/icons/FormatBold';
-import FormatItalicIcon from '@material-ui/icons/FormatItalic';
-import FormatUnderlinedIcon from '@material-ui/icons/FormatUnderlined';
-import CodeIcon from '@material-ui/icons/Code';
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import {
+  Toolbar,
+  Grid,
+  Container,
+  Divider,
+  Typography,
+} from "@material-ui/core";
+import FormatBoldIcon from "@material-ui/icons/FormatBold";
+import FormatItalicIcon from "@material-ui/icons/FormatItalic";
+import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
+import CodeIcon from "@material-ui/icons/Code";
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
+import { makeStyles, withStyles } from "@material-ui/core/styles";
 
-import LooksOneIcon from '@material-ui/icons/LooksOne';
-import LooksTwoIcon from '@material-ui/icons/LooksTwo';
-import Looks3Icon from '@material-ui/icons/Looks3';
-import Looks4Icon from '@material-ui/icons/Looks4';
-import Looks5Icon from '@material-ui/icons/Looks5';
-import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
-import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
-import FormatListNumberedIcon from '@material-ui/icons/FormatListNumbered';
+import {
+  Node as SlateNode,
+  Element as SlateElement,
+  Editor as SlateEditor,
+} from "slate";
+
+import LooksOneIcon from "@material-ui/icons/LooksOne";
+import LooksTwoIcon from "@material-ui/icons/LooksTwo";
+import Looks3Icon from "@material-ui/icons/Looks3";
+import Looks4Icon from "@material-ui/icons/Looks4";
+import Looks5Icon from "@material-ui/icons/Looks5";
+import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
+import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
+import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -28,133 +39,157 @@ import FormatListNumberedIcon from '@material-ui/icons/FormatListNumbered';
 // The implementation below is based off of
 // https://github.com/ianstormtaylor/slate/blob/master/site/examples/richtext.js.
 
-const HOTKEYS = {
-  'mod+b': 'bold',
-  'mod+i': 'italic',
-  'mod+u': 'underline',
-  'mod+`': 'code',
-}
+type SlateMark = Record<string, any>;
 
-const FORMATS = ['bold', 'italic', 'underline', 'code']
+type HotkeyChecker = (key: string) => boolean;
+type HotkeyHandler = (editor: SlateEditor, mark: SlateMark) => void;
 
-const HEADING_BLOCKS = ['heading-1', 'heading-2',]
+const SUPPORTED_HOTKEYS: [HotkeyChecker, HotkeyHandler][] = [
+  // isBold: "bold",
+  [isBold],
+  // "mod+i": "italic",
+  // "mod+u": "underline",
+  // "mod+`": "code",
+];
+
+const FORMATS = ["bold", "italic", "underline", "code"];
+
+const HEADING_BLOCKS = ["heading-1", "heading-2"];
 const BLOCKS = [
-  'block-quote', 'bulleted-list', ...HEADING_BLOCKS,
-  'list-item', 'numbered-list'
-]
+  "block-quote",
+  "bulleted-list",
+  ...HEADING_BLOCKS,
+  "list-item",
+  "numbered-list",
+];
 
-const LIST_TYPES = ['numbered-list', 'bulleted-list']
+const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
 const Element = ({ attributes, children, element }) => {
   switch (element.type) {
-    case 'block-quote':
+    case "block-quote":
       return (
         <blockquote {...attributes}>
-          <Typography variant="body1">
-            {children}
-          </Typography>
+          <Typography variant="body1">{children}</Typography>
         </blockquote>
-      )
-    case 'bulleted-list':
-      return (<ul {...attributes}>{children}</ul>)
-    case 'heading-1':
-      return <Typography variant="h2" {...attributes}>{children}</Typography>
-    case 'heading-2':
-      return <Typography variant="h3" {...attributes}>{children}</Typography>
-    case 'list-item':
-      return <li {...attributes}>{children}</li>
-    case 'numbered-list':
-      return <ol {...attributes}>{children}</ol>
+      );
+    case "bulleted-list":
+      return <ul {...attributes}>{children}</ul>;
+    case "heading-1":
+      return (
+        <Typography variant="h2" {...attributes}>
+          {children}
+        </Typography>
+      );
+    case "heading-2":
+      return (
+        <Typography variant="h3" {...attributes}>
+          {children}
+        </Typography>
+      );
+    case "list-item":
+      return <li {...attributes}>{children}</li>;
+    case "numbered-list":
+      return <ol {...attributes}>{children}</ol>;
     default:
-      return <Typography variant="body1" paragraph={true} {...attributes}>{children}</Typography>
-
+      return (
+        <Typography variant="body1" paragraph={true} {...attributes}>
+          {children}
+        </Typography>
+      );
   }
-}
+};
 
 const Leaf = ({ attributes, children, leaf }) => {
   if (leaf.bold) {
-    children = <strong>{children}</strong>
+    children = <strong>{children}</strong>;
   }
   if (leaf.code) {
-    children = <code>{children}</code>
+    children = <code>{children}</code>;
   }
   if (leaf.italic) {
-    children = <em>{children}</em>
+    children = <em>{children}</em>;
   }
   if (leaf.underline) {
-    children = <u>{children}</u>
+    children = <u>{children}</u>;
   }
-  return <span {...attributes}>{children}</span>
-}
+  return <span {...attributes}>{children}</span>;
+};
 
 const isMarkActive = (editor, format) => {
-  const marks = Editor.marks(editor)
-  return marks ? marks[format] === true : false
-}
+  const marks = Editor.marks(editor);
+  return marks ? marks[format] === true : false;
+};
 
 const toggleMark = (editor, format) => {
-  const isActive = isMarkActive(editor, format)
+  const isActive = isMarkActive(editor, format);
   if (isActive) {
-    Editor.removeMark(editor, format)
+    Editor.removeMark(editor, format);
   } else {
-    Editor.addMark(editor, format, true)
+    Editor.addMark(editor, format, true);
   }
-}
+};
 
 const useStyles = makeStyles((theme) => ({
   paper: {
-    display: 'flex',
+    display: "flex",
     border: `1px solid ${theme.palette.divider}`,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   divider: {
     margin: theme.spacing(1, 0.5),
-  }
-}))
+  },
+}));
 
 const StyledToggleButtonGroup = withStyles((theme) => ({
   grouped: {
     margin: theme.spacing(0.5),
-    border: 'none',
-    '&:not(:first-child)': {
+    border: "none",
+    "&:not(:first-child)": {
       borderRadius: theme.shape.borderRadius,
     },
-    '&:first-child': {
+    "&:first-child": {
       borderRadius: theme.shape.borderRadius,
     },
   },
-}))(ToggleButtonGroup)
+}))(ToggleButtonGroup);
 
 const MarkButtonGroup = () => {
-  const editor = useSlate()
+  const editor = useSlate();
 
   const getActiveFormats = () => {
-    return FORMATS.filter(x => isMarkActive(editor, x))
-  }
+    return FORMATS.filter((x) => isMarkActive(editor, x));
+  };
 
   const handleFormat = (event, newFormats) => {
-    event.preventDefault()
+    event.preventDefault();
 
     // Handle update to formats
-    const newlyActiveFormats = newFormats.filter(x => !isMarkActive(editor, x))
-    const newlyInactiveFormats = getActiveFormats()
-      .filter(x => !newFormats.includes(x))
+    const newlyActiveFormats = newFormats.filter(
+      (x) => !isMarkActive(editor, x)
+    );
+    const newlyInactiveFormats = getActiveFormats().filter(
+      (x) => !newFormats.includes(x)
+    );
 
     for (let format of newlyActiveFormats) {
-      Editor.addMark(editor, format, true)
+      Editor.addMark(editor, format, true);
     }
 
     for (let format of newlyInactiveFormats) {
-      Editor.removeMark(editor, format)
+      Editor.removeMark(editor, format);
     }
 
     // Need to move focus back to editor to keep the selection.
-    ReactEditor.focus(editor)
-  }
+    ReactEditor.focus(editor);
+  };
 
   return (
     <StyledToggleButtonGroup
-      size="small" value={getActiveFormats()} onChange={handleFormat} aria-label="text formatting"
+      size="small"
+      value={getActiveFormats()}
+      onChange={handleFormat}
+      aria-label="text formatting"
     >
       <ToggleButton value="bold" aria-label="bold">
         <FormatBoldIcon />
@@ -169,53 +204,56 @@ const MarkButtonGroup = () => {
         <CodeIcon />
       </ToggleButton>
     </StyledToggleButtonGroup>
-  )
-}
+  );
+};
 
 const isBlockActive = (editor, format) => {
   const [match] = Editor.nodes(editor, {
-    match: n => n.type === format,
-  })
+    match: (n) => n.type === format,
+  });
 
-  return !!match
-}
+  return !!match;
+};
 
 const toggleBlock = (editor, format) => {
-  const isActive = isBlockActive(editor, format)
-  const isList = LIST_TYPES.includes(format)
+  const isActive = isBlockActive(editor, format);
+  const isList = LIST_TYPES.includes(format);
 
   Transforms.unwrapNodes(editor, {
-    match: n => LIST_TYPES.includes(n.type),
+    match: (n) => LIST_TYPES.includes(n.type),
     split: true,
-  })
+  });
 
   Transforms.setNodes(editor, {
-    type: isActive ? 'paragraph' : isList ? 'list-item' : format
-  })
+    type: isActive ? "paragraph" : isList ? "list-item" : format,
+  });
 
   if (!isActive && isList) {
-    const block = { type: format, children: [] }
-    Transforms.wrapNodes(editor, block)
+    const block = { type: format, children: [] };
+    Transforms.wrapNodes(editor, block);
   }
-}
+};
 
 const BlockButtonGroup = () => {
-  const editor = useSlate()
-  const activeBlocks = BLOCKS.filter(x => isBlockActive(editor, x))
+  const editor = useSlate();
+  const activeBlocks = BLOCKS.filter((x) => isBlockActive(editor, x));
   const activeBlock = activeBlocks.length === 1 ? activeBlocks[0] : null;
 
   const handleBlock = (event, newBlock) => {
-    event.preventDefault()
-    toggleBlock(editor, newBlock)
+    event.preventDefault();
+    toggleBlock(editor, newBlock);
 
     // Need to move focus back to editor to keep the selection.
-    ReactEditor.focus(editor)
-  }
+    ReactEditor.focus(editor);
+  };
 
   return (
     <StyledToggleButtonGroup
-      size="small" exclusive
-      value={activeBlock} onChange={handleBlock} aria-label="block type selection"
+      size="small"
+      exclusive
+      value={activeBlock}
+      onChange={handleBlock}
+      aria-label="block type selection"
     >
       <ToggleButton value="heading-1" aria-label="heading-1">
         <LooksOneIcon />
@@ -242,8 +280,8 @@ const BlockButtonGroup = () => {
         <FormatListNumberedIcon />
       </ToggleButton>
     </StyledToggleButtonGroup>
-  )
-}
+  );
+};
 
 const RichTextEditorToolbar = () => {
   const classes = useStyles();
@@ -254,75 +292,80 @@ const RichTextEditorToolbar = () => {
       <Divider flexItem orientation="vertical" className={classes.divider} />
       <BlockButtonGroup />
     </Toolbar>
-  )
-}
+  );
+};
 
 // TODO: need to make it so that inserting a break from inside a heading does
 // not cause the heading itself to become a paragraph.
 const withResetBlockOnInsertBreak = (editor) => {
-  const { insertBreak } = editor
+  const { insertBreak } = editor;
 
   editor.insertBreak = () => {
-    insertBreak()
+    insertBreak();
 
-    for (let block in HEADING_BLOCKS.filter(x => isBlockActive(editor, x))) {
-      toggleBlock(editor, block)
+    for (let block in HEADING_BLOCKS.filter((x) => isBlockActive(editor, x))) {
+      toggleBlock(editor, block);
     }
-  }
+  };
 
-  return editor
-}
+  return editor;
+};
 
-const withEditableTypographyLayout = editor => {
-  const { normalizeNode } = editor
+const withEditableTypographyLayout = (editor) => {
+  const { normalizeNode } = editor;
 
   editor.normalizeNode = (entry) => {
-    const [node, path] = entry
+    const [node, path] = entry;
 
     if (Text.isText(node)) {
       // Make sure that there are no newlines in the text
       const newNode = {
-        text: node.text.replace(/\r?\n|\r/g, "")
-      }
-      Transforms.setNodes(editor, newNode, { at: path })
+        text: node.text.replace(/\r?\n|\r/g, ""),
+      };
+      Transforms.setNodes(editor, newNode, { at: path });
     } else {
       // Merge all nodes into a single text node
       if (path.length > 0 && path[path.length - 1] !== 0) {
-        Transforms.mergeNodes(editor, { at: path, voids: true })
+        Transforms.mergeNodes(editor, { at: path, voids: true });
       }
     }
 
-    return normalizeNode(entry)
-  }
+    return normalizeNode(entry);
+  };
 
-  return editor
-}
+  return editor;
+};
 
 const EditableTypography = ({ initialValue, variant, handleEscape }) => {
   if (initialValue === undefined) {
     initialValue = [
       {
-        type: 'paragraph',
-        children: [
-          { text: '' },
-        ],
+        type: "paragraph",
+        children: [{ text: "" }],
       },
-    ]
+    ];
   }
-  const [value, setValue] = useState(initialValue)
-  const editor = useMemo(() => withEditableTypographyLayout(withHistory(withReact(createEditor()))), [])
+  const [value, setValue] = useState(initialValue);
+  const editor = useMemo(
+    () => withEditableTypographyLayout(withHistory(withReact(createEditor()))),
+    []
+  );
 
   const renderLeaf = useCallback(
-    ({ children, attributes }) => <Typography variant={variant} {...attributes} >{children}</Typography>,
+    ({ children, attributes }) => (
+      <Typography variant={variant} {...attributes}>
+        {children}
+      </Typography>
+    ),
     [variant]
-  )
+  );
 
   return (
     <Slate editor={editor} value={value} onChange={setValue}>
       <Editable
         placeholder="Enter a title"
         renderLeaf={renderLeaf}
-        onKeyDown={event => {
+        onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === "Escape") {
             event.preventDefault();
             if (handleEscape) {
@@ -332,46 +375,68 @@ const EditableTypography = ({ initialValue, variant, handleEscape }) => {
         }}
       />
     </Slate>
-  )
-}
+  );
+};
 
 const DocumentTitle = (props) => {
-  return (
-    <EditableTypography variant="h1" {...props} />
-  )
+  return <EditableTypography variant="h1" {...props} />;
+};
+
+type Title = string | undefined;
+type Body = SlateNode[];
+
+interface NoteRecord {
+  title: Title;
+  body: Body;
 }
 
-const RichTextEditor = () => {
-  const [value, setValue] = useState([
+const emptyNoteRecord: NoteRecord = {
+  title: undefined,
+  body: [
     {
-      type: 'paragraph',
-      children: [
-        { text: '' },
-      ],
+      type: "paragraph",
+      children: [{ text: "" }],
     },
-  ])
-  const renderElement = useCallback(props => <Element {...props} />, [])
-  const renderLeaf = useCallback(props => <Leaf {...props} />, [])
+  ],
+};
 
-  const editor = useMemo(() => withResetBlockOnInsertBreak(withHistory(withReact(createEditor()))), [])
+const RichTextEditor = () => {
+  // TODO: Modify value to also include document title.
+  // TODO: Modify document title to be synced with state.
+  const renderElement = useCallback((props) => <Element {...props} />, []);
+  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
 
-  const slateOnChange = value => {
-    setValue(value)
-  }
+  const [title, setTitle] = useState<Title>(emptyNoteRecord.title);
+  const [body, setBody] = useState<Body>(emptyNoteRecord.body);
+
+  const editor = useMemo(
+    () => withResetBlockOnInsertBreak(withHistory(withReact(createEditor()))),
+    []
+  );
+
+  const bodyOnChange = (newBody: Body) => {
+    setBody(newBody);
+  };
 
   return (
     <div elevation={1} className="RichTextEditor">
       <Container>
-        <Grid container direction="column" justify="flex-start" alignItems="stretch" spacing={3}>
+        <Grid
+          container
+          direction="column"
+          justify="flex-start"
+          alignItems="stretch"
+          spacing={3}
+        >
           <Grid item>
             <DocumentTitle
-              handleEscape={event => {
-                ReactEditor.focus(editor)
+              handleEscape={(event) => {
+                ReactEditor.focus(editor);
               }}
             />
           </Grid>
           <Grid item>
-            <Slate editor={editor} value={value} onChange={slateOnChange}>
+            <Slate editor={editor} value={body} onChange={bodyOnChange}>
               <RichTextEditorToolbar />
               <Editable
                 renderElement={renderElement}
@@ -379,12 +444,12 @@ const RichTextEditor = () => {
                 placeholder="Enter some text"
                 spellCheck
                 autoFocus
-                onKeyDown={event => {
+                onKeyDown={(event: KeyboardEvent) => {
                   for (const hotkey in HOTKEYS) {
                     if (isHotkey(hotkey, event)) {
-                      event.preventDefault()
-                      const mark = HOTKEYS[hotkey]
-                      toggleMark(editor, mark)
+                      event.preventDefault();
+                      const mark = HOTKEYS[hotkey];
+                      toggleMark(editor, mark);
                     }
                   }
                 }}
@@ -394,7 +459,7 @@ const RichTextEditor = () => {
         </Grid>
       </Container>
     </div>
-  )
-}
+  );
+};
 
-export default RichTextEditor
+export default RichTextEditor;
