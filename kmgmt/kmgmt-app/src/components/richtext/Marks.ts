@@ -1,46 +1,18 @@
+import { Editor } from "slate";
+import { Mark } from "./Types";
+
 // TODO: Implement event handling for marks: bold, italic, underline, code.
-// TODO: Implement event handling for non-section blocks: block-quote,
-//       bulleted-list, list item and numbered list.
 
-// Marks
-const isMarkActive = (editor, format) => {
+export const isMarkActive = (editor: Editor, mark: Mark) => {
   const marks = Editor.marks(editor);
-  return marks ? marks[format] === true : false;
+  return marks ? marks[mark] === true : false;
 };
 
-const toggleMark = (editor, format) => {
-  const isActive = isMarkActive(editor, format);
+export const toggleMark = (editor: Editor, mark: Mark) => {
+  const isActive = isMarkActive(editor, mark);
   if (isActive) {
-    Editor.removeMark(editor, format);
+    Editor.removeMark(editor, mark);
   } else {
-    Editor.addMark(editor, format, true);
-  }
-};
-
-// Blocks
-const isBlockActive = (editor, format) => {
-  const [match] = Editor.nodes(editor, {
-    match: (n) => n.type === format,
-  });
-
-  return !!match;
-};
-
-const toggleBlock = (editor, format) => {
-  const isActive = isBlockActive(editor, format);
-  const isList = LIST_TYPES.includes(format);
-
-  Transforms.unwrapNodes(editor, {
-    match: (n) => LIST_TYPES.includes(n.type),
-    split: true,
-  });
-
-  Transforms.setNodes(editor, {
-    type: isActive ? "paragraph" : isList ? "list-item" : format,
-  });
-
-  if (!isActive && isList) {
-    const block = { type: format, children: [] };
-    Transforms.wrapNodes(editor, block);
+    Editor.addMark(editor, mark, true);
   }
 };

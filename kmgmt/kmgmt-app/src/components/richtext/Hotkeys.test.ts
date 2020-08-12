@@ -1,5 +1,11 @@
-import { HotkeyMapping, makeHotkeyResolver } from "./Hotkeys";
-import { isKeyHotkey, isHotkey } from "is-hotkey";
+import {
+  platformAwareKeymapToActiveKeymap,
+  makeHotkeyHandler,
+} from "./Hotkeys";
+import { isKeyHotkey } from "is-hotkey";
+import { PlatformAwareKeymap, Keymap } from "./Types";
+
+import { noopKBEventHandler } from "./EventHandling";
 
 // utils taken from
 // https://github.com/ianstormtaylor/is-hotkey/blob/master/test/index.js under
@@ -15,6 +21,29 @@ function e(value: number | string, ...modifiers: string[]) {
   };
 }
 
+test("conversion from platform aware keymap to active keymap works", () => {
+  const platformAwareKeymap: PlatformAwareKeymap = {
+    generic: {
+      bold: ["alt+b", noopKBEventHandler()],
+      italic: ["alt+i", noopKBEventHandler()],
+    },
+    platformSpecific: {
+      apple: {
+        redo: ["cmd+shift+z", noopKBEventHandler()],
+      },
+      windows: {},
+    },
+  };
+
+  const activeKeymap: Keymap = platformAwareKeymapToActiveKeymap(
+    platformAwareKeymap,
+    "apple"
+  );
+
+  const expectedKeys = ["bold", "italic", "redo"];
+  expect(new Set(Object.keys(activeKeymap))).toEqual(new Set(expectedKeys));
+});
+
 test("mod alias does not work in headless test env", () => {
   // WARNING: IS_MAC in
   // https://github.com/ianstormtaylor/is-hotkey/blob/master/src/index.js relies
@@ -27,27 +56,32 @@ test("mod alias does not work in headless test env", () => {
   expect(matcher(event)).toBeFalsy();
 });
 
-test("builds working hotkey resolver", () => {
-  const hotkeyMapping: HotkeyMapping = {
-    generic: {
-      bold: "alt+b",
-      italic: "alt+i",
-    },
-    apple: {
-      redo: "cmd+shift+z",
-    },
-    windows: {},
+test("builds working hotkey handler", () => {
+  const keymap: Keymap = {
+    bold: ["alt+b", jest.fn(noopKBEventHandler())],
+    italic: ["alt+i", jest.fn(noopKBEventHandler())],
+    redo: ["cmd+shift+z", jest.fn(noopKBEventHandler())],
   };
 
+  const hotkeyHandler = makeHotkeyHandler(keymap);
+
+  const nonHotkeyKBEvent = new KeyboardEvent("keydown", e("b"));
+  hotkeyHandler(nonHotkeyKBEvent);
+
+  for (let [_, mockFn] of Object.values(keymap)) {
+    expect(mockFn.mock.calls.length).toBe(0);
+  }
+
   const testKBEvents = {
-    italic: new KeyboardEvent("keydown", e("i", "alt")),
     bold: new KeyboardEvent("keydown", e("b", "alt")),
+    italic: new KeyboardEvent("keydown", e("i", "alt")),
     redo: new KeyboardEvent("keydown", e("z", "meta", "shift")), // cmd is meta on Mac
   };
 
-  const hotkeyResolver = makeHotkeyResolver(hotkeyMapping, "apple");
-
   for (let [expectedCmdName, kbEvent] of Object.entries(testKBEvents)) {
-    expect(hotkeyResolver(kbEvent)).toEqual(expectedCmdName);
+    hotkeyHandler(kbEvent);
+
+    let [_, expectedMockFn] = keymap[expectedCmdName];
+    expect(expectedMockFn.mock.calls.length).toBe(1);
   }
 });

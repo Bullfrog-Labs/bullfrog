@@ -2,119 +2,73 @@
 // https://github.com/ianstormtaylor/slate/blob/e766e7a4ac6dbdd2863a73012140d79ebe42743e/packages/slate-react/src/utils/hotkeys.ts
 // under MIT license.
 
+import * as log from "loglevel";
 import { isKeyHotkey } from "is-hotkey";
 import { IS_APPLE } from "./Environment";
+import { PlatformAwareKeymap, Platform, KBEventHandler, Keymap } from "./Types";
 
-export type HotkeySpec = string | string[];
-export type CommandNameToHotkey = { [commandName: string]: HotkeySpec };
-
-// Hotkey mappings for each platform - this should be maintained to reflect what
-// the RichTextEditor supports.
-
-// TODO: Disable unsupported hotkeys and move to specific implementation, e.g. RichTextEditor
-const GENERIC_HOTKEYS: CommandNameToHotkey = {
-  bold: "mod+b",
-  compose: ["down", "left", "right", "up", "backspace", "enter"],
-  moveBackward: "left",
-  moveForward: "right",
-  moveWordBackward: "ctrl+left",
-  moveWordForward: "ctrl+right",
-  deleteBackward: "shift?+backspace",
-  deleteForward: "shift?+delete",
-  extendBackward: "shift+left",
-  extendForward: "shift+right",
-  italic: "mod+i",
-  splitBlock: "shift?+enter",
-  undo: "mod+z",
-};
-
-const APPLE_HOTKEYS: CommandNameToHotkey = {
-  moveLineBackward: "opt+up",
-  moveLineForward: "opt+down",
-  moveWordBackward: "opt+left",
-  moveWordForward: "opt+right",
-  deleteBackward: ["ctrl+backspace", "ctrl+h"],
-  deleteForward: ["ctrl+delete", "ctrl+d"],
-  deleteLineBackward: "cmd+shift?+backspace",
-  deleteLineForward: ["cmd+shift?+delete", "ctrl+k"],
-  deleteWordBackward: "opt+shift?+backspace",
-  deleteWordForward: "opt+shift?+delete",
-  extendLineBackward: "opt+shift+up",
-  extendLineForward: "opt+shift+down",
-  redo: "cmd+shift+z",
-  transposeCharacter: "ctrl+t",
-};
-
-const WINDOWS_HOTKEYS: CommandNameToHotkey = {
-  deleteWordBackward: "ctrl+shift?+backspace",
-  deleteWordForward: "ctrl+shift?+delete",
-  redo: ["ctrl+y", "ctrl+shift+z"],
-};
-
-// TODO: Replace platform-specific strings to an enum
-export interface HotkeyMapping {
-  generic: CommandNameToHotkey;
-  apple: CommandNameToHotkey;
-  windows: CommandNameToHotkey;
-}
-
-export const HOTKEY_MAPPING: HotkeyMapping = {
-  generic: GENERIC_HOTKEYS,
-  apple: APPLE_HOTKEYS,
-  windows: WINDOWS_HOTKEYS,
-};
-
-function makeHotkeyMatcher(commandName: string, hkspec: HotkeySpec) {
-  let checkKeyForHotkey = isKeyHotkey(hkspec);
-  return (event: KeyboardEvent) =>
-    checkKeyForHotkey(event) ? commandName : undefined;
-}
-
-function hotkeyMappingToActiveHotkeys(
-  hotkeyMapping: HotkeyMapping,
-  platform: string
-) {
+export function platformAwareKeymapToActiveKeymap(
+  platformAwareKeymap: PlatformAwareKeymap,
+  platform: Platform
+): Keymap {
   let platformSpecificHotkeys;
   switch (platform) {
     case "apple":
-      platformSpecificHotkeys = hotkeyMapping.apple;
+      platformSpecificHotkeys = platformAwareKeymap.platformSpecific.apple;
       break;
     case "windows":
-      platformSpecificHotkeys = hotkeyMapping.windows;
+      platformSpecificHotkeys = platformAwareKeymap.platformSpecific.windows;
       break;
     default:
       throw new Error("invalid platform");
   }
 
-  debugger;
+  let activeHotkeys = {
+    ...platformAwareKeymap.generic,
+    ...platformSpecificHotkeys,
+  };
 
-  let activeHotkeys = { ...hotkeyMapping.generic, ...platformSpecificHotkeys };
   return activeHotkeys;
 }
 
-// Create platform-aware hotkey resolver.
-export function makeHotkeyResolver(
-  hotkeyMapping: HotkeyMapping,
-  platform?: string | undefined
-) {
+type HotkeyMatcher = (event: KeyboardEvent) => boolean;
+
+export function makeHotkeyHandler(activeKeymap: Keymap): KBEventHandler {
+  let matcherHandlers: [
+    string,
+    HotkeyMatcher,
+    KBEventHandler
+  ][] = Object.entries(activeKeymap).map(([commandName, keymapEntry]) => {
+    let [hotkeySpec, kbEventHandler] = keymapEntry;
+    let hotkeyMatcher = isKeyHotkey(hotkeySpec);
+
+    return [commandName, hotkeyMatcher, kbEventHandler];
+  });
+
+  const logger = log.getLogger("HotkeyHandler");
+
+  return (event: KeyboardEvent) => {
+    for (let [commandName, matcher, handler] of matcherHandlers) {
+      if (matcher(event)) {
+        logger.info(`Matched ${commandName}`);
+        handler(event);
+      }
+    }
+  };
+}
+
+export function platformAwareKeymapToHotkeyHandler(
+  platformAwareKeymap: PlatformAwareKeymap,
+  platform: Platform
+): KBEventHandler {
   if (!platform) {
     platform = IS_APPLE ? "apple" : "windows";
   }
 
-  let activeHotkeys = hotkeyMappingToActiveHotkeys(hotkeyMapping, platform);
-  let hotkeyMatchers: ((
-    e: KeyboardEvent
-  ) => string | undefined)[] = Object.entries(
-    activeHotkeys
-  ).map(([commandName, hkspec]) => makeHotkeyMatcher(commandName, hkspec));
+  let activeHotkeys = platformAwareKeymapToActiveKeymap(
+    platformAwareKeymap,
+    platform
+  );
 
-  return (event: KeyboardEvent) => {
-    for (let matcher of hotkeyMatchers) {
-      let result = matcher(event);
-      if (result) {
-        return result;
-      }
-    }
-    return undefined;
-  };
+  return makeHotkeyHandler(activeHotkeys);
 }
