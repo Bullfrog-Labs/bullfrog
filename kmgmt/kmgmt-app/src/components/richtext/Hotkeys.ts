@@ -5,12 +5,13 @@
 import { isKeyHotkey } from "is-hotkey";
 import { IS_APPLE } from "./Environment";
 
-// Hotkey mappings for each platform - this should be maintained to reflect what
-// the RichTextEditor supports.
-
 export type HotkeySpec = string | string[];
 export type CommandNameToHotkey = { [commandName: string]: HotkeySpec };
 
+// Hotkey mappings for each platform - this should be maintained to reflect what
+// the RichTextEditor supports.
+
+// TODO: Disable unsupported hotkeys and move to specific implementation, e.g. RichTextEditor
 const GENERIC_HOTKEYS: CommandNameToHotkey = {
   bold: "mod+b",
   compose: ["down", "left", "right", "up", "backspace", "enter"],
@@ -50,6 +51,7 @@ const WINDOWS_HOTKEYS: CommandNameToHotkey = {
   redo: ["ctrl+y", "ctrl+shift+z"],
 };
 
+// TODO: Replace platform-specific strings to an enum
 export interface HotkeyMapping {
   generic: CommandNameToHotkey;
   apple: CommandNameToHotkey;
