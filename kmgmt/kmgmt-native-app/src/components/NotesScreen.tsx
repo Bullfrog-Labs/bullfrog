@@ -1,6 +1,6 @@
 import "react-native-gesture-handler";
 import * as React from "react";
-import "./services/Firebase";
+import "../services/Firebase";
 import firebase from "firebase";
 import { StyleSheet, View, StatusBar, FlatList, Text } from "react-native";
 import { NotesScreenNavigationProp } from "../services/Navigation";

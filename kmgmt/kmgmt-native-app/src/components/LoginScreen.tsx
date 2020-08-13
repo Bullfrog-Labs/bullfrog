@@ -1,5 +1,5 @@
 import * as React from "react";
-import "./services/Firebase";
+import "../services/Firebase";
 import firebase from "firebase";
 import { Button, StyleSheet, View, StatusBar } from "react-native";
 import * as Google from "expo-google-app-auth";
