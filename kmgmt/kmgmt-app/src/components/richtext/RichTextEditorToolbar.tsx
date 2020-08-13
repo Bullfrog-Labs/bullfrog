@@ -15,6 +15,8 @@ import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
 import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
 import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 
+/*
+
 import {
   Toolbar,
   Grid,
@@ -160,3 +162,5 @@ const RichTextEditorToolbar = () => {
     </Toolbar>
   );
 };
+
+*/
