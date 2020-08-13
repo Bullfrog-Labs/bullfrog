@@ -16,6 +16,7 @@ export type EditableTypographyProps = {
   initialValue?: SlateNode[];
   variant?: string;
   handleEscape: KBEventHandler;
+  onStateChange?: (newValue: SlateNode[]) => void;
 };
 
 const handleExitEditable = (handleEscape?: KBEventHandler) => (
@@ -33,6 +34,7 @@ export const EditableTypography: FunctionComponent<EditableTypographyProps> = ({
   initialValue,
   variant,
   handleEscape,
+  onStateChange,
 }) => {
   if (initialValue === undefined) {
     initialValue = [
@@ -48,6 +50,13 @@ export const EditableTypography: FunctionComponent<EditableTypographyProps> = ({
     []
   );
 
+  const onChange = (newValue: SlateNode[]) => {
+    setValue(newValue);
+    if (onStateChange) {
+      onStateChange(newValue);
+    }
+  };
+
   const renderLeaf = useCallback(
     ({ children, attributes }) => (
       <Typography variant={variant} {...attributes}>
@@ -58,7 +67,7 @@ export const EditableTypography: FunctionComponent<EditableTypographyProps> = ({
   );
 
   return (
-    <Slate editor={editor} value={value} onChange={setValue}>
+    <Slate editor={editor} value={value} onChange={onChange}>
       <Editable
         placeholder="Enter a title"
         renderLeaf={renderLeaf}

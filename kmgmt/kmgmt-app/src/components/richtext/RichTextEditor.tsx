@@ -17,7 +17,7 @@ import { DocumentTitle } from "./DocumentTitle";
 // The implementation below is based off of
 // https://github.com/ianstormtaylor/slate/blob/master/site/examples/richtext.js.
 
-type Title = string | undefined;
+type Title = SlateNode[];
 type Body = SlateNode[];
 
 interface NoteRecord {
@@ -26,7 +26,12 @@ interface NoteRecord {
 }
 
 const emptyNoteRecord: NoteRecord = {
-  title: undefined,
+  title: [
+    {
+      type: "paragraph",
+      children: [{ text: "" }],
+    },
+  ],
   body: [
     {
       type: "paragraph",
@@ -69,6 +74,8 @@ const RichTextEditor = () => {
                 handleEscape={(event) => {
                   ReactEditor.focus(editor);
                 }}
+                initialValue={title}
+                onStateChange={setTitle}
               />
             </Grid>
             <Grid item>
