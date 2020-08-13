@@ -12,17 +12,17 @@ export interface PlatformAwareKeymap {
   platformSpecific: PlatformSpecificKeymap;
 }
 
-const marks = ["bold", "italic", "underline", "code"] as const;
-export type Mark = typeof marks[number];
+export const MARKS = ["bold", "italic", "underline", "code"] as const;
+export type Mark = typeof MARKS[number];
 
-const sectionBlocks = ["heading-1", "heading-2"]; // not supported yet
-const listBlocks = ["bulleted-list", "numbered-list"];
-const blocks = ["block-quote", "list-item", ...listBlocks];
+export const SECTION_BLOCKS = ["heading-1", "heading-2"]; // not supported yet
+export const LIST_BLOCKS = ["bulleted-list", "numbered-list"];
+export const BLOCKS = ["block-quote", "list-item", ...LIST_BLOCKS];
 
-export type SectionBlock = typeof sectionBlocks[number];
-export type ListBlock = typeof listBlocks[number];
-export type Block = typeof blocks[number];
+export type SectionBlock = typeof SECTION_BLOCKS[number];
+export type ListBlock = typeof LIST_BLOCKS[number];
+export type Block = typeof BLOCKS[number];
 
 export const isList = (block: Block): block is ListBlock => {
-  return listBlocks.includes(block);
+  return LIST_BLOCKS.includes(block);
 };
