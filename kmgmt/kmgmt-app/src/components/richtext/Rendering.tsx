@@ -1,14 +1,8 @@
 import React, { FunctionComponent } from "react";
-import { Node as SlateNode } from "slate";
 import { Typography } from "@material-ui/core";
+import { RenderLeafProps, RenderElementProps } from "slate-react";
 
-type ElementProps = {
-  attributes: object;
-  children: React.ReactChild[];
-  element: SlateNode;
-};
-
-export const Element: FunctionComponent<ElementProps> = ({
+export const Element: FunctionComponent<RenderElementProps> = ({
   attributes,
   children,
   element,
@@ -47,30 +41,22 @@ export const Element: FunctionComponent<ElementProps> = ({
   }
 };
 
-type LeafProps = {
-  attributes: object;
-  children: React.ReactChild[];
-  leaf: SlateNode;
-};
-
-export const Leaf: FunctionComponent<LeafProps> = ({
+export const Leaf: FunctionComponent<RenderLeafProps> = ({
   attributes,
   children,
   leaf,
 }) => {
-  let leafElement;
-
   if (leaf.bold) {
-    leafElement = <strong>{children}</strong>;
+    children = <strong>{children}</strong>;
   }
   if (leaf.code) {
-    leafElement = <code>{children}</code>;
+    children = <code>{children}</code>;
   }
   if (leaf.italic) {
-    leafElement = <em>{children}</em>;
+    children = <em>{children}</em>;
   }
   if (leaf.underline) {
-    leafElement = <u>{children}</u>;
+    children = <u>{children}</u>;
   }
-  return <span {...attributes}>{leafElement}</span>;
+  return <span {...attributes}>{children}</span>;
 };

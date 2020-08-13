@@ -3,7 +3,7 @@ import { ReactEditor, withReact, Slate, Editable } from "slate-react";
 import { createEditor } from "slate";
 import { withHistory } from "slate-history";
 
-import { Grid, Container, Divider, Paper } from "@material-ui/core";
+import { Grid, Container, Paper } from "@material-ui/core";
 import { Node as SlateNode } from "slate";
 
 import { hotkeyHandler, toReactKBEventHandler } from "./EventHandling";
@@ -80,7 +80,6 @@ const RichTextEditor = () => {
             </Grid>
             <Grid item>
               {/* <RichTextEditorToolbar /> */}
-              {/*
 
               <Slate editor={editor} value={body} onChange={bodyOnChange}>
                 <Editable
@@ -92,8 +91,6 @@ const RichTextEditor = () => {
                   onKeyDown={toReactKBEventHandler(hotkeyHandler(editor))}
                 />
               </Slate>
-              
-              */}
             </Grid>
           </Grid>
         </Container>

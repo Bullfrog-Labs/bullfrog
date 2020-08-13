@@ -19,6 +19,6 @@ export const IS_FIREFOX =
 
 export const IS_SAFARI =
   typeof navigator !== "undefined" &&
-  /Version\/[\d\.]+.*Safari/.test(navigator.userAgent);
+  /Version\/[\d]+.*Safari/.test(navigator.userAgent);
 
 export const PLATFORM: Platform = IS_APPLE ? "apple" : "windows";
