@@ -4,6 +4,7 @@ import { render, waitForElement } from "@testing-library/react";
 import MainView from "./MainView";
 import { Database, NoteRecord, UserRecord } from "../services/Database";
 import Logging from "../services/Logging";
+import { AuthProvider, AuthContext } from "../services/Auth";
 
 Logging.configure(log);
 
@@ -13,8 +14,21 @@ test("renders single note", async () => {
     addNote: jest.fn(async (userName: string, noteRecord: NoteRecord) => {}),
     addUser: jest.fn(async (userRecord: UserRecord) => {}),
   };
-  const ac = <MainView database={database} />;
-  const { getByText } = render(ac);
+
+  // this authProvider always authenticates the user automatically
+  const authProvider: AuthProvider = {
+    onAuthStateChanged: (authState) => {},
+    getInitialAuthState: () => ({
+      displayName: "Test user",
+      email: "testuser@somewhere.com",
+    }),
+  };
+
+  const { getByText } = render(
+    <AuthContext.Provider value={authProvider.getInitialAuthState()}>
+      <MainView database={database} />
+    </AuthContext.Provider>
+  );
 
   /**
    * This waitForElement call is necessary because MainView loads data from an
