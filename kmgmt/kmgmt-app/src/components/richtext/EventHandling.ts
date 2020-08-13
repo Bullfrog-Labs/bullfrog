@@ -1,4 +1,9 @@
-import { PlatformAwareKeymap, Mark, KBEventHandler } from "./Types";
+import {
+  PlatformAwareKeymap,
+  Mark,
+  KBEventHandler,
+  MouseEventHandler,
+} from "./Types";
 import { Editor } from "slate";
 import { toggleMark } from "./Marks";
 import { platformAwareKeymapToHotkeyHandler } from "./Hotkeys";
@@ -36,3 +41,8 @@ export const hotkeyHandler = (editor: Editor) => {
 export const toReactKBEventHandler = (kbEventHandler: KBEventHandler) => (
   reactEvent: React.KeyboardEvent
 ) => kbEventHandler(reactEvent.nativeEvent);
+
+export const toReactMouseEventHandler = (
+  mouseEventHandler: MouseEventHandler
+) => (reactEvent: React.MouseEvent, value: any) =>
+  mouseEventHandler(reactEvent.nativeEvent, value);

@@ -4,6 +4,8 @@ import {
   EditableTypographyProps,
 } from "./EditableTypography";
 
-export const DocumentTitle = (props: EditableTypographyProps) => {
+const DocumentTitle = (props: EditableTypographyProps) => {
   return <EditableTypography variant="h1" {...props} />;
 };
+
+export default DocumentTitle;

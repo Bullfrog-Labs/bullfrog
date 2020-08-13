@@ -1,5 +1,6 @@
 export type HotkeySpec = string | string[];
 export type KBEventHandler = (event: KeyboardEvent) => void;
+export type MouseEventHandler = (event: MouseEvent, value: any) => void;
 export type KeymapEntry = [HotkeySpec, KBEventHandler];
 
 export type Platform = "generic" | "apple" | "windows";

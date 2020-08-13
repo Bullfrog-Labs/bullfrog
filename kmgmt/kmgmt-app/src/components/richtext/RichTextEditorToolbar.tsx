@@ -1,3 +1,5 @@
+import React from "react";
+
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
@@ -15,8 +17,6 @@ import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
 import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
 import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 
-/*
-
 import {
   Toolbar,
   Grid,
@@ -24,6 +24,11 @@ import {
   Divider,
   Typography,
 } from "@material-ui/core";
+import { useSlate, ReactEditor } from "slate-react";
+import { MARKS, Mark } from "./Types";
+import { isMarkActive } from "./Marks";
+import { Editor } from "slate";
+import { toReactMouseEventHandler } from "./EventHandling";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -39,26 +44,24 @@ const useStyles = makeStyles((theme) => ({
 const MarkButtonGroup = () => {
   const editor = useSlate();
 
-  const getActiveFormats = () => {
-    return FORMATS.filter((x) => isMarkActive(editor, x));
+  const getActiveMarks = () => {
+    return MARKS.filter((x) => isMarkActive(editor, x));
   };
 
-  const handleFormat = (event, newFormats) => {
+  const handleMark = (event: MouseEvent, newMarks: Mark[]) => {
     event.preventDefault();
 
     // Handle update to formats
-    const newlyActiveFormats = newFormats.filter(
-      (x) => !isMarkActive(editor, x)
-    );
-    const newlyInactiveFormats = getActiveFormats().filter(
-      (x) => !newFormats.includes(x)
+    const newlyActiveMarks = newMarks.filter((x) => !isMarkActive(editor, x));
+    const newlyInactiveMarks = getActiveMarks().filter(
+      (x) => !newMarks.includes(x)
     );
 
-    for (let format of newlyActiveFormats) {
+    for (let format of newlyActiveMarks) {
       Editor.addMark(editor, format, true);
     }
 
-    for (let format of newlyInactiveFormats) {
+    for (let format of newlyInactiveMarks) {
       Editor.removeMark(editor, format);
     }
 
@@ -69,8 +72,8 @@ const MarkButtonGroup = () => {
   return (
     <StyledToggleButtonGroup
       size="small"
-      value={getActiveFormats()}
-      onChange={handleFormat}
+      value={getActiveMarks()}
+      onChange={toReactMouseEventHandler(handleMark)}
       aria-label="text formatting"
     >
       <ToggleButton value="bold" aria-label="bold">
@@ -102,6 +105,7 @@ const StyledToggleButtonGroup = withStyles((theme) => ({
   },
 }))(ToggleButtonGroup);
 
+/*
 const BlockButtonGroup = () => {
   const editor = useSlate();
   const activeBlocks = BLOCKS.filter((x) => isBlockActive(editor, x));
@@ -150,6 +154,7 @@ const BlockButtonGroup = () => {
     </StyledToggleButtonGroup>
   );
 };
+*/
 
 const RichTextEditorToolbar = () => {
   const classes = useStyles();
@@ -157,10 +162,12 @@ const RichTextEditorToolbar = () => {
   return (
     <Toolbar>
       <MarkButtonGroup />
+      {/*
       <Divider flexItem orientation="vertical" className={classes.divider} />
       <BlockButtonGroup />
+ */}
     </Toolbar>
   );
 };
 
-*/
+export default RichTextEditorToolbar;

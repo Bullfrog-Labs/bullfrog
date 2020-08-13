@@ -9,7 +9,8 @@ import { Node as SlateNode } from "slate";
 import { hotkeyHandler, toReactKBEventHandler } from "./EventHandling";
 import { Element, Leaf } from "./Rendering";
 import { withResetBlockOnInsertBreak } from "./EditorBehaviors";
-import { DocumentTitle } from "./DocumentTitle";
+import DocumentTitle from "./DocumentTitle";
+import RichTextEditorToolbar from "./RichTextEditorToolbar";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -79,9 +80,8 @@ const RichTextEditor = () => {
               />
             </Grid>
             <Grid item>
-              {/* <RichTextEditorToolbar /> */}
-
               <Slate editor={editor} value={body} onChange={bodyOnChange}>
+                <RichTextEditorToolbar />
                 <Editable
                   renderElement={renderElement}
                   renderLeaf={renderLeaf}
