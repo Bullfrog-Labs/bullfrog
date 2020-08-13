@@ -1,4 +1,4 @@
-import { PlatformAwareKeymap, Mark } from "./Types";
+import { PlatformAwareKeymap, Mark, KBEventHandler } from "./Types";
 import { Editor } from "slate";
 import { toggleMark } from "./Marks";
 import { platformAwareKeymapToHotkeyHandler } from "./Hotkeys";
@@ -32,3 +32,7 @@ export const hotkeyHandler = (editor: Editor) => {
   // Note that PLATFORM will only work in a browser environemnt, not in headless test environments.
   return platformAwareKeymapToHotkeyHandler(PLATFORM_AWARE_KEYMAP, PLATFORM);
 };
+
+export const toReactKBEventHandler = (kbEventHandler: KBEventHandler) => (
+  reactEvent: React.KeyboardEvent
+) => kbEventHandler(reactEvent.nativeEvent);

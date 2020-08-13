@@ -3,16 +3,13 @@ import { ReactEditor, withReact, Slate, Editable } from "slate-react";
 import { createEditor } from "slate";
 import { withHistory } from "slate-history";
 
-import {
-  Toolbar,
-  Grid,
-  Container,
-  Divider,
-  Typography,
-} from "@material-ui/core";
+import { Grid, Container, Divider, Paper } from "@material-ui/core";
 import { Node as SlateNode } from "slate";
 
-import { hotkeyHandler } from "./EventHandling";
+import { hotkeyHandler, toReactKBEventHandler } from "./EventHandling";
+import { Element, Leaf } from "./Rendering";
+import { withResetBlockOnInsertBreak } from "./EditorBehaviors";
+import { DocumentTitle } from "./DocumentTitle";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -48,7 +45,7 @@ const RichTextEditor = () => {
   const [body, setBody] = useState<Body>(emptyNoteRecord.body);
 
   const editor = useMemo(
-    () => withResetBlockOnInsertBreak(withHistory(withReact(createEditor()))),
+    () => withReact(withResetBlockOnInsertBreak(withHistory(createEditor()))),
     []
   );
 
@@ -57,38 +54,44 @@ const RichTextEditor = () => {
   };
 
   return (
-    <div elevation={1} className="RichTextEditor">
-      <Container>
-        <Grid
-          container
-          direction="column"
-          justify="flex-start"
-          alignItems="stretch"
-          spacing={3}
-        >
-          <Grid item>
-            <DocumentTitle
-              handleEscape={(event) => {
-                ReactEditor.focus(editor);
-              }}
-            />
-          </Grid>
-          <Grid item>
-            <Slate editor={editor} value={body} onChange={bodyOnChange}>
-              <RichTextEditorToolbar />
-              <Editable
-                renderElement={renderElement}
-                renderLeaf={renderLeaf}
-                placeholder="Enter some text"
-                spellCheck
-                autoFocus
-                onKeyDown={hotkeyHandler(editor)}
+    <Paper elevation={1}>
+      <div className="RichTextEditor">
+        <Container>
+          <Grid
+            container
+            direction="column"
+            justify="flex-start"
+            alignItems="stretch"
+            spacing={3}
+          >
+            <Grid item>
+              <DocumentTitle
+                handleEscape={(event) => {
+                  ReactEditor.focus(editor);
+                }}
               />
-            </Slate>
+            </Grid>
+            <Grid item>
+              {/* <RichTextEditorToolbar /> */}
+              {/*
+
+              <Slate editor={editor} value={body} onChange={bodyOnChange}>
+                <Editable
+                  renderElement={renderElement}
+                  renderLeaf={renderLeaf}
+                  placeholder="Enter some text"
+                  spellCheck
+                  autoFocus
+                  onKeyDown={toReactKBEventHandler(hotkeyHandler(editor))}
+                />
+              </Slate>
+              
+              */}
+            </Grid>
           </Grid>
-        </Grid>
-      </Container>
-    </div>
+        </Container>
+      </div>
+    </Paper>
   );
 };
 
