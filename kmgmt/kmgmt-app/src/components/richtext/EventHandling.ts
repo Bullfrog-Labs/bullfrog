@@ -2,7 +2,7 @@ import { PlatformAwareKeymap, Mark } from "./Types";
 import { Editor } from "slate";
 import { toggleMark } from "./marks";
 import { platformAwareKeymapToHotkeyHandler } from "./Hotkeys";
-import { IS_APPLE } from "./environment";
+import { PLATFORM } from "./environment";
 
 export const noopKBEventHandler = () => {
   return (event: KeyboardEvent) => {};
@@ -29,6 +29,6 @@ export const hotkeyHandler = (editor: Editor) => {
     },
   };
 
-  // Note that IS_APPLE will only work in a browser environemnt, not in headless test environments.
-  return platformAwareKeymapToHotkeyHandler(PLATFORM_AWARE_KEYMAP, IS_APPLE);
+  // Note that PLATFORM will only work in a browser environemnt, not in headless test environments.
+  return platformAwareKeymapToHotkeyHandler(PLATFORM_AWARE_KEYMAP, PLATFORM);
 };

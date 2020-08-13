@@ -4,7 +4,7 @@
 
 import * as log from "loglevel";
 import { isKeyHotkey } from "is-hotkey";
-import { IS_APPLE } from "./Environment";
+import { PLATFORM } from "./Environment";
 import { PlatformAwareKeymap, Platform, KBEventHandler, Keymap } from "./Types";
 
 export function platformAwareKeymapToActiveKeymap(
@@ -62,7 +62,7 @@ export function platformAwareKeymapToHotkeyHandler(
   platform: Platform
 ): KBEventHandler {
   if (!platform) {
-    platform = IS_APPLE ? "apple" : "windows";
+    platform = PLATFORM;
   }
 
   let activeHotkeys = platformAwareKeymapToActiveKeymap(
