@@ -3,7 +3,7 @@ import React from "react";
 import { render } from "@testing-library/react-native";
 import { View, Text } from "react-native";
 
-test("app container renders children and title", () => {
+test("test dummy react to prove it works", () => {
   const view = (
     <View>
       <Text>Login</Text>
