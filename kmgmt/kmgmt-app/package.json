@@ -36,7 +36,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --env=jsdom-sixteen",
     "eject": "react-scripts eject",
     "ts-node": "DOTENV_CONFIG_PATH=$PWD/.env.admin ts-node -r dotenv/config -O '{\"module\":\"commonjs\"}'"
   },
@@ -54,5 +54,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "jest": {},
+  "devDependencies": {
+    "jest-environment-jsdom-sixteen": "^1.0.3"
   }
 }
