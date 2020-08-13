@@ -25,10 +25,11 @@ import {
   Typography,
 } from "@material-ui/core";
 import { useSlate, ReactEditor } from "slate-react";
-import { MARKS, Mark } from "./Types";
+import { MARKS, Mark, BLOCKS, Block } from "./Types";
 import { isMarkActive } from "./Marks";
 import { Editor } from "slate";
 import { toReactMouseEventHandler } from "./EventHandling";
+import { isBlockActive, toggleBlock } from "./Blocks";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -105,13 +106,12 @@ const StyledToggleButtonGroup = withStyles((theme) => ({
   },
 }))(ToggleButtonGroup);
 
-/*
 const BlockButtonGroup = () => {
   const editor = useSlate();
   const activeBlocks = BLOCKS.filter((x) => isBlockActive(editor, x));
   const activeBlock = activeBlocks.length === 1 ? activeBlocks[0] : null;
 
-  const handleBlock = (event, newBlock) => {
+  const handleBlock = (event: MouseEvent, newBlock: Block) => {
     event.preventDefault();
     toggleBlock(editor, newBlock);
 
@@ -124,7 +124,7 @@ const BlockButtonGroup = () => {
       size="small"
       exclusive
       value={activeBlock}
-      onChange={handleBlock}
+      onChange={toReactMouseEventHandler(handleBlock)}
       aria-label="block type selection"
     >
       <ToggleButton value="heading-1" aria-label="heading-1">
@@ -154,7 +154,6 @@ const BlockButtonGroup = () => {
     </StyledToggleButtonGroup>
   );
 };
-*/
 
 const RichTextEditorToolbar = () => {
   const classes = useStyles();
@@ -162,10 +161,8 @@ const RichTextEditorToolbar = () => {
   return (
     <Toolbar>
       <MarkButtonGroup />
-      {/*
       <Divider flexItem orientation="vertical" className={classes.divider} />
       <BlockButtonGroup />
- */}
     </Toolbar>
   );
 };
