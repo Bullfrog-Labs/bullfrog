@@ -17,13 +17,7 @@ import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
 import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
 import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 
-import {
-  Toolbar,
-  Grid,
-  Container,
-  Divider,
-  Typography,
-} from "@material-ui/core";
+import { Toolbar, Divider } from "@material-ui/core";
 import { useSlate, ReactEditor } from "slate-react";
 import { MARKS, Mark, BLOCKS, Block } from "./Types";
 import { isMarkActive } from "./Marks";
