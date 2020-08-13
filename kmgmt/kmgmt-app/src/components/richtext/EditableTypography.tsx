@@ -12,7 +12,7 @@ import { withReact, Slate, Editable } from "slate-react";
 
 import { Typography } from "@material-ui/core";
 
-type EditableTypographyProps = {
+export type EditableTypographyProps = {
   initialValue?: SlateNode[];
   variant?: string;
   handleEscape: KBEventHandler;
