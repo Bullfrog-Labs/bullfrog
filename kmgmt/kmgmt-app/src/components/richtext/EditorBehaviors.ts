@@ -1,6 +1,6 @@
 import { Editor, Text, Transforms } from "slate";
 import { SECTION_BLOCKS } from "./Types";
-import { isBlockActive, toggleBlock } from "./blocks";
+import { isBlockActive, toggleBlock } from "./Blocks";
 
 // Ensures that inserting a break in the middle of a section block (i.e.
 // headings) causes the new block to be of the same type of section block.

@@ -1,8 +1,8 @@
 import { PlatformAwareKeymap, Mark } from "./Types";
 import { Editor } from "slate";
-import { toggleMark } from "./marks";
+import { toggleMark } from "./Marks";
 import { platformAwareKeymapToHotkeyHandler } from "./Hotkeys";
-import { PLATFORM } from "./environment";
+import { PLATFORM } from "./Environment";
 
 export const noopKBEventHandler = () => {
   return (event: KeyboardEvent) => {};
