@@ -1,14 +1,18 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 import { Node as SlateNode } from "slate";
 import { Typography } from "@material-ui/core";
 
-export const Element = (props: {
+type ElementProps = {
   attributes: object;
   children: React.ReactChild[];
   element: SlateNode;
-}) => {
-  let { attributes, children, element } = props;
+};
 
+export const Element: FunctionComponent<ElementProps> = ({
+  attributes,
+  children,
+  element,
+}) => {
   switch (element.type) {
     case "block-quote":
       return (
@@ -43,12 +47,17 @@ export const Element = (props: {
   }
 };
 
-export const Leaf = (props: {
+type LeafProps = {
   attributes: object;
   children: React.ReactChild[];
   leaf: SlateNode;
+};
+
+export const Leaf: FunctionComponent<LeafProps> = ({
+  attributes,
+  children,
+  leaf,
 }) => {
-  let { attributes, children, leaf } = props;
   let leafElement;
 
   if (leaf.bold) {
