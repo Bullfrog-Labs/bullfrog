@@ -3,8 +3,6 @@ import * as React from "react";
 import "../services/Firebase";
 import firebase from "firebase";
 import { StyleSheet, View, StatusBar, FlatList, Text } from "react-native";
-import { NotesScreenNavigationProp } from "../services/Navigation";
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -21,9 +19,7 @@ const styles = StyleSheet.create({
 
 const firestore = firebase.firestore();
 
-export default function NotesScreen(props: {
-  navigation: NotesScreenNavigationProp;
-}) {
+export default function NotesScreen() {
   const [notes, setNotes] = React.useState<{ title: string; body: string }[]>(
     []
   );
@@ -48,7 +44,7 @@ export default function NotesScreen(props: {
       }
     }
     getNotes();
-  }, [firestore, firebase]);
+  }, []);
 
   return (
     <View style={styles.container}>
