@@ -7,7 +7,7 @@ import NotesScreen from "./components/NotesScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { Stack } from "./services/Navigation";
 
-function App() {
+export function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
