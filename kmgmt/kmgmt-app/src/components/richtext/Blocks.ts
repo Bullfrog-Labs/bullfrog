@@ -1,9 +1,6 @@
 import { Editor, Transforms } from "slate";
 import { Block, isList } from "./Types";
 
-// TODO: Implement event handling for non-section blocks: block-quote,
-//       bulleted-list, list item and numbered list.
-
 export const isBlockActive = (editor: Editor, block: Block) => {
   const [match] = Editor.nodes(editor, {
     match: (n) => n.type === block,
@@ -14,7 +11,6 @@ export const isBlockActive = (editor: Editor, block: Block) => {
 
 export const toggleBlock = (editor: Editor, block: Block) => {
   const isActive = isBlockActive(editor, block);
-  // const isList = LIST_TYPES.includes(block);
 
   Transforms.unwrapNodes(editor, {
     match: (n) => {

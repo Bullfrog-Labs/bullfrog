@@ -42,8 +42,6 @@ const emptyNoteRecord: NoteRecord = {
 };
 
 const RichTextEditor = () => {
-  // TODO: Modify value to also include document title.
-  // TODO: Modify document title to be synced with state.
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
 
