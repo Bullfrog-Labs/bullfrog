@@ -5,4 +5,5 @@ workflows:
   node-tests:
     jobs:
       - node/test:
+          pkg-manager: yarn
           app-dir: kmgmt/kmgmt-app
