@@ -1,6 +1,6 @@
+import * as log from "loglevel";
 import React, { useContext } from "react";
 import Typography from "@material-ui/core/Typography";
-import * as log from "loglevel";
 import { Database, NoteRecord } from "../services/Database";
 import { Container, Grid, Paper, makeStyles } from "@material-ui/core";
 import { AuthContext } from "../services/Auth";
