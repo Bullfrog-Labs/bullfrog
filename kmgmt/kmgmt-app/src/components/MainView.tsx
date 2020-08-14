@@ -19,14 +19,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+type NoteRecordColumn = NoteRecord[];
+type NoteRecordGrid = NoteRecordColumn[];
+
 /**
  * Very simple dummy implementation for note layout. Lays notes out top to
  * bottom by always placing the next note in the smallest column.
  * @param notes
  */
-function createNoteLayout(notes: NoteRecord[]) {
+function createNoteGrid(notes: NoteRecordColumn) {
   const lengths: number[] = [0, 0, 0];
-  const columns: NoteRecord[][] = [[], [], []];
+  const columns: NoteRecordGrid = [[], [], []];
   notes.forEach((note) => {
     const i = lengths.indexOf(Math.min(...lengths));
     columns[i].push(note);
@@ -35,7 +38,7 @@ function createNoteLayout(notes: NoteRecord[]) {
   return columns;
 }
 
-function NoteColumn(props: { notes: NoteRecord[] }) {
+function NoteColumn(props: { notes: NoteRecordColumn }) {
   // eslint-disable-next-line
   const logger = log.getLogger("NoteColumn");
   const classes = useStyles();
@@ -56,6 +59,25 @@ function NoteColumn(props: { notes: NoteRecord[] }) {
   );
 }
 
+function NoteGrid(props: { columns: NoteRecordGrid }) {
+  const logger = log.getLogger("NoteGrid");
+  const classes = useStyles();
+
+  const noteColumns = Array.from(props.columns.entries(), ([i, column]) => (
+    <NoteColumn key={i} notes={column}></NoteColumn>
+  ));
+
+  return (
+    <Grid container className={classes.noteGrid} spacing={1}>
+      {noteColumns}
+    </Grid>
+  );
+}
+
+function EmptyNoteGridPlaceholder() {
+  return <span>"No notes!"</span>;
+}
+
 export default function MainView(props: { database: Database }) {
   const logger = log.getLogger("MainView");
   const classes = useStyles();
@@ -73,15 +95,15 @@ export default function MainView(props: { database: Database }) {
     loadNotes();
   }, [database, logger, authState.email]);
 
-  const columns = createNoteLayout(notes);
+  const columns = createNoteGrid(notes);
 
   return (
     <Container maxWidth="md">
-      <Grid container className={classes.noteGrid} spacing={1}>
-        <NoteColumn notes={columns[0]} />
-        <NoteColumn notes={columns[1]} />
-        <NoteColumn notes={columns[2]} />
-      </Grid>
+      {notes.length > 0 ? (
+        <NoteGrid columns={columns} />
+      ) : (
+        <EmptyNoteGridPlaceholder />
+      )}
     </Container>
   );
 }
