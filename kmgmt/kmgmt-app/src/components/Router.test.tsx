@@ -3,10 +3,13 @@ import { render, waitForElement } from "@testing-library/react";
 import Router from "./Router";
 import { AuthProvider, AuthContext } from "../services/Auth";
 import { NoteRecord, UserRecord } from "../services/Database";
+import { EMPTY_RICH_TEXT, richTextParagraph } from "./richtext/Utils";
 
 test("renders AppContainer", async () => {
   const database = {
-    getNotes: jest.fn(async () => [{ body: "Example note text" }]),
+    getNotes: jest.fn(async () => [
+      { body: richTextParagraph("Example note text") },
+    ]),
     addNote: jest.fn(async (userName: string, noteRecord: NoteRecord) => {}),
     addUser: jest.fn(async (userRecord: UserRecord) => {}),
   };

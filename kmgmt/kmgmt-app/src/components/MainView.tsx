@@ -2,8 +2,10 @@ import React, { useContext } from "react";
 import Typography from "@material-ui/core/Typography";
 import * as log from "loglevel";
 import { Database, NoteRecord } from "../services/Database";
-import { Container, Grid, Paper, makeStyles } from "@material-ui/core";
+import { Container, Grid, Paper, makeStyles, Button } from "@material-ui/core";
 import { AuthContext } from "../services/Auth";
+import { useHistory } from "react-router-dom";
+import { richTextStringPreview } from "./richtext/Utils";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -33,24 +35,39 @@ function createNoteGrid(notes: NoteRecordColumn) {
   notes.forEach((note) => {
     const i = lengths.indexOf(Math.min(...lengths));
     columns[i].push(note);
+    // TODO: note body length does not make sense with rich text. Fix this.
     lengths[i] = lengths[i] + note.body.length;
   });
   return columns;
 }
 
+function NotePreviewCard(props: { note: NoteRecord }) {
+  const logger = log.getLogger("NotePreviewCard");
+  const classes = useStyles();
+
+  const { note } = props;
+  const notePreview = richTextStringPreview(note.body);
+
+  return (
+    <Grid item xs={12}>
+      <Paper className={classes.paper}>
+        {!!note.title && <Typography variant="h6">{note.title}</Typography>}
+        {!!notePreview && (
+          <Typography variant="body1">
+            {richTextStringPreview(note.body)}
+          </Typography>
+        )}
+      </Paper>
+    </Grid>
+  );
+}
+
 function NoteColumn(props: { notes: NoteRecordColumn }) {
   // eslint-disable-next-line
   const logger = log.getLogger("NoteColumn");
-  const classes = useStyles();
+
   const items = props.notes.map((note: NoteRecord, index: number) => {
-    return (
-      <Grid key={index} item xs={12}>
-        <Paper className={classes.paper}>
-          {!!note.title && <Typography variant="h6">{note.title}</Typography>}
-          <Typography variant="body1">{note.body}</Typography>
-        </Paper>
-      </Grid>
-    );
+    return <NotePreviewCard key={index} note={note} />;
   });
   return (
     <Grid container item xs={4} spacing={1}>
@@ -64,7 +81,7 @@ function NoteGrid(props: { columns: NoteRecordGrid }) {
   const classes = useStyles();
 
   const noteColumns = Array.from(props.columns.entries(), ([i, column]) => (
-    <NoteColumn key={i} notes={column}></NoteColumn>
+    <NoteColumn key={i} notes={column} />
   ));
 
   return (
@@ -75,7 +92,15 @@ function NoteGrid(props: { columns: NoteRecordGrid }) {
 }
 
 function EmptyNoteGridPlaceholder() {
-  return <span>"No notes!"</span>;
+  let history = useHistory();
+  let createNewNoteOnClick = () => {
+    history.push("/create-new-note");
+  };
+  return (
+    <Button variant="contained" color="primary" onClick={createNewNoteOnClick}>
+      Create your first note
+    </Button>
+  );
 }
 
 export default function MainView(props: { database: Database }) {

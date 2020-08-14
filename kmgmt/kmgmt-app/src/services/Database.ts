@@ -1,6 +1,8 @@
+import { RichText } from "../components/richtext/Types";
+
 export interface NoteRecord {
   title?: string;
-  body: string;
+  body: RichText;
 }
 
 export interface UserRecord {

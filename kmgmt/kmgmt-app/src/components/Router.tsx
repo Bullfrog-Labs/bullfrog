@@ -2,7 +2,7 @@ import React from "react";
 import MainView from "./MainView";
 import { Database } from "../services/Database";
 import { Switch, Route, BrowserRouter, useLocation } from "react-router-dom";
-import NoteView from "./NoteView";
+import NoteView, { CreateNewNoteView } from "./NoteView";
 import PrivateRoute from "../routing/PrivateRoute";
 import { AuthProvider } from "../services/Auth";
 import AppContainer from "./AppContainer";
@@ -35,6 +35,11 @@ export default function Router(props: {
         <PrivateRoute path="/notes/:id">
           <AppContainer>
             <NoteView database={props.database} />
+          </AppContainer>
+        </PrivateRoute>
+        <PrivateRoute path="/create-new-note">
+          <AppContainer>
+            <CreateNewNoteView database={props.database} />
           </AppContainer>
         </PrivateRoute>
         <PrivateRoute exact path="/">
