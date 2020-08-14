@@ -1,12 +1,9 @@
 import React from "react";
-import { Route, Redirect } from "react-router-dom";
+import { Route, Redirect, RouteProps } from "react-router-dom";
 import { AuthContext } from "../services/Auth";
 import * as log from "loglevel";
 
-export default function PrivateRoute(props: {
-  children: React.ReactChild[] | React.ReactChild;
-  path: string[] | string;
-}) {
+export default function PrivateRoute(props: RouteProps) {
   let { children, ...rest } = props;
   const logger = log.getLogger("PrivateRoute");
 
