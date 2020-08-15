@@ -1,12 +1,15 @@
 {
-  "main": "node_modules/expo/AppEntry.js",
+  "name": "kmgmt-native-app",
+  "version": "0.1.0",
+  "main": "__generated__/AppEntry.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
     "eject": "expo eject",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "expo-yarn-workspaces postinstall"
   },
   "dependencies": {
     "@react-native-community/eslint-config": "^2.0.0",
@@ -33,13 +36,16 @@
     "react-native-safe-area-context": "~3.0.7",
     "react-native-screens": "~2.9.0",
     "react-native-web": "~0.11.7",
-    "react-test-renderer": "^16.13.1"
+    "react-test-renderer": "^16.13.1",
+    "kmgmt-common": "^0.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.6",
+    "@babel/core": "^7.11.1",
+    "@babel/runtime": "^7.11.1",
     "@testing-library/react-native": "^7.0.1",
     "@types/react": "~16.9.41",
     "@types/react-native": "~0.62.13",
+    "expo-yarn-workspaces": "^1.2.1",
     "typescript": "~3.9.5"
   },
   "eslintConfig": {

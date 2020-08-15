@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "workspaces": [
+    "kmgmt/kmgmt-app",
+    "kmgmt/kmgmt-native-app",
+    "kmgmt/kmgmt-common"
+  ]
+}
