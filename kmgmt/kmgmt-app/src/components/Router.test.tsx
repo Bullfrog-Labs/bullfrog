@@ -10,6 +10,10 @@ test("renders AppContainer", async () => {
     getNotes: jest.fn(async () => [
       { body: richTextParagraph("Example note text") },
     ]),
+    getUser: jest.fn(async (userName: string) => {
+      userName: "foo";
+    }),
+
     addNote: jest.fn(async (userName: string, noteRecord: NoteRecord) => {}),
     addUser: jest.fn(async (userRecord: UserRecord) => {}),
   };

@@ -37,6 +37,20 @@ export default class FirestoreDatabase implements Database {
     });
   }
 
+  async getUser(userName: string): Promise<UserRecord | null> {
+    const userDoc = await this.firestore
+      .collection(USERS_COLLECTION)
+      .doc(userName)
+      .get();
+    if (!userDoc.exists) {
+      return null;
+    } else {
+      return {
+        userName: userDoc.data()!.userName,
+      };
+    }
+  }
+
   async addUser(userRecord: UserRecord) {
     const doc = this.firestore
       .collection(USERS_COLLECTION)

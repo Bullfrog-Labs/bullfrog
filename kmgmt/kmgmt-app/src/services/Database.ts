@@ -10,7 +10,9 @@ export interface UserRecord {
 }
 
 export interface Database {
-  getNotes(userName: string): Promise<NoteRecord[]>;
   addUser(userRecord: UserRecord): Promise<void>;
+  getUser(userName: string): Promise<UserRecord | null>;
+
   addNote(userName: string, noteRecord: NoteRecord): Promise<void>;
+  getNotes(userName: string): Promise<NoteRecord[]>;
 }
