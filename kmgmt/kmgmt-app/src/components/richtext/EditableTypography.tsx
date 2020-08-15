@@ -16,7 +16,7 @@ export type EditableTypographyProps = {
   initialValue?: string;
   variant?: string;
   handleEscape: KBEventHandler;
-  onChange?: (newValue?: string) => void;
+  onChange?: (newValue: string) => void;
 };
 
 const handleExitEditable = (handleEscape?: KBEventHandler) => (

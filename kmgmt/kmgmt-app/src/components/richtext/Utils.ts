@@ -23,7 +23,7 @@ export const richTextParagraph = (content: string): RichText => {
 export const richTextStringPreview = (
   richText: RichText
 ): string | undefined => {
-  if (!richText || richText.length == 0) {
+  if (!richText || richText.length === 0) {
     return undefined;
   }
 

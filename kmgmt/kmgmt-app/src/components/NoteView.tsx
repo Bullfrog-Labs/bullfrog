@@ -1,12 +1,12 @@
 import React, { useState, useContext } from "react";
-import Typography from "@material-ui/core/Typography";
 import { Database } from "../services/Database";
 import { Container } from "@material-ui/core";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import RichTextEditor, {
-  RichTextState,
   Title,
   Body,
+  RichTextState,
+  EMPTY_RICH_TEXT_STATE,
 } from "./richtext/RichTextEditor";
 import IdleTimer from "react-idle-timer";
 import * as log from "loglevel";
@@ -27,12 +27,12 @@ export function CreateNewNoteView(props: NoteViewProps) {
   const logger = log.getLogger("CreateNewNoteView");
 
   const [noteChanged, setNoteChanged] = useState(false);
-  const [richTextState, setRichTextState] = useState<RichTextState>({
-    body: EMPTY_RICH_TEXT,
-  });
+  const [richTextState, setRichTextState] = useState<RichTextState>(
+    EMPTY_RICH_TEXT_STATE
+  );
 
   const saveNote = () => {
-    if (!richTextState.title && richTextState.body == EMPTY_RICH_TEXT) {
+    if (richTextState == EMPTY_RICH_TEXT_STATE) {
       // TODO: this works for create-new-note. Need to make sure it makes sense
       // for existing note.
       logger.info("Not saving empty note");
@@ -41,11 +41,11 @@ export function CreateNewNoteView(props: NoteViewProps) {
 
     const noteRecord = {
       title: richTextState.title,
-      body: richTextState.body ?? EMPTY_RICH_TEXT,
+      body: richTextState.body,
     };
 
     logger.info("Saving new note");
-    // props.database.addNote(authState.email, noteRecord);
+    props.database.addNote(authState.email, noteRecord);
   };
 
   const handleOnIdle = (event: Event) => {
@@ -59,7 +59,7 @@ export function CreateNewNoteView(props: NoteViewProps) {
     }
   };
 
-  const onTitleChange = (newTitle?: Title): void => {
+  const onTitleChange = (newTitle: Title): void => {
     setNoteChanged(newTitle != richTextState.title);
     setRichTextState({
       title: newTitle,

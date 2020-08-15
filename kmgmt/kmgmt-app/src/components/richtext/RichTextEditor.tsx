@@ -23,12 +23,17 @@ export type Title = string;
 export type Body = RichText;
 
 export type RichTextState = {
-  title?: Title;
+  title: Title;
   body: Body;
 };
 
+export const EMPTY_RICH_TEXT_STATE = {
+  title: "",
+  body: EMPTY_RICH_TEXT,
+};
+
 export type RichTextEditorProps = {
-  onTitleChange: (newTitle?: Title) => void;
+  onTitleChange: (newTitle: Title) => void;
   onBodyChange: (newBody: Body) => void;
   enableToolbar?: boolean;
 };
@@ -43,8 +48,8 @@ const RichTextEditor = (props: RichTextEditorProps) => {
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
 
-  const [title, setTitle] = useState<Title | undefined>(undefined);
-  const [body, setBody] = useState<Body>(EMPTY_RICH_TEXT);
+  const [title, setTitle] = useState<Title>(EMPTY_RICH_TEXT_STATE.title);
+  const [body, setBody] = useState<Body>(EMPTY_RICH_TEXT_STATE.body);
 
   const editor = useMemo(
     () => withReact(withResetBlockOnInsertBreak(withHistory(createEditor()))),
@@ -52,7 +57,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
   );
 
   const onChange = {
-    title: (newTitle?: Title) => {
+    title: (newTitle: Title) => {
       if (title === newTitle) {
         return;
       }
