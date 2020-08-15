@@ -5,7 +5,8 @@ import { Container } from "@material-ui/core";
 import { useParams, useLocation } from "react-router-dom";
 import RichTextEditor, {
   RichTextState,
-  Field,
+  Title,
+  Body,
 } from "./richtext/RichTextEditor";
 import IdleTimer from "react-idle-timer";
 import * as log from "loglevel";
@@ -31,7 +32,9 @@ export function CreateNewNoteView(props: NoteViewProps) {
   });
 
   const saveNote = () => {
-    if (!richTextState) {
+    if (!richTextState.title && richTextState.body == EMPTY_RICH_TEXT) {
+      // TODO: this works for create-new-note. Need to make sure it makes sense
+      // for existing note.
       logger.info("Not saving empty note");
       return;
     }
@@ -41,7 +44,8 @@ export function CreateNewNoteView(props: NoteViewProps) {
       body: richTextState.body ?? EMPTY_RICH_TEXT,
     };
 
-    props.database.addNote(authState.email, noteRecord);
+    logger.info("Saving new note");
+    // props.database.addNote(authState.email, noteRecord);
   };
 
   const handleOnIdle = (event: Event) => {
@@ -55,27 +59,26 @@ export function CreateNewNoteView(props: NoteViewProps) {
     }
   };
 
-  const onStateChange = (
-    changedState: RichTextState,
-    updatedFields: Field[]
-  ) => {
-    let noteChanged = false;
-    if (updatedFields.includes("title")) {
-      // noteChanged = changedState.title != richTextState.title;
-    }
-
-    if (updatedFields.includes("body")) {
-      // noteChanged = true;
-    }
-
-    setRichTextState(changedState);
-    setNoteChanged(noteChanged);
+  const onTitleChange = (newTitle?: Title): void => {
+    setNoteChanged(newTitle != richTextState.title);
+    setRichTextState({
+      title: newTitle,
+      body: richTextState.body,
+    });
+  };
+  const onBodyChange = (newBody: Body): void => {
+    setRichTextState({ title: richTextState.title, body: newBody });
+    setNoteChanged(true);
   };
 
   return (
     <Container maxWidth="md">
       <IdleTimer timeout={IDLE_TIME_FOR_SAVE} onIdle={handleOnIdle}>
-        <RichTextEditor onStateChange={onStateChange} enableToolbar={false} />
+        <RichTextEditor
+          onTitleChange={onTitleChange}
+          onBodyChange={onBodyChange}
+          enableToolbar={false}
+        />
       </IdleTimer>
     </Container>
   );

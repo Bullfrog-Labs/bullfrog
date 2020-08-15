@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { ReactEditor, withReact, Slate, Editable } from "slate-react";
-import { createEditor } from "slate";
+import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
 
 import { Grid, Container, Paper } from "@material-ui/core";
@@ -19,23 +19,26 @@ import { EMPTY_RICH_TEXT } from "./Utils";
 // The implementation below is based off of
 // https://github.com/ianstormtaylor/slate/blob/master/site/examples/richtext.js.
 
-type Title = string;
-type Body = RichText;
-
-export type Field = "title" | "body";
+export type Title = string;
+export type Body = RichText;
 
 export type RichTextState = {
   title?: Title;
-  body?: Body;
+  body: Body;
 };
 
 export type RichTextEditorProps = {
-  onStateChange: (newState: RichTextState, updatedFields: Field[]) => void;
+  onTitleChange: (newTitle?: Title) => void;
+  onBodyChange: (newBody: Body) => void;
   enableToolbar?: boolean;
 };
 
+const didOpsAffectContent = (ops: Operation[]): boolean => {
+  return ops.some((op) => !Operation.isSelectionOperation(op));
+};
+
 const RichTextEditor = (props: RichTextEditorProps) => {
-  const { onStateChange, enableToolbar } = props;
+  const { onTitleChange, onBodyChange, enableToolbar } = props;
 
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
@@ -48,14 +51,20 @@ const RichTextEditor = (props: RichTextEditorProps) => {
     []
   );
 
-  const titleOnChange = (newTitle?: Title) => {
-    setTitle(newTitle);
-    onStateChange({ title: newTitle, body: body }, ["title"]);
-  };
-
-  const bodyOnChange = (newBody: Body) => {
-    setBody(newBody);
-    onStateChange({ title: title, body: newBody }, ["body"]);
+  const onChange = {
+    title: (newTitle?: Title) => {
+      if (title === newTitle) {
+        return;
+      }
+      setTitle(newTitle);
+      onTitleChange(newTitle);
+    },
+    body: (newBody: Body) => {
+      if (didOpsAffectContent(editor.operations)) {
+        setBody(newBody);
+        onBodyChange(newBody);
+      }
+    },
   };
 
   return (
@@ -75,11 +84,11 @@ const RichTextEditor = (props: RichTextEditorProps) => {
                   ReactEditor.focus(editor);
                 }}
                 initialValue={title}
-                onStateChange={titleOnChange}
+                onChange={onChange.title}
               />
             </Grid>
             <Grid item>
-              <Slate editor={editor} value={body} onChange={bodyOnChange}>
+              <Slate editor={editor} value={body} onChange={onChange.body}>
                 {!!enableToolbar && <RichTextEditorToolbar />}
                 <Editable
                   renderElement={renderElement}
