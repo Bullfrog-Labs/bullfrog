@@ -31,10 +31,29 @@ export default class FirestoreDatabase implements Database {
     const coll = await userDoc.collection(NOTES_COLLECTION).get();
     return coll.docs.map((doc) => {
       return {
+        id: doc.id,
         title: doc.data().title,
         body: doc.data().body,
       };
     });
+  }
+
+  async getNote(userName: string, id: string): Promise<NoteRecord | null> {
+    const noteDoc = await this.firestore
+      .collection(USERS_COLLECTION)
+      .doc(userName)
+      .collection(NOTES_COLLECTION)
+      .doc(id)
+      .get();
+    if (!noteDoc.exists) {
+      return null;
+    } else {
+      return {
+        id: noteDoc.id,
+        title: noteDoc.data()!.title,
+        body: noteDoc.data()!.body,
+      };
+    }
   }
 
   async getUser(userName: string): Promise<UserRecord | null> {
