@@ -22,6 +22,28 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "loglevel": "^1.6.8"
+    "@react-native-community/eslint-config": "^2.0.0",
+    "@react-native-community/masked-view": "0.1.10",
+    "eslint-config": "^0.3.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-jest": "^23.20.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-react-native": "^3.8.1",
+    "firebase": "7.9.0",
+    "loglevel": "^1.6.8",
+    "react-native-gesture-handler": "~1.6.0",
+    "react-native-reanimated": "~1.9.0",
+    "react-native-safe-area-context": "~3.0.7",
+    "react-native-screens": "~2.9.0"
+  },
+  "eslintConfig": {
+    "extends": "@react-native-community",
+    "rules": {
+      "quotes": [
+        2,
+        "double"
+      ]
+    }
   }
 }

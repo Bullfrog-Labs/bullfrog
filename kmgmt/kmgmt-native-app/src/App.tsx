@@ -2,7 +2,6 @@ import "react-native-gesture-handler";
 import * as log from "loglevel";
 import { registerRootComponent } from "expo";
 import * as React from "react";
-import "./services/Firebase";
 import LoginScreen from "./components/LoginScreen";
 import NotesScreen from "./components/NotesScreen";
 import { NavigationContainer } from "@react-navigation/native";
@@ -13,7 +12,7 @@ Logging.configure(log);
 
 export function App() {
   const logger = log.getLogger("App");
-  logger.debug("foo");
+  logger.debug("Loading App");
   return (
     <NavigationContainer>
       <Stack.Navigator>
