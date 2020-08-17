@@ -12,7 +12,7 @@ Logging.configure(log);
 test("renders single note", async () => {
   const database: Database = {
     getNotes: jest.fn(async () => [
-      { body: richTextParagraph("Example note text") },
+      { id: "example-1", body: richTextParagraph("Example note text") },
     ]),
     addNote: jest.fn(async (userName: string, noteRecord: NoteRecord) => {}),
     getUser: jest.fn(async (userName: string) => {

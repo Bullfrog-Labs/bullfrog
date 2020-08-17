@@ -2,15 +2,25 @@ import React, { useContext } from "react";
 import Typography from "@material-ui/core/Typography";
 import * as log from "loglevel";
 import { Database, NoteRecord } from "../services/Database";
-import { Container, Grid, Paper, makeStyles, Button } from "@material-ui/core";
+import {
+  Container,
+  Grid,
+  Paper,
+  makeStyles,
+  Button,
+  Card,
+  CardActionArea,
+  Box,
+} from "@material-ui/core";
 import { AuthContext, AuthState } from "../services/Auth";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
 import { database } from "firebase";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+    maxWidth: 345,
   },
   noteGrid: {
     "margin-top": theme.spacing(1),
@@ -49,16 +59,37 @@ function NotePreviewCard(props: { note: NoteRecord }) {
   const { note } = props;
   const notePreview = richTextStringPreview(note.body);
 
+  // TODO: Convert the throw to an error boundary
+  let noteLink: string;
+  if (!!note.id) {
+    noteLink = `/notes/${note.id}`;
+  } else {
+    throw Error("Saved note should not have null id");
+  }
+
+  const history = useHistory();
+  let navigateToNoteOnClick = () => {
+    history.push(noteLink);
+  };
+
   return (
     <Grid item xs={12}>
-      <Paper className={classes.paper}>
-        {!!note.title && <Typography variant="h6">{note.title}</Typography>}
-        {!!notePreview && (
-          <Typography variant="body1">
-            {richTextStringPreview(note.body)}
-          </Typography>
-        )}
-      </Paper>
+      <Card className={classes.root} onClick={navigateToNoteOnClick}>
+        <Box p={2}>
+          <CardActionArea>
+            {!!note.title && (
+              <Typography variant="h6" component="h2">
+                {note.title}
+              </Typography>
+            )}
+            {!!notePreview && (
+              <Typography variant="body2" component="p">
+                {richTextStringPreview(note.body)}
+              </Typography>
+            )}
+          </CardActionArea>
+        </Box>
+      </Card>
     </Grid>
   );
 }
