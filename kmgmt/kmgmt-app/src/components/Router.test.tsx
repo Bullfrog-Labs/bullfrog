@@ -8,7 +8,7 @@ import { EMPTY_RICH_TEXT, richTextParagraph } from "./richtext/Utils";
 test("renders AppContainer", async () => {
   const database = {
     getNotes: jest.fn(async () => [
-      { body: richTextParagraph("Example note text") },
+      { id: "example-1", body: richTextParagraph("Example note text") },
     ]),
     getUser: jest.fn(async (userName: string) => {
       userName: "foo";

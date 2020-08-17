@@ -2,7 +2,7 @@ import React from "react";
 import MainView from "./MainView";
 import { Database } from "../services/Database";
 import { Switch, Route, BrowserRouter, useLocation } from "react-router-dom";
-import NoteView, { CreateNewNoteView } from "./NoteView";
+import { CreateNewNoteView, NoteView } from "./NoteView";
 import PrivateRoute from "../routing/PrivateRoute";
 import { AuthProvider } from "../services/Auth";
 import AppContainer from "./AppContainer";
