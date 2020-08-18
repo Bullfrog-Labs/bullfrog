@@ -34,9 +34,10 @@
     "typescript": "^3.9.7"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json --declaration true",
+    "build": "tsc -p tsconfig.json",
     "watch": "tsc -p tsconfig.json --watch",
-    "test": "jest src"
+    "test": "jest src",
+    "install": "tsc -p tsconfig.json"
   },
   "keywords": [],
   "author": "",
