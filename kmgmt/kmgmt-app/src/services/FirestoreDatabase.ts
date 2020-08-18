@@ -1,6 +1,6 @@
 import * as log from "loglevel";
 import Firebase from "./Firebase";
-import { Database, UserRecord, NoteRecord } from "./Database";
+import { Database, UserRecord, NoteRecord, NoteId } from "./Database";
 
 const USERS_COLLECTION = "users";
 const NOTES_COLLECTION = "notes";
@@ -77,9 +77,16 @@ export default class FirestoreDatabase implements Database {
     await doc.set(userRecord);
   }
 
-  async addNote(userName: string, noteRecord: NoteRecord) {
+  async addNote(userName: string, noteRecord: NoteRecord): Promise<NoteId> {
     const userDoc = this.firestore.collection(USERS_COLLECTION).doc(userName);
-    const noteDoc = await userDoc.collection(NOTES_COLLECTION).doc();
-    noteDoc.set(noteRecord);
+    const notesDoc = userDoc.collection(NOTES_COLLECTION);
+    const res = await notesDoc.add(noteRecord);
+    return res.id;
+  }
+
+  async updateNote(userName: string, noteId: NoteId, noteRecord: NoteRecord) {
+    const userDoc = this.firestore.collection(USERS_COLLECTION).doc(userName);
+    const notesDoc = userDoc.collection(NOTES_COLLECTION);
+    await notesDoc.doc(noteId).set(noteRecord);
   }
 }
