@@ -19,11 +19,13 @@ type BaseNoteViewProps = {
   body: Body;
   onTitleChange: (newTitle: Title) => void;
   onBodyChange: (newBody: Body) => void;
-  saveNote: () => boolean;
+  saveNote: () => Promise<boolean>;
+  readOnly?: boolean;
 };
 
 type NoteViewProps = {
   database: Database;
+  readOnly?: boolean;
 };
 
 function BaseNoteView(props: BaseNoteViewProps) {
@@ -33,6 +35,7 @@ function BaseNoteView(props: BaseNoteViewProps) {
   const handleOnIdle = (event: Event) => {
     logger.info("User idle");
     if (noteChanged) {
+      // saveNote will only be called when the note has actually been changed
       logger.info("Note changed, saving");
       props.saveNote();
       setNoteChanged(false);
@@ -42,7 +45,7 @@ function BaseNoteView(props: BaseNoteViewProps) {
   };
 
   const onTitleChange = (newTitle: Title): void => {
-    setNoteChanged(newTitle != props.title);
+    setNoteChanged(newTitle !== props.title);
     props.onTitleChange(newTitle);
   };
   const onBodyChange = (newBody: Body): void => {
@@ -54,6 +57,7 @@ function BaseNoteView(props: BaseNoteViewProps) {
     <Container maxWidth="md">
       <IdleTimer timeout={IDLE_TIME_FOR_SAVE} onIdle={handleOnIdle}>
         <RichTextEditor
+          readOnly={props.readOnly ?? false}
           title={props.title}
           onTitleChange={onTitleChange}
           body={props.body}
@@ -70,44 +74,37 @@ export function CreateNewNoteView(props: NoteViewProps) {
   const logger = log.getLogger("CreateNewNoteView");
   const authState = useContext(AuthContext);
 
-  const [noteEdited, setNoteEdited] = useState(false);
+  const [readOnly, setReadOnly] = useState(false);
   const [title, setTitle] = useState(EMPTY_RICH_TEXT_STATE.title);
   const [body, setBody] = useState<Body>(EMPTY_RICH_TEXT_STATE.body);
 
-  const saveNote = () => {
-    if (!noteEdited) {
-      logger.info("Not saving empty note");
-      return false;
-    }
+  const history = useHistory();
 
+  const saveNote = async () => {
     logger.info("Saving new note");
-    props.database.addNote(authState.email, {
+    setReadOnly(true);
+
+    let noteId: NoteId = await props.database.addNote(authState.email, {
       title: title,
       body: body,
     });
 
-    // TODO: How to transition to regular note after saving?
+    logger.info(`Saved new note with id ${noteId}`);
+
+    // do redirect to permanent note url
+    history.replace(`/notes/${noteId}`);
 
     return true;
-  };
-
-  const onTitleChange = (newTitle: Title) => {
-    setTitle(newTitle);
-    setNoteEdited(true);
-  };
-
-  const onBodyChange = (newBody: Body) => {
-    setBody(newBody);
-    setNoteEdited(true);
   };
 
   return (
     <BaseNoteView
       {...props}
+      readOnly={!!props.readOnly || readOnly}
       title={title}
       body={body}
-      onTitleChange={onTitleChange}
-      onBodyChange={onBodyChange}
+      onTitleChange={setTitle}
+      onBodyChange={setBody}
       saveNote={saveNote}
     />
   );
@@ -122,10 +119,13 @@ export function NoteView(props: NoteViewProps) {
   const [title, setTitle] = useState(EMPTY_RICH_TEXT_STATE.title);
   const [body, setBody] = useState<Body>(EMPTY_RICH_TEXT_STATE.body);
 
-  // Add state for note loaded? and show spinner if not loaded
-
-  const saveNote = () => {
+  const saveNote = async () => {
     logger.info(`Saving changes to note ${id}`);
+
+    props.database.updateNote(authState.email, id, {
+      title: title,
+      body: body,
+    });
 
     return true;
   };
@@ -139,6 +139,7 @@ export function NoteView(props: NoteViewProps) {
         setBody(note.body);
       } else {
         // TODO: handle note not found
+        logger.debug(`Note ${id} not found during load`);
       }
       setNoteLoaded(true);
       logger.debug(`loaded note ${id} for user ${authState.email}`);
