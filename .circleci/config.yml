@@ -1,29 +1,15 @@
 version: 2.1
 orbs:
   node: circleci/node@3.0.0
-jobs:
-  build:
-    docker:
-      - image: circleci/node
-    steps:
-      - checkout
-      - run: yarn install
 workflows:
   node-tests:
     jobs:
-      - build
       - node/test:
           pkg-manager: yarn
           app-dir: kmgmt/kmgmt-common
-          requires:
-            - build
       - node/test:
           pkg-manager: yarn
           app-dir: kmgmt/kmgmt-app
-          requires:
-            - build
       - node/test:
           pkg-manager: yarn
           app-dir: kmgmt/kmgmt-native-app
-          requires:
-            - build
