@@ -1,10 +1,9 @@
 import * as React from "react";
-import "../services/Firebase";
 import firebase from "firebase";
 import { Button, StyleSheet, View, StatusBar } from "react-native";
 import * as Google from "expo-google-app-auth";
-
 import { LoginScreenNavigationProp } from "../services/Navigation";
+import * as log from "loglevel";
 
 const styles = StyleSheet.create({
   container: {
@@ -21,6 +20,7 @@ const styles = StyleSheet.create({
 });
 
 async function login(): Promise<Google.LogInResult> {
+  const logger = log.getLogger("LoginScreen");
   const config = {
     iosClientId:
       "259671952872-lpsqbf7kkufjp2nq6psogcpda5gqk5j4.apps.googleusercontent.com",
@@ -30,27 +30,58 @@ async function login(): Promise<Google.LogInResult> {
   };
   try {
     const result = await Google.logInAsync(config);
-    console.log(`result=${JSON.stringify(result.type)}`);
+    logger.debug(`result=${JSON.stringify(result.type)}`);
+    logger.debug(`result=${JSON.stringify(result)}`);
     return result;
   } catch (e) {
-    console.log(`error=${JSON.stringify(e)}`);
+    logger.debug(`error=${JSON.stringify(e)}`);
     return { type: "cancel" };
   }
 }
+/*
+async function cacheAuthAsync(authState) {
+  return await AsyncStorage.setItem(StorageKey, JSON.stringify(authState));
+}
 
+export async function getCachedAuthAsync() {
+  let value = await AsyncStorage.getItem(StorageKey);
+  let authState = JSON.parse(value);
+  console.log("getCachedAuthAsync", authState);
+  if (authState) {
+    if (checkIfTokenExpired(authState)) {
+      return refreshAuthAsync(authState);
+    } else {
+      return authState;
+    }
+  }
+  return null;
+}
+
+function checkIfTokenExpired({ accessTokenExpirationDate }) {
+  return new Date(accessTokenExpirationDate) < new Date();
+}
+
+async function refreshAuthAsync({ refreshToken }) {
+  let authState = await AppAuth.refreshAsync(config, refreshToken);
+  console.log("refreshAuth", authState);
+  await cacheAuthAsync(authState);
+  return authState;
+}
+*/
 export default function LoginScreen(props: {
   navigation: LoginScreenNavigationProp;
 }) {
+  const logger = log.getLogger("LoginScreen");
   const [result, setResult] = React.useState<Google.LogInResult>();
 
   React.useEffect(() => {
     if (result?.type === "success") {
       const idToken = result.idToken;
-      console.log(`got ${idToken}`);
+      logger.debug(`got ${idToken}`);
       const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
       firebase.auth().signInWithCredential(credential);
     }
-  }, [result]);
+  }, [result, logger]);
 
   return (
     <View style={styles.container}>

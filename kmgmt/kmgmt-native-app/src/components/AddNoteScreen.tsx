@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
 const app = Firebase.init();
 const database = FirestoreDatabase.fromApp(app);
 
-export default function NotesScreen() {
+export default function AddNoteScreen() {
   const logger = log.getLogger("AddNoteScreen");
   const [notes, setNotes] = React.useState<NoteRecord[]>([]);
   React.useEffect(() => {
@@ -32,7 +32,7 @@ export default function NotesScreen() {
       logger.debug(`using email for fetch; email = ${email}`);
       if (email) {
         const fetchedNotes = await database.getNotes(email);
-        logger.debug(`got ${fetchedNotes.length} notes`);
+        logger.debug(`notes = ${fetchedNotes}`);
         setNotes(fetchedNotes);
       }
     }
