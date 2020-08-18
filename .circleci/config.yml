@@ -7,9 +7,12 @@ workflows:
       - node/test:
           pkg-manager: yarn
           app-dir: kmgmt/kmgmt-common
+          cache-version: v2
       - node/test:
           pkg-manager: yarn
           app-dir: kmgmt/kmgmt-app
+          cache-version: v2
       - node/test:
           pkg-manager: yarn
           app-dir: kmgmt/kmgmt-native-app
+          cache-version: v2
