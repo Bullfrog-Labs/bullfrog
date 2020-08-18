@@ -1,8 +1,11 @@
-import Logging from "../src/services/Logging";
-import FirestoreDatabase from "../src/services/FirestoreDatabase";
+import {
+  Logging,
+  NoteRecord,
+  UserRecord,
+  FirestoreDatabase,
+} from "kmgmt-common";
 import FirebaseAdmin from "../src/services/FirebaseAdmin";
 import * as log from "loglevel";
-import { NoteRecord, UserRecord } from "../src/services/Database";
 
 Logging.configure(log);
 

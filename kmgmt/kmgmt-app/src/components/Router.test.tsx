@@ -2,7 +2,7 @@ import React from "react";
 import { render, waitForElement } from "@testing-library/react";
 import Router from "./Router";
 import { AuthProvider, AuthContext } from "../services/Auth";
-import { NoteRecord, UserRecord } from "../services/Database";
+import { NoteRecord, UserRecord } from "kmgmt-common";
 
 test("renders AppContainer", async () => {
   const database = {

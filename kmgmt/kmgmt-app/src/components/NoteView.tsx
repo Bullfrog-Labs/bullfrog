@@ -1,6 +1,6 @@
 import React from "react";
 import Typography from "@material-ui/core/Typography";
-import { Database } from "../services/Database";
+import { Database } from "kmgmt-common";
 import { Container } from "@material-ui/core";
 import { useParams } from "react-router-dom";
 
