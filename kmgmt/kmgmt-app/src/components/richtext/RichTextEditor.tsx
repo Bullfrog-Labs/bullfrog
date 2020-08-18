@@ -38,6 +38,7 @@ export type RichTextEditorProps = {
   onTitleChange: (newTitle: Title) => void;
   onBodyChange: (newBody: Body) => void;
   enableToolbar?: boolean;
+  readOnly?: boolean;
 };
 
 const didOpsAffectContent = (ops: Operation[]): boolean => {
@@ -85,6 +86,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
           >
             <Grid item>
               <DocumentTitle
+                readOnly={props.readOnly}
                 handleEscape={(event) => {
                   ReactEditor.focus(editor);
                 }}
@@ -96,6 +98,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
               <Slate editor={editor} value={body} onChange={onChange.body}>
                 {!!enableToolbar && <RichTextEditorToolbar />}
                 <Editable
+                  readOnly={props.readOnly ?? false}
                   renderElement={renderElement}
                   renderLeaf={renderLeaf}
                   placeholder="Enter some text"

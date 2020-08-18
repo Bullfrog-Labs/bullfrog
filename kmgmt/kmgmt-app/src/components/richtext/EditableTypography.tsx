@@ -13,6 +13,7 @@ import { withReact, Slate, Editable } from "slate-react";
 import { Typography } from "@material-ui/core";
 
 export type EditableTypographyProps = {
+  readOnly?: boolean;
   initialValue?: string;
   variant?: string;
   handleEscape: KBEventHandler;
@@ -67,6 +68,7 @@ export const EditableTypography: FunctionComponent<EditableTypographyProps> = (
   return (
     <Slate editor={editor} value={value} onChange={onChange}>
       <Editable
+        readOnly={props.readOnly ?? false}
         placeholder="Enter a title"
         renderLeaf={renderLeaf}
         onKeyDown={handleExitEditable(props.handleEscape)}
