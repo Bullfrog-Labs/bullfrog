@@ -4,6 +4,16 @@ orbs:
 workflows:
   node-tests:
     jobs:
+      - build:
+          steps:
+            - checkout
+            - run: yarn install
+      - node/test:
+          pkg-manager: yarn
+          app-dir: kmgmt/kmgmt-common
       - node/test:
           pkg-manager: yarn
           app-dir: kmgmt/kmgmt-app
+      - node/test:
+          pkg-manager: yarn
+          app-dir: kmgmt/kmgmt-native-app
