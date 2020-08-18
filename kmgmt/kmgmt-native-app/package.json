@@ -33,6 +33,7 @@
     "firebase": "7.9.0",
     "jest": "24.9.0",
     "kmgmt-common": "^0.1.0",
+    "lodash": "^4.17.20",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-38.0.2.tar.gz",
@@ -64,7 +65,7 @@
   "jest": {
     "preset": "react-native",
     "setupFiles": [
-      "./node_modules/react-native-gesture-handler/jestSetup.js"
+      "../../node_modules/react-native-gesture-handler/jestSetup.js"
     ],
     "transformIgnorePatterns": [
       "/node_modules/(?!native-base)/"
