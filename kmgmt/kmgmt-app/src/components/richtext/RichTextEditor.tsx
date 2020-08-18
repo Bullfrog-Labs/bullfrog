@@ -33,6 +33,8 @@ export const EMPTY_RICH_TEXT_STATE = {
 };
 
 export type RichTextEditorProps = {
+  title: Title;
+  body: Body;
   onTitleChange: (newTitle: Title) => void;
   onBodyChange: (newBody: Body) => void;
   enableToolbar?: boolean;
@@ -43,13 +45,13 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
 };
 
 const RichTextEditor = (props: RichTextEditorProps) => {
-  const { onTitleChange, onBodyChange, enableToolbar } = props;
+  const { title, body, onTitleChange, onBodyChange, enableToolbar } = props;
 
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
 
-  const [title, setTitle] = useState<Title>(EMPTY_RICH_TEXT_STATE.title);
-  const [body, setBody] = useState<Body>(EMPTY_RICH_TEXT_STATE.body);
+  // const [title, setTitle] = useState<Title>(EMPTY_RICH_TEXT_STATE.title);
+  // const [body, setBody] = useState<Body>(EMPTY_RICH_TEXT_STATE.body);
 
   const editor = useMemo(
     () => withReact(withResetBlockOnInsertBreak(withHistory(createEditor()))),
@@ -61,12 +63,10 @@ const RichTextEditor = (props: RichTextEditorProps) => {
       if (title === newTitle) {
         return;
       }
-      setTitle(newTitle);
       onTitleChange(newTitle);
     },
     body: (newBody: Body) => {
       if (didOpsAffectContent(editor.operations)) {
-        setBody(newBody);
         onBodyChange(newBody);
       }
     },

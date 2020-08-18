@@ -1,5 +1,5 @@
 import React, { useState, useContext, SetStateAction, Dispatch } from "react";
-import { Database } from "../services/Database";
+import { Database, NoteRecord } from "../services/Database";
 import { Container, CircularProgress } from "@material-ui/core";
 import { useParams } from "react-router-dom";
 import RichTextEditor, {
@@ -15,9 +15,11 @@ import { AuthContext } from "../services/Auth";
 const IDLE_TIME_FOR_SAVE = 1 * 1000;
 
 type BaseNoteViewProps = {
-  saveNote: (richTextState: RichTextState) => boolean;
-  richTextState: RichTextState;
-  setRichTextState: Dispatch<SetStateAction<RichTextState>>;
+  title: Title;
+  body: Body;
+  onTitleChange: (newTitle: Title) => void;
+  onBodyChange: (newBody: Body) => void;
+  saveNote: () => boolean;
 };
 
 type NoteViewProps = {
@@ -28,13 +30,11 @@ function BaseNoteView(props: BaseNoteViewProps) {
   const logger = log.getLogger("BaseNoteView");
   const [noteChanged, setNoteChanged] = useState(false);
 
-  const { richTextState, setRichTextState } = props;
-
   const handleOnIdle = (event: Event) => {
     logger.info("User idle");
     if (noteChanged) {
       logger.info("Note changed, saving");
-      props.saveNote(richTextState);
+      props.saveNote();
       setNoteChanged(false);
     } else {
       logger.info("Note unchanged, not saving");
@@ -42,22 +42,21 @@ function BaseNoteView(props: BaseNoteViewProps) {
   };
 
   const onTitleChange = (newTitle: Title): void => {
-    setNoteChanged(newTitle != richTextState.title);
-    setRichTextState({
-      title: newTitle,
-      body: richTextState.body,
-    });
+    setNoteChanged(newTitle != props.title);
+    props.onTitleChange(newTitle);
   };
   const onBodyChange = (newBody: Body): void => {
-    setRichTextState({ title: richTextState.title, body: newBody });
     setNoteChanged(true);
+    props.onBodyChange(newBody);
   };
 
   return (
     <Container maxWidth="md">
       <IdleTimer timeout={IDLE_TIME_FOR_SAVE} onIdle={handleOnIdle}>
         <RichTextEditor
+          title={props.title}
           onTitleChange={onTitleChange}
+          body={props.body}
           onBodyChange={onBodyChange}
           enableToolbar={false}
         />
@@ -67,36 +66,49 @@ function BaseNoteView(props: BaseNoteViewProps) {
 }
 
 export function CreateNewNoteView(props: NoteViewProps) {
+  // The note does not yet have an id.
   const logger = log.getLogger("CreateNewNoteView");
   const authState = useContext(AuthContext);
 
-  const [richTextState, setRichTextState] = useState<RichTextState>(
-    EMPTY_RICH_TEXT_STATE
-  );
+  const [noteEdited, setNoteEdited] = useState(false);
+  const [title, setTitle] = useState(EMPTY_RICH_TEXT_STATE.title);
+  const [body, setBody] = useState<Body>(EMPTY_RICH_TEXT_STATE.body);
 
-  const saveNote = (richTextState: RichTextState) => {
-    // The note does not yet have an id.
-    if (richTextState == EMPTY_RICH_TEXT_STATE) {
-      // TODO: this works for create-new-note. Need to make sure it makes sense
-      // for existing note.
+  const saveNote = () => {
+    if (!noteEdited) {
       logger.info("Not saving empty note");
       return false;
     }
 
     logger.info("Saving new note");
-    props.database.addNote(authState.email, richTextState);
+    props.database.addNote(authState.email, {
+      title: title,
+      body: body,
+    });
 
     // TODO: How to transition to regular note after saving?
 
     return true;
   };
 
+  const onTitleChange = (newTitle: Title) => {
+    setTitle(newTitle);
+    setNoteEdited(true);
+  };
+
+  const onBodyChange = (newBody: Body) => {
+    setBody(newBody);
+    setNoteEdited(true);
+  };
+
   return (
     <BaseNoteView
       {...props}
+      title={title}
+      body={body}
+      onTitleChange={onTitleChange}
+      onBodyChange={onBodyChange}
       saveNote={saveNote}
-      richTextState={richTextState}
-      setRichTextState={setRichTextState}
     />
   );
 }
@@ -107,13 +119,12 @@ export function NoteView(props: NoteViewProps) {
   const { id } = useParams();
 
   const [noteLoaded, setNoteLoaded] = useState(false);
-  const [richTextState, setRichTextState] = useState<RichTextState>(
-    EMPTY_RICH_TEXT_STATE
-  );
+  const [title, setTitle] = useState(EMPTY_RICH_TEXT_STATE.title);
+  const [body, setBody] = useState<Body>(EMPTY_RICH_TEXT_STATE.body);
 
   // Add state for note loaded? and show spinner if not loaded
 
-  const saveNote = (richTextState: RichTextState) => {
+  const saveNote = () => {
     logger.info(`Saving changes to note ${id}`);
 
     return true;
@@ -123,10 +134,12 @@ export function NoteView(props: NoteViewProps) {
     const loadNote = async () => {
       logger.debug(`fetching note ${id} for user ${authState.email}`);
       const note = await props.database.getNote(authState.email, id);
-      setRichTextState({
-        title: richTextState.title,
-        body: richTextState.body,
-      });
+      if (!!note) {
+        setTitle(note.title ?? "");
+        setBody(note.body);
+      } else {
+        // TODO: handle note not found
+      }
       setNoteLoaded(true);
       logger.debug(`loaded note ${id} for user ${authState.email}`);
     };
@@ -137,9 +150,11 @@ export function NoteView(props: NoteViewProps) {
     return (
       <BaseNoteView
         {...props}
+        title={title}
+        body={body}
+        onTitleChange={setTitle}
+        onBodyChange={setBody}
         saveNote={saveNote}
-        richTextState={richTextState}
-        setRichTextState={setRichTextState}
       />
     );
   } else {
