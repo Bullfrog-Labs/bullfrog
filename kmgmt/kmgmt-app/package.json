@@ -25,6 +25,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-firebaseui": "^4.1.0",
+    "react-idle-timer": "^4.3.6",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
     "slate": "^0.58.4",

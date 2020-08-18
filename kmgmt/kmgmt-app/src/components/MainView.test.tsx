@@ -5,13 +5,19 @@ import MainView from "./MainView";
 import { Database, NoteRecord, UserRecord } from "../services/Database";
 import Logging from "../services/Logging";
 import { AuthProvider, AuthContext } from "../services/Auth";
+import { richTextParagraph } from "./richtext/Utils";
 
 Logging.configure(log);
 
 test("renders single note", async () => {
   const database: Database = {
-    getNotes: jest.fn(async () => [{ body: "Example note text" }]),
+    getNotes: jest.fn(async () => [
+      { id: "example-1", body: richTextParagraph("Example note text") },
+    ]),
     addNote: jest.fn(async (userName: string, noteRecord: NoteRecord) => {}),
+    getUser: jest.fn(async (userName: string) => {
+      userName: "foo";
+    }),
     addUser: jest.fn(async (userRecord: UserRecord) => {}),
   };
 

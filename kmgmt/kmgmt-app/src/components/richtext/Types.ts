@@ -1,3 +1,5 @@
+import { Node as SlateNode } from "slate";
+
 export type HotkeySpec = string | string[];
 export type KBEventHandler = (event: KeyboardEvent) => void;
 export type MouseEventHandler = (event: MouseEvent, value: any) => void;
@@ -27,3 +29,5 @@ export type Block = typeof BLOCKS[number];
 export const isList = (block: Block): block is ListBlock => {
   return LIST_BLOCKS.includes(block);
 };
+
+export type RichText = SlateNode[];
