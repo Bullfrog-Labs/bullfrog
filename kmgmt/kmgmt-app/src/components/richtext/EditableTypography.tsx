@@ -5,7 +5,7 @@ import React, {
   useCallback,
 } from "react";
 import { Node as SlateNode, createEditor } from "slate";
-import { KBEventHandler } from "./Types";
+import { KBEventHandler, RichText } from "./Types";
 import { withEditableTypographyLayout } from "./EditorBehaviors";
 import { withHistory } from "slate-history";
 import { withReact, Slate, Editable } from "slate-react";
@@ -13,10 +13,11 @@ import { withReact, Slate, Editable } from "slate-react";
 import { Typography } from "@material-ui/core";
 
 export type EditableTypographyProps = {
-  initialValue?: SlateNode[];
+  readOnly?: boolean;
+  initialValue?: string;
   variant?: string;
   handleEscape: KBEventHandler;
-  onStateChange?: (newValue: SlateNode[]) => void;
+  onChange?: (newValue: string) => void;
 };
 
 const handleExitEditable = (handleEscape?: KBEventHandler) => (
@@ -30,48 +31,47 @@ const handleExitEditable = (handleEscape?: KBEventHandler) => (
   }
 };
 
-export const EditableTypography: FunctionComponent<EditableTypographyProps> = ({
-  initialValue,
-  variant,
-  handleEscape,
-  onStateChange,
-}) => {
-  if (initialValue === undefined) {
-    initialValue = [
-      {
-        type: "paragraph",
-        children: [{ text: "" }],
-      },
-    ];
-  }
-  const [value, setValue] = useState(initialValue);
+const slateNodeToString = (title: RichText): string =>
+  SlateNode.leaf(title[0], [0]).text;
+
+export const EditableTypography: FunctionComponent<EditableTypographyProps> = (
+  props
+) => {
+  const [value, setValue] = useState<RichText>([
+    {
+      type: "paragraph",
+      children: [{ text: props.initialValue ?? "" }],
+    },
+  ]);
+
   const editor = useMemo(
     () => withReact(withEditableTypographyLayout(withHistory(createEditor()))),
     []
   );
 
-  const onChange = (newValue: SlateNode[]) => {
+  const onChange = (newValue: RichText) => {
     setValue(newValue);
-    if (onStateChange) {
-      onStateChange(newValue);
+    if (!!props.onChange) {
+      props.onChange(slateNodeToString(newValue));
     }
   };
 
   const renderLeaf = useCallback(
     ({ children, attributes }) => (
-      <Typography variant={variant} {...attributes}>
+      <Typography variant={props.variant} {...attributes}>
         {children}
       </Typography>
     ),
-    [variant]
+    [props.variant]
   );
 
   return (
     <Slate editor={editor} value={value} onChange={onChange}>
       <Editable
+        readOnly={props.readOnly ?? false}
         placeholder="Enter a title"
         renderLeaf={renderLeaf}
-        onKeyDown={handleExitEditable(handleEscape)}
+        onKeyDown={handleExitEditable(props.handleEscape)}
       />
     </Slate>
   );
