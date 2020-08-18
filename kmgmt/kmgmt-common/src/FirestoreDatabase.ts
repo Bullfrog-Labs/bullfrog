@@ -1,6 +1,6 @@
 import * as log from "loglevel";
-import Firebase from "./Firebase";
-import { Database, UserRecord, NoteRecord, NoteId } from "./Database";
+import firebase from "firebase/app";
+import { Database, UserRecord, NoteRecord, NoteID } from "./Database";
 
 const USERS_COLLECTION = "users";
 const NOTES_COLLECTION = "notes";
@@ -14,19 +14,16 @@ export default class FirestoreDatabase implements Database {
     this.logger.debug("created FirestoreDatabase");
   }
 
-  static create(): Database {
-    const firebase = Firebase.init();
-    const firestore = firebase.firestore();
+  static fromApp(app: firebase.app.App): Database {
+    const firestore = app.firestore();
     return new FirestoreDatabase(firestore);
   }
 
-  static of(firestore: firebase.firestore.Firestore): Database {
+  static fromFirestore(firestore: firebase.firestore.Firestore): Database {
     return new FirestoreDatabase(firestore);
   }
 
   async getNotes(userName: string): Promise<NoteRecord[]> {
-    // Just using this dummy model for now. Lets replace it completely
-    // once we know what we need.
     const userDoc = this.firestore.collection(USERS_COLLECTION).doc(userName);
     const coll = await userDoc.collection(NOTES_COLLECTION).get();
     return coll.docs.map((doc) => {
@@ -77,16 +74,16 @@ export default class FirestoreDatabase implements Database {
     await doc.set(userRecord);
   }
 
-  async addNote(userName: string, noteRecord: NoteRecord): Promise<NoteId> {
+  async addNote(userName: string, noteRecord: NoteRecord): Promise<NoteID> {
     const userDoc = this.firestore.collection(USERS_COLLECTION).doc(userName);
     const notesDoc = userDoc.collection(NOTES_COLLECTION);
     const res = await notesDoc.add(noteRecord);
     return res.id;
   }
 
-  async updateNote(userName: string, noteId: NoteId, noteRecord: NoteRecord) {
+  async updateNote(userName: string, noteID: NoteID, noteRecord: NoteRecord) {
     const userDoc = this.firestore.collection(USERS_COLLECTION).doc(userName);
     const notesDoc = userDoc.collection(NOTES_COLLECTION);
-    await notesDoc.doc(noteId).set(noteRecord);
+    await notesDoc.doc(noteID).set(noteRecord);
   }
 }

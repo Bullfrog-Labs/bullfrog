@@ -1,9 +1,10 @@
-import { RichText } from "../components/richtext/Types";
+import { Node as SlateNode } from "slate";
 
-export type NoteId = string;
+export type RichText = SlateNode[];
+export type NoteID = string;
 
 export interface NoteRecord {
-  id?: NoteId; // should only be null for unsaved new note
+  id?: NoteID; // should only be null for unsaved new note
   title?: string;
   body: RichText;
 }
@@ -16,13 +17,13 @@ export interface Database {
   addUser(userRecord: UserRecord): Promise<void>;
   getUser(userName: string): Promise<UserRecord | null>;
 
-  addNote(userName: string, noteRecord: NoteRecord): Promise<NoteId>;
+  addNote(userName: string, noteRecord: NoteRecord): Promise<NoteID>;
   updateNote(
     userName: string,
-    noteId: NoteId,
+    noteID: NoteID,
     noteRecord: NoteRecord
   ): Promise<void>;
 
   getNotes(userName: string): Promise<NoteRecord[]>;
-  getNote(userName: string, id: NoteId): Promise<NoteRecord | null>;
+  getNote(userName: string, id: NoteID): Promise<NoteRecord | null>;
 }

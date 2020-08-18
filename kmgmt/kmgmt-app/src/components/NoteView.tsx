@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Database, NoteId } from "../services/Database";
+import { Database, NoteID } from "kmgmt-common";
 import { Container, CircularProgress } from "@material-ui/core";
 import { useParams, useHistory } from "react-router-dom";
 import RichTextEditor, {
@@ -83,15 +83,15 @@ export function CreateNewNoteView(props: NoteViewProps) {
     logger.info("Saving new note");
     setReadOnly(true);
 
-    let noteId: NoteId = await props.database.addNote(authState.email, {
+    let noteID: NoteID = await props.database.addNote(authState.email, {
       title: title,
       body: body,
     });
 
-    logger.info(`Saved new note with id ${noteId}`);
+    logger.info(`Saved new note with id ${noteID}`);
 
     // do redirect to permanent note url
-    history.replace(`/notes/${noteId}`);
+    history.replace(`/notes/${noteID}`);
 
     return true;
   };

@@ -1,6 +1,6 @@
 import React from "react";
 import MainView from "./MainView";
-import { Database } from "../services/Database";
+import { Database } from "kmgmt-common";
 import { Switch, Route, BrowserRouter, useLocation } from "react-router-dom";
 import { CreateNewNoteView, NoteView } from "./NoteView";
 import PrivateRoute from "../routing/PrivateRoute";

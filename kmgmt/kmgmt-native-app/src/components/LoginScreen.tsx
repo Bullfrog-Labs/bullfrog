@@ -30,10 +30,10 @@ async function login(): Promise<Google.LogInResult> {
   };
   try {
     const result = await Google.logInAsync(config);
-    console.log(`result ${JSON.stringify(result)}`);
+    console.log(`result=${JSON.stringify(result.type)}`);
     return result;
   } catch (e) {
-    console.log(`got error ${JSON.stringify(e)}`);
+    console.log(`error=${JSON.stringify(e)}`);
     return { type: "cancel" };
   }
 }

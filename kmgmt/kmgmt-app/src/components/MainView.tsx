@@ -1,7 +1,7 @@
+import * as log from "loglevel";
 import React, { useContext } from "react";
 import Typography from "@material-ui/core/Typography";
-import * as log from "loglevel";
-import { Database, NoteRecord } from "../services/Database";
+import { Database, NoteRecord } from "kmgmt-common";
 import {
   Container,
   Grid,
@@ -51,6 +51,7 @@ function createNoteGrid(notes: NoteRecordColumn) {
 }
 
 function NotePreviewCard(props: { note: NoteRecord }) {
+  // eslint-disable-next-line
   const logger = log.getLogger("NotePreviewCard");
   const classes = useStyles();
 
@@ -107,6 +108,7 @@ function NoteColumn(props: { notes: NoteRecordColumn }) {
 }
 
 function NoteGrid(props: { columns: NoteRecordGrid }) {
+  // eslint-disable-next-line
   const logger = log.getLogger("NoteGrid");
   const classes = useStyles();
 

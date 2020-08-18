@@ -2,8 +2,7 @@ import * as log from "loglevel";
 import React from "react";
 import { render, waitForElement } from "@testing-library/react";
 import MainView from "./MainView";
-import { Database, NoteRecord, UserRecord } from "../services/Database";
-import Logging from "../services/Logging";
+import { Logging, Database, NoteRecord, UserRecord } from "kmgmt-common";
 import { AuthProvider, AuthContext } from "../services/Auth";
 import { richTextParagraph } from "./richtext/Utils";
 

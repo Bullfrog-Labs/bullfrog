@@ -1,7 +1,8 @@
 import "react-native-gesture-handler";
 import * as React from "react";
-import "../services/Firebase";
+import Firebase from "../services/Firebase";
 import firebase from "firebase";
+import { FirestoreDatabase, NoteRecord } from "kmgmt-common";
 import { StyleSheet, View, StatusBar, FlatList, Text } from "react-native";
 const styles = StyleSheet.create({
   container: {
@@ -17,28 +18,17 @@ const styles = StyleSheet.create({
   },
 });
 
-const firestore = firebase.firestore();
+const app = Firebase.init();
+const database = FirestoreDatabase.fromApp(app);
 
 export default function NotesScreen() {
-  const [notes, setNotes] = React.useState<{ title: string; body: string }[]>(
-    []
-  );
+  const [notes, setNotes] = React.useState<NoteRecord[]>([]);
   React.useEffect(() => {
     async function getNotes() {
       const email = firebase.auth().currentUser?.email;
       console.log(`using email for fetch; email = ${email}`);
       if (email) {
-        const coll = await firestore
-          .collection("users")
-          .doc(email)
-          .collection("notes")
-          .get();
-        const fetchedNotes = coll.docs.map((doc) => {
-          return {
-            title: doc.data().title,
-            body: doc.data().body,
-          };
-        });
+        const fetchedNotes = await database.getNotes(email);
         console.log(`notes = ${fetchedNotes}`);
         setNotes(fetchedNotes);
       }
