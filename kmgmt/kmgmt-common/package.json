@@ -24,18 +24,25 @@
   "devDependencies": {
     "@types/node": "^14.0.27",
     "husky": "^4.2.5",
+    "jest": "^26.4.0",
+    "jest-preset-typescript": "^1.2.0",
     "prettier": "^2.0.5",
     "pretty-quick": "^2.0.1",
+    "ts-jest": "^26.2.0",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.7"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --declaration true",
-    "watch": "tsc -p tsconfig.json --watch"
+    "watch": "tsc -p tsconfig.json --watch",
+    "test": "jest src"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "jest": {
+    "preset": "jest-preset-typescript"
+  },
   "eslintConfig": {
     "extends": "@react-native-community",
     "rules": {
