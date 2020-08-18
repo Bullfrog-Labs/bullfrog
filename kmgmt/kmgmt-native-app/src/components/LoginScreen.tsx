@@ -31,7 +31,6 @@ async function login(): Promise<Google.LogInResult> {
   try {
     const result = await Google.logInAsync(config);
     logger.debug(`result=${JSON.stringify(result.type)}`);
-    logger.debug(`result=${JSON.stringify(result)}`);
     return result;
   } catch (e) {
     logger.debug(`error=${JSON.stringify(e)}`);
