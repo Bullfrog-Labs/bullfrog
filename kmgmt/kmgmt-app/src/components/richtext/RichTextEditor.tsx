@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { ReactEditor, withReact, Slate, Editable } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
@@ -50,9 +50,6 @@ const RichTextEditor = (props: RichTextEditorProps) => {
 
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
-
-  // const [title, setTitle] = useState<Title>(EMPTY_RICH_TEXT_STATE.title);
-  // const [body, setBody] = useState<Body>(EMPTY_RICH_TEXT_STATE.body);
 
   const editor = useMemo(
     () => withReact(withResetBlockOnInsertBreak(withHistory(createEditor()))),

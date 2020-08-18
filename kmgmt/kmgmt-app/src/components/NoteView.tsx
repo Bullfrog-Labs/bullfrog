@@ -1,11 +1,10 @@
-import React, { useState, useContext, SetStateAction, Dispatch } from "react";
-import { Database, NoteRecord } from "../services/Database";
+import React, { useState, useContext } from "react";
+import { Database, NoteId } from "../services/Database";
 import { Container, CircularProgress } from "@material-ui/core";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import RichTextEditor, {
   Title,
   Body,
-  RichTextState,
   EMPTY_RICH_TEXT_STATE,
 } from "./richtext/RichTextEditor";
 import IdleTimer from "react-idle-timer";

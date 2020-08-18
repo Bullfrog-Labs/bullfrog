@@ -5,7 +5,6 @@ import { Database, NoteRecord } from "../services/Database";
 import {
   Container,
   Grid,
-  Paper,
   makeStyles,
   Button,
   Card,
@@ -13,9 +12,8 @@ import {
   Box,
 } from "@material-ui/core";
 import { AuthContext, AuthState } from "../services/Auth";
-import { useHistory, Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
-import { database } from "firebase";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -146,7 +144,6 @@ async function createNewAccount(database: Database, authState: AuthState) {
 export default function MainView(props: { database: Database }) {
   const logger = log.getLogger("MainView");
   const [notes, setNotes] = React.useState<NoteRecord[]>([]);
-  const [newUser, setNewUser] = React.useState(true);
   const authState = useContext(AuthContext);
   const { database } = props;
 
@@ -154,7 +151,6 @@ export default function MainView(props: { database: Database }) {
     const checkIfUserExists = async () => {
       logger.debug(`checking whether user ${authState.email} exists`);
       const user = await database.getUser(authState.email);
-      setNewUser(!user);
       if (user) {
         logger.debug(`${authState.email} is an existing user`);
       } else {
@@ -163,7 +159,7 @@ export default function MainView(props: { database: Database }) {
       }
     };
     checkIfUserExists();
-  }, [database, logger, authState.email]);
+  }, [database, logger, authState]);
 
   React.useEffect(() => {
     const loadNotes = async () => {
