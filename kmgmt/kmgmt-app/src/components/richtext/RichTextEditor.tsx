@@ -1,16 +1,17 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { ReactEditor, withReact, Slate, Editable } from "slate-react";
-import { createEditor } from "slate";
+import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
 
 import { Grid, Container, Paper } from "@material-ui/core";
-import { Node as SlateNode } from "slate";
 
 import { hotkeyHandler, toReactKBEventHandler } from "./EventHandling";
 import { Element, Leaf } from "./Rendering";
 import { withResetBlockOnInsertBreak } from "./EditorBehaviors";
 import DocumentTitle from "./DocumentTitle";
 import RichTextEditorToolbar from "./RichTextEditorToolbar";
+import { RichText } from "./Types";
+import { EMPTY_RICH_TEXT } from "./Utils";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -18,43 +19,55 @@ import RichTextEditorToolbar from "./RichTextEditorToolbar";
 // The implementation below is based off of
 // https://github.com/ianstormtaylor/slate/blob/master/site/examples/richtext.js.
 
-type Title = SlateNode[];
-type Body = SlateNode[];
+export type Title = string;
+export type Body = RichText;
 
-interface NoteRecord {
+export type RichTextState = {
   title: Title;
   body: Body;
-}
-
-const emptyNoteRecord: NoteRecord = {
-  title: [
-    {
-      type: "paragraph",
-      children: [{ text: "" }],
-    },
-  ],
-  body: [
-    {
-      type: "paragraph",
-      children: [{ text: "" }],
-    },
-  ],
 };
 
-const RichTextEditor = () => {
+export const EMPTY_RICH_TEXT_STATE = {
+  title: "",
+  body: EMPTY_RICH_TEXT,
+};
+
+export type RichTextEditorProps = {
+  title: Title;
+  body: Body;
+  onTitleChange: (newTitle: Title) => void;
+  onBodyChange: (newBody: Body) => void;
+  enableToolbar?: boolean;
+  readOnly?: boolean;
+};
+
+const didOpsAffectContent = (ops: Operation[]): boolean => {
+  return ops.some((op) => !Operation.isSelectionOperation(op));
+};
+
+const RichTextEditor = (props: RichTextEditorProps) => {
+  const { title, body, onTitleChange, onBodyChange, enableToolbar } = props;
+
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
-
-  const [title, setTitle] = useState<Title>(emptyNoteRecord.title);
-  const [body, setBody] = useState<Body>(emptyNoteRecord.body);
 
   const editor = useMemo(
     () => withReact(withResetBlockOnInsertBreak(withHistory(createEditor()))),
     []
   );
 
-  const bodyOnChange = (newBody: Body) => {
-    setBody(newBody);
+  const onChange = {
+    title: (newTitle: Title) => {
+      if (title === newTitle) {
+        return;
+      }
+      onTitleChange(newTitle);
+    },
+    body: (newBody: Body) => {
+      if (didOpsAffectContent(editor.operations)) {
+        onBodyChange(newBody);
+      }
+    },
   };
 
   return (
@@ -70,17 +83,19 @@ const RichTextEditor = () => {
           >
             <Grid item>
               <DocumentTitle
+                readOnly={props.readOnly}
                 handleEscape={(event) => {
                   ReactEditor.focus(editor);
                 }}
                 initialValue={title}
-                onStateChange={setTitle}
+                onChange={onChange.title}
               />
             </Grid>
             <Grid item>
-              <Slate editor={editor} value={body} onChange={bodyOnChange}>
-                <RichTextEditorToolbar />
+              <Slate editor={editor} value={body} onChange={onChange.body}>
+                {!!enableToolbar && <RichTextEditorToolbar />}
                 <Editable
+                  readOnly={props.readOnly ?? false}
                   renderElement={renderElement}
                   renderLeaf={renderLeaf}
                   placeholder="Enter some text"

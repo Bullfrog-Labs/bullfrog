@@ -1,6 +1,6 @@
 import * as log from "loglevel";
 import firebase from "firebase/app";
-import { Database, UserRecord, NoteRecord } from "./Database";
+import { Database, UserRecord, NoteRecord, NoteID } from "./Database";
 
 const USERS_COLLECTION = "users";
 const NOTES_COLLECTION = "notes";
@@ -28,10 +28,43 @@ export default class FirestoreDatabase implements Database {
     const coll = await userDoc.collection(NOTES_COLLECTION).get();
     return coll.docs.map((doc) => {
       return {
+        id: doc.id,
         title: doc.data().title,
         body: doc.data().body,
       };
     });
+  }
+
+  async getNote(userName: string, id: string): Promise<NoteRecord | null> {
+    const noteDoc = await this.firestore
+      .collection(USERS_COLLECTION)
+      .doc(userName)
+      .collection(NOTES_COLLECTION)
+      .doc(id)
+      .get();
+    if (!noteDoc.exists) {
+      return null;
+    } else {
+      return {
+        id: noteDoc.id,
+        title: noteDoc.data()!.title,
+        body: noteDoc.data()!.body,
+      };
+    }
+  }
+
+  async getUser(userName: string): Promise<UserRecord | null> {
+    const userDoc = await this.firestore
+      .collection(USERS_COLLECTION)
+      .doc(userName)
+      .get();
+    if (!userDoc.exists) {
+      return null;
+    } else {
+      return {
+        userName: userDoc.data()!.userName,
+      };
+    }
   }
 
   async addUser(userRecord: UserRecord) {
@@ -41,9 +74,16 @@ export default class FirestoreDatabase implements Database {
     await doc.set(userRecord);
   }
 
-  async addNote(userName: string, noteRecord: NoteRecord) {
+  async addNote(userName: string, noteRecord: NoteRecord): Promise<NoteID> {
     const userDoc = this.firestore.collection(USERS_COLLECTION).doc(userName);
-    const noteDoc = await userDoc.collection(NOTES_COLLECTION).doc();
-    noteDoc.set(noteRecord);
+    const notesDoc = userDoc.collection(NOTES_COLLECTION);
+    const res = await notesDoc.add(noteRecord);
+    return res.id;
+  }
+
+  async updateNote(userName: string, noteID: NoteID, noteRecord: NoteRecord) {
+    const userDoc = this.firestore.collection(USERS_COLLECTION).doc(userName);
+    const notesDoc = userDoc.collection(NOTES_COLLECTION);
+    await notesDoc.doc(noteID).set(noteRecord);
   }
 }

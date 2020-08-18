@@ -1,12 +1,24 @@
 import React from "react";
 import MainView from "./MainView";
 import { Database } from "kmgmt-common";
-import { Switch, Route, BrowserRouter } from "react-router-dom";
-import NoteView from "./NoteView";
+import { Switch, Route, BrowserRouter, useLocation } from "react-router-dom";
+import { CreateNewNoteView, NoteView } from "./NoteView";
 import PrivateRoute from "../routing/PrivateRoute";
 import { AuthProvider } from "../services/Auth";
 import AppContainer from "./AppContainer";
 import LoginView from "./LoginView";
+
+function Sad404() {
+  let location = useLocation();
+
+  return (
+    <div>
+      <h3>
+        No match for <code>{location.pathname}</code>
+      </h3>
+    </div>
+  );
+}
 
 export default function Router(props: {
   database: Database;
@@ -25,11 +37,19 @@ export default function Router(props: {
             <NoteView database={props.database} />
           </AppContainer>
         </PrivateRoute>
-        <PrivateRoute path="/">
+        <PrivateRoute path="/create-new-note">
+          <AppContainer>
+            <CreateNewNoteView database={props.database} />
+          </AppContainer>
+        </PrivateRoute>
+        <PrivateRoute exact path="/">
           <AppContainer>
             <MainView database={props.database} />
           </AppContainer>
         </PrivateRoute>
+        <Route path="*">
+          <Sad404 />
+        </Route>
       </Switch>
     </BrowserRouter>
   );
