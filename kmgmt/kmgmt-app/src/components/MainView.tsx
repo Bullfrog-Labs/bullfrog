@@ -57,11 +57,11 @@ function NotePreviewCard(props: { note: NoteRecord }) {
   const { note } = props;
   const notePreview = richTextStringPreview(note.body);
 
-  // TODO: Convert the throw to an error boundary
   let noteLink: string;
   if (!!note.id) {
     noteLink = `/notes/${note.id}`;
   } else {
+    // TODO: Convert the throw to an error boundary
     throw Error("Saved note should not have null id");
   }
 
@@ -73,8 +73,8 @@ function NotePreviewCard(props: { note: NoteRecord }) {
   return (
     <Grid item xs={12}>
       <Card className={classes.root} onClick={navigateToNoteOnClick}>
-        <Box p={2}>
-          <CardActionArea>
+        <CardActionArea>
+          <Box p={2}>
             {!!note.title && (
               <Typography variant="h6" component="h2">
                 {note.title}
@@ -85,8 +85,8 @@ function NotePreviewCard(props: { note: NoteRecord }) {
                 {richTextStringPreview(note.body)}
               </Typography>
             )}
-          </CardActionArea>
-        </Box>
+          </Box>
+        </CardActionArea>
       </Card>
     </Grid>
   );
