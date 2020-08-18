@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Router from "./components/Router";
-import Logging from "./services/Logging";
+import { Logging } from "kmgmt-common";
 import FirestoreDatabase from "./services/FirestoreDatabase";
 import FirebaseAuthProvider from "./services/FirebaseAuthProvider";
 import * as log from "loglevel";

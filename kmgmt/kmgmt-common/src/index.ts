@@ -1,5 +1,5 @@
 import Logging from "./Logging";
-import { Database, NoteRecord, UserRecord } from "./Database";
 import FirestoreDatabase from "./FirestoreDatabase";
+export type { Database, NoteRecord, UserRecord } from "./Database";
 
-export { Logging, FirestoreDatabase, Database, NoteRecord, UserRecord };
+export { Logging, FirestoreDatabase };

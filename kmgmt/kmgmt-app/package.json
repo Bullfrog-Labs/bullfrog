@@ -27,7 +27,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
     "ts-node": "^8.10.2",
-    "typescript": "~3.7.2"
+    "typescript": "~3.7.2",
+    "kmgmt-common": "^0.1.0"
   },
   "scripts": {
     "start": "react-scripts start",

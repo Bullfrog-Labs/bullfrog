@@ -1,26 +1,11 @@
 {
   "name": "kmgmt-common",
   "version": "0.1.0",
-  "description": "",
-  "main": "src/index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "precommit": "pretty-quick --staged",
-    "prepare": "tsc",
-    "build": "tsc",
-    "start": "ts-node src/index.ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/node": "^14.0.27",
-    "husky": "^4.2.5",
-    "prettier": "^2.0.5",
-    "pretty-quick": "^2.0.1",
-    "ts-node": "^8.10.2",
-    "typescript": "^3.9.7"
-  },
+  "main": "./build/index.js",
+  "typings": "./build/index.d.ts",
+  "files": [
+    "build"
+  ],
   "dependencies": {
     "@react-native-community/eslint-config": "^2.0.0",
     "@react-native-community/masked-view": "0.1.10",
@@ -37,6 +22,21 @@
     "react-native-safe-area-context": "~3.0.7",
     "react-native-screens": "~2.9.0"
   },
+  "devDependencies": {
+    "@types/node": "^14.0.27",
+    "husky": "^4.2.5",
+    "prettier": "^2.0.5",
+    "pretty-quick": "^2.0.1",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --declaration true",
+    "watch": "tsc -p tsconfig.json --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "eslintConfig": {
     "extends": "@react-native-community",
     "rules": {
