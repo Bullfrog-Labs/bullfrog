@@ -3,6 +3,7 @@ orbs:
   node: circleci/node@3.0.0
 jobs:
   build:
+    docker: circleci/node
     steps:
       - checkout
       - run: yarn install
