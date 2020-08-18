@@ -8,6 +8,7 @@ import {
   Container,
   CssBaseline,
   InputBase,
+  Box,
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
@@ -23,6 +24,18 @@ const theme = createMuiTheme({
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+  },
+  appBar: {
+    margin: "0px",
+    [theme.breakpoints.up("md")]: {
+      width: "368px",
+      position: "fixed",
+      top: "40px",
+      right: "40px",
+    },
+    [theme.breakpoints.down("sm")]: {
+      position: "static",
+    },
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -104,7 +117,7 @@ export default function AppContainer(props: { children: React.ReactNode }) {
   return (
     <MuiThemeProvider theme={theme}>
       <div className={classes.root}>
-        <AppBar position="static" color="inherit">
+        <AppBar className={classes.appBar}>
           <Toolbar>
             <IconButton
               edge="start"
@@ -131,7 +144,7 @@ export default function AppContainer(props: { children: React.ReactNode }) {
             </div>
           </Toolbar>
         </AppBar>
-        <Container maxWidth="lg">
+        <Container>
           <CssBaseline />
           {props.children}
         </Container>
