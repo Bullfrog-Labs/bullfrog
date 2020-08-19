@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
   appBar: {
     margin: "0px",
     [theme.breakpoints.up("md")]: {
-      width: "368px",
+      width: "400px",
       position: "fixed",
       top: "40px",
       right: "40px",
@@ -54,6 +54,7 @@ const useStyles = makeStyles((theme) => ({
   },
   menuButton: {
     marginRight: theme.spacing(2),
+    color: theme.palette.primary.light,
   },
   title: {
     flexGrow: 1,
@@ -61,8 +62,6 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up("sm")]: {
       display: "block",
     },
-
-    color: theme.palette.text.primary,
   },
   search: {
     position: "relative",
@@ -103,14 +102,6 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
-  paper: {
-    padding: theme.spacing(1),
-    textAlign: "center",
-    color: theme.palette.text.primary,
-  },
-  noteDrawerList: {
-    "padding-left": "17px",
-  },
   textfield: {
     "& textarea": {
       border: "0px solid",
@@ -121,9 +112,6 @@ const useStyles = makeStyles((theme) => ({
     "& textarea:focus": {
       border: "0px solid",
     },
-  },
-  invisible: {
-    visibility: "hidden",
   },
 }));
 
