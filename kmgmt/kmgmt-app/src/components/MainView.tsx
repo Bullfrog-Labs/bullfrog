@@ -16,17 +16,18 @@ import { useHistory } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
+  noteGrid: {
+    "margin-top": theme.spacing(3),
+  },
+  card: {
     flexGrow: 1,
     maxWidth: 345,
-  },
-  noteGrid: {
-    "margin-top": theme.spacing(1),
-  },
-  paper: {
-    padding: theme.spacing(1),
-    textAlign: "center",
-    color: theme.palette.text.secondary,
+    "&:hover": {
+      backgroundColor: theme.palette.secondary.light,
+      color: theme.palette.secondary.contrastText,
+    },
+    borderRadius: theme.spacing(1),
+    borderWidth: theme.spacing(0.25),
   },
 }));
 
@@ -73,8 +74,14 @@ function NotePreviewCard(props: { note: NoteRecord }) {
 
   return (
     <Grid item xs={12}>
-      <Card className={classes.root} onClick={navigateToNoteOnClick}>
-        <CardActionArea>
+      <Card
+        className={classes.card}
+        variant="outlined"
+        raised={true}
+        elevation={1}
+        onClick={navigateToNoteOnClick}
+      >
+        <CardActionArea className={classes.card}>
           <Box p={2}>
             {!!note.title && (
               <Typography variant="h6" component="h2">
