@@ -19,8 +19,7 @@
     "loglevel": "^1.6.8",
     "react-native-reanimated": "~1.9.0",
     "react-native-safe-area-context": "~3.0.7",
-    "react-native-screens": "~2.9.0",
-    "slate": "^0.58.4"
+    "react-native-screens": "~2.9.0"
   },
   "devDependencies": {
     "@types/node": "^14.0.27",
