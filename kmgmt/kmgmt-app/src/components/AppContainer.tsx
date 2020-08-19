@@ -147,7 +147,7 @@ export default function AppContainer(props: { children: React.ReactNode }) {
             </div>
           </Toolbar>
         </AppBar>
-        <Container>
+        <Container maxWidth={false}>
           <CssBaseline />
           {props.children}
         </Container>
