@@ -1,9 +1,10 @@
 import * as React from "react";
 import firebase from "firebase";
-import { Button, StyleSheet, View, StatusBar } from "react-native";
+import { StyleSheet, View, StatusBar } from "react-native";
 import * as Google from "expo-google-app-auth";
 import { LoginScreenNavigationProp } from "../services/Navigation";
 import * as log from "loglevel";
+import { Button } from "react-native-paper";
 
 const styles = StyleSheet.create({
   container: {
@@ -37,36 +38,7 @@ async function login(): Promise<Google.LogInResult> {
     return { type: "cancel" };
   }
 }
-/*
-async function cacheAuthAsync(authState) {
-  return await AsyncStorage.setItem(StorageKey, JSON.stringify(authState));
-}
 
-export async function getCachedAuthAsync() {
-  let value = await AsyncStorage.getItem(StorageKey);
-  let authState = JSON.parse(value);
-  console.log("getCachedAuthAsync", authState);
-  if (authState) {
-    if (checkIfTokenExpired(authState)) {
-      return refreshAuthAsync(authState);
-    } else {
-      return authState;
-    }
-  }
-  return null;
-}
-
-function checkIfTokenExpired({ accessTokenExpirationDate }) {
-  return new Date(accessTokenExpirationDate) < new Date();
-}
-
-async function refreshAuthAsync({ refreshToken }) {
-  let authState = await AppAuth.refreshAsync(config, refreshToken);
-  console.log("refreshAuth", authState);
-  await cacheAuthAsync(authState);
-  return authState;
-}
-*/
 export default function LoginScreen(props: {
   navigation: LoginScreenNavigationProp;
 }) {
@@ -85,13 +57,14 @@ export default function LoginScreen(props: {
   return (
     <View style={styles.container}>
       <Button
-        title="Login"
         onPress={async () => {
           const loginResult = await login();
           setResult(loginResult);
           props.navigation.navigate("Notes");
         }}
-      />
+      >
+        Login
+      </Button>
       <StatusBar />
     </View>
   );

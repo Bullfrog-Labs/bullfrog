@@ -3,20 +3,34 @@ import * as React from "react";
 import Firebase from "../services/Firebase";
 import firebase from "firebase";
 import { FirestoreDatabase, NoteRecord } from "kmgmt-common";
-import { StyleSheet, View, StatusBar, FlatList, Text } from "react-native";
+import { StyleSheet, View, StatusBar, FlatList } from "react-native";
+import { Text, TextInput, Surface, Button } from "react-native-paper";
 import * as log from "loglevel";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+  },
+  notes: {
+    flex: 1,
+  },
+  surface: {
+    padding: 4,
+    margin: 4,
+    elevation: 1,
   },
   item: {
     padding: 10,
     fontSize: 18,
     height: 44,
+  },
+  input: {
+    fontSize: 18,
+    margin: 4,
+  },
+  button: {
+    fontSize: 18,
   },
 });
 
@@ -39,12 +53,26 @@ export default function AddNoteScreen() {
     getNotes();
   }, [logger]);
 
+  function handleButtonPress(event) {
+    logger.debug(`button press ${event.target}`);
+  }
+
   return (
     <View style={styles.container}>
-      <FlatList
-        data={notes}
-        renderItem={({ item }) => <Text style={styles.item}>{item.body}</Text>}
-      />
+      <View style={styles.notes}>
+        <FlatList
+          data={notes}
+          renderItem={({ item }) => (
+            <Surface style={styles.surface}>
+              <Text style={styles.item}>{item.body}</Text>
+            </Surface>
+          )}
+        />
+      </View>
+      <View>
+        <TextInput style={styles.input} />
+        <Button onPress={handleButtonPress}>Publish</Button>
+      </View>
       <StatusBar />
     </View>
   );

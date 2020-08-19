@@ -5,14 +5,36 @@ import React, { useState } from "react";
 import firebase from "firebase";
 import Firebase from "./services/Firebase";
 import LoginScreen from "./components/LoginScreen";
-import NotesScreen from "./components/NotesScreen";
 import AddNoteScreen from "./components/AddNoteScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { Stack } from "./services/Navigation";
 import { Logging } from "kmgmt-common";
+import { Provider as PaperProvider } from "react-native-paper";
 
 Logging.configure(log);
 const app = Firebase.init();
+
+function LoggedInScreens() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="AddNote"
+        options={{
+          headerTitle: "Notes",
+        }}
+        component={AddNoteScreen}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function LoggedOutScreens() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Login" component={LoginScreen} />
+    </Stack.Navigator>
+  );
+}
 
 export function App() {
   const logger = log.getLogger("App");
@@ -24,20 +46,11 @@ export function App() {
   });
 
   return (
-    <NavigationContainer>
-      {userAuth ? (
-        <Stack.Navigator>
-          <Stack.Screen name="Notes" component={NotesScreen} />
-          <Stack.Screen name="AddNote" component={AddNoteScreen} />
-        </Stack.Navigator>
-      ) : (
-        <Stack.Navigator>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Notes" component={NotesScreen} />
-          <Stack.Screen name="AddNote" component={AddNoteScreen} />
-        </Stack.Navigator>
-      )}
-    </NavigationContainer>
+    <PaperProvider>
+      <NavigationContainer>
+        {userAuth ? <LoggedInScreens /> : <LoggedOutScreens />}
+      </NavigationContainer>
+    </PaperProvider>
   );
 }
 

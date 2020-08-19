@@ -7,6 +7,7 @@ import {
 export type StackParamList = {
   Login: undefined;
   Notes: undefined;
+  AddNote: undefined;
 };
 
 export const Stack = createStackNavigator<StackParamList>();
@@ -17,4 +18,8 @@ export type NotesScreenNavigationProp = StackNavigationProp<
 export type LoginScreenNavigationProp = StackNavigationProp<
   StackParamList,
   "Login"
+>;
+export type AddNoteScreenNavigationProp = StackNavigationProp<
+  StackParamList,
+  "AddNote"
 >;
