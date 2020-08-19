@@ -1,6 +1,18 @@
-import { Node as SlateNode } from "slate";
+// Taken from Slate type definitions
+export interface Text {
+  text: string;
+  [key: string]: unknown;
+}
 
-export type RichText = SlateNode[];
+export interface Element {
+  children: Node[];
+  [key: string]: unknown;
+}
+
+export declare type Node = Element | Text;
+
+export type RichText = Node[];
+
 export type NoteID = string;
 
 export interface NoteRecord {
