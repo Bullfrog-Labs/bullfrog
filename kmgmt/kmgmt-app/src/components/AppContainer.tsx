@@ -18,6 +18,21 @@ const theme = createMuiTheme({
   direction: "ltr",
   palette: {
     type: "light",
+    primary: {
+      main: "#011627",
+    },
+    secondary: {
+      main: "#FF9F1C",
+    },
+    error: {
+      main: "#F71735",
+    },
+    info: {
+      main: "#41EAD4",
+    },
+    success: {
+      main: "#008148",
+    },
   },
 });
 
