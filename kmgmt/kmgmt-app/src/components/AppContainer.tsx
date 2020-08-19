@@ -8,7 +8,6 @@ import {
   Container,
   CssBaseline,
   InputBase,
-  Box,
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
