@@ -40,6 +40,7 @@ const database = FirestoreDatabase.fromApp(app);
 export default function AddNoteScreen() {
   const logger = log.getLogger("AddNoteScreen");
   const [notes, setNotes] = React.useState<NoteRecord[]>([]);
+  const [note, setNote] = React.useState<string>();
   React.useEffect(() => {
     async function getNotes() {
       const email = firebase.auth().currentUser?.email;
@@ -53,8 +54,8 @@ export default function AddNoteScreen() {
     getNotes();
   }, [logger]);
 
-  function handleButtonPress(event) {
-    logger.debug(`button press ${event.target}`);
+  function handleButtonPress() {
+    logger.debug(`button press ${note}`);
   }
 
   return (
@@ -70,7 +71,7 @@ export default function AddNoteScreen() {
         />
       </View>
       <View>
-        <TextInput style={styles.input} />
+        <TextInput style={styles.input} value={note} onChangeText={setNote} />
         <Button onPress={handleButtonPress}>Publish</Button>
       </View>
       <StatusBar />
