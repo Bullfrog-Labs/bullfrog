@@ -11,10 +11,6 @@ export type StackParamList = {
 };
 
 export const Stack = createStackNavigator<StackParamList>();
-export type NotesScreenNavigationProp = StackNavigationProp<
-  StackParamList,
-  "Notes"
->;
 export type LoginScreenNavigationProp = StackNavigationProp<
   StackParamList,
   "Login"

@@ -35,6 +35,6 @@ test("test with valid user", async () => {
   const view = <AddNoteScreen database={mockDB} userAuth={{ email: "foo" }} />;
   const { getByText, debug } = render(view);
   debug();
-  const button = getByText(/Publish/i);
+  getByText(/Publish/i);
   await waitFor(() => getByText(/Example note text/));
 });
