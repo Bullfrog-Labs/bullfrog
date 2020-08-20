@@ -4,5 +4,8 @@
     "kmgmt/kmgmt-app",
     "kmgmt/kmgmt-native-app",
     "kmgmt/kmgmt-common"
-  ]
+  ],
+  "scripts": {
+    "ci-test": "CI=1 yarn workspaces run test"
+  }
 }
