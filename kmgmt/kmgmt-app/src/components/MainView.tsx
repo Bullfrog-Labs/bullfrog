@@ -22,19 +22,12 @@ const useStyles = makeStyles((theme) => ({
   card: {
     flexGrow: 1,
     maxHeight: 400,
-    "&:hover, &:focus": {
-      borderWidth: theme.spacing(0.25),
-      borderColor: theme.palette.secondary.light,
-    },
     borderRadius: theme.spacing(1),
   },
   emptyNotePlaceholder: {
     color: "#80868b",
   },
 }));
-
-type NoteRecordColumn = NoteRecord[];
-type NoteRecordGrid = NoteRecordColumn[];
 
 function NotePreviewCard(props: { note: NoteRecord }) {
   // eslint-disable-next-line
@@ -60,7 +53,7 @@ function NotePreviewCard(props: { note: NoteRecord }) {
   return (
     <Card
       className={classes.card}
-      variant="outlined"
+      variant="elevation"
       onClick={navigateToNoteOnClick}
     >
       <CardActionArea className={classes.card}>
