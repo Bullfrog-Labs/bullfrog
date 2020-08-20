@@ -90,7 +90,7 @@ export default function AddNoteScreen() {
           renderItem={({ item }) => (
             <Surface style={styles.surface}>
               <Text style={styles.item}>
-                {RichTextRenderer.render(item.body)}
+                {RichTextRenderer.renderTopLevelParagraphs(item.body)}
               </Text>
             </Surface>
           )}

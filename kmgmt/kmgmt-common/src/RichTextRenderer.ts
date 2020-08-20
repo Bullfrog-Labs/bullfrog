@@ -1,7 +1,11 @@
 import { SimpleRichText } from "./Database";
 
 export default class RichTextRenderer {
-  static render(text: SimpleRichText): string {
+  /**
+   * Really basic mobile note renderer which concatenates any paragraphs in the top level.
+   * @param text
+   */
+  static renderTopLevelParagraphs(text: SimpleRichText): string {
     let result = "";
     text.forEach((node, i) => {
       if (node.type === "paragraph") {
