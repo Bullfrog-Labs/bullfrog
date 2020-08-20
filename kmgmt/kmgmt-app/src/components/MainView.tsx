@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import Typography from "@material-ui/core/Typography";
 import { Database, NoteRecord } from "kmgmt-common";
 import {
@@ -22,12 +22,11 @@ const useStyles = makeStyles((theme) => ({
   card: {
     flexGrow: 1,
     maxHeight: 400,
-    "&:hover": {
-      backgroundColor: theme.palette.secondary.light,
-      color: theme.palette.secondary.contrastText,
+    "&:hover, &:focus": {
+      borderWidth: theme.spacing(0.25),
+      borderColor: theme.palette.secondary.light,
     },
     borderRadius: theme.spacing(1),
-    borderWidth: theme.spacing(0.25),
   },
   emptyNotePlaceholder: {
     color: "#80868b",
@@ -62,8 +61,6 @@ function NotePreviewCard(props: { note: NoteRecord }) {
     <Card
       className={classes.card}
       variant="outlined"
-      raised={true}
-      elevation={1}
       onClick={navigateToNoteOnClick}
     >
       <CardActionArea className={classes.card}>
@@ -140,7 +137,7 @@ async function createNewAccount(database: Database, authState: AuthState) {
 
 export default function MainView(props: { database: Database }) {
   const logger = log.getLogger("MainView");
-  const [notes, setNotes] = React.useState<NoteRecord[]>([]);
+  const [notes, setNotes] = useState<NoteRecord[]>([]);
   const authState = useContext(AuthContext);
   const { database } = props;
 
