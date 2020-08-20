@@ -76,6 +76,7 @@ export default function AddNoteScreen(props: {
       }
       await database.addNote(email, noteRecord);
       notes.push(noteRecord);
+      setNotes(Array.from(notes));
       setNote("");
       logger.debug("added note");
     }
@@ -97,7 +98,12 @@ export default function AddNoteScreen(props: {
         />
       </View>
       <View>
-        <TextInput style={styles.input} value={note} onChangeText={setNote} />
+        <TextInput
+          style={styles.input}
+          value={note}
+          onChangeText={setNote}
+          accessibilityLabel={"Note Input"}
+        />
         <Button onPress={handleButtonPress}>Publish</Button>
       </View>
       <StatusBar />
