@@ -1,12 +1,11 @@
 import "react-native-gesture-handler";
 import * as React from "react";
-import Firebase from "../services/Firebase";
 import firebase from "firebase";
 import {
-  FirestoreDatabase,
   NoteRecord,
   RichTextBuilder,
   RichTextRenderer,
+  Database,
 } from "kmgmt-common";
 import { StyleSheet, View, StatusBar, FlatList } from "react-native";
 import { Text, TextInput, Surface, Button } from "react-native-paper";
@@ -39,14 +38,15 @@ const styles = StyleSheet.create({
   },
 });
 
-const app = Firebase.init();
-const database = FirestoreDatabase.fromApp(app);
-
-export default function AddNoteScreen() {
+export default function AddNoteScreen(props: {
+  database: Database;
+  userAuth?: firebase.User;
+}) {
+  const { database, userAuth } = props;
   const logger = log.getLogger("AddNoteScreen");
   const [notes, setNotes] = React.useState<NoteRecord[]>([]);
   const [note, setNote] = React.useState<string>("");
-  const email = firebase.auth().currentUser?.email;
+  const email = userAuth?.email;
 
   React.useEffect(() => {
     async function getNotes() {
@@ -58,7 +58,7 @@ export default function AddNoteScreen() {
       }
     }
     getNotes();
-  }, [logger, email]);
+  }, [logger, email, database]);
 
   function handleButtonPress() {
     logger.debug(`button press ${note}`);

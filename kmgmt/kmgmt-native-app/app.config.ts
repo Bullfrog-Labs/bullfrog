@@ -1,6 +1,7 @@
 import "dotenv/config";
 
-export default ({ config }) => {
+export default (params: any) => {
+  const { config } = params;
   console.log(`Loading config for ${config.name}`);
   const merged = {
     ...config,
