@@ -7,5 +7,5 @@ workflows:
       - node/test:
         name: run-tests
         pkg-manager: yarn
-        run-command: CI=true yarn workspaces run test
+        run-command: ci-test
         cache-version: v3
