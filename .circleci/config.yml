@@ -5,17 +5,7 @@ workflows:
   node-tests:
     jobs:
       - node/test:
-          name: kmgmt-common
+          name: run-tests
           pkg-manager: yarn
-          app-dir: kmgmt/kmgmt-common
-          cache-version: v2
-      - node/test:
-          name: kmgmt-app
-          pkg-manager: yarn
-          app-dir: kmgmt/kmgmt-app
-          cache-version: v2
-      - node/test:
-          name: kmgmt-native-app
-          pkg-manager: yarn
-          app-dir: kmgmt/kmgmt-native-app
-          cache-version: v2
+          run-command: ci-test
+          cache-version: v3
