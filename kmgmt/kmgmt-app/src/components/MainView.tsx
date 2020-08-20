@@ -10,10 +10,23 @@ import {
   Card,
   CardActionArea,
   Box,
+  useTheme,
 } from "@material-ui/core";
 import { AuthContext, AuthState } from "../services/Auth";
 import { useHistory } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
+
+/*
+// import { Responsive as ResponsiveGridLayout } from "react-grid-layout";
+import { Responsive, WidthProvider } from "react-grid-layout";
+*/
+
+import { Layout } from "react-grid-layout";
+import { Breakpoint } from "@material-ui/core/styles/createBreakpoints";
+
+import GridLayout from "react-grid-layout";
+
+// export const BREAK = ["bold", "italic", "underline", "code"] as const;
 
 const useStyles = makeStyles((theme) => ({
   noteGrid: {
@@ -47,7 +60,7 @@ function NotePreviewCard(props: { note: NoteRecord }) {
 
   const history = useHistory();
   let navigateToNoteOnClick = () => {
-    history.push(noteLink);
+    // history.push(noteLink);
   };
 
   return (
@@ -84,17 +97,80 @@ function NotePreviewCard(props: { note: NoteRecord }) {
 }
 
 function NoteGrid(props: { notes: NoteRecord[] }) {
+  // const ResponsiveGridLayout = WidthProvider(Responsive);
   // eslint-disable-next-line
   const logger = log.getLogger("NoteGrid");
   const classes = useStyles();
+  const theme = useTheme();
 
-  const notePreviewCards = Array.from(props.notes.entries(), ([i, note]) => (
-    <Grid item key={i} xs={12} sm={12} md={4} lg={3} xl={2}>
-      <NotePreviewCard note={note} />
-    </Grid>
-  ));
+  type ResponsiveLayout = {
+    [key in Breakpoint]: Layout[];
+  };
+
+  // generate layouts
+  const cols = { xl: 20, lg: 16, md: 12, sm: 4, xs: 4 };
+
+  const generateLayouts = (
+    notes: NoteRecord[]
+  ): [ResponsiveLayout, NotePreviewCard[]] => {
+    const result = Array.from(props.notes.entries(), ([i, note]) => {
+      // const key: string = !!note.id ? note.id : i;
+      const key: string = String(i);
+
+      const notePreviewCard = (
+        <div key={key}>
+          <NotePreviewCard key={key} note={note} />
+        </div>
+      );
+
+      // layout below is compute with respect to xl (largest) breakpoint
+      // TODO: Need to determine note height
+      // Use constant note width
+      const defaultWidth = 4;
+      const layout = {
+        i: key,
+        x: (i * defaultWidth) % cols.xl,
+        y: Infinity,
+        w: defaultWidth,
+        h: 10,
+      };
+
+      return [layout, notePreviewCard];
+    });
+
+    return [{ xl: result.map((x) => x[0]) }, result.map((x) => x[1])];
+  };
+
+  // generate grid items (note preview cards)
+
+  const [layouts, notePreviewCards] = generateLayouts(props.notes);
+
+  // generate grid
 
   return (
+    <GridLayout
+      layout={layouts.xl}
+      cols={20}
+      width={1920}
+      rowHeight={theme.spacing(1)}
+    >
+      {notePreviewCards}
+    </GridLayout>
+  );
+  /*
+  return (
+    <ResponsiveGridLayout
+      layouts={layouts}
+      breakpoints={theme.breakpoints.values}
+      cols={cols}
+      measureBeforeMount={false}
+    >
+      {notePreviewCards}
+    </ResponsiveGridLayout>
+  );
+  */
+
+  /*
     <Grid
       container
       direction="row"
@@ -105,7 +181,7 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
     >
       {notePreviewCards}
     </Grid>
-  );
+    */
 }
 
 function EmptyNoteGridPlaceholder() {
@@ -158,13 +234,5 @@ export default function MainView(props: { database: Database }) {
     loadNotes();
   }, [database, logger, authState.email]);
 
-  return (
-    <Container maxWidth={false}>
-      {notes.length > 0 ? (
-        <NoteGrid notes={notes} />
-      ) : (
-        <EmptyNoteGridPlaceholder />
-      )}
-    </Container>
-  );
+  return <NoteGrid notes={notes} />;
 }
