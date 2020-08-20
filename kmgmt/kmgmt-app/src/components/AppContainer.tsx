@@ -8,10 +8,10 @@ import {
   Container,
   CssBaseline,
   InputBase,
+  Button,
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { createMuiTheme, fade, makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router-dom";
 
@@ -55,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up("sm")]: {
       display: "block",
     },
+    color: theme.palette.primary.contrastText,
   },
   search: {
     position: "relative",
@@ -108,12 +109,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// function AppBar
+
 export default function AppContainer(props: { children: React.ReactNode }) {
   const classes = useStyles();
   const history = useHistory();
 
-  const navigateBack = () => {
-    history.goBack();
+  const navigateToNoteList = () => {
+    history.push("/");
   };
 
   return (
@@ -124,21 +127,15 @@ export default function AppContainer(props: { children: React.ReactNode }) {
             <IconButton
               edge="start"
               className={classes.menuButton}
-              aria-label="back"
-              onClick={navigateBack}
-            >
-              <ArrowBackIcon />
-            </IconButton>
-            <IconButton
-              edge="start"
-              className={classes.menuButton}
               aria-label="open drawer"
             >
               <MenuIcon />
             </IconButton>
-            <Typography className={classes.title} variant="h4" noWrap>
-              kmgmt
-            </Typography>
+            <Button onClick={navigateToNoteList}>
+              <Typography className={classes.title} variant="h4" noWrap>
+                kmgmt
+              </Typography>
+            </Button>
             <div className={classes.search}>
               <div className={classes.searchIcon}>
                 <SearchIcon />
