@@ -26,7 +26,7 @@ export const hotkeyHandler = (editor: Editor) => {
       bold: ["mod+b", toggleMarkHotkeyHandler(editor, "bold")],
       italic: ["mod+i", toggleMarkHotkeyHandler(editor, "italic")],
       underline: ["mod+u", toggleMarkHotkeyHandler(editor, "underline")],
-      code: ["mod+c", toggleMarkHotkeyHandler(editor, "code")],
+      code: ["mod+shift+c", toggleMarkHotkeyHandler(editor, "code")],
     },
     platformSpecific: {
       apple: {},
