@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import Typography from "@material-ui/core/Typography";
 import { Database, NoteRecord } from "kmgmt-common";
 import {
@@ -16,39 +16,18 @@ import { useHistory } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-    maxWidth: 345,
-  },
   noteGrid: {
-    "margin-top": theme.spacing(1),
+    "margin-top": theme.spacing(3),
   },
-  paper: {
-    padding: theme.spacing(1),
-    textAlign: "center",
-    color: theme.palette.text.secondary,
+  card: {
+    flexGrow: 1,
+    maxHeight: 400,
+    borderRadius: theme.spacing(1),
+  },
+  emptyNotePlaceholder: {
+    color: "#80868b",
   },
 }));
-
-type NoteRecordColumn = NoteRecord[];
-type NoteRecordGrid = NoteRecordColumn[];
-
-/**
- * Very simple dummy implementation for note layout. Lays notes out top to
- * bottom by always placing the next note in the smallest column.
- * @param notes
- */
-function createNoteGrid(notes: NoteRecordColumn) {
-  const lengths: number[] = [0, 0, 0];
-  const columns: NoteRecordGrid = [[], [], []];
-  notes.forEach((note) => {
-    const i = lengths.indexOf(Math.min(...lengths));
-    columns[i].push(note);
-    // TODO: note body length does not make sense with rich text. Fix this.
-    lengths[i] = lengths[i] + note.body.length;
-  });
-  return columns;
-}
 
 function NotePreviewCard(props: { note: NoteRecord }) {
   // eslint-disable-next-line
@@ -72,53 +51,59 @@ function NotePreviewCard(props: { note: NoteRecord }) {
   };
 
   return (
-    <Grid item xs={12}>
-      <Card className={classes.root} onClick={navigateToNoteOnClick}>
-        <CardActionArea>
-          <Box p={2}>
-            {!!note.title && (
-              <Typography variant="h6" component="h2">
-                {note.title}
-              </Typography>
-            )}
-            {!!notePreview && (
-              <Typography variant="body2" component="p">
-                {richTextStringPreview(note.body)}
-              </Typography>
-            )}
-          </Box>
-        </CardActionArea>
-      </Card>
-    </Grid>
+    <Card
+      className={classes.card}
+      variant="elevation"
+      onClick={navigateToNoteOnClick}
+    >
+      <CardActionArea className={classes.card}>
+        <Box p={2}>
+          {!!note.title && (
+            <Typography variant="h6" component="h2">
+              {note.title}
+            </Typography>
+          )}
+          {!!notePreview && (
+            <Typography variant="body2" component="p">
+              {richTextStringPreview(note.body)}
+            </Typography>
+          )}
+          {!note.title && !notePreview && (
+            <Typography
+              variant="h5"
+              component="h2"
+              className={classes.emptyNotePlaceholder}
+            >
+              Empty note
+            </Typography>
+          )}
+        </Box>
+      </CardActionArea>
+    </Card>
   );
 }
 
-function NoteColumn(props: { notes: NoteRecordColumn }) {
-  // eslint-disable-next-line
-  const logger = log.getLogger("NoteColumn");
-
-  const items = props.notes.map((note: NoteRecord, index: number) => {
-    return <NotePreviewCard key={index} note={note} />;
-  });
-  return (
-    <Grid container item xs={4} spacing={1}>
-      {items}
-    </Grid>
-  );
-}
-
-function NoteGrid(props: { columns: NoteRecordGrid }) {
+function NoteGrid(props: { notes: NoteRecord[] }) {
   // eslint-disable-next-line
   const logger = log.getLogger("NoteGrid");
   const classes = useStyles();
 
-  const noteColumns = Array.from(props.columns.entries(), ([i, column]) => (
-    <NoteColumn key={i} notes={column} />
+  const notePreviewCards = Array.from(props.notes.entries(), ([i, note]) => (
+    <Grid item key={i} xs={12} sm={12} md={4} lg={3} xl={2}>
+      <NotePreviewCard note={note} />
+    </Grid>
   ));
 
   return (
-    <Grid container className={classes.noteGrid} spacing={1}>
-      {noteColumns}
+    <Grid
+      container
+      direction="row"
+      justify="flex-start"
+      alignItems="flex-start"
+      className={classes.noteGrid}
+      spacing={2}
+    >
+      {notePreviewCards}
     </Grid>
   );
 }
@@ -145,7 +130,7 @@ async function createNewAccount(database: Database, authState: AuthState) {
 
 export default function MainView(props: { database: Database }) {
   const logger = log.getLogger("MainView");
-  const [notes, setNotes] = React.useState<NoteRecord[]>([]);
+  const [notes, setNotes] = useState<NoteRecord[]>([]);
   const authState = useContext(AuthContext);
   const { database } = props;
 
@@ -173,12 +158,10 @@ export default function MainView(props: { database: Database }) {
     loadNotes();
   }, [database, logger, authState.email]);
 
-  const columns = createNoteGrid(notes);
-
   return (
-    <Container maxWidth="md">
+    <Container maxWidth={false}>
       {notes.length > 0 ? (
-        <NoteGrid columns={columns} />
+        <NoteGrid notes={notes} />
       ) : (
         <EmptyNoteGridPlaceholder />
       )}
