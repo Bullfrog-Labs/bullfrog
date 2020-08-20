@@ -13,12 +13,7 @@ import { AuthContext } from "../services/Auth";
 
 const useStyles = makeStyles((theme) => ({
   noteView: {
-    [theme.breakpoints.up("md")]: {
-      "margin-top": theme.spacing(20),
-    },
-    [theme.breakpoints.down("sm")]: {
-      "margin-top": theme.spacing(5),
-    },
+    "margin-top": theme.spacing(5),
   },
 }));
 

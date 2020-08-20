@@ -41,15 +41,7 @@ const useStyles = makeStyles((theme) => ({
   },
   appBar: {
     margin: "0px",
-    [theme.breakpoints.up("md")]: {
-      width: "400px",
-      position: "fixed",
-      top: "40px",
-      right: "40px",
-    },
-    [theme.breakpoints.down("sm")]: {
-      position: "static",
-    },
+    position: "static",
   },
   menuButton: {
     marginRight: theme.spacing(2),
