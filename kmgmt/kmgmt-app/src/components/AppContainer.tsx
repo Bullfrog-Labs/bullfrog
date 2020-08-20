@@ -11,7 +11,9 @@ import {
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { createMuiTheme, fade, makeStyles } from "@material-ui/core/styles";
+import { useHistory } from "react-router-dom";
 
 const theme = createMuiTheme({
   direction: "ltr",
@@ -108,11 +110,25 @@ const useStyles = makeStyles((theme) => ({
 
 export default function AppContainer(props: { children: React.ReactNode }) {
   const classes = useStyles();
+  const history = useHistory();
+
+  const navigateBack = () => {
+    history.goBack();
+  };
+
   return (
     <MuiThemeProvider theme={theme}>
       <div className={classes.root}>
         <AppBar className={classes.appBar}>
           <Toolbar>
+            <IconButton
+              edge="start"
+              className={classes.menuButton}
+              aria-label="back"
+              onClick={navigateBack}
+            >
+              <ArrowBackIcon />
+            </IconButton>
             <IconButton
               edge="start"
               className={classes.menuButton}
