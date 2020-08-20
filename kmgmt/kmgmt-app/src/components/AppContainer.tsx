@@ -8,15 +8,32 @@ import {
   Container,
   CssBaseline,
   InputBase,
+  Button,
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import { createMuiTheme, fade, makeStyles } from "@material-ui/core/styles";
+import { useHistory } from "react-router-dom";
 
 const theme = createMuiTheme({
   direction: "ltr",
   palette: {
     type: "light",
+    primary: {
+      main: "#011627",
+    },
+    secondary: {
+      main: "#FF9F1C",
+    },
+    error: {
+      main: "#F71735",
+    },
+    info: {
+      main: "#41EAD4",
+    },
+    success: {
+      main: "#008148",
+    },
   },
 });
 
@@ -24,8 +41,13 @@ const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
   },
+  appBar: {
+    margin: "0px",
+    position: "static",
+  },
   menuButton: {
     marginRight: theme.spacing(2),
+    color: theme.palette.primary.light,
   },
   title: {
     flexGrow: 1,
@@ -33,8 +55,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up("sm")]: {
       display: "block",
     },
-
-    color: theme.palette.text.primary,
+    color: theme.palette.primary.contrastText,
   },
   search: {
     position: "relative",
@@ -75,14 +96,6 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
-  paper: {
-    padding: theme.spacing(1),
-    textAlign: "center",
-    color: theme.palette.text.primary,
-  },
-  noteDrawerList: {
-    "padding-left": "17px",
-  },
   textfield: {
     "& textarea": {
       border: "0px solid",
@@ -94,17 +107,22 @@ const useStyles = makeStyles((theme) => ({
       border: "0px solid",
     },
   },
-  invisible: {
-    visibility: "hidden",
-  },
 }));
+
+// function AppBar
 
 export default function AppContainer(props: { children: React.ReactNode }) {
   const classes = useStyles();
+  const history = useHistory();
+
+  const navigateToNoteList = () => {
+    history.push("/");
+  };
+
   return (
     <MuiThemeProvider theme={theme}>
       <div className={classes.root}>
-        <AppBar position="static" color="inherit">
+        <AppBar className={classes.appBar}>
           <Toolbar>
             <IconButton
               edge="start"
@@ -113,9 +131,11 @@ export default function AppContainer(props: { children: React.ReactNode }) {
             >
               <MenuIcon />
             </IconButton>
-            <Typography className={classes.title} variant="h4" noWrap>
-              kmgmt
-            </Typography>
+            <Button onClick={navigateToNoteList}>
+              <Typography className={classes.title} variant="h4" noWrap>
+                kmgmt
+              </Typography>
+            </Button>
             <div className={classes.search}>
               <div className={classes.searchIcon}>
                 <SearchIcon />
@@ -131,7 +151,7 @@ export default function AppContainer(props: { children: React.ReactNode }) {
             </div>
           </Toolbar>
         </AppBar>
-        <Container maxWidth="lg">
+        <Container maxWidth={false}>
           <CssBaseline />
           {props.children}
         </Container>
