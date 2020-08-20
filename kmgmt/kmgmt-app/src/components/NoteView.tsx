@@ -15,6 +15,11 @@ const useStyles = makeStyles((theme) => ({
   noteView: {
     "margin-top": theme.spacing(5),
   },
+  loadingIndicator: {
+    position: "fixed",
+    top: "30%",
+    left: "50%",
+  },
 }));
 
 const IDLE_TIME_FOR_SAVE = 1 * 1000;
@@ -154,6 +159,8 @@ export function NoteView(props: NoteViewProps) {
     loadNote();
   }, [props.database, logger, authState.email, id]);
 
+  const styles = useStyles();
+
   if (noteLoaded) {
     return (
       <BaseNoteView
@@ -166,6 +173,6 @@ export function NoteView(props: NoteViewProps) {
       />
     );
   } else {
-    return <CircularProgress />;
+    return <CircularProgress className={styles.loadingIndicator} />;
   }
 }
