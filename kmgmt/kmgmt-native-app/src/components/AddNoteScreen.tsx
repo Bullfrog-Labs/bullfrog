@@ -2,7 +2,12 @@ import "react-native-gesture-handler";
 import * as React from "react";
 import Firebase from "../services/Firebase";
 import firebase from "firebase";
-import { FirestoreDatabase, NoteRecord } from "kmgmt-common";
+import {
+  FirestoreDatabase,
+  NoteRecord,
+  RichTextBuilder,
+  RichTextRenderer,
+} from "kmgmt-common";
 import { StyleSheet, View, StatusBar, FlatList } from "react-native";
 import { Text, TextInput, Surface, Button } from "react-native-paper";
 import * as log from "loglevel";
@@ -40,10 +45,11 @@ const database = FirestoreDatabase.fromApp(app);
 export default function AddNoteScreen() {
   const logger = log.getLogger("AddNoteScreen");
   const [notes, setNotes] = React.useState<NoteRecord[]>([]);
-  const [note, setNote] = React.useState<string>();
+  const [note, setNote] = React.useState<string>("");
+  const email = firebase.auth().currentUser?.email;
+
   React.useEffect(() => {
     async function getNotes() {
-      const email = firebase.auth().currentUser?.email;
       logger.debug(`using email for fetch; email = ${email}`);
       if (email) {
         const fetchedNotes = await database.getNotes(email);
@@ -52,10 +58,28 @@ export default function AddNoteScreen() {
       }
     }
     getNotes();
-  }, [logger]);
+  }, [logger, email]);
 
   function handleButtonPress() {
     logger.debug(`button press ${note}`);
+    const addedNote = note;
+    const builder = new RichTextBuilder();
+    const body = builder.addParagraph(addedNote).build();
+    logger.debug(`adding note ${JSON.stringify(body)}`);
+    const noteRecord: NoteRecord = {
+      body: body,
+    };
+    async function addNote() {
+      if (!email) {
+        logger.error("email is not set, skipping add");
+        return;
+      }
+      await database.addNote(email, noteRecord);
+      notes.push(noteRecord);
+      setNote("");
+      logger.debug("added note");
+    }
+    addNote();
   }
 
   return (
@@ -65,7 +89,9 @@ export default function AddNoteScreen() {
           data={notes}
           renderItem={({ item }) => (
             <Surface style={styles.surface}>
-              <Text style={styles.item}>{item.body}</Text>
+              <Text style={styles.item}>
+                {RichTextRenderer.render(item.body)}
+              </Text>
             </Surface>
           )}
         />

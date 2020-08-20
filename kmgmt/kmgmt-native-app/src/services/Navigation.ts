@@ -7,7 +7,7 @@ import {
 export type StackParamList = {
   Login: undefined;
   Notes: undefined;
-  AddNote: ["database"];
+  AddNote: undefined;
 };
 
 export const Stack = createStackNavigator<StackParamList>();

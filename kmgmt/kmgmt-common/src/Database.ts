@@ -7,11 +7,17 @@ export interface Text {
 export interface Element {
   children: Node[];
   [key: string]: unknown;
+  type: string;
 }
 
 export declare type Node = Element | Text;
 
 export type RichText = Node[];
+
+export type SimpleRichText = {
+  children: { text: string }[];
+  type: string;
+}[];
 
 export type NoteID = string;
 

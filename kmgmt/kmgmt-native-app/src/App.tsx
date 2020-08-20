@@ -32,6 +32,13 @@ function LoggedOutScreens() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen
+        name="AddNote"
+        options={{
+          headerTitle: "Notes",
+        }}
+        component={AddNoteScreen}
+      />
     </Stack.Navigator>
   );
 }

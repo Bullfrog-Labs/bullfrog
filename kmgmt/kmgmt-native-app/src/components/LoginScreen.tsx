@@ -60,7 +60,7 @@ export default function LoginScreen(props: {
         onPress={async () => {
           const loginResult = await login();
           setResult(loginResult);
-          props.navigation.navigate("Notes");
+          props.navigation.navigate("AddNote");
         }}
       >
         Login
