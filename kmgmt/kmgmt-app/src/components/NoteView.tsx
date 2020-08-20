@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Database, NoteID } from "kmgmt-common";
-import { Container, CircularProgress } from "@material-ui/core";
+import { Container, CircularProgress, makeStyles } from "@material-ui/core";
 import { useParams, useHistory } from "react-router-dom";
 import RichTextEditor, {
   Title,
@@ -10,6 +10,17 @@ import RichTextEditor, {
 import IdleTimer from "react-idle-timer";
 import * as log from "loglevel";
 import { AuthContext } from "../services/Auth";
+
+const useStyles = makeStyles((theme) => ({
+  noteView: {
+    [theme.breakpoints.up("md")]: {
+      "margin-top": theme.spacing(20),
+    },
+    [theme.breakpoints.down("sm")]: {
+      "margin-top": theme.spacing(5),
+    },
+  },
+}));
 
 const IDLE_TIME_FOR_SAVE = 1 * 1000;
 
@@ -30,6 +41,8 @@ type NoteViewProps = {
 function BaseNoteView(props: BaseNoteViewProps) {
   const logger = log.getLogger("BaseNoteView");
   const [noteChanged, setNoteChanged] = useState(false);
+
+  const classes = useStyles();
 
   const handleOnIdle = (event: Event) => {
     logger.info("User idle");
@@ -53,7 +66,7 @@ function BaseNoteView(props: BaseNoteViewProps) {
   };
 
   return (
-    <Container maxWidth="md">
+    <Container className={classes.noteView} maxWidth="md">
       <IdleTimer timeout={IDLE_TIME_FOR_SAVE} onIdle={handleOnIdle}>
         <RichTextEditor
           readOnly={props.readOnly ?? false}
