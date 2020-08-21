@@ -234,5 +234,13 @@ export default function MainView(props: { database: Database }) {
     loadNotes();
   }, [database, logger, authState.email]);
 
-  return <NoteGrid notes={notes} />;
+  return (
+    <Container maxWidth={false}>
+      {notes.length > 0 ? (
+        <NoteGrid notes={notes} />
+      ) : (
+        <EmptyNoteGridPlaceholder />
+      )}
+    </Container>
+  );
 }
