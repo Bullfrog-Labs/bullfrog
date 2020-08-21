@@ -44,6 +44,25 @@
  * here so that we do not get tripped in the future by weird behavior when/if we
  * do try to use those features. 
  */
+.react-grid-layout {
+  position: relative;
+  transition: height 200ms ease;
+}
+
+.react-grid-item {
+  transition: all 200ms ease;
+  transition-property: left, top;
+}
+
+.react-grid-item.cssTransforms {
+  transition-property: transform;
+}
+
+.react-grid-item.resizing {
+  z-index: 1;
+  will-change: width, height;
+}
+
 .react-grid-item.react-draggable-dragging {
   transition: none;
   z-index: 3;
