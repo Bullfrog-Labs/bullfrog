@@ -23,10 +23,10 @@ import { richTextStringPreview } from "./richtext/Utils";
 import { Responsive, WidthProvider } from "react-grid-layout";
 */
 
-import { Layout, LayoutItem } from "react-grid-layout";
+import { Layout } from "react-grid-layout";
 import { Breakpoint } from "@material-ui/core/styles/createBreakpoints";
 
-import sizeMe from "react-sizeme";
+import sizeMe, { SizeMeProps } from "react-sizeme";
 import RGL, { WidthProvider } from "react-grid-layout";
 
 const ReactGridLayout = WidthProvider(RGL);
@@ -75,7 +75,7 @@ function NotePreviewCard(props: { note: NoteRecord; height?: number }) {
   return (
     <Card
       className={classes.card}
-      // variant="elevation"
+      variant="elevation"
       // variant="outlined"
       onClick={navigateToNoteOnClick}
       // style={style}
@@ -120,71 +120,66 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
   const classes = useStyles();
   const theme = useTheme();
 
-  const [noteSizes, setNoteSizes] = useState({});
+  const [noteSizes, setNoteSizes] = useState<{
+    [key: string]: SizeMeProps["size"];
+  }>({});
 
   type ResponsiveLayout = {
     [key in Breakpoint]: Layout[];
   };
 
-  // generate layouts
   const cols = { xl: 5, lg: 4, md: 3, sm: 1, xs: 1 };
 
-  const onSize = (key: string) => (size: { height: number }) => {
+  const onSize = (key: string) => (size: SizeMeProps["size"]) => {
     let newNoteSizes = { ...noteSizes };
     newNoteSizes[key] = size;
     setNoteSizes(newNoteSizes);
   };
 
-  const generateLayouts = (
-    notes: NoteRecord[]
-  ): [ResponsiveLayout, NotePreviewCard[]] => {
-    const result = Array.from(props.notes.entries(), ([i, note]) => {
-      const key: string = !!note.id ? note.id : i;
-      // const key: string = String(i);
+  const heightToGridRows = (x: number) =>
+    Math.ceil((x - theme.spacing(1)) / (theme.spacing(1) + 10)) + 1;
 
-      const noteHeight = !!noteSizes[key] ? noteSizes[key].height : undefined;
+  const generateLayoutAndNotePreviews = (
+    cols: number,
+    idx: number,
+    note: NoteRecord
+  ) => {
+    const key: string = !!note.id ? note.id : String(idx);
+    const noteHeight = !!noteSizes[key]
+      ? noteSizes[key].height ?? undefined
+      : undefined;
 
-      const notePreviewCard = (
-        <div className={classes.foo} key={key}>
-          <SizeAwareGridItem key={key} onSize={onSize(key)}>
-            <NotePreviewCard note={note} height={noteHeight} />
-          </SizeAwareGridItem>
-        </div>
-      );
-      // layout below is compute with respect to xl (largest) breakpoint
-      // TODO: Need to determine note height
-      // Use constant note width
-      const defaultWidth = 1;
-      // Math.ceil(noteHeight / theme.spacing(1)),
-      /*
-      const hackyHacks =
-        Math.ceil((noteHeight - theme.spacing(1)) / (theme.spacing(1) + 10)) +
-        1;
-        */
+    const notePreviewCard = (
+      <div key={key}>
+        <SizeAwareGridItem key={key} onSize={onSize(key)}>
+          <NotePreviewCard note={note} height={noteHeight} />
+        </SizeAwareGridItem>
+      </div>
+    );
 
-      const hackyHacks = (x: number) =>
-        Math.ceil((x - theme.spacing(1)) / (theme.spacing(1) + 10)) + 1;
+    // Use constant note width
+    const defaultWidth = 1;
 
-      const layout = {
-        i: key,
-        x: (i * defaultWidth) % cols.lg,
-        y: Infinity,
-        w: defaultWidth,
-        // h: hackyHacks,
-        h: !!noteHeight ? hackyHacks(noteHeight) : 1,
-      };
+    const layout: Layout = {
+      i: key,
+      x: (idx * defaultWidth) % cols,
+      y: Infinity,
+      w: defaultWidth,
+      h: !!noteHeight ? heightToGridRows(noteHeight) : 1,
+    };
 
-      return [layout, notePreviewCard];
-    });
-
-    return [{ xl: result.map((x) => x[0]) }, result.map((x) => x[1])];
+    return [layout, notePreviewCard];
   };
 
-  // generate grid items (note preview cards)
+  const layoutsAndNotePreviews = Array.from(
+    props.notes.entries(),
+    ([i, note]) => {
+      return generateLayoutAndNotePreviews(cols.lg, i, note);
+    }
+  );
 
-  const [layouts, notePreviewCards] = generateLayouts(props.notes);
-
-  // generate grid
+  const layouts = { xl: layoutsAndNotePreviews.map((x) => x[0]) };
+  const notePreviews = layoutsAndNotePreviews.map((x) => x[1]);
 
   // See
   // https://github.com/STRML/react-grid-layout/issues/720#issuecomment-614808306
@@ -197,7 +192,7 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
         width={1440}
         rowHeight={theme.spacing(1)}
       >
-        {notePreviewCards}
+        {notePreviews}
       </ReactGridLayout>
     </div>
   );
