@@ -4,32 +4,25 @@ import Typography from "@material-ui/core/Typography";
 import { Database, NoteRecord } from "kmgmt-common";
 import {
   Container,
-  Grid,
   makeStyles,
   Button,
-  Paper,
   Card,
   CardActionArea,
   Box,
   useTheme,
-  Theme,
 } from "@material-ui/core";
 import { AuthContext, AuthState } from "../services/Auth";
 import { useHistory } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
 
-/*
-// import { Responsive as ResponsiveGridLayout } from "react-grid-layout";
-import { Responsive, WidthProvider } from "react-grid-layout";
-*/
-
 import { Layout } from "react-grid-layout";
 import { Breakpoint } from "@material-ui/core/styles/createBreakpoints";
 
 import sizeMe, { SizeMeProps } from "react-sizeme";
-import RGL, { WidthProvider } from "react-grid-layout";
 
-const ReactGridLayout = WidthProvider(RGL);
+import { Responsive, WidthProvider } from "react-grid-layout";
+
+const ReactGridLayout = WidthProvider(Responsive);
 
 const useStyles = makeStyles((theme) => ({
   noteGrid: {
@@ -111,12 +104,13 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
   // const ResponsiveGridLayout = WidthProvider(Responsive);
   // eslint-disable-next-line
   const logger = log.getLogger("NoteGrid");
-  const classes = useStyles();
   const theme = useTheme();
 
   const [noteSizes, setNoteSizes] = useState<{
     [key: string]: SizeMeProps["size"];
   }>({});
+
+  const [currentBreakpoint, setCurrentBreakpoint] = useState<Breakpoint>("xl");
 
   type ResponsiveLayout = {
     [key in Breakpoint]: Layout[];
@@ -133,11 +127,7 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
   const heightToGridRows = (x: number) =>
     Math.ceil((x - theme.spacing(1)) / (theme.spacing(1) + 10)) + 1;
 
-  const generateLayoutAndNotePreviews = (
-    cols: number,
-    idx: number,
-    note: NoteRecord
-  ) => {
+  const generateLayoutAndNotePreviews = (idx: number, note: NoteRecord) => {
     const key: string = !!note.id ? note.id : String(idx);
     const noteHeight = !!noteSizes[key]
       ? noteSizes[key].height ?? undefined
@@ -156,7 +146,7 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
 
     const layout: Layout = {
       i: key,
-      x: (idx * defaultWidth) % cols,
+      x: (idx * defaultWidth) % cols[currentBreakpoint],
       y: Infinity,
       w: defaultWidth,
       h: !!noteHeight ? heightToGridRows(noteHeight) : 1,
@@ -168,13 +158,16 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
   const layoutsAndNotePreviews = Array.from(
     props.notes.entries(),
     ([i, note]) => {
-      return generateLayoutAndNotePreviews(cols.lg, i, note);
+      return generateLayoutAndNotePreviews(i, note);
     }
   );
 
-  const layouts = { xl: layoutsAndNotePreviews.map((x) => x[0]) };
+  const layouts: ResponsiveLayout = {
+    [currentBreakpoint]: layoutsAndNotePreviews.map((x) => x[0]),
+  };
   const notePreviews = layoutsAndNotePreviews.map((x) => x[1]);
 
+  /*
   return (
     <ReactGridLayout
       isDraggable={false}
@@ -186,18 +179,19 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
       {notePreviews}
     </ReactGridLayout>
   );
-  /*
+  */
   return (
-    <ResponsiveGridLayout
+    <ReactGridLayout
       layouts={layouts}
       breakpoints={theme.breakpoints.values}
       cols={cols}
+      rowHeight={theme.spacing(1)}
       measureBeforeMount={false}
+      onBreakpointChange={setCurrentBreakpoint}
     >
-      {notePreviewCards}
-    </ResponsiveGridLayout>
+      {notePreviews}
+    </ReactGridLayout>
   );
-  */
 
   /*
     <Grid
