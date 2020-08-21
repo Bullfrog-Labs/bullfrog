@@ -11,6 +11,7 @@ import {
   CardActionArea,
   Box,
   useTheme,
+  Theme,
 } from "@material-ui/core";
 import { AuthContext, AuthState } from "../services/Auth";
 import { useHistory } from "react-router-dom";
@@ -45,8 +46,25 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function buildNotePreviewCard(note: NoteRecord) {
+function buildNotePreviewCard(note: NoteRecord, theme: Theme) {
   const notePreview = richTextStringPreview(note.body);
+
+  let noteHeight = 0;
+  if (!note.title && !notePreview) {
+    // empty card
+    noteHeight += theme.spacing(4);
+  } else {
+    if (!!note.title) {
+      noteHeight += Math.ceil(note.title.length / 35) * theme.spacing(4);
+    }
+    if (!!notePreview) {
+      noteHeight += Math.ceil(notePreview.length / 50) * theme.spacing(2.5);
+    }
+  }
+
+  // noteHeight = Math.min(noteHeight, 400);
+
+  return [<NotePreviewCard note={note} />, noteHeight];
 }
 
 function NotePreviewCard(props: { note: NoteRecord }) {
@@ -81,7 +99,7 @@ function NotePreviewCard(props: { note: NoteRecord }) {
     noteHeight += Math.floor(notePreview.length / 40) * theme.spacing(0.5);
   }
 
-  return [
+  return (
     <Card
       className={classes.card}
       variant="elevation"
@@ -110,16 +128,15 @@ function NotePreviewCard(props: { note: NoteRecord }) {
           )}
         </Box>
       </CardActionArea>
-    </Card>,
-    noteHeight,
-  ];
+    </Card>
+  );
 }
 
-const SizeAwareGridItem = sizeMe()(
-  (props: { key: string; children: React.ReactNode }) => (
-    <div key={props.key}>{props.children}</div>
-  )
-);
+const SizeAwareGridItem = sizeMe({
+  monitorHeight: true,
+})((props: { key: string; children: React.ReactNode }) => (
+  <div key={props.key}>{props.children}</div>
+));
 
 function NoteGrid(props: { notes: NoteRecord[] }) {
   // const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -140,6 +157,7 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
   const onSize = (key: string) => (size) => {
     noteSizes[key] = size;
     setNoteSizes(noteSizes);
+    console.log(`Got onSize for ${key} with height ${size.height}`);
   };
 
   const generateLayouts = (
@@ -149,11 +167,17 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
       // const key: string = !!note.id ? note.id : i;
       const key: string = String(i);
 
-      const [foo, noteHeight] = <NotePreviewCard note={note} />;
+      let [foo, noteHeight] = buildNotePreviewCard(note, theme);
+
+      if (key in noteSizes) {
+        console.log(`Found actual size for ${key}: ${noteSizes[key].height}`);
+        noteHeight = noteSizes[key].height;
+      }
 
       const notePreviewCard = (
         <div key={key}>
           <SizeAwareGridItem key={key} onSize={onSize(key)}>
+            {noteHeight}
             {foo}
           </SizeAwareGridItem>
         </div>
@@ -162,13 +186,24 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
       // TODO: Need to determine note height
       // Use constant note width
       const defaultWidth = 4;
+      // Math.ceil(noteHeight / theme.spacing(1)),
+      const hackyHacks =
+        Math.ceil((noteHeight - theme.spacing(1)) / (theme.spacing(1) + 10)) +
+        1;
       const layout = {
         i: key,
         x: (i * defaultWidth) % cols.xl,
         y: Infinity,
         w: defaultWidth,
-        h: 10,
+        h: hackyHacks,
+        // h: 1,
       };
+
+      console.log([
+        !!note.title ? note.title : "Empty note",
+        noteHeight,
+        Math.ceil(noteHeight / theme.spacing(1)),
+      ]);
 
       return [layout, notePreviewCard];
     });
