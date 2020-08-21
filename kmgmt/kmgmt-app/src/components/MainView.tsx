@@ -26,6 +26,8 @@ import { Breakpoint } from "@material-ui/core/styles/createBreakpoints";
 
 import GridLayout from "react-grid-layout";
 
+import sizeMe from "react-sizeme";
+
 // export const BREAK = ["bold", "italic", "underline", "code"] as const;
 
 const useStyles = makeStyles((theme) => ({
@@ -34,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
   },
   card: {
     flexGrow: 1,
+
     maxHeight: 400,
     borderRadius: theme.spacing(1),
   },
@@ -42,10 +45,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+function buildNotePreviewCard(note: NoteRecord) {
+  const notePreview = richTextStringPreview(note.body);
+}
+
 function NotePreviewCard(props: { note: NoteRecord }) {
   // eslint-disable-next-line
   const logger = log.getLogger("NotePreviewCard");
   const classes = useStyles();
+  const theme = useTheme();
 
   const { note } = props;
   const notePreview = richTextStringPreview(note.body);
@@ -63,14 +71,24 @@ function NotePreviewCard(props: { note: NoteRecord }) {
     // history.push(noteLink);
   };
 
-  return (
+  let padding = 2;
+
+  let noteHeight = theme.spacing(4) + theme.spacing(padding * 2); // min height, including padding
+  if (!!note.title) {
+    noteHeight += Math.floor(note.title.length / 24) * theme.spacing(1);
+  }
+  if (!!notePreview) {
+    noteHeight += Math.floor(notePreview.length / 40) * theme.spacing(0.5);
+  }
+
+  return [
     <Card
       className={classes.card}
       variant="elevation"
       onClick={navigateToNoteOnClick}
     >
       <CardActionArea className={classes.card}>
-        <Box p={2}>
+        <Box p={padding}>
           {!!note.title && (
             <Typography variant="h6" component="h2">
               {note.title}
@@ -92,9 +110,16 @@ function NotePreviewCard(props: { note: NoteRecord }) {
           )}
         </Box>
       </CardActionArea>
-    </Card>
-  );
+    </Card>,
+    noteHeight,
+  ];
 }
+
+const SizeAwareGridItem = sizeMe()(
+  (props: { key: string; children: React.ReactNode }) => (
+    <div key={props.key}>{props.children}</div>
+  )
+);
 
 function NoteGrid(props: { notes: NoteRecord[] }) {
   // const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -103,12 +128,19 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
   const classes = useStyles();
   const theme = useTheme();
 
+  const [noteSizes, setNoteSizes] = useState({});
+
   type ResponsiveLayout = {
     [key in Breakpoint]: Layout[];
   };
 
   // generate layouts
   const cols = { xl: 20, lg: 16, md: 12, sm: 4, xs: 4 };
+
+  const onSize = (key: string) => (size) => {
+    noteSizes[key] = size;
+    setNoteSizes(noteSizes);
+  };
 
   const generateLayouts = (
     notes: NoteRecord[]
@@ -117,12 +149,15 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
       // const key: string = !!note.id ? note.id : i;
       const key: string = String(i);
 
+      const [foo, noteHeight] = <NotePreviewCard note={note} />;
+
       const notePreviewCard = (
         <div key={key}>
-          <NotePreviewCard key={key} note={note} />
+          <SizeAwareGridItem key={key} onSize={onSize(key)}>
+            {foo}
+          </SizeAwareGridItem>
         </div>
       );
-
       // layout below is compute with respect to xl (largest) breakpoint
       // TODO: Need to determine note height
       // Use constant note width

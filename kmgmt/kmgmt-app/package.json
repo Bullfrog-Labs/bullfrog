@@ -30,6 +30,7 @@
     "react-idle-timer": "^4.3.6",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
+    "react-sizeme": "^2.6.12",
     "slate": "^0.58.4",
     "slate-history": "^0.58.4",
     "slate-react": "^0.58.4",
