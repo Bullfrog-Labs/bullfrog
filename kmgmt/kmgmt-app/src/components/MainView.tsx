@@ -155,8 +155,9 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
   const cols = { xl: 20, lg: 16, md: 12, sm: 4, xs: 4 };
 
   const onSize = (key: string) => (size) => {
-    noteSizes[key] = size;
-    setNoteSizes(noteSizes);
+    let newNoteSizes = { ...noteSizes };
+    newNoteSizes[key] = size;
+    setNoteSizes(newNoteSizes);
     console.log(`Got onSize for ${key} with height ${size.height}`);
   };
 
@@ -167,18 +168,10 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
       // const key: string = !!note.id ? note.id : i;
       const key: string = String(i);
 
-      let [foo, noteHeight] = buildNotePreviewCard(note, theme);
-
-      if (key in noteSizes) {
-        console.log(`Found actual size for ${key}: ${noteSizes[key].height}`);
-        noteHeight = noteSizes[key].height;
-      }
-
       const notePreviewCard = (
         <div key={key}>
           <SizeAwareGridItem key={key} onSize={onSize(key)}>
-            {noteHeight}
-            {foo}
+            <NotePreviewCard note={note} />
           </SizeAwareGridItem>
         </div>
       );
@@ -187,16 +180,24 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
       // Use constant note width
       const defaultWidth = 4;
       // Math.ceil(noteHeight / theme.spacing(1)),
+      /*
       const hackyHacks =
         Math.ceil((noteHeight - theme.spacing(1)) / (theme.spacing(1) + 10)) +
         1;
+        */
+
+      const noteHeight = !!noteSizes[key] ? noteSizes[key].height : undefined;
+
+      const hackyHacks = (x: number) =>
+        Math.ceil((x - theme.spacing(1)) / (theme.spacing(1) + 10)) + 1;
+
       const layout = {
         i: key,
         x: (i * defaultWidth) % cols.xl,
         y: Infinity,
         w: defaultWidth,
-        h: hackyHacks,
-        // h: 1,
+        // h: hackyHacks,
+        h: !!noteHeight ? hackyHacks(noteHeight) : 1,
       };
 
       console.log([
@@ -216,6 +217,7 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
   const [layouts, notePreviewCards] = generateLayouts(props.notes);
 
   // generate grid
+  console.log(`Render() for notegrid: ${Object.keys(noteSizes).length}`);
 
   return (
     <GridLayout
