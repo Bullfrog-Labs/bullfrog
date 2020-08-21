@@ -37,7 +37,6 @@ const useStyles = makeStyles((theme) => ({
   },
   card: {
     flexGrow: 1,
-
     maxHeight: 400,
     borderRadius: theme.spacing(1),
   },
@@ -50,7 +49,6 @@ function NotePreviewCard(props: { note: NoteRecord; height?: number }) {
   // eslint-disable-next-line
   const logger = log.getLogger("NotePreviewCard");
   const classes = useStyles();
-  const theme = useTheme();
 
   const { note } = props;
   const notePreview = richTextStringPreview(note.body);
@@ -65,20 +63,16 @@ function NotePreviewCard(props: { note: NoteRecord; height?: number }) {
 
   const history = useHistory();
   let navigateToNoteOnClick = () => {
-    // history.push(noteLink);
+    history.push(noteLink);
   };
 
   let padding = 2;
-
-  const style = !!props.height ? { height: props.height } : {};
 
   return (
     <Card
       className={classes.card}
       variant="elevation"
-      // variant="outlined"
       onClick={navigateToNoteOnClick}
-      // style={style}
     >
       <CardActionArea className={classes.card}>
         <Box p={padding}>
@@ -181,20 +175,16 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
   const layouts = { xl: layoutsAndNotePreviews.map((x) => x[0]) };
   const notePreviews = layoutsAndNotePreviews.map((x) => x[1]);
 
-  // See
-  // https://github.com/STRML/react-grid-layout/issues/720#issuecomment-614808306
-  // for why the relative-positioned div is needed below.
   return (
-    <div style={{ position: "relative" }}>
-      <ReactGridLayout
-        layout={layouts.xl}
-        cols={4}
-        width={1440}
-        rowHeight={theme.spacing(1)}
-      >
-        {notePreviews}
-      </ReactGridLayout>
-    </div>
+    <ReactGridLayout
+      isDraggable={false}
+      layout={layouts.xl}
+      cols={4}
+      width={1440}
+      rowHeight={theme.spacing(1)}
+    >
+      {notePreviews}
+    </ReactGridLayout>
   );
   /*
   return (
