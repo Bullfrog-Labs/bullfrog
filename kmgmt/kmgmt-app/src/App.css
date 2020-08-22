@@ -37,12 +37,12 @@
   }
 }
 
-/* 
+/*
  * Related to react-grid-layout, taken from
  * https://github.com/STRML/react-grid-layout/blob/master/css/styles.css. We do
  * not support drag/drop or resizing yet (if ever), but this is being recorded
  * here so that we do not get tripped in the future by weird behavior when/if we
- * do try to use those features. 
+ * do try to use those features.
  */
 .react-grid-layout {
   position: relative;
