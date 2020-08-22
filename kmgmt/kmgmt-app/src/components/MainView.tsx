@@ -132,6 +132,7 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
   const heightToGridRows = (x: number) =>
     Math.ceil((x - theme.spacing(1)) / (theme.spacing(1) + 10)) + 1;
 
+  // Generating note previews and layouts
   const keyFromNote = (idx: number, note: NoteRecord): string =>
     !!note.id ? note.id : String(idx);
 
