@@ -1,6 +1,6 @@
 import * as log from "loglevel";
 import React from "react";
-import { render, waitForElement } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import MainView from "./MainView";
 import { Logging, Database, NoteRecord, UserRecord } from "kmgmt-common";
 import { AuthProvider, AuthContext } from "../services/Auth";
@@ -41,7 +41,7 @@ test("renders single note", async () => {
    * happens almost instantaneously because the DB is mocked, we need to wait
    * to get to the next render loop.
    */
-  const el = await waitForElement(() => {
+  const el = await waitFor(() => {
     return getByText(/Example note text/i);
   });
 
