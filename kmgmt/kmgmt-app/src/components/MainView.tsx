@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function NotePreviewCard(props: { note: NoteRecord; height?: number }) {
+function NotePreviewCard(props: { note: NoteRecord }) {
   // eslint-disable-next-line
   const logger = log.getLogger("NotePreviewCard");
   const classes = useStyles();
@@ -94,29 +94,33 @@ function NotePreviewCard(props: { note: NoteRecord; height?: number }) {
   );
 }
 
-const SizeAwareGridItem = sizeMe({
+const SizeAwareElement = sizeMe({
   monitorHeight: true,
-})((props: { key: string; children: React.ReactNode }) => (
-  <div key={props.key}>{props.children}</div>
-));
+})((props: { children: React.ReactNode }) => <div>{props.children}</div>);
+
+type ResponsiveLayout = {
+  [key: string]: Layout[];
+};
 
 function NoteGrid(props: { notes: NoteRecord[] }) {
-  // const ResponsiveGridLayout = WidthProvider(Responsive);
   // eslint-disable-next-line
   const logger = log.getLogger("NoteGrid");
   const theme = useTheme();
 
+  // Breakpoint tracking and grid columns per breakpoint
+  const [currentBreakpoint, setCurrentBreakpoint] = useState<Breakpoint>("xl");
+  const cols: { [key in Breakpoint]: number } = {
+    xl: 5,
+    lg: 4,
+    md: 3,
+    sm: 1,
+    xs: 1,
+  };
+
+  // Note size tracking: state and callback
   const [noteSizes, setNoteSizes] = useState<{
     [key: string]: SizeMeProps["size"];
   }>({});
-
-  const [currentBreakpoint, setCurrentBreakpoint] = useState<Breakpoint>("xl");
-
-  type ResponsiveLayout = {
-    [key in Breakpoint]: Layout[];
-  };
-
-  const cols = { xl: 5, lg: 4, md: 3, sm: 1, xs: 1 };
 
   const onSize = (key: string) => (size: SizeMeProps["size"]) => {
     let newNoteSizes = { ...noteSizes };
@@ -124,87 +128,69 @@ function NoteGrid(props: { notes: NoteRecord[] }) {
     setNoteSizes(newNoteSizes);
   };
 
+  // Determining grid rows from element height
   const heightToGridRows = (x: number) =>
     Math.ceil((x - theme.spacing(1)) / (theme.spacing(1) + 10)) + 1;
 
-  const generateLayoutAndNotePreviews = (idx: number, note: NoteRecord) => {
-    const key: string = !!note.id ? note.id : String(idx);
-    const noteHeight = !!noteSizes[key]
-      ? noteSizes[key].height ?? undefined
-      : undefined;
+  const keyFromNote = (idx: number, note: NoteRecord): string =>
+    !!note.id ? note.id : String(idx);
 
-    const notePreviewCard = (
+  const notePreviews = Array.from(props.notes.entries(), ([idx, note]) => {
+    const key = keyFromNote(idx, note);
+    return (
       <div key={key}>
-        <SizeAwareGridItem key={key} onSize={onSize(key)}>
-          <NotePreviewCard note={note} height={noteHeight} />
-        </SizeAwareGridItem>
+        <SizeAwareElement onSize={onSize(key)}>
+          <NotePreviewCard note={note} />
+        </SizeAwareElement>
       </div>
     );
+  });
 
-    // Use constant note width
-    const defaultWidth = 1;
+  const layouts = {
+    [currentBreakpoint]: Array.from(props.notes.entries(), ([idx, note]) => {
+      const key = keyFromNote(idx, note);
+      // Use constant note width
+      const defaultWidth = 1;
+      const noteHeight = !!noteSizes[key]
+        ? noteSizes[key].height ?? undefined
+        : undefined;
 
-    const layout: Layout = {
-      i: key,
-      x: (idx * defaultWidth) % cols[currentBreakpoint],
-      y: Infinity,
-      w: defaultWidth,
-      h: !!noteHeight ? heightToGridRows(noteHeight) : 1,
-    };
+      const layout: Layout = {
+        i: key,
+        x: (idx * defaultWidth) % cols[currentBreakpoint],
+        y: Infinity,
+        w: defaultWidth,
+        h: !!noteHeight ? heightToGridRows(noteHeight) : 1,
+      };
 
-    return [layout, notePreviewCard];
+      return layout;
+    }),
   };
 
-  const layoutsAndNotePreviews = Array.from(
-    props.notes.entries(),
-    ([i, note]) => {
-      return generateLayoutAndNotePreviews(i, note);
+  const validBreakpoints: Set<string> = new Set(theme.breakpoints.keys);
+
+  const onBreakpointChange = (newBreakpoint: string, newCols: number) => {
+    if (validBreakpoints.has(newBreakpoint)) {
+      setCurrentBreakpoint(newBreakpoint as Breakpoint);
+    } else {
+      throw Error(`invalid breakpoint ${newBreakpoint}`);
     }
-  );
-
-  const layouts: ResponsiveLayout = {
-    [currentBreakpoint]: layoutsAndNotePreviews.map((x) => x[0]),
   };
-  const notePreviews = layoutsAndNotePreviews.map((x) => x[1]);
 
-  /*
   return (
     <ReactGridLayout
       isDraggable={false}
-      layout={layouts.xl}
-      cols={4}
-      width={1440}
-      rowHeight={theme.spacing(1)}
-    >
-      {notePreviews}
-    </ReactGridLayout>
-  );
-  */
-  return (
-    <ReactGridLayout
+      isResizable={false}
       layouts={layouts}
       breakpoints={theme.breakpoints.values}
       cols={cols}
       rowHeight={theme.spacing(1)}
       measureBeforeMount={false}
-      onBreakpointChange={setCurrentBreakpoint}
+      onBreakpointChange={onBreakpointChange}
     >
       {notePreviews}
     </ReactGridLayout>
   );
-
-  /*
-    <Grid
-      container
-      direction="row"
-      justify="flex-start"
-      alignItems="flex-start"
-      className={classes.noteGrid}
-      spacing={2}
-    >
-      {notePreviewCards}
-    </Grid>
-    */
 }
 
 function EmptyNoteGridPlaceholder() {
