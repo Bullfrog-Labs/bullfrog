@@ -7,7 +7,7 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.3.2",
+    "@testing-library/react": "^10.4.9",
     "@testing-library/user-event": "^7.1.2",
     "@types/jest": "^24.0.0",
     "@types/lodash": "^4.14.159",
@@ -20,20 +20,22 @@
     "firebase": "7.9.0",
     "firebase-admin": "^9.0.0",
     "firebaseui": "^4.6.1",
+    "kmgmt-common": "^0.1.0",
     "lodash": "^4.17.19",
     "loglevel": "^1.6.8",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-firebaseui": "^4.1.0",
+    "react-grid-layout": "^1.0.0",
     "react-idle-timer": "^4.3.6",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
+    "react-sizeme": "^2.6.12",
     "slate": "^0.58.4",
     "slate-history": "^0.58.4",
     "slate-react": "^0.58.4",
     "ts-node": "^8.10.2",
-    "typescript": "~3.7.2",
-    "kmgmt-common": "^0.1.0"
+    "typescript": "~3.7.2"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -59,6 +61,7 @@
   },
   "jest": {},
   "devDependencies": {
+    "@types/react-grid-layout": "^0.17.2",
     "jest-environment-jsdom-sixteen": "^1.0.3"
   }
 }
