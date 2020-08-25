@@ -1,5 +1,5 @@
 import React from "react";
-import { render, waitForElement } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import Router from "./Router";
 import { AuthProvider, AuthContext } from "../services/Auth";
 import { NoteRecord, UserRecord } from "kmgmt-common";
@@ -29,7 +29,7 @@ test("renders AppContainer", async () => {
       <Router database={database} authProvider={authProvider} />
     </AuthContext.Provider>
   );
-  const el = await waitForElement(() => {
+  const el = await waitFor(() => {
     return getByText(/Example note text/i);
   });
   expect(el).toBeInTheDocument();

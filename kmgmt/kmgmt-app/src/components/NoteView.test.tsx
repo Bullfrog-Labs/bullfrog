@@ -2,7 +2,7 @@ import React from "react";
 import { Database, NoteRecord, UserRecord, NoteId } from "../services/Database";
 import { richTextParagraph } from "./richtext/Utils";
 import { NoteView, CreateNewNoteView } from "./NoteView";
-import { render, waitForElement } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { createMemoryHistory } from "history";
 import { Router } from "react-router-dom";
 import { AuthProvider, AuthContext } from "../services/Auth";
@@ -68,7 +68,7 @@ test("Renders NoteView", async () => {
     </AuthContext.Provider>
   );
 
-  const el = await waitForElement(() => {
+  const el = await waitFor(() => {
     return getByText(/Example note text/i);
   });
 
