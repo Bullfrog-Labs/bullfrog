@@ -1,7 +1,6 @@
 // Taken from Slate type definitions
 export interface Text {
   text: string;
-  [key: string]: unknown;
 }
 
 export interface Element {

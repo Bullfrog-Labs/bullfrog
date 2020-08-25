@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "kmgmt-native-app",
-    "slug": "kmgmt-native-app",
+    "slug": "kmgmt",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,7 +15,13 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
+      "bundleIdentifier": "xyz.blfrg.kmgmt",
+      "buildNumber": "1.0.0",
       "supportsTablet": true
+    },
+    "android": {
+      "package": "xyz.blfrg.kmgmt",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"

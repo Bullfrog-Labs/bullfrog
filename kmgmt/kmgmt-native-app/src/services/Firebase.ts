@@ -15,7 +15,6 @@ function init(): firebase.app.App {
       messagingSenderId: Constants.manifest.extra.messagingSenderId,
       appId: Constants.manifest.extra.appId,
     };
-    console.log(`Firebase config: ${JSON.stringify(config)}`);
     app = firebase.initializeApp(config);
   }
   return app;
