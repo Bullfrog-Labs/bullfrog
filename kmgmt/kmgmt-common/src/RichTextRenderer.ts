@@ -1,4 +1,4 @@
-import { RichText, Element, Node, Text } from "./Database";
+import { RichText, Element, Text } from "./Database";
 
 export default class RichTextRenderer {
   /**

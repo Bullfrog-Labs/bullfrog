@@ -5,7 +5,7 @@ export interface Text {
 
 export interface Element {
   children: Node[];
-  type: string;
+  [key: string]: unknown;
 }
 
 export declare type Node = Element | Text;
