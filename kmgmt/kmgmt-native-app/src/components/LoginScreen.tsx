@@ -34,7 +34,7 @@ async function login(): Promise<Google.LogInResult> {
     logger.debug(`result=${JSON.stringify(result.type)}`);
     return result;
   } catch (e) {
-    logger.debug(`error=${JSON.stringify(e)}`);
+    logger.error(`error=${JSON.stringify(e)}`);
     return { type: "cancel" };
   }
 }
@@ -48,8 +48,8 @@ export default function LoginScreen(props: {
   React.useEffect(() => {
     if (result?.type === "success") {
       const idToken = result.idToken;
-      logger.debug(`got ${idToken}`);
       const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+      logger.info("signing in with firebase");
       firebase.auth().signInWithCredential(credential);
     }
   }, [result, logger]);
@@ -60,7 +60,12 @@ export default function LoginScreen(props: {
         onPress={async () => {
           const loginResult = await login();
           setResult(loginResult);
-          props.navigation.navigate("AddNote");
+          if (loginResult?.type === "success") {
+            logger.info("log in succeeded");
+            props.navigation.navigate("AddNote");
+          } else {
+            logger.info("log in failed");
+          }
         }}
       >
         Login
