@@ -1,9 +1,9 @@
 import * as React from "react";
+import * as Google from "expo-google-app-auth";
+import * as log from "loglevel";
 import firebase from "firebase";
 import { StyleSheet, View, StatusBar } from "react-native";
-import * as Google from "expo-google-app-auth";
 import { LoginScreenNavigationProp } from "../services/Navigation";
-import * as log from "loglevel";
 import { Button } from "react-native-paper";
 
 const styles = StyleSheet.create({
