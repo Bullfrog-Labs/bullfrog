@@ -34,7 +34,7 @@ async function login(): Promise<Google.LogInResult> {
     logger.debug(`result=${JSON.stringify(result.type)}`);
     return result;
   } catch (e) {
-    logger.error(`error=${JSON.stringify(e)}`);
+    logger.error(`Failed to log-in, error=${JSON.stringify(e)}`);
     return { type: "cancel" };
   }
 }
@@ -61,10 +61,10 @@ export default function LoginScreen(props: {
           const loginResult = await login();
           setResult(loginResult);
           if (loginResult?.type === "success") {
-            logger.info("log in succeeded");
+            logger.info("login succeeded");
             props.navigation.navigate("AddNote");
           } else {
-            logger.info("log in failed");
+            logger.warn(`login failed ${JSON.stringify(loginResult)}`);
           }
         }}
       >
