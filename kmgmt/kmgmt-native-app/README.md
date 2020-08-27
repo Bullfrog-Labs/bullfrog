@@ -39,3 +39,27 @@ Changes will be reflected in your app as you make em.
 ## Expo client window stuck at 100% downloading or building js bundle
 
 Try restarting the expo client
+
+# Guides
+
+## Building and deploying standalone native apps
+
+### IOS
+
+1.  Increment the build number for the build in `app.json`. Ex. increment the build number below to 1.0.4.
+
+        ...
+
+        "buildNumber": "1.0.3",
+
+        ...
+
+2.  Run the following command. Note you will be asked to provide two credentials: a) Your apple developer account credentials, and b) an app-specific password for the upload script. The script should explain where to find these.
+
+        tools/build-and-upload-ios.sh
+
+### Android
+
+Run the following:
+
+    tools/build-and-upload-android.sh
