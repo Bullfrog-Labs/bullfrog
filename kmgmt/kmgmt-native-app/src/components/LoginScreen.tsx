@@ -1,9 +1,9 @@
 import * as React from "react";
+import * as Google from "expo-google-app-auth";
+import * as log from "loglevel";
 import firebase from "firebase";
 import { StyleSheet, View, StatusBar } from "react-native";
-import * as Google from "expo-google-app-auth";
 import { LoginScreenNavigationProp } from "../services/Navigation";
-import * as log from "loglevel";
 import { Button } from "react-native-paper";
 
 const styles = StyleSheet.create({
@@ -24,8 +24,12 @@ async function login(): Promise<Google.LogInResult> {
   const logger = log.getLogger("LoginScreen");
   const config = {
     iosClientId:
+      "259671952872-i8n885vofvgmaoiktfdpkvsgu8r66eb9.apps.googleusercontent.com",
+    iosStandaloneAppClientId:
       "259671952872-lpsqbf7kkufjp2nq6psogcpda5gqk5j4.apps.googleusercontent.com",
     androidClientId:
+      "259671952872-vd3csjtlh6r9btii2k0takg0vfi82j1u.apps.googleusercontent.com",
+    androidStandaloneAppClientId:
       "259671952872-8fjmi27dhntrl6ohqqcun26j4ni1ha6f.apps.googleusercontent.com",
     scopes: ["profile", "email"],
   };
@@ -34,7 +38,7 @@ async function login(): Promise<Google.LogInResult> {
     logger.debug(`result=${JSON.stringify(result.type)}`);
     return result;
   } catch (e) {
-    logger.debug(`error=${JSON.stringify(e)}`);
+    logger.error(`Failed to log-in, error=${JSON.stringify(e)}`);
     return { type: "cancel" };
   }
 }
@@ -48,8 +52,8 @@ export default function LoginScreen(props: {
   React.useEffect(() => {
     if (result?.type === "success") {
       const idToken = result.idToken;
-      logger.debug(`got ${idToken}`);
       const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+      logger.info("signing in with firebase");
       firebase.auth().signInWithCredential(credential);
     }
   }, [result, logger]);
@@ -60,7 +64,12 @@ export default function LoginScreen(props: {
         onPress={async () => {
           const loginResult = await login();
           setResult(loginResult);
-          props.navigation.navigate("AddNote");
+          if (loginResult?.type === "success") {
+            logger.info("login succeeded");
+            props.navigation.navigate("AddNote");
+          } else {
+            logger.warn(`login failed ${JSON.stringify(loginResult)}`);
+          }
         }}
       >
         Login

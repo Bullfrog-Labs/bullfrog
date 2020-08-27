@@ -23,7 +23,9 @@ const database = FirestoreDatabase.fromApp(app);
 export function App() {
   const logger = log.getLogger("App");
   logger.debug("Loading App");
-  const [userAuth, setUserAuth] = useState(firebase.auth().currentUser);
+  const [userAuth, setUserAuth] = useState(
+    firebase.auth().currentUser || undefined
+  );
 
   function AddNoteScreenAdapter() {
     return <AddNoteScreen database={database} userAuth={userAuth} />;
@@ -58,8 +60,10 @@ export function App() {
     );
   }
 
-  app.auth().onAuthStateChanged((auth) => {
-    setUserAuth(auth);
+  app.auth().onAuthStateChanged(async (auth) => {
+    logger.debug("Auth state changed");
+    await app.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
+    setUserAuth(auth || undefined);
   });
 
   return (
