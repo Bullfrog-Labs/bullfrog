@@ -24,8 +24,12 @@ async function login(): Promise<Google.LogInResult> {
   const logger = log.getLogger("LoginScreen");
   const config = {
     iosClientId:
+      "259671952872-i8n885vofvgmaoiktfdpkvsgu8r66eb9.apps.googleusercontent.com",
+    iosStandaloneAppClientId:
       "259671952872-lpsqbf7kkufjp2nq6psogcpda5gqk5j4.apps.googleusercontent.com",
     androidClientId:
+      "259671952872-vd3csjtlh6r9btii2k0takg0vfi82j1u.apps.googleusercontent.com",
+    androidStandaloneAppClientId:
       "259671952872-8fjmi27dhntrl6ohqqcun26j4ni1ha6f.apps.googleusercontent.com",
     scopes: ["profile", "email"],
   };
