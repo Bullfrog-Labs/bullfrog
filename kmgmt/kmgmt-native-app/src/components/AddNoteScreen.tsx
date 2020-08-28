@@ -1,6 +1,5 @@
 import "react-native-gesture-handler";
 import * as React from "react";
-import firebase from "firebase";
 import {
   NoteRecord,
   RichTextRenderer,

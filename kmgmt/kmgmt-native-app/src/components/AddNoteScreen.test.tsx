@@ -1,7 +1,6 @@
 import * as log from "loglevel";
 import "react-native-gesture-handler";
 import React from "react";
-import * as firebase from "firebase";
 import { render, waitFor, fireEvent } from "@testing-library/react-native";
 import {
   Logging,
