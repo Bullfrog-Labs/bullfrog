@@ -3,9 +3,9 @@ import * as React from "react";
 import firebase from "firebase";
 import {
   NoteRecord,
-  RichTextBuilder,
   RichTextRenderer,
   Database,
+  Documents,
 } from "kmgmt-common";
 import { StyleSheet, View, StatusBar, FlatList } from "react-native";
 import { Text, TextInput, Surface, Button } from "react-native-paper";
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
 
 export default function AddNoteScreen(props: {
   database: Database;
-  userAuth?: firebase.User;
+  userAuth?: { email: string | null };
 }) {
   const { database, userAuth } = props;
   const logger = log.getLogger("AddNoteScreen");
@@ -63,11 +63,10 @@ export default function AddNoteScreen(props: {
   function handleButtonPress() {
     logger.debug(`button press ${note}`);
     const addedNote = note;
-    const builder = new RichTextBuilder();
-    const body = builder.addParagraph(addedNote).build();
-    logger.debug(`adding note ${JSON.stringify(body)}`);
+    const doc = Documents.paragraph(addedNote);
+    logger.debug(`adding note ${JSON.stringify(doc)}`);
     const noteRecord: NoteRecord = {
-      body: body,
+      body: doc.children,
     };
     async function addNote() {
       if (!email) {

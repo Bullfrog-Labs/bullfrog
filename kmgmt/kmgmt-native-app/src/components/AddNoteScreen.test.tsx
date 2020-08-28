@@ -1,32 +1,41 @@
 import * as log from "loglevel";
 import "react-native-gesture-handler";
 import React from "react";
+import * as firebase from "firebase";
 import { render, waitFor, fireEvent } from "@testing-library/react-native";
-import { Logging, NoteRecord, UserRecord, RichTextBuilder } from "kmgmt-common";
+import {
+  Logging,
+  NoteRecord,
+  UserRecord,
+  Documents,
+  NoteID,
+  Database,
+} from "kmgmt-common";
 import AddNoteScreen from "./AddNoteScreen";
 
 Logging.configure(log);
 const logger = log.getLogger("AddNoteScreen.test");
 
 function getMockDB() {
-  const body = new RichTextBuilder().addParagraph("Example note text").build();
-  return {
-    getNotes: jest.fn(async () => [{ id: "example-1", body: body }]),
+  const doc = Documents.paragraph("Example note text");
+  const db: Database = {
+    getNotes: jest.fn(async () => [{ id: "example-1", body: doc.children }]),
     getNote: jest.fn(async (id: string) => ({
       id: id,
-      body: body,
+      body: doc.children,
     })),
     addNote: jest.fn(
-      async (userName: string, noteRecord: NoteRecord) => "example-1"
+      async (_userName: string, _noteRecord: NoteRecord) => "example-1"
     ),
-    getUser: jest.fn(async (userName: string) => ({
+    getUser: jest.fn(async (_userName: string) => ({
       userName: "foo",
     })),
-    addUser: jest.fn(async (userRecord: UserRecord) => {}),
+    addUser: jest.fn(async (_userRecord: UserRecord) => {}),
     updateNote: jest.fn(
-      async (userName: string, noteId: NoteId, noteRecord: NoteRecord) => {}
+      async (_userName: string, _noteID: NoteID, _noteRecord: NoteRecord) => {}
     ),
   };
+  return db;
 }
 
 test("test with valid user", async () => {
