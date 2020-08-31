@@ -25,8 +25,10 @@ export interface Document extends Element {
   children: Element[];
 }
 
+export type BlockElement = Paragraph;
+
 export class Nodes {
-  static document(elements: Element[] | Element): Document {
+  static document(elements: BlockElement[] | BlockElement): Document {
     let els = Array.isArray(elements) ? elements : [elements];
     return {
       type: ElementType.Document,
