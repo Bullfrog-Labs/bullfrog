@@ -1,5 +1,4 @@
 import { Text as SlateText, Element as SlateElement } from "slate";
-import { Block } from "typescript";
 
 export interface TypedNode {
   type: ElementType;
