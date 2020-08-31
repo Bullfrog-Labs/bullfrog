@@ -1,19 +1,25 @@
 import { Text as SlateText, Element as SlateElement } from "slate";
+import { Block } from "typescript";
 
-export interface Text extends SlateText {
-  bold?: boolean;
-  underline?: boolean;
-  italic?: boolean;
+export interface TypedNode {
+  type: ElementType;
 }
 
+// todo: -> NodeType
 export enum ElementType {
   Paragraph = "paragraph",
   Document = "document",
+  Text = "text",
 }
 
-export interface Element extends SlateElement {
-  type: ElementType;
+export interface Text extends SlateText, TypedNode {
+  bold?: boolean;
+  underline?: boolean;
+  italic?: boolean;
+  type: ElementType.Text;
 }
+
+export interface Element extends SlateElement, TypedNode {}
 
 export interface Paragraph extends Element {
   type: ElementType.Paragraph;
@@ -22,10 +28,11 @@ export interface Paragraph extends Element {
 
 export interface Document extends Element {
   type: ElementType.Document;
-  children: Element[];
+  children: BlockElement[];
 }
 
 export type BlockElement = Paragraph;
+export type RenderElement = BlockElement | Document | Text;
 
 export class Nodes {
   static document(elements: BlockElement[] | BlockElement): Document {
@@ -44,6 +51,7 @@ export class Nodes {
   static text(text: string): Text {
     return {
       text: text,
+      type: ElementType.Text,
     };
   }
 }

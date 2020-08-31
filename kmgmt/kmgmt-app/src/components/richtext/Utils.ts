@@ -1,13 +1,6 @@
 import { RichText } from "./Types";
 import { Node as SlateNode } from "slate";
 
-export const EMPTY_RICH_TEXT: RichText = [
-  {
-    type: "paragraph",
-    children: [{ text: "" }],
-  },
-];
-
 // TODO: This should probably be converted to a TSX function, so that the
 // preview is a React component. Code from Rendering.tsx can probably be used to
 // generate the preview.
