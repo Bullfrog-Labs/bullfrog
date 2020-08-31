@@ -11,7 +11,7 @@ import { withResetBlockOnInsertBreak } from "./EditorBehaviors";
 import DocumentTitle from "./DocumentTitle";
 import RichTextEditorToolbar from "./RichTextEditorToolbar";
 import { RichText } from "./Types";
-import { EMPTY_RICH_TEXT } from "./Utils";
+import { Documents } from "kmgmt-common";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -29,7 +29,7 @@ export type RichTextState = {
 
 export const EMPTY_RICH_TEXT_STATE = {
   title: "",
-  body: EMPTY_RICH_TEXT,
+  body: Documents.emptyParagraph().children,
 };
 
 export type RichTextEditorProps = {

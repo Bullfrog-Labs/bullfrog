@@ -1,6 +1,11 @@
 import React from "react";
-import { Database, NoteRecord, UserRecord, NoteId } from "../services/Database";
-import { richTextParagraph } from "./richtext/Utils";
+import {
+  Database,
+  NoteRecord,
+  UserRecord,
+  NoteID,
+  Documents,
+} from "kmgmt-common";
 import { NoteView, CreateNewNoteView } from "./NoteView";
 import { render, waitFor } from "@testing-library/react";
 import { createMemoryHistory } from "history";
@@ -13,11 +18,14 @@ let mockAuthProvider: AuthProvider;
 beforeEach(() => {
   mockDatabase = {
     getNotes: jest.fn(async () => [
-      { id: "example-1", body: richTextParagraph("Example note text") },
+      {
+        id: "example-1",
+        body: Documents.paragraph("Example note text").children,
+      },
     ]),
     getNote: jest.fn(async (id: string) => ({
       id: id,
-      body: richTextParagraph("Example note text"),
+      body: Documents.paragraph("Example note text").children,
     })),
     addNote: jest.fn(
       async (userName: string, noteRecord: NoteRecord) => "example-1"
@@ -27,7 +35,7 @@ beforeEach(() => {
     })),
     addUser: jest.fn(async (userRecord: UserRecord) => {}),
     updateNote: jest.fn(
-      async (userName: string, noteId: NoteId, noteRecord: NoteRecord) => {}
+      async (userName: string, noteId: NoteID, noteRecord: NoteRecord) => {}
     ),
   };
 

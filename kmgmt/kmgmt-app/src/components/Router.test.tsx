@@ -2,13 +2,15 @@ import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import Router from "./Router";
 import { AuthProvider, AuthContext } from "../services/Auth";
-import { NoteRecord, UserRecord } from "kmgmt-common";
-import { richTextParagraph } from "./richtext/Utils";
+import { NoteRecord, UserRecord, Documents } from "kmgmt-common";
 
 test("renders AppContainer", async () => {
   const database = {
     getNotes: jest.fn(async () => [
-      { id: "example-1", body: richTextParagraph("Example note text") },
+      {
+        id: "example-1",
+        body: Documents.paragraph("Example note text").children,
+      },
     ]),
     getUser: jest.fn(async (userName: string) => {
       return { userName: "foo" };

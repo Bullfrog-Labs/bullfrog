@@ -8,15 +8,6 @@ export const EMPTY_RICH_TEXT: RichText = [
   },
 ];
 
-export const richTextParagraph = (content: string): RichText => {
-  return [
-    {
-      type: "paragraph",
-      children: [{ text: content }],
-    },
-  ];
-};
-
 // TODO: This should probably be converted to a TSX function, so that the
 // preview is a React component. Code from Rendering.tsx can probably be used to
 // generate the preview.

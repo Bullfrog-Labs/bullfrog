@@ -2,16 +2,24 @@ import * as log from "loglevel";
 import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import MainView from "./MainView";
-import { Logging, Database, NoteRecord, UserRecord } from "kmgmt-common";
+import {
+  Logging,
+  Database,
+  NoteRecord,
+  UserRecord,
+  Documents,
+} from "kmgmt-common";
 import { AuthProvider, AuthContext } from "../services/Auth";
-import { richTextParagraph } from "./richtext/Utils";
 
 Logging.configure(log);
 
 test("renders single note", async () => {
   const database: Database = {
     getNotes: jest.fn(async () => [
-      { id: "example-1", body: richTextParagraph("Example note text") },
+      {
+        id: "example-1",
+        body: Documents.paragraph("Example note text").children,
+      },
     ]),
     addNote: jest.fn(async (userName: string, noteRecord: NoteRecord) => {}),
     getUser: jest.fn(async (userName: string) => {

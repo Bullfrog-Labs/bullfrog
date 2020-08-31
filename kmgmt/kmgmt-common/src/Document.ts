@@ -53,6 +53,9 @@ export class Documents {
     const document = Nodes.document(paragraph);
     return document;
   }
+  static emptyParagraph(): Document {
+    return Documents.paragraph("");
+  }
   static appendParagraph(document: Document, paragraph: string): Document {
     const text = Nodes.text(paragraph);
     const para = Nodes.paragraph(text);
