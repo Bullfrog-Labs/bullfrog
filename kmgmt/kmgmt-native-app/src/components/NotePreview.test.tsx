@@ -7,7 +7,7 @@ import { render } from "@testing-library/react-native";
 Logging.configure(log);
 const logger = log.getLogger("NotePreview.test");
 
-test.only("render single row", async () => {
+test("render single row", async () => {
   const data = [
     {
       body: [
