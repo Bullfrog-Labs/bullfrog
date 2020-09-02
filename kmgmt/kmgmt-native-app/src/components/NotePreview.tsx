@@ -1,5 +1,6 @@
 import * as React from "react";
 import { DocumentNode, NodeType, RenderNode, TextNode } from "kmgmt-common";
+import { View } from "react-native";
 import { Text } from "react-native-paper";
 
 function renderText(textNode: TextNode) {
@@ -18,12 +19,15 @@ function render(node: RenderNode): React.ReactFragment {
     }
     case NodeType.Text:
       return renderText(node);
-    case NodeType.Document:
-      return renderChildren(node.children);
+    case NodeType.Document: {
+      const children = renderChildren(node.children);
+      return children;
+    }
   }
 }
 
 export function NotePreview(props: { document: DocumentNode }) {
   const { document } = props;
-  return render(document);
+  const children = render(document);
+  return <View>{children}</View>;
 }

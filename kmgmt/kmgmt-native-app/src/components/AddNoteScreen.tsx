@@ -1,14 +1,10 @@
 import "react-native-gesture-handler";
 import * as React from "react";
-import {
-  NoteRecord,
-  RichTextRenderer,
-  Database,
-  Documents,
-} from "kmgmt-common";
+import { NoteRecord, Database, Documents, DocumentNode } from "kmgmt-common";
 import { StyleSheet, View, StatusBar, FlatList } from "react-native";
-import { Text, TextInput, Surface, Button } from "react-native-paper";
+import { TextInput, Surface, Button } from "react-native-paper";
 import * as log from "loglevel";
+import { NotePreview } from "./NotePreview";
 
 const styles = StyleSheet.create({
   container: {
@@ -88,9 +84,7 @@ export default function AddNoteScreen(props: {
           data={notes}
           renderItem={({ item }) => (
             <Surface style={styles.surface}>
-              <Text style={styles.item}>
-                {RichTextRenderer.renderTopLevelParagraphs(item.body)}
-              </Text>
+              <NotePreview document={{ children: item.body } as DocumentNode} />
             </Surface>
           )}
         />
