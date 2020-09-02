@@ -9,6 +9,7 @@ import {
   TypedNode,
   TextNode,
   RenderNode,
+  Nodes,
 } from "./Document";
 import { Database, NoteRecord, UserRecord, NoteID } from "./Database";
 
@@ -23,4 +24,4 @@ export type {
   DocumentNode,
   RenderNode,
 };
-export { Logging, FirestoreDatabase, Utils, Documents, NodeType };
+export { Logging, FirestoreDatabase, Utils, Documents, NodeType, Nodes };

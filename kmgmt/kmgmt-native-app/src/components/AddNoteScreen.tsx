@@ -2,7 +2,7 @@ import "react-native-gesture-handler";
 import * as React from "react";
 import { NoteRecord, Database, Documents, DocumentNode } from "kmgmt-common";
 import { StyleSheet, View, StatusBar, FlatList } from "react-native";
-import { TextInput, Surface, Button } from "react-native-paper";
+import { TextInput, Button } from "react-native-paper";
 import * as log from "loglevel";
 import { NotePreview } from "./NotePreview";
 
@@ -18,11 +18,6 @@ const styles = StyleSheet.create({
     padding: 4,
     margin: 4,
     elevation: 1,
-  },
-  item: {
-    padding: 10,
-    fontSize: 18,
-    height: 44,
   },
   input: {
     fontSize: 18,
@@ -85,14 +80,7 @@ export default function AddNoteScreen(props: {
         <FlatList
           data={notes}
           renderItem={({ item }) => (
-            <Surface style={styles.surface}>
-              {/* This cast to DocumentNode is weird. Should prob. add an explicit integrity check. */}
-              <NotePreview
-                document={
-                  { children: item.body, type: "document" } as DocumentNode
-                }
-              />
-            </Surface>
+            <NotePreview document={Documents.fromChildren(item.body)} />
           )}
         />
       </View>

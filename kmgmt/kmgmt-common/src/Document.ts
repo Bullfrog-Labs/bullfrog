@@ -1,8 +1,17 @@
 import Slate from "slate";
 
 /**
- * Just a trait to make it more clear that type property should
- * always exist in any node.
+ * NOTE: Important to keep in mind that these types are a spec for a
+ * persistent storage format. Non-backwards compatible changes should
+ * never be made. In general:
+ * 1. Never remove any field
+ * 2. Add any new field as optional
+ * 3. Don't add non-storage format related state or functionality
+ */
+
+/**
+ * Just a trait to make it more clear that type property should always
+ * exist in any node.
  */
 export interface TypedNode {
   type: NodeType;
@@ -71,6 +80,12 @@ export class Nodes {
       type: NodeType.Text,
     };
   }
+  static fromTextObject(text: Object): TextNode {
+    return text as TextNode;
+  }
+  static fromParagraphObject(paragraph: Object): ParagraphNode {
+    return paragraph as ParagraphNode;
+  }
 }
 
 /**
@@ -94,5 +109,15 @@ export class Documents {
     const para = Nodes.paragraph(text);
     document.children.push(para);
     return document;
+  }
+  static fromChildren(children: any): DocumentNode {
+    const document = {
+      children: children,
+      type: NodeType.Document,
+    };
+    return Documents.fromObject(document);
+  }
+  static fromObject(document: Object): DocumentNode {
+    return document as DocumentNode;
   }
 }

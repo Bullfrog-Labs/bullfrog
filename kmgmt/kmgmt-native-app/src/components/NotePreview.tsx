@@ -1,8 +1,21 @@
 import * as React from "react";
 import * as log from "loglevel";
 import { DocumentNode, NodeType, RenderNode, TextNode } from "kmgmt-common";
-import { View } from "react-native";
-import { Text } from "react-native-paper";
+import { StyleSheet, View } from "react-native";
+import { Text, Surface } from "react-native-paper";
+
+const styles = StyleSheet.create({
+  surface: {
+    padding: 4,
+    margin: 4,
+    elevation: 1,
+  },
+  item: {
+    padding: 10,
+    fontSize: 18,
+    height: 44,
+  },
+});
 
 function renderText(textNode: TextNode) {
   return textNode.text;
@@ -34,5 +47,9 @@ export function NotePreview(props: { document: DocumentNode }) {
   const { document } = props;
   logger.debug(`rendering preview ${JSON.stringify(document)}`);
   const children = render(document);
-  return <View>{children}</View>;
+  return (
+    <Surface style={styles.surface}>
+      <View style={styles.item}>{children}</View>
+    </Surface>
+  );
 }
