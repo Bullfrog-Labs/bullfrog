@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as log from "loglevel";
 import { DocumentNode, NodeType, RenderNode, TextNode } from "kmgmt-common";
 import { View } from "react-native";
 import { Text } from "react-native-paper";
@@ -12,6 +13,8 @@ function renderChildren(children: RenderNode[]) {
 }
 
 function render(node: RenderNode): React.ReactFragment {
+  const logger = log.getLogger("NotePreview");
+  logger.debug(`render ${node.type}`);
   switch (node.type) {
     case NodeType.Paragraph: {
       const children = renderChildren(node.children);
@@ -27,7 +30,9 @@ function render(node: RenderNode): React.ReactFragment {
 }
 
 export function NotePreview(props: { document: DocumentNode }) {
+  const logger = log.getLogger("NotePreview");
   const { document } = props;
+  logger.debug(`rendering preview ${JSON.stringify(document)}`);
   const children = render(document);
   return <View>{children}</View>;
 }

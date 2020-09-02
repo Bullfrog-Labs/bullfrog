@@ -1,5 +1,9 @@
 import Slate from "slate";
 
+/**
+ * Just a trait to make it more clear that type property should
+ * always exist in any node.
+ */
 export interface TypedNode {
   type: NodeType;
 }
@@ -10,14 +14,17 @@ export enum NodeType {
   Text = "text",
 }
 
+/**
+ * In kmgmt, all elements have a type field.
+ */
+export interface Element extends Slate.Element, TypedNode {}
+
 export interface TextNode extends Slate.Text, TypedNode {
   bold?: boolean;
   underline?: boolean;
   italic?: boolean;
   type: NodeType.Text;
 }
-
-export interface Element extends Slate.Element, TypedNode {}
 
 export interface ParagraphNode extends Element {
   type: NodeType.Paragraph;
@@ -29,9 +36,21 @@ export interface DocumentNode extends Element {
   children: BlockNode[];
 }
 
+/**
+ * Any top-level block node.
+ */
 export type BlockNode = ParagraphNode;
+
+/**
+ * All nodes that need to be rendered. Using a union-type here makes it
+ * easier to ensure we always handle each type because it supports a sort
+ * of pattern matching.
+ */
 export type RenderNode = BlockNode | DocumentNode | TextNode;
 
+/**
+ * Helper functions for creating Nodes.
+ */
 export class Nodes {
   static document(elements: BlockNode[] | BlockNode): DocumentNode {
     let els = Array.isArray(elements) ? elements : [elements];
@@ -54,6 +73,9 @@ export class Nodes {
   }
 }
 
+/**
+ * Helper functions for creating Documents.
+ */
 export class Documents {
   static paragraph(content: string): DocumentNode {
     const text = Nodes.text(content);

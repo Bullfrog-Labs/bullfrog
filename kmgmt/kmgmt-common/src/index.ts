@@ -1,6 +1,5 @@
 import Logging from "./Logging";
 import FirestoreDatabase from "./FirestoreDatabase";
-import RichTextRenderer from "./RichTextRenderer";
 import * as Utils from "./Utils";
 import {
   Documents,
@@ -24,11 +23,4 @@ export type {
   DocumentNode,
   RenderNode,
 };
-export {
-  Logging,
-  FirestoreDatabase,
-  Utils,
-  RichTextRenderer,
-  Documents,
-  NodeType,
-};
+export { Logging, FirestoreDatabase, Utils, Documents, NodeType };

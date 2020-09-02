@@ -43,12 +43,14 @@ export default function AddNoteScreen(props: {
   const [note, setNote] = React.useState<string>("");
   const email = userAuth?.email;
 
+  logger.debug(`notes state = ${JSON.stringify(notes)}`);
+
   React.useEffect(() => {
     async function getNotes() {
       logger.debug(`using email for fetch; email = ${email}`);
       if (email) {
         const fetchedNotes = await database.getNotes(email);
-        logger.debug(`notes = ${fetchedNotes}`);
+        logger.debug(`notes = ${JSON.stringify(fetchedNotes)}`);
         setNotes(fetchedNotes);
       }
     }
@@ -84,7 +86,12 @@ export default function AddNoteScreen(props: {
           data={notes}
           renderItem={({ item }) => (
             <Surface style={styles.surface}>
-              <NotePreview document={{ children: item.body } as DocumentNode} />
+              {/* This cast to DocumentNode is weird. Should prob. add an explicit integrity check. */}
+              <NotePreview
+                document={
+                  { children: item.body, type: "document" } as DocumentNode
+                }
+              />
             </Surface>
           )}
         />

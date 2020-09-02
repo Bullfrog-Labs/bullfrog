@@ -44,6 +44,7 @@ test("test with valid user", async () => {
   const { getByText, debug } = render(view);
   debug();
   getByText(/Publish/i);
+  debug();
   await waitFor(() => getByText(/Example note text/));
 });
 
