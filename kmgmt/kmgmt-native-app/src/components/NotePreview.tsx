@@ -1,32 +1,29 @@
 import * as React from "react";
-import {
-  Document,
-  ElementType,
-  RenderElement,
-  Text as TextNode,
-} from "kmgmt-common";
+import { DocumentNode, NodeType, RenderNode, TextNode } from "kmgmt-common";
 import { Text } from "react-native-paper";
 
 function renderText(textNode: TextNode) {
   return textNode.text;
 }
 
-function renderChildren(children: RenderElement[]) {
-  return children.map((c) => render(c));
+function renderChildren(children: RenderNode[]) {
+  return children.map((ch) => render(ch));
 }
 
-function render(node: RenderElement): React.ReactFragment {
+function render(node: RenderNode): React.ReactFragment {
   switch (node.type) {
-    case ElementType.Paragraph:
-      return <Text>{renderChildren(node.children)}</Text>;
-    case ElementType.Text:
+    case NodeType.Paragraph: {
+      const children = renderChildren(node.children);
+      return <Text>{children}</Text>;
+    }
+    case NodeType.Text:
       return renderText(node);
-    case ElementType.Document:
+    case NodeType.Document:
       return renderChildren(node.children);
   }
 }
 
-export function NotePreview(props: { document: Document }) {
+export function NotePreview(props: { document: DocumentNode }) {
   const { document } = props;
   return render(document);
 }

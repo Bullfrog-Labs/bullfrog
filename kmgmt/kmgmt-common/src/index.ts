@@ -5,11 +5,11 @@ import * as Utils from "./Utils";
 import {
   Documents,
   Element,
-  ElementType,
-  Document,
+  NodeType,
+  DocumentNode,
   TypedNode,
-  Text,
-  RenderElement,
+  TextNode,
+  RenderNode,
 } from "./Document";
 import { Database, NoteRecord, UserRecord, NoteID } from "./Database";
 
@@ -19,10 +19,10 @@ export type {
   UserRecord,
   NoteID,
   Element,
-  Document,
   TypedNode,
-  Text,
-  RenderElement,
+  TextNode,
+  DocumentNode,
+  RenderNode,
 };
 export {
   Logging,
@@ -30,5 +30,5 @@ export {
   Utils,
   RichTextRenderer,
   Documents,
-  ElementType,
+  NodeType,
 };
