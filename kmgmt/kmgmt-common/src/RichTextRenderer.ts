@@ -1,4 +1,4 @@
-import { RichText, Element, Text } from "./Database";
+import { RichText } from "./Database";
 
 export default class RichTextRenderer {
   /**
@@ -7,8 +7,8 @@ export default class RichTextRenderer {
    */
   static renderTopLevelParagraphs(text: RichText): string {
     let result = "";
-    text.forEach((node: Element | Text, i: number) => {
-      if ("children" in node) {
+    text.forEach((node, i: number) => {
+      if (node.children && Array.isArray(node.children)) {
         if (node.type === "paragraph") {
           if (node.children.length > 0) {
             if (i > 0) {
