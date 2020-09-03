@@ -1,4 +1,3 @@
-import { jest } from "@jest/globals";
 import * as log from "loglevel";
 
 import { NoteRecord, UserRecord, NoteID, Database } from "./Database";
