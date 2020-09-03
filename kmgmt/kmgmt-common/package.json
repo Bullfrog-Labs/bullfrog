@@ -54,6 +54,9 @@
         2,
         "double"
       ]
+    },
+    "env": {
+      "jest": true
     }
   }
 }
