@@ -29,5 +29,5 @@ test("render single row", async () => {
   const view = <NotePreview document={Documents.fromChildren(data[0].body)} />;
   const { getByText, debug } = render(view);
   debug();
-  await waitFor(() => getByText(/Example note text/i));
+  getByText(/Example note text/i);
 });
