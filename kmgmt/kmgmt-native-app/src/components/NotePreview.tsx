@@ -29,16 +29,18 @@ function SlateDocument(props: {
   renderElement: RenderElementFn;
   renderLeaf: RenderLeafFn;
 }): JSX.Element {
+  const logger = log.getLogger("NotePreview");
   const { node, renderElement, renderLeaf } = props;
   if (TypedElement.isTypedElement(node)) {
     const children = node.children.map((c: Slate.Node) => {
-      return (
-        <SlateDocument
-          node={c}
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
-        />
-      );
+      logger.debug(`Render child; type=${c}, ptype=${node.type}`);
+      // Force eager render. The test fails without this. Would like to
+      // understand why...
+      return SlateDocument({
+        node: c,
+        renderElement: renderElement,
+        renderLeaf: renderLeaf,
+      });
     });
     if (!node.type) {
       throw new Error(`Element ${node} is missing type`);
@@ -82,6 +84,7 @@ export function NotePreview(props: { document: DocumentNode }) {
   const logger = log.getLogger("NotePreview");
   const { document } = props;
   logger.debug(`rendering preview ${JSON.stringify(document)}`);
+
   return (
     <SlateDocument
       node={document}
