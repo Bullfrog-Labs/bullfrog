@@ -1,5 +1,3 @@
-import { Node as SlateNode } from "slate";
-
 export type HotkeySpec = string | string[];
 export type KBEventHandler = (event: KeyboardEvent) => void;
 export type MouseEventHandler = (event: MouseEvent, value: any) => void;
