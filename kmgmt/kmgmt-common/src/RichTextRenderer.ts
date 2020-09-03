@@ -14,7 +14,7 @@ export default class RichTextRenderer {
             if (i > 0) {
               result += "\n";
             }
-            if ("text" in node.children[0]) {
+            if (node.children[0].text) {
               result += node.children[0].text;
             }
           }
