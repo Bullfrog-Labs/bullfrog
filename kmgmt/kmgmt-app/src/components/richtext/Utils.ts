@@ -1,5 +1,5 @@
 import { RichText } from "kmgmt-common";
-import Slate from "slate";
+import * as Slate from "slate";
 
 // TODO: This should probably be converted to a TSX function, so that the
 // preview is a React component. Code from Rendering.tsx can probably be used to
