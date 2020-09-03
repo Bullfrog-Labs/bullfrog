@@ -42,7 +42,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom-sixteen",
     "eject": "react-scripts eject",
-    "ts-node": "DOTENV_CONFIG_PATH=$PWD/.env.admin ts-node -r dotenv/config -O '{\"module\":\"commonjs\"}'"
+    "ts-node": "DOTENV_CONFIG_PATH=$PWD/.env.admin ts-node -r dotenv/config -O '{\"module\":\"commonjs\"}'",
+    "tsc": "tsc"
   },
   "eslintConfig": {
     "extends": "react-app"

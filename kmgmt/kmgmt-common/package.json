@@ -38,7 +38,8 @@
     "build": "tsc -p tsconfig.json",
     "watch": "tsc -p tsconfig.json --watch",
     "test": "jest src",
-    "install": "tsc -p tsconfig.json"
+    "install": "tsc -p tsconfig.json",
+    "tsc": "tsc"
   },
   "keywords": [],
   "author": "",

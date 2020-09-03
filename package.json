@@ -6,6 +6,7 @@
     "kmgmt/kmgmt-common"
   ],
   "scripts": {
-    "ci-test": "CI=1 yarn workspaces run test"
+    "ci-test": "CI=1 yarn workspaces run test",
+    "tsc": "yarn workspaces run tsc"
   }
 }

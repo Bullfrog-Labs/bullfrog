@@ -9,7 +9,8 @@
     "web": "expo start --web",
     "eject": "expo eject",
     "test": "jest",
-    "postinstall": "expo-yarn-workspaces postinstall"
+    "postinstall": "expo-yarn-workspaces postinstall",
+    "tsc": "tsc"
   },
   "dependencies": {
     "@react-native-community/eslint-config": "^2.0.0",
