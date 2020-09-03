@@ -125,7 +125,7 @@ export function CreateNewNoteView(props: NoteViewProps) {
 export function NoteView(props: NoteViewProps) {
   const logger = log.getLogger("NoteView");
   const authState = useContext(AuthContext);
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
 
   const [noteLoaded, setNoteLoaded] = useState(false);
   const [title, setTitle] = useState(EMPTY_RICH_TEXT_STATE.title);

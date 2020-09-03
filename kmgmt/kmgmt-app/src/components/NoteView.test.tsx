@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Database,
-  NoteRecord,
-  UserRecord,
-  NoteID,
-  Documents,
-} from "kmgmt-common";
+import { Database, MockDatabases } from "kmgmt-common";
 import { NoteView, CreateNewNoteView } from "./NoteView";
 import { render, waitFor } from "@testing-library/react";
 import { createMemoryHistory } from "history";
@@ -16,28 +10,7 @@ let mockDatabase: Database;
 let mockAuthProvider: AuthProvider;
 
 beforeEach(() => {
-  mockDatabase = {
-    getNotes: jest.fn(async () => [
-      {
-        id: "example-1",
-        body: Documents.paragraph("Example note text").children,
-      },
-    ]),
-    getNote: jest.fn(async (id: string) => ({
-      id: id,
-      body: Documents.paragraph("Example note text").children,
-    })),
-    addNote: jest.fn(
-      async (userName: string, noteRecord: NoteRecord) => "example-1"
-    ),
-    getUser: jest.fn(async (userName: string) => ({
-      userName: "foo",
-    })),
-    addUser: jest.fn(async (userRecord: UserRecord) => {}),
-    updateNote: jest.fn(
-      async (userName: string, noteId: NoteID, noteRecord: NoteRecord) => {}
-    ),
-  };
+  mockDatabase = MockDatabases.singleNote("Example note text");
 
   mockAuthProvider = {
     onAuthStateChanged: (authState) => {},

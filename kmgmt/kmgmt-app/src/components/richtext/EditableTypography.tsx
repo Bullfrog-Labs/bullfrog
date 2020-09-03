@@ -5,11 +5,11 @@ import React, {
   useCallback,
 } from "react";
 import { Node as SlateNode, createEditor } from "slate";
-import { KBEventHandler, RichText } from "./Types";
+import { KBEventHandler } from "./Types";
 import { withEditableTypographyLayout } from "./EditorBehaviors";
 import { withHistory } from "slate-history";
 import { withReact, Slate, Editable } from "slate-react";
-
+import { RichText } from "kmgmt-common";
 import { Typography } from "@material-ui/core";
 
 export type EditableTypographyProps = {

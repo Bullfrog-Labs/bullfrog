@@ -29,5 +29,3 @@ export type Block = typeof BLOCKS[number];
 export const isList = (block: Block): block is ListBlock => {
   return LIST_BLOCKS.includes(block);
 };
-
-export type RichText = SlateNode[];
