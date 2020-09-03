@@ -3,6 +3,11 @@ import FirestoreDatabase from "./FirestoreDatabase";
 import * as Utils from "./Utils";
 import MockDatabases from "./MockDatabases";
 import {
+  SlateDocument,
+  RenderElementFn,
+  RenderLeafFn,
+} from "./components/SlateDocument";
+import {
   Documents,
   Element,
   ElementType,
@@ -21,6 +26,8 @@ export type {
   DocumentNode,
   RichText,
   ElementType,
+  RenderElementFn,
+  RenderLeafFn,
 };
 export {
   Logging,
@@ -30,4 +37,5 @@ export {
   Nodes,
   MockDatabases,
   TypedElement,
+  SlateDocument,
 };

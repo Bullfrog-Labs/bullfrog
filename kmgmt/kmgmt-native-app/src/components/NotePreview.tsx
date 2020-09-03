@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as log from "loglevel";
 import * as Slate from "slate";
-import { DocumentNode, TypedElement } from "kmgmt-common";
+import { DocumentNode, TypedElement, SlateDocument } from "kmgmt-common";
 import { StyleSheet, View } from "react-native";
 import { Text, Surface } from "react-native-paper";
 
@@ -17,39 +17,6 @@ const styles = StyleSheet.create({
     height: 44,
   },
 });
-
-type RenderElementFn = (
-  element: TypedElement,
-  children: JSX.Element[]
-) => JSX.Element;
-type RenderLeafFn = (text: Slate.Text) => JSX.Element;
-
-function SlateDocument(props: {
-  node: Slate.Node;
-  renderElement: RenderElementFn;
-  renderLeaf: RenderLeafFn;
-}): JSX.Element {
-  const logger = log.getLogger("NotePreview");
-  const { node, renderElement, renderLeaf } = props;
-  if (TypedElement.isTypedElement(node)) {
-    const children = node.children.map((c: Slate.Node) => {
-      logger.debug(`Render child; type=${c}, ptype=${node.type}`);
-      // Force eager render. The test fails without this. Would like to
-      // understand why...
-      return SlateDocument({
-        node: c,
-        renderElement: renderElement,
-        renderLeaf: renderLeaf,
-      });
-    });
-    if (!node.type) {
-      throw new Error(`Element ${node} is missing type`);
-    }
-    return renderElement(node as TypedElement, children);
-  } else {
-    return renderLeaf(node as Slate.Text);
-  }
-}
 
 function renderElement(
   element: TypedElement,
