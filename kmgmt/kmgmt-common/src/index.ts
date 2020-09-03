@@ -4,9 +4,10 @@ import RichTextBuilder from "./RichTextBuilder";
 import RichTextRenderer from "./RichTextRenderer";
 import * as Utils from "./Utils";
 import { Documents } from "./Document";
-import { Database, NoteRecord, UserRecord, NoteID } from "./Database";
+import { Database, NoteRecord, UserRecord, NoteID, RichText } from "./Database";
+import MockDatabases from "./MockDatabases";
 
-export type { Database, NoteRecord, UserRecord, NoteID };
+export type { Database, NoteRecord, UserRecord, NoteID, RichText };
 export {
   Logging,
   FirestoreDatabase,
@@ -14,4 +15,5 @@ export {
   RichTextBuilder,
   RichTextRenderer,
   Documents,
+  MockDatabases,
 };

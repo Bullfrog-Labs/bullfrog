@@ -2,16 +2,13 @@ import React, { useCallback, useMemo } from "react";
 import { ReactEditor, withReact, Slate, Editable } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
-
 import { Grid, Container, Paper } from "@material-ui/core";
-
 import { hotkeyHandler, toReactKBEventHandler } from "./EventHandling";
 import { Element, Leaf } from "./Rendering";
 import { withResetBlockOnInsertBreak } from "./EditorBehaviors";
 import DocumentTitle from "./DocumentTitle";
 import RichTextEditorToolbar from "./RichTextEditorToolbar";
-import { RichText } from "./Types";
-import { Documents } from "kmgmt-common";
+import { Documents, RichText } from "kmgmt-common";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.

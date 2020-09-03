@@ -2,27 +2,14 @@ import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import Router from "./Router";
 import { AuthProvider, AuthContext } from "../services/Auth";
-import { NoteRecord, UserRecord, Documents } from "kmgmt-common";
+import { MockDatabases } from "kmgmt-common";
 
 test("renders AppContainer", async () => {
-  const database = {
-    getNotes: jest.fn(async () => [
-      {
-        id: "example-1",
-        body: Documents.paragraph("Example note text").children,
-      },
-    ]),
-    getUser: jest.fn(async (userName: string) => {
-      return { userName: "foo" };
-    }),
-
-    addNote: jest.fn(async (userName: string, noteRecord: NoteRecord) => {}),
-    addUser: jest.fn(async (userRecord: UserRecord) => {}),
-  };
+  const database = MockDatabases.singleNote("Example note text");
 
   // this authProvider always authenticates the user automatically
   const authProvider: AuthProvider = {
-    onAuthStateChanged: (authState) => {},
+    onAuthStateChanged: (_authState) => {},
     getInitialAuthState: () => ({ displayName: "Test user" }),
   };
 

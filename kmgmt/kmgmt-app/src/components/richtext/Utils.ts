@@ -1,5 +1,5 @@
-import { RichText } from "./Types";
-import { Node as SlateNode } from "slate";
+import { RichText } from "kmgmt-common";
+import Slate from "slate";
 
 export const EMPTY_RICH_TEXT: RichText = [
   {
@@ -18,7 +18,7 @@ export const richTextStringPreview = (
     return undefined;
   }
 
-  return Array.from(SlateNode.texts(richText[0]), ([text, path]) => text.text)
+  return Array.from(Slate.Node.texts(richText[0]), ([text, path]) => text.text)
     .slice(0, 3)
     .join("\n");
 };

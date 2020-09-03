@@ -57,10 +57,13 @@ test("mod alias does not work in headless test env", () => {
 });
 
 test("builds working hotkey handler", () => {
+  const hb = jest.fn(noopKBEventHandler());
+  const hi = jest.fn(noopKBEventHandler());
+  const hr = jest.fn(noopKBEventHandler());
   const keymap: Keymap = {
-    bold: ["alt+b", jest.fn(noopKBEventHandler())],
-    italic: ["alt+i", jest.fn(noopKBEventHandler())],
-    redo: ["cmd+shift+z", jest.fn(noopKBEventHandler())],
+    bold: ["alt+b", hb],
+    italic: ["alt+i", hi],
+    redo: ["cmd+shift+z", hr],
   };
 
   const hotkeyHandler = makeHotkeyHandler(keymap);
@@ -68,9 +71,9 @@ test("builds working hotkey handler", () => {
   const nonHotkeyKBEvent = new KeyboardEvent("keydown", e("b"));
   hotkeyHandler(nonHotkeyKBEvent);
 
-  for (let [_, mockFn] of Object.values(keymap)) {
-    expect(mockFn.mock.calls.length).toBe(0);
-  }
+  expect(hb.mock.calls.length).toBe(0);
+  expect(hi.mock.calls.length).toBe(0);
+  expect(hr.mock.calls.length).toBe(0);
 
   const testKBEvents = {
     bold: new KeyboardEvent("keydown", e("b", "alt")),
@@ -78,10 +81,10 @@ test("builds working hotkey handler", () => {
     redo: new KeyboardEvent("keydown", e("z", "meta", "shift")), // cmd is meta on Mac
   };
 
-  for (let [expectedCmdName, kbEvent] of Object.entries(testKBEvents)) {
+  for (let [_expectedCmdName, kbEvent] of Object.entries(testKBEvents)) {
     hotkeyHandler(kbEvent);
-
-    let [_, expectedMockFn] = keymap[expectedCmdName];
-    expect(expectedMockFn.mock.calls.length).toBe(1);
   }
+  expect(hb.mock.calls.length).toBe(1);
+  expect(hi.mock.calls.length).toBe(1);
+  expect(hr.mock.calls.length).toBe(1);
 });
