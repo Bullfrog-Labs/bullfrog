@@ -47,18 +47,16 @@ export const Leaf: FunctionComponent<RenderLeafProps> = ({
   children,
   leaf,
 }) => {
-  // Convert to kmgmt Text.
-  const text = Nodes.fromTextObject(leaf);
-  if (text.bold) {
+  if (leaf.bold) {
     children = <strong>{children}</strong>;
   }
-  if (text.code) {
+  if (leaf.code) {
     children = <code>{children}</code>;
   }
-  if (text.italics) {
+  if (leaf.italics) {
     children = <em>{children}</em>;
   }
-  if (text.underline) {
+  if (leaf.underline) {
     children = <u>{children}</u>;
   }
   return <span {...attributes}>{children}</span>;

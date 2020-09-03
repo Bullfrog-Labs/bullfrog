@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as log from "loglevel";
-import { DocumentNode, NodeType, RenderNode, TextNode } from "kmgmt-common";
+import * as Slate from "slate";
+import { DocumentNode, TypedElement } from "kmgmt-common";
 import { StyleSheet, View } from "react-native";
 import { Text, Surface } from "react-native-paper";
 
@@ -17,39 +18,72 @@ const styles = StyleSheet.create({
   },
 });
 
-function renderText(textNode: TextNode) {
-  return textNode.text;
-}
+type RenderElementFn = (
+  element: TypedElement,
+  children: JSX.Element[]
+) => JSX.Element;
+type RenderLeafFn = (text: Slate.Text) => JSX.Element;
 
-function renderChildren(children: RenderNode[]) {
-  return children.map((ch) => render(ch));
-}
-
-function render(node: RenderNode): React.ReactFragment {
-  const logger = log.getLogger("NotePreview");
-  logger.debug(`render ${node.type}`);
-  switch (node.type) {
-    case NodeType.Paragraph: {
-      const children = renderChildren(node.children);
-      return <Text>{children}</Text>;
+function SlateDocument(props: {
+  node: Slate.Node;
+  renderElement: RenderElementFn;
+  renderLeaf: RenderLeafFn;
+}): JSX.Element {
+  const { node, renderElement, renderLeaf } = props;
+  if (TypedElement.isTypedElement(node)) {
+    const children = node.children.map((c: Slate.Node) => {
+      return (
+        <SlateDocument
+          node={c}
+          renderElement={renderElement}
+          renderLeaf={renderLeaf}
+        />
+      );
+    });
+    if (!node.type) {
+      throw new Error(`Element ${node} is missing type`);
     }
-    case NodeType.Text:
-      return renderText(node);
-    case NodeType.Document: {
-      const children = renderChildren(node.children);
-      return children;
+    return renderElement(node as TypedElement, children);
+  } else {
+    return renderLeaf(node as Slate.Text);
+  }
+}
+
+function renderElement(
+  element: TypedElement,
+  children: JSX.Element[]
+): JSX.Element {
+  const logger = log.getLogger("NotePreview");
+  switch (element.type) {
+    case "paragraph":
+      return <Text>{children}</Text>;
+    case "document": {
+      return (
+        <Surface style={styles.surface}>
+          <View style={styles.item}>{children}</View>
+        </Surface>
+      );
+    }
+    default: {
+      logger.warn(`Unhandled element, ignoring; type=${element.type}`);
+      return <React.Fragment />;
     }
   }
+}
+
+function renderLeaf(text: Slate.Text): JSX.Element {
+  return <React.Fragment>{text.text}</React.Fragment>;
 }
 
 export function NotePreview(props: { document: DocumentNode }) {
   const logger = log.getLogger("NotePreview");
   const { document } = props;
   logger.debug(`rendering preview ${JSON.stringify(document)}`);
-  const children = render(document);
   return (
-    <Surface style={styles.surface}>
-      <View style={styles.item}>{children}</View>
-    </Surface>
+    <SlateDocument
+      node={document}
+      renderElement={renderElement}
+      renderLeaf={renderLeaf}
+    />
   );
 }

@@ -1,4 +1,5 @@
 import Slate from "slate";
+import isPlainObject from "is-plain-object";
 
 /**
  * NOTE: Important to keep in mind that these types are a spec for a
@@ -9,82 +10,60 @@ import Slate from "slate";
  * 3. Don't add non-storage format related state or functionality
  */
 
+export const MarkTypes = ["bold", "italic", "underline", "code"];
+export type MarkType = typeof MarkTypes[number];
+
+export const ElementTypes = ["paragraph", "document"] as const;
+export type ElementType = typeof ElementTypes[number];
+
 /**
  * Just a trait to make it more clear that type property should always
  * exist in any node.
  */
-export interface TypedNode {
-  type: NodeType;
+export interface TypedElement extends Slate.Element {
+  type: ElementType;
 }
 
-export enum NodeType {
-  Paragraph = "paragraph",
-  Document = "document",
-  Text = "text",
-}
+export const TypedElement = {
+  isTypedElement(value: any): value is TypedElement {
+    return isPlainObject(value) && value.type && typeof value.type === "string";
+  },
+};
 
 /**
  * In kmgmt, all elements have a type field.
  */
-export interface Element extends Slate.Element, TypedNode {}
-
-export interface TextNode extends Slate.Text, TypedNode {
-  bold?: boolean;
-  underline?: boolean;
-  italic?: boolean;
-  type: NodeType.Text;
-}
+export interface Element extends Slate.Element, TypedElement {}
 
 export interface ParagraphNode extends Element {
-  type: NodeType.Paragraph;
-  children: TextNode[];
+  type: "paragraph";
 }
 
 export interface DocumentNode extends Element {
-  type: NodeType.Document;
-  children: BlockNode[];
+  type: "document";
 }
 
 /**
- * Any top-level block node.
- */
-export type BlockNode = ParagraphNode;
-
-/**
- * All nodes that need to be rendered. Using a union-type here makes it
- * easier to ensure we always handle each type because it supports a sort
- * of pattern matching.
- */
-export type RenderNode = BlockNode | DocumentNode | TextNode;
-
-/**
- * Helper functions for creating Nodes.
+ * Helper functions for creating Nodes. Mostly just used for tests, and some corner cases.
  */
 export class Nodes {
-  static document(elements: BlockNode[] | BlockNode): DocumentNode {
+  static document(elements: Element[] | Element): DocumentNode {
     let els = Array.isArray(elements) ? elements : [elements];
     return {
-      type: NodeType.Document,
+      type: "document",
       children: els,
     };
   }
-  static paragraph(text: TextNode): ParagraphNode {
+  static paragraph(text: Slate.Text): ParagraphNode {
     return {
-      type: NodeType.Paragraph,
+      type: "paragraph",
       children: [text],
     };
   }
-  static text(text: string): TextNode {
+  static text(text: string): Slate.Text {
     return {
       text: text,
-      type: NodeType.Text,
     };
-  }
-  static fromTextObject(text: Object): TextNode {
-    return text as TextNode;
-  }
-  static fromParagraphObject(paragraph: Object): ParagraphNode {
-    return paragraph as ParagraphNode;
   }
 }
 
@@ -113,7 +92,7 @@ export class Documents {
   static fromChildren(children: any): DocumentNode {
     const document = {
       children: children,
-      type: NodeType.Document,
+      type: "document",
     };
     return Documents.fromObject(document);
   }

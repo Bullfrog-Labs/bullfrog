@@ -5,11 +5,9 @@ import MockDatabases from "./MockDatabases";
 import {
   Documents,
   Element,
-  NodeType,
+  ElementType,
   DocumentNode,
-  TypedNode,
-  TextNode,
-  RenderNode,
+  TypedElement,
   Nodes,
 } from "./Document";
 import { Database, NoteRecord, UserRecord, NoteID, RichText } from "./Database";
@@ -20,18 +18,16 @@ export type {
   UserRecord,
   NoteID,
   Element,
-  TypedNode,
-  TextNode,
   DocumentNode,
-  RenderNode,
   RichText,
+  ElementType,
 };
 export {
   Logging,
   FirestoreDatabase,
   Utils,
   Documents,
-  NodeType,
   Nodes,
   MockDatabases,
+  TypedElement,
 };
