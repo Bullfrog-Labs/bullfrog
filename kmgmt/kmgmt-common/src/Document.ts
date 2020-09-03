@@ -1,4 +1,4 @@
-import Slate from "slate";
+import * as Slate from "slate";
 import isPlainObject from "is-plain-object";
 
 /**
@@ -26,7 +26,12 @@ export interface TypedElement extends Slate.Element {
 
 export const TypedElement = {
   isTypedElement(value: any): value is TypedElement {
-    return isPlainObject(value) && value.type && typeof value.type === "string";
+    return (
+      isPlainObject(value) &&
+      value.type &&
+      typeof value.type === "string" &&
+      Slate.Element.isElement(value)
+    );
   },
 };
 

@@ -54,6 +54,7 @@ function renderElement(
   children: JSX.Element[]
 ): JSX.Element {
   const logger = log.getLogger("NotePreview");
+  logger.debug(`Render element; type=${element.type}`);
   switch (element.type) {
     case "paragraph":
       return <Text>{children}</Text>;
@@ -72,6 +73,8 @@ function renderElement(
 }
 
 function renderLeaf(text: Slate.Text): JSX.Element {
+  const logger = log.getLogger("NotePreview");
+  logger.debug(`Render text; text=${text.text}`);
   return <React.Fragment>{text.text}</React.Fragment>;
 }
 
