@@ -14,8 +14,6 @@ import {
   DocumentNode,
   TypedElement,
   Nodes,
-  MarkType,
-  MarkTypes,
 } from "./Document";
 import { Database, NoteRecord, UserRecord, NoteID, RichText } from "./Database";
 
@@ -30,10 +28,8 @@ export type {
   ElementType,
   RenderElementFn,
   RenderLeafFn,
-  MarkType,
 };
 export {
-  MarkTypes,
   Logging,
   FirestoreDatabase,
   Utils,

@@ -1,7 +1,8 @@
 import React, { FunctionComponent } from "react";
 import { Typography } from "@material-ui/core";
 import { RenderLeafProps, RenderElementProps } from "slate-react";
-import { TypedElement, MarkType, MarkTypes } from "kmgmt-common";
+import { TypedElement } from "kmgmt-common";
+import { MARKS, Mark } from "./Types";
 import * as log from "loglevel";
 
 export const Element: FunctionComponent<RenderElementProps> = ({
@@ -51,7 +52,7 @@ export const Element: FunctionComponent<RenderElementProps> = ({
   }
 };
 
-const renderMark = (markType: MarkType, children: JSX.Element): JSX.Element => {
+const renderMark = (markType: Mark, children: JSX.Element): JSX.Element => {
   switch (markType) {
     case "bold":
       return <strong>{children}</strong>;
@@ -71,7 +72,7 @@ export const Leaf: FunctionComponent<RenderLeafProps> = ({
 }) => {
   // Doing this with reduce lets us rely on the type system to ensure all the
   // cases are handled. If we forget a mark, tsc will barf.
-  const markedText = MarkTypes.reduce((el: JSX.Element, mark: MarkType) => {
+  const markedText = MARKS.reduce((el: JSX.Element, mark: Mark) => {
     if (mark in leaf) {
       return renderMark(mark, el);
     } else {

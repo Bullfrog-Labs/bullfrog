@@ -10,9 +10,6 @@ import isPlainObject from "is-plain-object";
  * 3. Don't add non-storage format related state or functionality
  */
 
-export const MarkTypes = ["bold", "italic", "underline", "code"] as const;
-export type MarkType = typeof MarkTypes[number];
-
 export const ElementTypes = [
   "paragraph",
   "document",
