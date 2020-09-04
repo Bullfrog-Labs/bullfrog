@@ -26,18 +26,18 @@ export function formatLogLine(
   )}: ${loggerName} : ${message}`;
 }
 
-function configure(log: log.RootLogger) {
-  const logLevel = toLogLevel(process.env.REACT_APP_LOG_LEVEL);
-  log.setDefaultLevel(logLevel);
+function configure(rootLogger: log.RootLogger) {
+  const logLevelString = toLogLevel(process.env.REACT_APP_LOG_LEVEL);
+  rootLogger.setDefaultLevel(logLevelString);
   const original = log.methodFactory;
-  log.methodFactory = (methodName, logLevel, loggerName) => {
+  rootLogger.methodFactory = (methodName, logLevel, loggerName) => {
     const applied = original(methodName, logLevel, loggerName);
     return (message) => {
       applied(formatLogLine(methodName, loggerName, message));
     };
   };
-  const logger = log.getLogger("Logging");
-  logger.info(`Using log level ${logLevel}`);
+  const logger = rootLogger.getLogger("Logging");
+  logger.info(`Using log level ${logLevelString}`);
 }
 
 export default {
