@@ -34,10 +34,14 @@ function renderElement(
         </Surface>
       );
     }
-    default: {
-      logger.warn(`Unhandled element, ignoring; type=${element.type}`);
+    case "block-quote":
+    case "bulleted-list":
+    case "heading-1":
+    case "heading-2":
+    case "list-item":
+    case "numbered-list":
+      logger.info(`type=${element.type} is not supported in this component`);
       return <React.Fragment />;
-    }
   }
 }
 

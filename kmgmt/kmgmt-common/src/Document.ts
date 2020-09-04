@@ -10,10 +10,20 @@ import isPlainObject from "is-plain-object";
  * 3. Don't add non-storage format related state or functionality
  */
 
-export const MarkTypes = ["bold", "italic", "underline", "code"];
+export const MarkTypes = ["bold", "italic", "underline", "code"] as const;
 export type MarkType = typeof MarkTypes[number];
 
-export const ElementTypes = ["paragraph", "document"] as const;
+export const ElementTypes = [
+  "paragraph",
+  "document",
+  // Below here, not currently supported.
+  "block-quote",
+  "bulleted-list",
+  "heading-1",
+  "heading-2",
+  "list-item",
+  "numbered-list",
+] as const;
 export type ElementType = typeof ElementTypes[number];
 
 /**
@@ -29,7 +39,7 @@ export const TypedElement = {
     return (
       isPlainObject(value) &&
       value.type &&
-      typeof value.type === "string" &&
+      ElementTypes.indexOf(value.type) > -1 &&
       Slate.Element.isElement(value)
     );
   },
