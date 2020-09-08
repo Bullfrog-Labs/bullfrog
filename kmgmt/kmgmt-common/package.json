@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@types/node": "^14.0.27",
+    "eslint-plugin-simple-import-sort": "^5.0.3",
     "husky": "^4.2.5",
     "jest": "24.9.0",
     "jest-preset-typescript": "^1.2.0",
@@ -46,7 +47,11 @@
   },
   "eslintConfig": {
     "extends": "@react-native-community",
+    "plugins": [
+      "simple-import-sort"
+    ],
     "rules": {
+      "simple-import-sort/sort": "error",
       "quotes": [
         2,
         "double"
