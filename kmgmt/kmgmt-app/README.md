@@ -26,6 +26,10 @@ The test runner stays active in a tab and reruns automatically.
 
 Tests should always be passing in a clean checkout.
 
+## Run storybook
+
+    yarn storybook
+
 ## Set up VSCode
 
 VSCode will encourage you to install most of these automatically, but we list them here anyway.
