@@ -66,7 +66,7 @@ export const Leaf: FunctionComponent<RenderLeafProps> = ({
   const focused = useFocused();
 
   if (selected && focused) {
-    children = <span className="selected>">{children}</span>;
+    children = <span className="selected">{children}</span>;
   }
 
   if (leaf.bold) {
