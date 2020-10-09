@@ -80,3 +80,13 @@
   -o-user-select: none;
   user-select: none;
 }
+
+.section-title-empty br {
+  display: none;
+}
+
+.section-title-empty .selected::after {
+  color: gold;
+  pointer-events: "none";
+  content: "Placeholder";
+}

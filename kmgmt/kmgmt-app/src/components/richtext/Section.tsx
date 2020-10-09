@@ -1,5 +1,6 @@
 import { Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
+import { Node } from "slate";
 import { ReactEditor, RenderElementProps, useEditor } from "slate-react";
 
 export const SectionTitle: FunctionComponent<RenderElementProps> = ({
@@ -17,8 +18,14 @@ export const SectionTitle: FunctionComponent<RenderElementProps> = ({
       ? `h${level + 1}`
       : "body1";
 
+  const isEmpty = Node.string(element) === "";
+
   return (
-    <Typography variant={variant} {...attributes}>
+    <Typography
+      className={isEmpty ? "section-title-empty" : ""}
+      variant={variant}
+      {...attributes}
+    >
       {children}
     </Typography>
   );
