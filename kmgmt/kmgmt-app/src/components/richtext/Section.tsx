@@ -1,7 +1,13 @@
 import { Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { Node } from "slate";
-import { ReactEditor, RenderElementProps, useEditor } from "slate-react";
+import {
+  ReactEditor,
+  RenderElementProps,
+  useEditor,
+  useFocused,
+  useSelected,
+} from "slate-react";
 
 export const SectionTitle: FunctionComponent<RenderElementProps> = ({
   attributes,
@@ -20,6 +26,13 @@ export const SectionTitle: FunctionComponent<RenderElementProps> = ({
 
   const isEmpty = Node.string(element) === "";
 
+  const selected = useSelected();
+  const focused = useFocused();
+
+  if (selected && focused) {
+    children = <div className="selected">{children}</div>;
+  }
+
   return (
     <Typography
       className={isEmpty ? "section-title-empty" : ""}
@@ -36,8 +49,6 @@ export const Section: FunctionComponent<RenderElementProps> = ({
   children,
   element,
 }) => {
-  const editor = useEditor();
-  const path = ReactEditor.findPath(editor, element);
   const divStyle = {
     borderLeftWidth: "thick",
     borderLeftColor: "gainsboro",

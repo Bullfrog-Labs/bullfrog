@@ -1,11 +1,6 @@
 import React, { FunctionComponent } from "react";
 import { Typography } from "@material-ui/core";
-import {
-  RenderLeafProps,
-  RenderElementProps,
-  useSelected,
-  useFocused,
-} from "slate-react";
+import { RenderLeafProps, RenderElementProps } from "slate-react";
 import { Section, SectionTitle } from "./Section";
 
 export const Element: FunctionComponent<RenderElementProps> = ({
@@ -62,13 +57,6 @@ export const Leaf: FunctionComponent<RenderLeafProps> = ({
   children,
   leaf,
 }) => {
-  const selected = useSelected();
-  const focused = useFocused();
-
-  if (selected && focused) {
-    children = <span className="selected">{children}</span>;
-  }
-
   if (leaf.bold) {
     children = <strong>{children}</strong>;
   }
