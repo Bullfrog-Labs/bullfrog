@@ -73,7 +73,7 @@ const TEST_STATE = {
       type: "section",
       children: [
         {
-          type: "heading-1",
+          type: "section-title",
           children: [{ text: "Lacus sed viverra tellus in" }],
         },
         {
@@ -89,7 +89,7 @@ const TEST_STATE = {
           type: "section",
           children: [
             {
-              type: "heading-2",
+              type: "section-title",
               children: [{ text: "Scelerisque viverra mauris in aliquam" }],
             },
             {
