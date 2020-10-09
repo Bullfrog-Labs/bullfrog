@@ -34,6 +34,7 @@ const Template: Story<RichTextEditorProps> = (args) => (
   <RichTextEditorStateWrapper {...args} />
 );
 
+/*
 export const BasicRTEReadOnly = Template.bind({});
 BasicRTEReadOnly.args = {
   title: EMPTY_RICH_TEXT_STATE.title,
@@ -63,32 +64,50 @@ RTEWithToolbar.args = {
   readOnly: false,
 };
 
+*/
+
 const TEST_STATE = {
   title: "Nulla facilisi",
   body: [
-    { type: "heading-1", children: [{ text: "Lacus sed viverra tellus in" }] },
     {
-      type: "paragraph",
+      type: "section",
       children: [
         {
-          text:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+          type: "heading-1",
+          children: [{ text: "Lacus sed viverra tellus in" }],
         },
-      ],
-    },
-    {
-      type: "heading-2",
-      children: [{ text: "Scelerisque viverra mauris in aliquam" }],
-    },
-    {
-      type: "paragraph",
-      children: [
-        { text: "Nisl nisi scelerisque eu ultrices vitae ", bold: true },
-        { text: "auctor. Habitasse", bold: true, italic: true },
-        { text: " platea", italic: true },
         {
-          text:
-            " dictumst quisque sagittis purus sit amet volutpat consequat. Vitae sapien pellentesque habitant morbi tristique senectus et netus. Lobortis scelerisque fermentum dui faucibus. dadsadsa",
+          type: "paragraph",
+          children: [
+            {
+              text:
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+            },
+          ],
+        },
+        {
+          type: "section",
+          children: [
+            {
+              type: "heading-2",
+              children: [{ text: "Scelerisque viverra mauris in aliquam" }],
+            },
+            {
+              type: "paragraph",
+              children: [
+                {
+                  text: "Nisl nisi scelerisque eu ultrices vitae ",
+                  bold: true,
+                },
+                { text: "auctor. Habitasse", bold: true, italic: true },
+                { text: " platea", italic: true },
+                {
+                  text:
+                    " dictumst quisque sagittis purus sit amet volutpat consequat. Vitae sapien pellentesque habitant morbi tristique senectus et netus. Lobortis scelerisque fermentum dui faucibus. dadsadsa",
+                },
+              ],
+            },
+          ],
         },
       ],
     },
@@ -101,7 +120,10 @@ const TEST_STATE = {
       children: [
         {
           type: "list-item",
-          children: [{ text: "dictum fusce ut placerat orci" }],
+          children: [
+            { text: "dictum fusce ut placerat orci" },
+            { text: " platea", italic: true },
+          ],
         },
         {
           type: "list-item",

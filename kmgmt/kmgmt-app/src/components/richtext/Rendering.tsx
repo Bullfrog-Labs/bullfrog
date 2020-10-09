@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { Typography } from "@material-ui/core";
 import { RenderLeafProps, RenderElementProps } from "slate-react";
+import { Section } from "./Section";
 
 export const Element: FunctionComponent<RenderElementProps> = ({
   attributes,
@@ -8,6 +9,13 @@ export const Element: FunctionComponent<RenderElementProps> = ({
   element,
 }) => {
   switch (element.type) {
+    case "section":
+      const props = {
+        attributes: attributes,
+        children: children,
+        element: element,
+      };
+      return <Section {...props} />;
     case "block-quote":
       return (
         <blockquote {...attributes}>
