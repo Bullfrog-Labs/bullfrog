@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
@@ -8,6 +8,7 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 
+import ViewHeadlineIcon from "@material-ui/icons/ViewHeadline";
 import LooksOneIcon from "@material-ui/icons/LooksOne";
 import LooksTwoIcon from "@material-ui/icons/LooksTwo";
 import Looks3Icon from "@material-ui/icons/Looks3";
@@ -19,11 +20,19 @@ import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 
 import { Toolbar, Divider } from "@material-ui/core";
 import { useSlate, ReactEditor } from "slate-react";
-import { MARKS, Mark, BLOCKS, Block } from "./Types";
+import {
+  MARKS,
+  Mark,
+  BLOCKS,
+  Block,
+  StructureAction,
+  StructureMode,
+} from "./Types";
 import { isMarkActive } from "./Marks";
 import { Editor } from "slate";
 import { toReactMouseEventHandler } from "./EventHandling";
 import { isBlockActive, toggleBlock } from "./Blocks";
+import { RichTextEditorProps } from "./RichTextEditor";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -121,21 +130,6 @@ const BlockButtonGroup = () => {
       onChange={toReactMouseEventHandler(handleBlock)}
       aria-label="block type selection"
     >
-      <ToggleButton value="heading-1" aria-label="heading-1">
-        <LooksOneIcon />
-      </ToggleButton>
-      <ToggleButton value="heading-2" aria-label="heading-2">
-        <LooksTwoIcon />
-      </ToggleButton>
-      <ToggleButton value="heading-3" aria-label="heading-3">
-        <Looks3Icon />
-      </ToggleButton>
-      <ToggleButton value="heading-4" aria-label="heading-4">
-        <Looks4Icon />
-      </ToggleButton>
-      <ToggleButton value="heading-5" aria-label="heading-5">
-        <Looks5Icon />
-      </ToggleButton>
       <ToggleButton value="block-quote" aria-label="block-quote">
         <FormatQuoteIcon />
       </ToggleButton>
@@ -149,12 +143,74 @@ const BlockButtonGroup = () => {
   );
 };
 
-const RichTextEditorToolbar = () => {
+export type StructureButtonGroupProps = {
+  structureMode: StructureMode;
+  onStructureModeChange: (newStructureMode: StructureMode) => void;
+};
+
+const StructureButtonGroup: FunctionComponent<StructureButtonGroupProps> = ({
+  structureMode,
+  onStructureModeChange,
+}) => {
+  const activeStructure = "foo"; // TODO: Fix this to work properly
+
+  const handleStructure = (
+    event: MouseEvent,
+    structureAction: StructureAction
+  ) => {
+    event.preventDefault();
+
+    // TODO: do the thing
+
+    if (structureAction === "toggle-structure-mode") {
+      // check structure mode, and change it
+      const newStructureMode =
+        structureMode === "edit-mode" ? "outline-mode" : "edit-mode"; // flip between the two modes
+      // let parent components know that structure mode changed
+      onStructureModeChange(newStructureMode);
+    }
+  };
+
+  return (
+    <StyledToggleButtonGroup
+      size="small"
+      exclusive
+      value={activeStructure}
+      onChange={toReactMouseEventHandler(handleStructure)}
+      aria-label="block type selection"
+    >
+      <ToggleButton value="section" aria-label="section">
+        <LooksOneIcon />
+      </ToggleButton>
+      <ToggleButton
+        value="toggle-structure-mode"
+        aria-label="toggle-structure-mode"
+      >
+        <ViewHeadlineIcon />
+      </ToggleButton>
+    </StyledToggleButtonGroup>
+  );
+};
+
+export type RichTextEditorToolbarProps = {
+  structureMode: StructureMode;
+  onStructureModeChange: (newStructureMode: StructureMode) => void;
+};
+
+const RichTextEditorToolbar: FunctionComponent<RichTextEditorToolbarProps> = ({
+  structureMode,
+  onStructureModeChange,
+}) => {
   const classes = useStyles();
 
   return (
     <Toolbar>
       <MarkButtonGroup />
+      <Divider flexItem orientation="vertical" className={classes.divider} />
+      <StructureButtonGroup
+        structureMode={structureMode}
+        onStructureModeChange={onStructureModeChange}
+      />
       <Divider flexItem orientation="vertical" className={classes.divider} />
       <BlockButtonGroup />
     </Toolbar>

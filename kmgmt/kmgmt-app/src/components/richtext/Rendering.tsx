@@ -3,6 +3,14 @@ import { Typography } from "@material-ui/core";
 import { RenderLeafProps, RenderElementProps } from "slate-react";
 import { Section, SectionTitle } from "./Section";
 
+export const OutlineElement: FunctionComponent<RenderElementProps> = ({
+  attributes,
+  children,
+  element,
+}) => {
+  return <br />;
+};
+
 export const Element: FunctionComponent<RenderElementProps> = ({
   attributes,
   children,
@@ -50,6 +58,14 @@ export const Element: FunctionComponent<RenderElementProps> = ({
         </Typography>
       );
   }
+};
+
+export const OutlineLeaf: FunctionComponent<RenderLeafProps> = ({
+  attributes,
+  children,
+  leaf,
+}) => {
+  return <br />;
 };
 
 export const Leaf: FunctionComponent<RenderLeafProps> = ({

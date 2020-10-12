@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ReactEditor, withReact, Slate, Editable } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
@@ -6,11 +6,11 @@ import { withHistory } from "slate-history";
 import { Grid, Container, Paper } from "@material-ui/core";
 
 import { hotkeyHandler, toReactKBEventHandler } from "./EventHandling";
-import { Element, Leaf } from "./Rendering";
+import { Element, Leaf, OutlineElement, OutlineLeaf } from "./Rendering";
 import { withResetBlockOnInsertBreak } from "./EditorBehaviors";
 import DocumentTitle from "./DocumentTitle";
 import RichTextEditorToolbar from "./RichTextEditorToolbar";
-import { RichText } from "./Types";
+import { RichText, StructureMode } from "./Types";
 import { EMPTY_RICH_TEXT } from "./Utils";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
@@ -48,8 +48,28 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
 const RichTextEditor = (props: RichTextEditorProps) => {
   const { title, body, onTitleChange, onBodyChange, enableToolbar } = props;
 
-  const renderElement = useCallback((props) => <Element {...props} />, []);
-  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+  const [structureMode, setStructureMode] = useState<StructureMode>(
+    "edit-mode"
+  );
+
+  const renderElement = useCallback(
+    (props) =>
+      structureMode === "edit-mode" ? (
+        <Element {...props} />
+      ) : (
+        <OutlineElement {...props} />
+      ),
+    [structureMode]
+  );
+  const renderLeaf = useCallback(
+    (props) =>
+      structureMode === "edit-mode" ? (
+        <Leaf {...props} />
+      ) : (
+        <OutlineLeaf {...props} />
+      ),
+    [structureMode]
+  );
 
   const editor = useMemo(
     () => withReact(withResetBlockOnInsertBreak(withHistory(createEditor()))),
@@ -93,7 +113,12 @@ const RichTextEditor = (props: RichTextEditorProps) => {
             </Grid>
             <Grid item>
               <Slate editor={editor} value={body} onChange={onChange.body}>
-                {!!enableToolbar && <RichTextEditorToolbar />}
+                {!!enableToolbar && (
+                  <RichTextEditorToolbar
+                    structureMode={structureMode}
+                    onStructureModeChange={setStructureMode}
+                  />
+                )}
                 <Editable
                   readOnly={props.readOnly ?? false}
                   renderElement={renderElement}

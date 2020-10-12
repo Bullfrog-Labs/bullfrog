@@ -72,6 +72,8 @@ export const Section: FunctionComponent<RenderElementProps> = ({
     borderLeftStyle: "solid",
     borderLeftRadius: "4px",
     padding: "4px",
+    marginTop: "4px",
+    marginBottom: "4px",
   };
 
   return (
