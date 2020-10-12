@@ -1,4 +1,4 @@
-import { Typography } from "@material-ui/core";
+import { makeStyles, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
 import { Node } from "slate";
 import {
@@ -9,11 +9,26 @@ import {
   useSelected,
 } from "slate-react";
 
+const useStyles = makeStyles((theme) => ({
+  emptySectionTitle: {
+    "& br": {
+      display: "none", // Slate adds a <br> for empty leaves
+    },
+    "& .selected::after": {
+      color: theme.palette.text.secondary,
+      pointerEvents: "none",
+      content: `"Add a section title"`,
+    },
+  },
+}));
+
 export const SectionTitle: FunctionComponent<RenderElementProps> = ({
   attributes,
   children,
   element,
 }) => {
+  const classes = useStyles();
+
   const editor = useEditor();
   const path = ReactEditor.findPath(editor, element);
   const level = path.length;
@@ -29,13 +44,15 @@ export const SectionTitle: FunctionComponent<RenderElementProps> = ({
   const selected = useSelected();
   const focused = useFocused();
 
+  // const placeholder = "Enter a section title"
+
   if (selected && focused) {
     children = <div className="selected">{children}</div>;
   }
 
   return (
     <Typography
-      className={isEmpty ? "section-title-empty" : ""}
+      className={isEmpty ? classes.emptySectionTitle : ""}
       variant={variant}
       {...attributes}
     >
