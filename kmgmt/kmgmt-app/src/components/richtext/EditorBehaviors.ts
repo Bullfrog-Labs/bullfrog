@@ -11,11 +11,14 @@ export const withResetBlockOnInsertBreak = (editor: Editor) => {
     insertBreak();
 
     // TODO: Figure out if this behavior makes sense, or what it even means
+    // TODO: Disabling because this is buggy, need to fix to work within structural sections paradigm
+    /*
     for (let block in STRUCTURE_BLOCKS.filter((x) =>
       isBlockActive(editor, x)
     )) {
       toggleBlock(editor, block);
     }
+    */
   };
 
   return editor;
