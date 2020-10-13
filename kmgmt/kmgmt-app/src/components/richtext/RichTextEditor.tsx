@@ -17,6 +17,7 @@ import DocumentTitle from "./DocumentTitle";
 import RichTextEditorToolbar from "./RichTextEditorToolbar";
 import { RichText, StructureMode } from "./Types";
 import { EMPTY_RICH_TEXT } from "./Utils";
+import { withSectionTitles } from "./Section";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -80,7 +81,12 @@ const RichTextEditor = (props: RichTextEditorProps) => {
   );
 
   const editor = useMemo(
-    () => withReact(withResetBlockOnInsertBreak(withHistory(createEditor()))),
+    () =>
+      withReact(
+        withSectionTitles(
+          withResetBlockOnInsertBreak(withHistory(createEditor()))
+        )
+      ),
     []
   );
 

@@ -1,6 +1,6 @@
 import { makeStyles, Typography } from "@material-ui/core";
 import React, { FunctionComponent } from "react";
-import { Node } from "slate";
+import { Editor, Node, Element, Transforms } from "slate";
 import {
   ReactEditor,
   RenderElementProps,
@@ -21,6 +21,35 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
+
+export const withSectionTitles = (editor: Editor) => {
+  const { normalizeNode } = editor;
+
+  editor.normalizeNode = (entry) => {
+    const [node, path] = entry;
+
+    if (Element.isElement(node) && node.type === "section") {
+      const first = Node.child(node, 0);
+      const isSectionTitle =
+        Element.isElement(first) && first.type === "section-title";
+      if (!isSectionTitle) {
+        const blankSectionTitle = {
+          type: "section-title",
+          children: [{ text: "" }],
+        };
+        const sectionTitleLoc = path.slice();
+        sectionTitleLoc.push(0);
+        Transforms.insertNodes(editor, blankSectionTitle, {
+          at: sectionTitleLoc,
+        });
+      }
+    }
+
+    normalizeNode(entry);
+  };
+
+  return editor;
+};
 
 export const SectionTitle: FunctionComponent<RenderElementProps> = ({
   attributes,
@@ -56,13 +85,3 @@ export const SectionTitle: FunctionComponent<RenderElementProps> = ({
     </Typography>
   );
 };
-
-/*
-export const Section: FunctionComponent<RenderElementProps> = ({
-  attributes,
-  children,
-  element,
-}) => {
-  return <div>{children}</div>;
-};
-*/
