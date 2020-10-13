@@ -55,7 +55,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
   const { title, body, onTitleChange, onBodyChange, enableToolbar } = props;
 
   const [structureMode, setStructureMode] = useState<StructureMode>(
-    "edit-mode"
+    "outline-mode"
   );
 
   const renderElement = useCallback(
