@@ -109,6 +109,42 @@ const TEST_STATE = {
             },
           ],
         },
+        {
+          type: "section",
+          children: [
+            {
+              type: "section-title",
+              children: [{ text: "Lacus sed viverra tellus in" }],
+            },
+            {
+              type: "paragraph",
+              children: [
+                {
+                  text:
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: "section",
+          children: [
+            {
+              type: "section-title",
+              children: [{ text: "Lacus sed viverra tellus in" }],
+            },
+            {
+              type: "paragraph",
+              children: [
+                {
+                  text:
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {

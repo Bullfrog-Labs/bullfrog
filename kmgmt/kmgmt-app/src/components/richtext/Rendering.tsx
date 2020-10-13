@@ -1,8 +1,9 @@
 import React, { FunctionComponent } from "react";
 import { Typography } from "@material-ui/core";
 import { RenderLeafProps, RenderElementProps } from "slate-react";
-import { Section, SectionTitle } from "./Section";
+import { SectionTitle } from "./Section";
 import { StructureMode } from "./Types";
+import { StructuralBox } from "./Structure";
 
 export type RichTextEditorElementProps = {
   structureMode: StructureMode;
@@ -12,31 +13,6 @@ export type RichTextEditorElementProps = {
 export type RichTextEditorLeafProps = {
   structureMode: StructureMode;
   renderLeafProps: RenderLeafProps;
-};
-
-type StructuralBoxProps = {
-  structureMode: StructureMode;
-};
-
-const StructuralBox: FunctionComponent<StructuralBoxProps> = ({
-  structureMode,
-  children,
-}) => {
-  const divStyle = {
-    borderLeftWidth: "thick",
-    borderLeftColor: "gainsboro",
-    borderLeftStyle: "solid",
-    borderLeftRadius: "4px",
-    padding: "4px",
-    marginTop: "4px",
-    marginBottom: "4px",
-  };
-
-  return (
-    <div style={structureMode === "outline-mode" ? divStyle : {}}>
-      {children}
-    </div>
-  );
 };
 
 export const Element: FunctionComponent<RichTextEditorElementProps> = (

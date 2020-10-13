@@ -18,8 +18,10 @@ import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
 import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
 import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 
-import { Toolbar, Divider } from "@material-ui/core";
-import { useSlate, ReactEditor } from "slate-react";
+import { CgMoveLeft, CgMoveRight } from "react-icons/cg";
+
+import { Toolbar, Divider, Button, ButtonGroup } from "@material-ui/core";
+import { useSlate, ReactEditor, useEditor } from "slate-react";
 import {
   MARKS,
   Mark,
@@ -33,6 +35,7 @@ import { Editor } from "slate";
 import { toReactMouseEventHandler } from "./EventHandling";
 import { isBlockActive, toggleBlock } from "./Blocks";
 import { RichTextEditorProps } from "./RichTextEditor";
+import { denestSection, nestSection } from "./Structure";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -109,6 +112,19 @@ const StyledToggleButtonGroup = withStyles((theme) => ({
   },
 }))(ToggleButtonGroup);
 
+const StyledButtonGroup = withStyles((theme) => ({
+  grouped: {
+    margin: theme.spacing(0.5),
+    border: "none",
+    "&:not(:first-child)": {
+      borderRadius: theme.shape.borderRadius,
+    },
+    "&:first-child": {
+      borderRadius: theme.shape.borderRadius,
+    },
+  },
+}))(ButtonGroup);
+
 const BlockButtonGroup = () => {
   const editor = useSlate();
   const activeBlocks = BLOCKS.filter((x) => isBlockActive(editor, x));
@@ -152,43 +168,47 @@ const StructureButtonGroup: FunctionComponent<StructureButtonGroupProps> = ({
   structureMode,
   onStructureModeChange,
 }) => {
-  const activeStructure = "foo"; // TODO: Fix this to work properly
+  const outlineModeActive = structureMode === "outline-mode";
+  const editor = useSlate();
 
-  const handleStructure = (
-    event: MouseEvent,
-    structureAction: StructureAction
-  ) => {
-    event.preventDefault();
-
-    // TODO: do the thing
-
-    if (structureAction === "toggle-structure-mode") {
-      // check structure mode, and change it
-      const newStructureMode =
-        structureMode === "edit-mode" ? "outline-mode" : "edit-mode"; // flip between the two modes
-      // let parent components know that structure mode changed
-      onStructureModeChange(newStructureMode);
-    }
+  const handleDenestSelection = () => {
+    // event.preventDefault();
+    denestSection(editor);
+    ReactEditor.focus(editor);
   };
 
+  const handleNestSelection = () => {
+    // event.preventDefault();
+    nestSection(editor);
+    ReactEditor.focus(editor);
+  };
+
+  const handleToggleOutlineMode = () => {
+    // check structure mode, and change it
+    const newStructureMode =
+      structureMode === "edit-mode" ? "outline-mode" : "edit-mode"; // flip between the two modes
+    // let parent components know that structure mode changed
+    onStructureModeChange(newStructureMode);
+  };
+
+  // TODO: Fix CSS issues with the button sizes and colors
   return (
-    <StyledToggleButtonGroup
-      size="small"
-      exclusive
-      value={activeStructure}
-      onChange={toReactMouseEventHandler(handleStructure)}
-      aria-label="block type selection"
-    >
-      <ToggleButton value="section" aria-label="section">
-        <LooksOneIcon />
-      </ToggleButton>
+    <StyledButtonGroup>
+      <Button onClick={handleDenestSelection} aria-label="denest-section">
+        <CgMoveLeft size={24} />
+      </Button>
+      <Button onClick={handleNestSelection} aria-label="nest-section">
+        <CgMoveRight size={24} />
+      </Button>
       <ToggleButton
-        value="toggle-structure-mode"
-        aria-label="toggle-structure-mode"
+        value="outline-mode"
+        aria-label="outline-mode"
+        selected={outlineModeActive}
+        onChange={handleToggleOutlineMode}
       >
         <ViewHeadlineIcon />
       </ToggleButton>
-    </StyledToggleButtonGroup>
+    </StyledButtonGroup>
   );
 };
 
