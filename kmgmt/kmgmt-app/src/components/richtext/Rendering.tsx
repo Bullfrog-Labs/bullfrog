@@ -31,46 +31,21 @@ export const Element: FunctionComponent<RichTextEditorElementProps> = (
       return <SectionTitle {...props.renderElementProps} />;
     case "block-quote":
       return (
-        <StructuralBox structureMode={props.structureMode}>
-          <blockquote {...attributes}>
-            <Typography variant="body1">{children}</Typography>
-          </blockquote>
-        </StructuralBox>
+        <blockquote {...attributes}>
+          <Typography variant="body1">{children}</Typography>
+        </blockquote>
       );
     case "bulleted-list":
-      return (
-        <StructuralBox structureMode={props.structureMode}>
-          <ul {...attributes}>{children}</ul>{" "}
-        </StructuralBox>
-      );
-    case "heading-1":
-      return (
-        <Typography variant="h2" {...attributes}>
-          {children}
-        </Typography>
-      );
-    case "heading-2":
-      return (
-        <Typography variant="h3" {...attributes}>
-          {children}
-        </Typography>
-      );
+      return <ul {...attributes}>{children}</ul>;
     case "list-item":
       return <li {...attributes}>{children}</li>;
     case "numbered-list":
-      return (
-        <StructuralBox structureMode={props.structureMode}>
-          {" "}
-          <ol {...attributes}>{children}</ol>{" "}
-        </StructuralBox>
-      );
+      return <ol {...attributes}>{children}</ol>;
     default:
       return (
-        <StructuralBox structureMode={props.structureMode}>
-          <Typography variant="body1" paragraph={true} {...attributes}>
-            {children}
-          </Typography>
-        </StructuralBox>
+        <Typography variant="body1" paragraph={true} {...attributes}>
+          {children}
+        </Typography>
       );
   }
 };
