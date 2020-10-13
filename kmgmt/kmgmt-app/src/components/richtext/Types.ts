@@ -27,7 +27,7 @@ export const BLOCKS = [...FORMAT_BLOCKS, ...STRUCTURE_BLOCKS];
 
 export type ListBlock = typeof LIST_BLOCKS[number];
 export type FormatBlock = typeof FORMAT_BLOCKS[number];
-export type SectionBlock = typeof STRUCTURE_BLOCKS[number];
+export type StructureBlock = typeof STRUCTURE_BLOCKS[number];
 export type Block = typeof BLOCKS[number];
 
 export const isList = (block: Block): block is ListBlock => {

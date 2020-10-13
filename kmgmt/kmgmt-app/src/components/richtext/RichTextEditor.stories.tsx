@@ -112,26 +112,31 @@ const TEST_STATE = {
       ],
     },
     {
-      type: "heading-3",
-      children: [{ text: "non curabitur gravida arcu ac" }],
-    },
-    {
-      type: "bulleted-list",
+      type: "section",
       children: [
         {
-          type: "list-item",
+          type: "section-title",
+          children: [{ text: "non curabitur gravida arcu ac" }],
+        },
+        {
+          type: "bulleted-list",
           children: [
-            { text: "dictum fusce ut placerat orci" },
-            { text: " platea", italic: true },
+            {
+              type: "list-item",
+              children: [
+                { text: "dictum fusce ut placerat orci" },
+                { text: " platea", italic: true },
+              ],
+            },
+            {
+              type: "list-item",
+              children: [{ text: "mus mauris vitae ultricies leo" }],
+            },
+            {
+              type: "list-item",
+              children: [{ text: "urna molestie at elementum eu" }],
+            },
           ],
-        },
-        {
-          type: "list-item",
-          children: [{ text: "mus mauris vitae ultricies leo" }],
-        },
-        {
-          type: "list-item",
-          children: [{ text: "urna molestie at elementum eu" }],
         },
       ],
     },

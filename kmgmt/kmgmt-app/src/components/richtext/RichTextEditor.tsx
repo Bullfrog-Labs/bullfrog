@@ -6,7 +6,12 @@ import { withHistory } from "slate-history";
 import { Grid, Container, Paper } from "@material-ui/core";
 
 import { hotkeyHandler, toReactKBEventHandler } from "./EventHandling";
-import { Element, Leaf, OutlineElement, OutlineLeaf } from "./Rendering";
+import {
+  Element,
+  Leaf,
+  RichTextEditorElementProps,
+  RichTextEditorLeafProps,
+} from "./Rendering";
 import { withResetBlockOnInsertBreak } from "./EditorBehaviors";
 import DocumentTitle from "./DocumentTitle";
 import RichTextEditorToolbar from "./RichTextEditorToolbar";
@@ -53,21 +58,24 @@ const RichTextEditor = (props: RichTextEditorProps) => {
   );
 
   const renderElement = useCallback(
-    (props) =>
-      structureMode === "edit-mode" ? (
-        <Element {...props} />
-      ) : (
-        <OutlineElement {...props} />
-      ),
+    (props) => {
+      const elementProps: RichTextEditorElementProps = {
+        structureMode: structureMode,
+        renderElementProps: props,
+      };
+      return <Element {...elementProps} />;
+    },
     [structureMode]
   );
   const renderLeaf = useCallback(
-    (props) =>
-      structureMode === "edit-mode" ? (
-        <Leaf {...props} />
-      ) : (
-        <OutlineLeaf {...props} />
-      ),
+    (props) => {
+      props.structureMode = structureMode;
+      const leafProps: RichTextEditorLeafProps = {
+        structureMode: structureMode,
+        renderLeafProps: props,
+      };
+      return <Leaf {...leafProps} />;
+    },
     [structureMode]
   );
 

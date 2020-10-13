@@ -44,8 +44,6 @@ export const SectionTitle: FunctionComponent<RenderElementProps> = ({
   const selected = useSelected();
   const focused = useFocused();
 
-  // const placeholder = "Enter a section title"
-
   if (selected && focused) {
     children = <div className="selected">{children}</div>;
   }
@@ -61,24 +59,12 @@ export const SectionTitle: FunctionComponent<RenderElementProps> = ({
   );
 };
 
+/*
 export const Section: FunctionComponent<RenderElementProps> = ({
   attributes,
   children,
   element,
 }) => {
-  const divStyle = {
-    borderLeftWidth: "thick",
-    borderLeftColor: "gainsboro",
-    borderLeftStyle: "solid",
-    borderLeftRadius: "4px",
-    padding: "4px",
-    marginTop: "4px",
-    marginBottom: "4px",
-  };
-
-  return (
-    <div style={divStyle} {...attributes}>
-      {children}
-    </div>
-  );
+  return <div>{children}</div>;
 };
+*/
