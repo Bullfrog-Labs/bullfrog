@@ -35,9 +35,7 @@ export const SectionTitle: FunctionComponent<RenderElementProps> = ({
   const max_level_for_block_style_section_title = 5;
 
   const variant =
-    level <= max_level_for_block_style_section_title
-      ? `h${level + 1}`
-      : "body1";
+    level <= max_level_for_block_style_section_title ? `h${level}` : "body1";
 
   const isEmpty = Node.string(element) === "";
 
