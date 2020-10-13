@@ -31,9 +31,11 @@ export const Element: FunctionComponent<RichTextEditorElementProps> = (
       return <SectionTitle {...props.renderElementProps} />;
     case "block-quote":
       return (
-        <blockquote {...attributes}>
-          <Typography variant="body1">{children}</Typography>
-        </blockquote>
+        <StructuralBox structureMode={props.structureMode}>
+          <blockquote {...attributes}>
+            <Typography variant="body1">{children}</Typography>
+          </blockquote>
+        </StructuralBox>
       );
     case "bulleted-list":
       return <ul {...attributes}>{children}</ul>;
@@ -41,12 +43,16 @@ export const Element: FunctionComponent<RichTextEditorElementProps> = (
       return <li {...attributes}>{children}</li>;
     case "numbered-list":
       return <ol {...attributes}>{children}</ol>;
-    default:
+    case "paragraph":
       return (
-        <Typography variant="body1" paragraph={true} {...attributes}>
-          {children}
-        </Typography>
+        <StructuralBox structureMode={props.structureMode}>
+          <Typography variant="body1" paragraph={true} {...attributes}>
+            {children}
+          </Typography>
+        </StructuralBox>
       );
+    default:
+      throw new Error(`invalid element type: ${element.type}`);
   }
 };
 
