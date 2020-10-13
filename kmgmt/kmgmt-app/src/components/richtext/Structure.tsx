@@ -1,6 +1,5 @@
 import React, { FunctionComponent } from "react";
 import { Editor, Transforms } from "slate";
-import { ReactEditor, useSlate } from "slate-react";
 import { StructureMode } from "./Types";
 
 export const denestSection = (editor: Editor) => {
@@ -15,7 +14,10 @@ export const nestSection = (editor: Editor) => {
   // 1. text selected
   // 2. no text selected
   // 3. ?
-  Transforms.wrapNodes(editor, { type: "section", children: [] });
+  Transforms.wrapNodes(editor, {
+    type: "section",
+    children: [],
+  });
 };
 
 type StructuralBoxProps = {
