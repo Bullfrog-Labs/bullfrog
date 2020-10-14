@@ -35,7 +35,7 @@ import { Editor } from "slate";
 import { toReactMouseEventHandler } from "./EventHandling";
 import { isBlockActive, toggleBlock } from "./Blocks";
 import { RichTextEditorProps } from "./RichTextEditor";
-import { denestSection, nestSection } from "./Structure";
+import { denestBlock, nestSection } from "./Structure";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -171,9 +171,9 @@ const StructureButtonGroup: FunctionComponent<StructureButtonGroupProps> = ({
   const outlineModeActive = structureMode === "outline-mode";
   const editor = useSlate();
 
-  const handleDenestSelection = () => {
+  const handleDenestBlock = () => {
     // event.preventDefault();
-    denestSection(editor);
+    denestBlock(editor);
     ReactEditor.focus(editor);
   };
 
@@ -194,7 +194,7 @@ const StructureButtonGroup: FunctionComponent<StructureButtonGroupProps> = ({
   // TODO: Fix CSS issues with the button sizes and colors
   return (
     <StyledButtonGroup>
-      <Button onClick={handleDenestSelection} aria-label="denest-section">
+      <Button onClick={handleDenestBlock} aria-label="denest-block">
         <CgMoveLeft size={24} />
       </Button>
       <Button onClick={handleNestSelection} aria-label="nest-section">

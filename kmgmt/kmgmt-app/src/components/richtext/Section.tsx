@@ -8,6 +8,7 @@ import {
   useFocused,
   useSelected,
 } from "slate-react";
+import { isSectionTitleActive } from "./Structure";
 
 const useStyles = makeStyles((theme) => ({
   emptySectionTitle: {
@@ -28,16 +29,23 @@ export const withSectionTitles = (editor: Editor) => {
   editor.normalizeNode = (entry) => {
     const [node, path] = entry;
 
+    const isSectionTitle = (n: Node) => {
+      return Element.isElement(n) && n.type === "section-title";
+    };
+
     const isSection = Element.isElement(node) && node.type === "section";
+
+    // Rule 0. No top-level section titles
+    if (isSectionTitle(node)) {
+      if (path.length === 1) {
+        Transforms.setNodes(editor, { type: "paragraph" }, { at: path });
+      }
+    }
 
     if (!isSection) {
       normalizeNode(entry);
       return;
     }
-
-    const isSectionTitle = (n: Node) => {
-      return Element.isElement(n) && n.type === "section-title";
-    };
 
     // Rule 1. First node should be a section title.
     const first = Node.child(node, 0);
@@ -85,7 +93,9 @@ export const SectionTitle: FunctionComponent<RenderElementProps> = ({
   const max_level_for_block_style_section_title = 5;
 
   const variant =
-    level <= max_level_for_block_style_section_title ? `h${level}` : "body1";
+    level <= max_level_for_block_style_section_title
+      ? `h${level - 1}`
+      : "body1";
 
   const isEmpty = Node.string(element) === "";
 
