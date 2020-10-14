@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { Editor, Range, Node, Transforms, Element } from "slate";
+import { Editor, Range, Node, Transforms, Element, Text } from "slate";
 import { ReactEditor } from "slate-react";
 import { StructureMode } from "./Types";
 
@@ -20,69 +20,70 @@ export const isSectionTitleActive = (editor: Editor) => {
 };
 
 export const denestBlock = (editor: ReactEditor) => {
-  const matches = Array.from(
-    Editor.nodes(editor, {
-      at: editor.selection,
-      mode: "lowest",
-      match: (n) => {
-        if (Element.isElement(n) && n.type === "section") {
-          const path = ReactEditor.findPath(editor, n);
-          return path.length === 1;
-        }
-      },
-    })
-  );
+  // TODO: does not work properly with expanded ranges yet.
 
-  /*
-  Transforms.unwrapNodes(editor, {
-    mode: "lowest",
-    match: (n) => {
-      if (Element.isElement(n) && n.type === "section") {
-        const path = ReactEditor.findPath(editor, n);
-        return path.length === 1;
-      }
-    },
-  });
-  */
+  if (!editor.selection || Range.isExpanded(editor.selection)) {
+    return;
+  }
 
-  // WTF: The match function seems to be run over every single parent node from
-  // the selection, so that even the parent nodes have the operation performed
-  // upon them.
+  // get non-text element
+  let nodePath = Range.start(editor.selection).path;
+  let node = Node.get(editor, nodePath);
+
+  if (Text.isText(node)) {
+    nodePath = nodePath.slice(0, -1);
+    node = Node.get(editor, nodePath);
+  }
+
+  if (Element.isElement(node) && node.type == "section-title") {
+    nodePath = nodePath.slice(0, -1);
+    node = Node.get(editor, nodePath);
+  }
+
+  // a top-level section is being denested
+  if (
+    nodePath.length === 1 &&
+    Element.isElement(node) &&
+    node.type === "section"
+  ) {
+    // turn the section title into a paragraph
+    const sectionTitlePath = nodePath.slice();
+    sectionTitlePath.push(0);
+    Transforms.setNodes(
+      editor,
+      { type: "paragraph" },
+      { at: sectionTitlePath }
+    );
+
+    // node path unchanged by above edits
+    Transforms.unwrapNodes(editor, { at: nodePath });
+    return;
+  }
+
+  const matchFn = (n: Node) => {
+    // need to denest from a section, so if there is no section, skip
+    // denesting
+    if (!isSectionActive(editor)) {
+      return false;
+    }
+
+    // denesting on a section title means to denest the section itself
+    if (isSectionTitleActive(editor)) {
+      return "type" in n && n.type === "section";
+    } else {
+      return Editor.isBlock(editor, n);
+    }
+  };
+
+  // WTFNOTE: some things in Slate works in weird ways
+  // 1. A path intersects with another path if they share any common prefix
+  // 2. Tree traversal with `at` set to editor.selection traverses over the root
+  // node, because all traversals hit the root node
+
   Transforms.liftNodes(editor, {
     mode: "lowest",
-    match: (n) => {
-      // need to denest from a section, so if there is no section, skip
-      // denesting
-      if (!isSectionActive(editor)) {
-        return false;
-      }
-
-      if (!editor.selection) {
-        return false;
-      }
-
-      const path = ReactEditor.findPath(editor, n);
-      const includedInSelection = Range.includes(editor.selection, path);
-
-      if (!includedInSelection) {
-        return false;
-      }
-
-      // denesting on a section title means to denest the section itself
-      if (isSectionTitleActive(editor)) {
-        const result = "type" in n && n.type === "section";
-        console.log(result, n);
-        return result;
-      } else {
-        const result = Editor.isBlock(editor, n);
-        console.log(result, n);
-        return result;
-      }
-    },
+    match: matchFn,
   });
-
-  // force normalize to fix section titles that would become top-level, if any
-  Editor.normalize(editor, { force: true });
 };
 export const nestSection = (editor: Editor) => {
   // cases
