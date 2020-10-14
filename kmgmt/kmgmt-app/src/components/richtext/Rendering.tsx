@@ -44,9 +44,17 @@ export const Element: FunctionComponent<RichTextEditorElementProps> = (
     case "numbered-list":
       return <ol {...attributes}>{children}</ol>;
     case "paragraph":
+      const paragraphStyle =
+        props.structureMode === "outline-mode" ? { marginBottom: "4px" } : {};
+
       return (
         <StructuralBox structureMode={props.structureMode}>
-          <Typography variant="body1" paragraph={true} {...attributes}>
+          <Typography
+            style={paragraphStyle}
+            variant="body1"
+            paragraph={true}
+            {...attributes}
+          >
             {children}
           </Typography>
         </StructuralBox>
