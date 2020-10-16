@@ -8,6 +8,7 @@ import { Editor } from "slate";
 import { toggleMark } from "./Marks";
 import { platformAwareKeymapToHotkeyHandler } from "./Hotkeys";
 import { PLATFORM } from "./Environment";
+import { moveOut, nestSection } from "./Structure";
 
 export const noopKBEventHandler = () => {
   return (event: KeyboardEvent) => {};
@@ -20,6 +21,16 @@ const toggleMarkHotkeyHandler = (editor: Editor, mark: Mark) => (
   toggleMark(editor, mark);
 };
 
+const nestSectionHotkeyHandler = (editor: Editor) => (event: KeyboardEvent) => {
+  event.preventDefault();
+  nestSection(editor);
+};
+
+const moveOutHotkeyHandler = (editor: Editor) => (event: KeyboardEvent) => {
+  event.preventDefault();
+  moveOut(editor);
+};
+
 export const hotkeyHandler = (editor: Editor) => {
   const PLATFORM_AWARE_KEYMAP: PlatformAwareKeymap = {
     generic: {
@@ -27,6 +38,8 @@ export const hotkeyHandler = (editor: Editor) => {
       italic: ["mod+i", toggleMarkHotkeyHandler(editor, "italic")],
       underline: ["mod+u", toggleMarkHotkeyHandler(editor, "underline")],
       code: ["mod+shift+c", toggleMarkHotkeyHandler(editor, "code")],
+      wrap: ["tab", nestSectionHotkeyHandler(editor)],
+      moveOut: ["shift+tab", moveOutHotkeyHandler(editor)],
     },
     platformSpecific: {
       apple: {},
