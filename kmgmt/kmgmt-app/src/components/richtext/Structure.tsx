@@ -35,7 +35,7 @@ export const denestBlock = (editor: ReactEditor) => {
     node = Node.get(editor, nodePath);
   }
 
-  if (Element.isElement(node) && node.type == "section-title") {
+  if (Element.isElement(node) && node.type === "section-title") {
     nodePath = nodePath.slice(0, -1);
     node = Node.get(editor, nodePath);
   }

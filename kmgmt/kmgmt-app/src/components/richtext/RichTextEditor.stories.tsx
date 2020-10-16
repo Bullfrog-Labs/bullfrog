@@ -107,21 +107,21 @@ const TEST_STATE = {
                 },
               ],
             },
-          ],
-        },
-        {
-          type: "section",
-          children: [
             {
-              type: "section-title",
-              children: [{ text: "Lacus sed viverra tellus in" }],
-            },
-            {
-              type: "paragraph",
+              type: "section",
               children: [
                 {
-                  text:
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                  type: "section-title",
+                  children: [{ text: "Another paragraph" }],
+                },
+                {
+                  type: "paragraph",
+                  children: [
+                    {
+                      text:
+                        "blah blah sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                    },
+                  ],
                 },
               ],
             },
@@ -132,14 +132,14 @@ const TEST_STATE = {
           children: [
             {
               type: "section-title",
-              children: [{ text: "Lacus sed viverra tellus in" }],
+              children: [{ text: "One more paragraph" }],
             },
             {
               type: "paragraph",
               children: [
                 {
                   text:
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                    "yada yada yada consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
                 },
               ],
             },
