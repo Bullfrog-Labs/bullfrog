@@ -18,6 +18,7 @@ import RichTextEditorToolbar from "./RichTextEditorToolbar";
 import { RichText, StructureMode } from "./Types";
 import { EMPTY_RICH_TEXT } from "./Utils";
 import { withSectionTitles } from "./Section";
+import { handleSelectionChange } from "./Structure";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -51,12 +52,18 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
   return ops.some((op) => !Operation.isSelectionOperation(op));
 };
 
+const didOpsAffectSelection = (ops: Operation[]): boolean => {
+  return ops.some((op) => Operation.isSelectionOperation(op));
+};
+
 const RichTextEditor = (props: RichTextEditorProps) => {
   const { title, body, onTitleChange, onBodyChange, enableToolbar } = props;
 
   const [structureMode, setStructureMode] = useState<StructureMode>(
     "outline-mode"
   );
+
+  const [sectionModeEnabled, setSectionModeEnabled] = useState<boolean>(false);
 
   const renderElement = useCallback(
     (props) => {
@@ -95,6 +102,12 @@ const RichTextEditor = (props: RichTextEditorProps) => {
     body: (newBody: Body) => {
       if (didOpsAffectContent(editor.operations)) {
         onBodyChange(newBody);
+      } else if (didOpsAffectSelection(editor.operations)) {
+        handleSelectionChange(
+          editor,
+          sectionModeEnabled,
+          setSectionModeEnabled
+        );
       }
     },
   };
