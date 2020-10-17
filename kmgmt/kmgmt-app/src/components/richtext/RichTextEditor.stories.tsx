@@ -73,10 +73,6 @@ const TEST_STATE = {
       type: "section",
       children: [
         {
-          type: "section-title",
-          children: [{ text: "Lacus sed viverra tellus in" }],
-        },
-        {
           type: "paragraph",
           children: [
             {
@@ -88,10 +84,6 @@ const TEST_STATE = {
         {
           type: "section",
           children: [
-            {
-              type: "section-title",
-              children: [{ text: "Scelerisque viverra mauris in aliquam" }],
-            },
             {
               type: "paragraph",
               children: [
@@ -111,10 +103,6 @@ const TEST_STATE = {
               type: "section",
               children: [
                 {
-                  type: "section-title",
-                  children: [{ text: "Another paragraph" }],
-                },
-                {
                   type: "paragraph",
                   children: [
                     {
@@ -131,10 +119,6 @@ const TEST_STATE = {
           type: "section",
           children: [
             {
-              type: "section-title",
-              children: [{ text: "One more paragraph" }],
-            },
-            {
               type: "paragraph",
               children: [
                 {
@@ -150,10 +134,6 @@ const TEST_STATE = {
     {
       type: "section",
       children: [
-        {
-          type: "section-title",
-          children: [{ text: "non curabitur gravida arcu ac" }],
-        },
         {
           type: "bulleted-list",
           children: [
