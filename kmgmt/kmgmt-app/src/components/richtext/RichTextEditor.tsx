@@ -88,7 +88,12 @@ const RichTextEditor = (props: RichTextEditorProps) => {
   );
 
   const editor = useMemo(
-    () => withReact(withResetBlockOnInsertBreak(withHistory(createEditor()))),
+    () =>
+      withReact(
+        withSectionTitles(
+          withResetBlockOnInsertBreak(withHistory(createEditor()))
+        )
+      ),
     []
   );
 
