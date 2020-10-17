@@ -295,8 +295,7 @@ const expandSelectionToCoverSections = (editor: Editor) => {
   const endPath =
     endSectionPath === null ? Range.end(editor.selection).path : endSectionPath;
   const pointPastEnd = {
-    // path: Path.next(endPath), // TODO: how's this supposed to work for the last node?
-    path: endPath,
+    path: Path.next(endPath), // TODO: how's this supposed to work for the last node?
     offset: 0,
   };
 

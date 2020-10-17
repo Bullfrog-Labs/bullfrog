@@ -23,9 +23,11 @@ export const Element: FunctionComponent<RichTextEditorElementProps> = (
   switch (element.type) {
     case "section":
       return (
-        <StructuralBox structureMode={props.structureMode}>
-          {props.renderElementProps.children}
-        </StructuralBox>
+        <div {...attributes}>
+          <StructuralBox structureMode={props.structureMode}>
+            {children}
+          </StructuralBox>
+        </div>
       );
     case "section-title":
       return <SectionTitle {...props.renderElementProps} />;
