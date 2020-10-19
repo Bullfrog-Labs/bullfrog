@@ -234,6 +234,23 @@ export const nestSection = (editor: Editor) => {
   });
 };
 
+const rangeSpansAcrossBlocks = (editor: Editor, range: Range): boolean => {
+  const [startPath, endPath] = Range.edges(range).map((p) => {
+    const entry = getEnclosingBlockPathEntry(editor, p.path);
+    if (entry === null) {
+      throw new Error(
+        "All content should be enclosed in blocks, but this one is not."
+      );
+    }
+    const [_node, path] = entry;
+    return path;
+  });
+
+  const result = !arePathsSame(startPath, endPath);
+  console.log({ startPath: startPath, endPath: endPath, result: result });
+  return result;
+};
+
 const rangeSpansAcrossSections = (editor: Editor, range: Range): boolean => {
   const [startPath, endPath] = Range.edges(range).map((p) => {
     const entry = getEnclosingSectionPathEntry(editor, p.path);
@@ -319,7 +336,7 @@ export const handleSelectionChange = (
     return;
   }
 
-  if (rangeSpansAcrossSections(editor, editor.selection)) {
+  if (rangeSpansAcrossBlocks(editor, editor.selection)) {
     // if the selection spans multiple sections, switch to section mode.
     // TODO: is there any logic to be done when switching in, beyond setting the flag?
     if (!sectionModeEnabled) {
