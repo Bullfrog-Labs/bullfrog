@@ -246,9 +246,7 @@ const rangeSpansAcrossBlocks = (editor: Editor, range: Range): boolean => {
     return path;
   });
 
-  const result = !arePathsSame(startPath, endPath);
-  console.log({ startPath: startPath, endPath: endPath, result: result });
-  return result;
+  return !arePathsSame(startPath, endPath);
 };
 
 const rangeSpansAcrossSections = (editor: Editor, range: Range): boolean => {
@@ -285,6 +283,39 @@ const rangeSpansAcrossSections = (editor: Editor, range: Range): boolean => {
   }
 };
 
+const first = <T extends unknown>(iter: Iterable<T>): T | null => {
+  for (const x of iter) {
+    return x;
+  }
+
+  return null;
+};
+
+const elementPathsToSelectionPoints = (
+  editor: Editor,
+  startElementPath: Path,
+  endElementPath: Path
+): [Point, Point] => {
+  const [_startNode, startPath] = first(
+    Node.texts(Node.get(editor, startElementPath), {})
+  );
+
+  const startPoint = {
+    path: startElementPath.concat(startPath),
+    offset: 0,
+  };
+
+  const [endNode, endPath] = first(
+    Node.texts(Node.get(editor, endElementPath), { reverse: true })
+  );
+  const endPoint = {
+    path: endElementPath.concat(endPath),
+    offset: endNode.text.length,
+  };
+
+  return [startPoint, endPoint];
+};
+
 const expandSelectionToCoverSections = (editor: Editor) => {
   if (!editor.selection) {
     return;
@@ -301,30 +332,22 @@ const expandSelectionToCoverSections = (editor: Editor) => {
     }
   );
 
-  const startPoint = {
-    path:
-      startSectionPath === null
-        ? Range.start(editor.selection).path // start not contained in section
-        : startSectionPath,
-    offset: 0,
-  };
+  const startElementPath =
+    startSectionPath === null
+      ? Range.start(editor.selection).path // start not contained in section
+      : startSectionPath;
 
-  const endPath =
+  const endElementPath =
     endSectionPath === null ? Range.end(editor.selection).path : endSectionPath;
-  const pointPastEnd = {
-    path: Path.next(endPath), // TODO: how's this supposed to work for the last node?
-    offset: 0,
-  };
 
-  console.log(startPoint);
-  console.log(pointPastEnd);
+  const [startPoint, endPoint] = elementPathsToSelectionPoints(
+    editor,
+    startElementPath,
+    endElementPath
+  );
 
-  // cannot set point to a place where there is no corresponding DOM node
   Transforms.setPoint(editor, startPoint, { edge: "start" });
-  // Transforms.setPoint(editor, pointPastEnd, { edge: "end" });
-
-  // Move back to end of section
-  // Transforms.move(editor, { distance: 1, unit: "offset", edge: "end" });
+  Transforms.setPoint(editor, endPoint, { edge: "end" });
 };
 
 export const handleSelectionChange = (
@@ -336,6 +359,9 @@ export const handleSelectionChange = (
     return;
   }
 
+  // TODO: Handle when selection mode is already enabled and the user is trying to change the selection mode, e.g. change selection by sections.
+  // TODO: Handle switching out of selection mode when a single selection is chosen, and the user makes the selection smaller (so that it no longer spans blocks)
+
   if (rangeSpansAcrossBlocks(editor, editor.selection)) {
     // if the selection spans multiple sections, switch to section mode.
     // TODO: is there any logic to be done when switching in, beyond setting the flag?
@@ -343,13 +369,12 @@ export const handleSelectionChange = (
       setSectionModeEnabled(true);
     }
     // move anchor and focus to cover the sections, if they are not in the middle of the section
-
     expandSelectionToCoverSections(editor);
+
     // mark sections as selected
     // WTFNOTE: how to get the sections?
   } else {
     // if the selection spans is in a single section, switch out of section mode.
-    // TODO: is there any logic to be done when switching out, beyond setting the flag?
     if (sectionModeEnabled) {
       setSectionModeEnabled(false);
     }
