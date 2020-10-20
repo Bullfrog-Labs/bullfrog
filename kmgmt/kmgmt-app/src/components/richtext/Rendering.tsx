@@ -1,9 +1,9 @@
 import React, { FunctionComponent } from "react";
 import { Typography } from "@material-ui/core";
 import { RenderLeafProps, RenderElementProps } from "slate-react";
-import { SectionTitle } from "./Section";
+import { SectionTitle } from "./structure/SectionTitle";
 import { StructureMode } from "./Types";
-import { StructuralBox } from "./Structure";
+import { StructuralBox } from "./structure/StructuralBox";
 
 export type RichTextEditorElementProps = {
   structureMode: StructureMode;

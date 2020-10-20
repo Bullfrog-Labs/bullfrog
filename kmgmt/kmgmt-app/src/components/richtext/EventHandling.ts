@@ -8,7 +8,7 @@ import { Editor } from "slate";
 import { toggleMark } from "./Marks";
 import { platformAwareKeymapToHotkeyHandler } from "./Hotkeys";
 import { PLATFORM } from "./Environment";
-import { moveOut, nestSection } from "./Structure";
+import { moveOut, nestSection } from "./structure/StructuralEdits";
 
 export const noopKBEventHandler = () => {
   return (event: KeyboardEvent) => {};

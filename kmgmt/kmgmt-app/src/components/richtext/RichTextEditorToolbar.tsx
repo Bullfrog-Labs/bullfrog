@@ -21,21 +21,13 @@ import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 import { CgMoveLeft, CgMoveRight } from "react-icons/cg";
 
 import { Toolbar, Divider, Button, ButtonGroup } from "@material-ui/core";
-import { useSlate, ReactEditor, useEditor } from "slate-react";
-import {
-  MARKS,
-  Mark,
-  BLOCKS,
-  Block,
-  StructureAction,
-  StructureMode,
-} from "./Types";
+import { useSlate, ReactEditor } from "slate-react";
+import { MARKS, Mark, BLOCKS, Block, StructureMode } from "./Types";
 import { isMarkActive } from "./Marks";
 import { Editor } from "slate";
 import { toReactMouseEventHandler } from "./EventHandling";
 import { isBlockActive, toggleBlock } from "./Blocks";
-import { RichTextEditorProps } from "./RichTextEditor";
-import { denestBlock, nestSection } from "./Structure";
+import { denestBlock, nestSection } from "./structure/StructuralEdits";
 
 const useStyles = makeStyles((theme) => ({
   paper: {

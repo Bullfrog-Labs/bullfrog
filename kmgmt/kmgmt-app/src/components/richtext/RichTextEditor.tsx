@@ -17,8 +17,7 @@ import DocumentTitle from "./DocumentTitle";
 import RichTextEditorToolbar from "./RichTextEditorToolbar";
 import { RichText, StructureMode } from "./Types";
 import { EMPTY_RICH_TEXT } from "./Utils";
-import { withSectionTitles } from "./Section";
-import { handleSelectionChange } from "./Structure";
+import { handleSelectionChange } from "./structure/SelectionMode";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -116,7 +115,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
             <Grid item>
               <DocumentTitle
                 readOnly={props.readOnly}
-                handleEscape={(event) => {
+                handleEscape={() => {
                   ReactEditor.focus(editor);
                 }}
                 initialValue={title}
