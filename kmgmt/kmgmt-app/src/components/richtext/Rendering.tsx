@@ -19,12 +19,16 @@ export const Element: FunctionComponent<RichTextEditorElementProps> = (
   props
 ) => {
   const { attributes, children, element } = props.renderElementProps;
+  const elementSelected: boolean = !!element.selected;
 
   switch (element.type) {
     case "section":
       return (
         <div {...attributes}>
-          <StructuralBox structureMode={props.structureMode}>
+          <StructuralBox
+            structureMode={props.structureMode}
+            selected={elementSelected}
+          >
             {children}
           </StructuralBox>
         </div>
@@ -33,7 +37,10 @@ export const Element: FunctionComponent<RichTextEditorElementProps> = (
       return <SectionTitle {...props.renderElementProps} />;
     case "block-quote":
       return (
-        <StructuralBox structureMode={props.structureMode}>
+        <StructuralBox
+          structureMode={props.structureMode}
+          selected={elementSelected}
+        >
           <blockquote {...attributes}>
             <Typography variant="body1">{children}</Typography>
           </blockquote>
@@ -50,7 +57,10 @@ export const Element: FunctionComponent<RichTextEditorElementProps> = (
         props.structureMode === "outline-mode" ? { marginBottom: "4px" } : {};
 
       return (
-        <StructuralBox structureMode={props.structureMode}>
+        <StructuralBox
+          structureMode={props.structureMode}
+          selected={elementSelected}
+        >
           <Typography
             style={paragraphStyle}
             variant="body1"

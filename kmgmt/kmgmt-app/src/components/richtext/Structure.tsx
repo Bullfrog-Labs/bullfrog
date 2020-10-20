@@ -1,3 +1,5 @@
+import { makeStyles } from "@material-ui/core";
+import { Transform } from "@material-ui/icons";
 import React, { FunctionComponent } from "react";
 import {
   Editor,
@@ -390,6 +392,15 @@ const convertCurrentSelectionToSectionMode = (editor: Editor) => {
 
   for (const path of spannedBlockPaths) {
     Transforms.setNodes(editor, { selected: true }, { at: path });
+
+    const node = Node.get(editor, path);
+    for (const [_childNode, childPath] of Node.elements(node)) {
+      Transforms.setNodes(
+        editor,
+        { selected: true },
+        { at: path.concat(childPath) }
+      );
+    }
   }
 };
 
@@ -406,6 +417,14 @@ const enableSectionMode = (editor: Editor) => {
 
   // TODO: unset editor selection?
   // Transforms.deselect(editor);
+};
+
+const disableSectionMode = (editor: Editor) => {
+  Transforms.unsetNodes(editor, "selected", {
+    mode: "all",
+    at: [],
+    match: (n) => true,
+  });
 };
 
 export const handleSelectionChange = (
@@ -433,6 +452,7 @@ export const handleSelectionChange = (
     // if the selection spans is in a single section, switch out of section mode.
     if (sectionModeEnabled) {
       setSectionModeEnabled(false);
+      disableSectionMode(editor);
     }
   }
 
@@ -443,27 +463,33 @@ export const handleSelectionChange = (
   // cover the entire section.
 };
 
-type StructuralBoxProps = {
-  structureMode: StructureMode;
-};
-
-export const StructuralBox: FunctionComponent<StructuralBoxProps> = ({
-  structureMode,
-  children,
-}) => {
-  const divStyle = {
+const useStyles = makeStyles((theme) => ({
+  structureBoxOutline: {
     borderLeftWidth: "thick",
-    borderLeftColor: "gainsboro",
+    borderLeftColor: (props: StructuralBoxProps) =>
+      props.selected ? "#07BEB8" : "gainsboro",
     borderLeftStyle: "solid",
     borderLeftRadius: "4px",
     padding: "4px",
     marginTop: "4px",
     marginBottom: "4px",
-  };
+  },
+  structureBox: {},
+}));
 
-  return (
-    <div style={structureMode === "outline-mode" ? divStyle : {}}>
-      {children}
-    </div>
-  );
+type StructuralBoxProps = {
+  structureMode: StructureMode;
+  selected: boolean;
+};
+
+export const StructuralBox: FunctionComponent<StructuralBoxProps> = (props) => {
+  const { structureMode, children } = props;
+  const classes = useStyles(props);
+
+  const className =
+    structureMode === "outline-mode"
+      ? classes.structureBoxOutline
+      : classes.structureBox;
+
+  return <div className={className}>{children}</div>;
 };
