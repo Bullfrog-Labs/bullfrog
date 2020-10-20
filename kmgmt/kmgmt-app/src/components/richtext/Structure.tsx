@@ -140,6 +140,28 @@ const arePathsSame = (path: Path, otherPath: Path): boolean => {
   return true;
 };
 
+const getEnclosingPath = (path: Path, otherPath: Path): Path => {
+  const enclosingPath: number[] = [];
+
+  for (const xs of zip(path, otherPath)) {
+    const left = xs[0];
+    const right = xs[1];
+    if (left === undefined || right === undefined) {
+      // difference in path length
+      break;
+    }
+
+    if (left !== right) {
+      // mismatch in path
+      break;
+    }
+
+    enclosingPath.push(left);
+  }
+
+  return enclosingPath;
+};
+
 const getSmallestEnclosingSection = (editor: Editor, range: Range): Path => {
   // Returns empty path [] to represent that the smallest enclosing section is
   // the top-level document.
@@ -182,25 +204,7 @@ const getSmallestEnclosingSection = (editor: Editor, range: Range): Path => {
       endPath.path
     );
 
-    const enclosingPath: number[] = [];
-
-    for (const xs of zip(startEnclosingBlockPath, endEnclosingBlockPath)) {
-      const left = xs[0];
-      const right = xs[1];
-      if (left === undefined || right === undefined) {
-        // difference in path length
-        break;
-      }
-
-      if (left !== right) {
-        // mismatch in path
-        break;
-      }
-
-      enclosingPath.push(left);
-    }
-
-    return enclosingPath;
+    return getEnclosingPath(startEnclosingBlockPath, endEnclosingBlockPath);
   }
 };
 
@@ -350,6 +354,60 @@ const expandSelectionToCoverSections = (editor: Editor) => {
   Transforms.setPoint(editor, endPoint, { edge: "end" });
 };
 
+const rangeToSpannedBlockPaths = (editor: Editor, range: Range): Path[] => {
+  const [startEntry, endEntry] = Range.edges(range).map((p) => {
+    return getEnclosingBlockPathEntry(editor, p.path);
+  });
+
+  // Find the common depth for the paths
+  const [startNode, startPath] = startEntry;
+  const [endNode, endPath] = endEntry;
+
+  const spanDepth = getEnclosingPath(startPath, endPath).length + 1;
+
+  const startSpanPath = startPath.slice(0, spanDepth);
+  const endSpanPath = endPath.slice(0, spanDepth);
+  const parentPath = startSpanPath.slice(0, -1);
+
+  const spanBlockPaths = [];
+
+  for (let i = startSpanPath.slice(-1)[0]; i <= endSpanPath.slice(-1)[0]; i++) {
+    const path = parentPath.slice();
+    path.push(i);
+    spanBlockPaths.push(path);
+  }
+
+  // Return blocks at that level spanned by range
+  return spanBlockPaths;
+};
+
+const convertCurrentSelectionToSectionMode = (editor: Editor) => {
+  if (!editor.selection) {
+    throw new Error("cannot convert null selection to section mode");
+  }
+
+  const spannedBlockPaths = rangeToSpannedBlockPaths(editor, editor.selection);
+
+  for (const path of spannedBlockPaths) {
+    Transforms.setNodes(editor, { selected: true }, { at: path });
+  }
+};
+
+const enableSectionMode = (editor: Editor) => {
+  if (!editor.selection) {
+    throw new Error("cannot enable section mode with null selection");
+  }
+
+  // move anchor and focus to cover the sections, if they are not in the middle of the section
+  // expandSelectionToCoverSections(editor);
+
+  // mark blocks under selection as selected
+  convertCurrentSelectionToSectionMode(editor);
+
+  // TODO: unset editor selection?
+  // Transforms.deselect(editor);
+};
+
 export const handleSelectionChange = (
   editor: Editor,
   sectionModeEnabled: boolean,
@@ -367,10 +425,8 @@ export const handleSelectionChange = (
     // TODO: is there any logic to be done when switching in, beyond setting the flag?
     if (!sectionModeEnabled) {
       setSectionModeEnabled(true);
+      enableSectionMode(editor);
     }
-    // move anchor and focus to cover the sections, if they are not in the middle of the section
-    expandSelectionToCoverSections(editor);
-
     // mark sections as selected
     // WTFNOTE: how to get the sections?
   } else {

@@ -52,10 +52,6 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
   return ops.some((op) => !Operation.isSelectionOperation(op));
 };
 
-const didOpsAffectSelection = (ops: Operation[]): boolean => {
-  return ops.some((op) => Operation.isSelectionOperation(op));
-};
-
 const RichTextEditor = (props: RichTextEditorProps) => {
   const { title, body, onTitleChange, onBodyChange, enableToolbar } = props;
 
@@ -102,12 +98,6 @@ const RichTextEditor = (props: RichTextEditorProps) => {
     body: (newBody: Body) => {
       if (didOpsAffectContent(editor.operations)) {
         onBodyChange(newBody);
-      } else if (didOpsAffectSelection(editor.operations)) {
-        handleSelectionChange(
-          editor,
-          sectionModeEnabled,
-          setSectionModeEnabled
-        );
       }
     },
   };
@@ -149,6 +139,13 @@ const RichTextEditor = (props: RichTextEditorProps) => {
                   spellCheck
                   autoFocus
                   onKeyDown={toReactKBEventHandler(hotkeyHandler(editor))}
+                  onSelect={() => {
+                    handleSelectionChange(
+                      editor,
+                      sectionModeEnabled,
+                      setSectionModeEnabled
+                    );
+                  }}
                 />
               </Slate>
             </Grid>
