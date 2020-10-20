@@ -416,7 +416,7 @@ const enableSectionMode = (editor: Editor) => {
   convertCurrentSelectionToSectionMode(editor);
 
   // TODO: unset editor selection?
-  // Transforms.deselect(editor);
+  Transforms.deselect(editor);
 };
 
 const disableSectionMode = (editor: Editor) => {
@@ -465,14 +465,21 @@ export const handleSelectionChange = (
 
 const useStyles = makeStyles((theme) => ({
   structureBoxOutline: {
+    backgroundColor: (props: StructuralBoxProps) => {
+      if (props.selected) {
+        return "#C4FFF9";
+      } else {
+        return null;
+      }
+    },
     borderLeftWidth: "thick",
     borderLeftColor: (props: StructuralBoxProps) =>
       props.selected ? "#07BEB8" : "gainsboro",
     borderLeftStyle: "solid",
     borderLeftRadius: "4px",
     padding: "4px",
-    marginTop: "4px",
-    marginBottom: "4px",
+    marginTop: "0px",
+    marginBottom: "1px",
   },
   structureBox: {},
 }));
