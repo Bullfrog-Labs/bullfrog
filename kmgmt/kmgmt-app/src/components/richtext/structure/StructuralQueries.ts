@@ -157,10 +157,10 @@ export const rangeToSpannedBlockPaths = (
     return getEnclosingBlockPathEntry(editor, p.path);
   });
 
-  // Find the common depth for the paths
   const [, startPath] = startEntry;
   const [, endPath] = endEntry;
 
+  // Find the common depth for the paths
   const spanDepth = getEnclosingPath(startPath, endPath).length + 1;
 
   const startSpanPath = startPath.slice(0, spanDepth);
