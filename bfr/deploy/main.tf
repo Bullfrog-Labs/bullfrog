@@ -5,9 +5,16 @@ provider "google" {
   zone    = "us-central1-c"
 }
 
+# Some 
 resource "google_app_engine_application" "bookmarks_sync_app" {
   project = "optimum-habitat-293418"
   location_id = "us-central"
+}
+
+# Service account for scheduler
+resource "google_service_account" "default_service_account" {
+  account_id   = "default-service-account"
+  display_name = "Default Service Account"
 }
 
 # Create the storage bucket
@@ -41,12 +48,25 @@ resource "google_cloudfunctions_function" "bookmarks_sync_function" {
  runtime               = "python37"
 }
 
-# Create scheduler
+# Scheduler
+
+resource "google_cloudfunctions_function_iam_member" "scheduler_function_iam_member" {
+  project        = google_cloudfunctions_function.bookmarks_sync_function.project
+  region         = google_cloudfunctions_function.bookmarks_sync_function.region
+  cloud_function = google_cloudfunctions_function.bookmarks_sync_function.name
+
+  role   = "roles/cloudfunctions.invoker"
+  member = "serviceAccount:${google_service_account.default_service_account.email}"
+}
+
 resource "google_cloud_scheduler_job" "bookmarks_sync_scheduler_job" {
  name        = "bookmarks-sync-scheduler"
  schedule    = "* * * * *"
 
  http_target {
    uri = google_cloudfunctions_function.bookmarks_sync_function.https_trigger_url
+   oidc_token {
+      service_account_email = google_service_account.default_service_account.email
+    }
  }
 }
