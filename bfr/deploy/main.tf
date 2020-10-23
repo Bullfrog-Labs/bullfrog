@@ -5,9 +5,14 @@ provider "google" {
   zone    = "us-central1-c"
 }
 
+resource "google_app_engine_application" "bookmarks_sync_app" {
+  project = "optimum-habitat-293418"
+  location_id = "us-central"
+}
+
 # Create the storage bucket
 resource "google_storage_bucket" "deploy_packages_bucket" {
- name   = "deploy_packages"
+ name     = "deploy_packages"
 }
 
 # Zip up our source code
