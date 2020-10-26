@@ -82,9 +82,5 @@ def main():
     logger.debug(
         f"Logged in; access_token={access_token}, consumer_key={consumer_key}")
 
-    pocket = Pocket(consumer_key, access_token)
-    results = pocket.get(count=1)
-    print(results[0]['list'])
-
 
 main()
