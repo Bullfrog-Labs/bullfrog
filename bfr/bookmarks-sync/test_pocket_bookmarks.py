@@ -10,7 +10,7 @@ from firebase_app import FirebaseApp
 from typing import List, Tuple
 import requests
 
-app = FirebaseApp.admin("bullfrog-reader-1")
+app = FirebaseApp.admin("bullfrog-reader")
 
 
 def load_json(file_name):
@@ -42,7 +42,7 @@ logger = logging.getLogger("TestPocketBookmarks")
 def clear_database():
     logger.debug("clearing db")
     r = requests.delete(
-        "http://localhost:8080/emulator/v1/projects/bullfrog-reader-1/databases/(default)/documents"
+        "http://localhost:8080/emulator/v1/projects/bullfrog-reader/databases/(default)/documents"
     )
     logger.debug(f"done; status={r.status_code}")
 

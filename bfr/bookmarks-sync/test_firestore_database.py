@@ -20,7 +20,7 @@ single_bookmark = load_json("single_bookmark.json")
 logging.basicConfig(level="DEBUG")
 logger = logging.getLogger("TestFirestoreDatabase")
 
-app = FirebaseApp.admin("bullfrog-reader-1")
+app = FirebaseApp.admin("bullfrog-reader")
 
 
 def clear_database():
