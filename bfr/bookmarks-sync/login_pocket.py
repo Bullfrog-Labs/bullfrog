@@ -1,4 +1,3 @@
-from typing import Any, List
 from pocket import Pocket
 import logging
 import argparse

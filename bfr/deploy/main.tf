@@ -7,8 +7,9 @@ provider "google" {
 
 # Some 
 resource "google_app_engine_application" "bookmarks_sync_app" {
-  project = "optimum-habitat-293418"
-  location_id = "us-central"
+  project       = "optimum-habitat-293418"
+  location_id   = "us-central"
+  database_type = "CLOUD_FIRESTORE"
 }
 
 # Service account for scheduler
@@ -19,33 +20,33 @@ resource "google_service_account" "default_service_account" {
 
 # Create the storage bucket
 resource "google_storage_bucket" "deploy_packages_bucket" {
- name     = "deploy_packages"
+  name = "deploy_packages"
 }
 
 # Zip up our source code
 data "archive_file" "bookmark_sync_package" {
- type        = "zip"
- source_dir  = "${path.root}/../bookmarks-sync/"
- output_path = "${path.root}/../dist/bookmarks-sync-package.zip"
+  type        = "zip"
+  source_dir  = "${path.root}/../bookmarks-sync/"
+  output_path = "${path.root}/../dist/bookmarks-sync-package.zip"
 }
 
 # Place the zip-ed code in the bucket
 resource "google_storage_bucket_object" "bookmarks_sync_package_object" {
- name   = "bookmarks-sync-package.zip"
- bucket = google_storage_bucket.deploy_packages_bucket.name
- source = "${path.root}/../dist/bookmarks-sync-package.zip"
+  name   = "bookmarks-sync-package.zip"
+  bucket = google_storage_bucket.deploy_packages_bucket.name
+  source = "${path.root}/../dist/bookmarks-sync-package.zip"
 }
 
 resource "google_cloudfunctions_function" "bookmarks_sync_function" {
- name                  = "bookmarks-sync"
- description           = "Sync bookmarks from external app"
- available_memory_mb   = 256
- timeout               = 60
- source_archive_bucket = google_storage_bucket.deploy_packages_bucket.name
- source_archive_object = google_storage_bucket_object.bookmarks_sync_package_object.name
- entry_point           = "main"
- trigger_http          = true
- runtime               = "python37"
+  name                  = "bookmarks-sync"
+  description           = "Sync bookmarks from external app"
+  available_memory_mb   = 256
+  timeout               = 60
+  source_archive_bucket = google_storage_bucket.deploy_packages_bucket.name
+  source_archive_object = google_storage_bucket_object.bookmarks_sync_package_object.name
+  entry_point           = "main"
+  trigger_http          = true
+  runtime               = "python37"
 }
 
 # Scheduler
@@ -60,13 +61,13 @@ resource "google_cloudfunctions_function_iam_member" "scheduler_function_iam_mem
 }
 
 resource "google_cloud_scheduler_job" "bookmarks_sync_scheduler_job" {
- name        = "bookmarks-sync-scheduler"
- schedule    = "* * * * *"
+  name     = "bookmarks-sync-scheduler"
+  schedule = "* * * * *"
 
- http_target {
-   uri = google_cloudfunctions_function.bookmarks_sync_function.https_trigger_url
-   oidc_token {
+  http_target {
+    uri = google_cloudfunctions_function.bookmarks_sync_function.https_trigger_url
+    oidc_token {
       service_account_email = google_service_account.default_service_account.email
     }
- }
+  }
 }
