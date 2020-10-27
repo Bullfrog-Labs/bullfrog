@@ -20,7 +20,7 @@ def main(request):
     if request:
         request_json = request.get_json(silent=True)
         request_args = request.args
-        logger.debug(f"got request; json={request_json}")
+        logger.debug(f"got requests; json={request_json}")
 
     app = FirebaseApp.admin(project_id)
     db = FirestoreDatabase.emulator(app)

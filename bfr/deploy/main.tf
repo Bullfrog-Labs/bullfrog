@@ -32,7 +32,7 @@ data "archive_file" "bookmark_sync_package" {
 
 # Place the zip-ed code in the bucket
 resource "google_storage_bucket_object" "bookmarks_sync_package_object" {
-  name   = "bookmarks-sync-package.zip"
+  name   = "bookmarks-sync-package-${data.archive_file.bookmark_sync_package.output_md5}.zip"
   bucket = google_storage_bucket.deploy_packages_bucket.name
   source = "${path.root}/../dist/bookmarks-sync-package.zip"
 }
@@ -46,7 +46,7 @@ resource "google_cloudfunctions_function" "bookmarks_sync_function" {
   source_archive_object = google_storage_bucket_object.bookmarks_sync_package_object.name
   entry_point           = "main"
   trigger_http          = true
-  runtime               = "python37"
+  runtime               = "python38"
 }
 
 # Scheduler
