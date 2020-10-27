@@ -2,7 +2,7 @@ import logging
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-from typing import TypedDict, List
+from typing import TypedDict, List, Optional
 from datetime import datetime
 
 
@@ -28,7 +28,7 @@ class FirestoreDatabase(object):
         self.db = db
 
     # Data access
-    def get_latest_bookmark(self, user_name: str) -> BookmarkRecord:
+    def get_latest_bookmark(self, user_name: str) -> Optional[BookmarkRecord]:
         self.logger.debug("get latest")
         query_ref = (
             self.db.collection("users")
@@ -37,8 +37,12 @@ class FirestoreDatabase(object):
             .order_by("created_at", direction=firestore.Query.DESCENDING)
             .limit(1)
         )
-        self.logger.debug(f"got {query_ref.get()[0].to_dict()}")
-        return query_ref.get()[0].to_dict()
+        results = query_ref.get()
+        if len(results) > 0:
+            self.logger.debug(f"got {query_ref.get()[0].to_dict()}")
+            return query_ref.get()[0].to_dict()
+        else:
+            return None
 
     def add_items(self, user_name: str, bookmarks: List[BookmarkRecord]) -> None:
         self.logger.debug(f"saving bookmarks {len(bookmarks)}")

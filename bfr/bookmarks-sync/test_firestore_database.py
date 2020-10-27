@@ -8,6 +8,7 @@ from firestore_database import FirestoreDatabase, BookmarkRecord
 from firebase_app import FirebaseApp
 import datetime
 import uuid
+import requests
 
 
 def load_json(file_name):
@@ -20,6 +21,14 @@ logging.basicConfig(level="DEBUG")
 logger = logging.getLogger("TestFirestoreDatabase")
 
 app = FirebaseApp.admin("bullfrog-reader-1")
+
+
+def clear_database():
+    logger.debug("clearing db")
+    r = requests.delete(
+        "http://localhost:8080/emulator/v1/projects/bullfrog-reader-1/databases/(default)/documents"
+    )
+    logger.debug(f"done; status={r.status_code}")
 
 
 class BookmarkRecords(object):
@@ -39,6 +48,9 @@ class BookmarkRecords(object):
 
 
 class TestFirestoreDatabase(unittest.TestCase):
+    def setUp(self):
+        clear_database()
+
     def test_save_items(self):
         os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
         db = FirestoreDatabase.emulator(app)
@@ -50,6 +62,8 @@ class TestFirestoreDatabase(unittest.TestCase):
     def test_get_latest(self):
         os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
         db = FirestoreDatabase.emulator(app)
+        bm0 = db.get_latest_bookmark("user@blfrg.xyz")
+        self.assertEqual(bm0, None)
         bm1 = BookmarkRecords.from_pocket_record(single_bookmark["item_0"])
         bm2 = BookmarkRecords.from_pocket_record(single_bookmark["item_0"])
         bm2["url"] = "http://last.com"
@@ -62,7 +76,7 @@ class TestFirestoreDatabase(unittest.TestCase):
             [bm2],
         )
         bm = db.get_latest_bookmark("user@blfrg.xyz")
-        self.assertEquals(bm["url"], "http://last.com")
+        self.assertEqual(bm["url"], "http://last.com")
 
 
 if __name__ == "__main__":
