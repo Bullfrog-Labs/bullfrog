@@ -2,3 +2,4 @@ dist
 **/.terraform
 **/.DS_Store
 **/terraform.tfstate.backup
+.vscode
