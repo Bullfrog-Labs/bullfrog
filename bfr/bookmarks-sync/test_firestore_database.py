@@ -4,7 +4,8 @@ import os
 import logging
 import time
 import sys
-from pocket_bookmarks import PocketBookmarks, FirestoreDatabase, BookmarkRecord
+from firestore_database import FirestoreDatabase, BookmarkRecord
+from firebase_app import FirebaseApp
 
 
 def load_json(file_name):
@@ -16,12 +17,14 @@ single_bookmark = load_json("single_bookmark.json")
 logging.basicConfig(level="DEBUG")
 logger = logging.getLogger("TestFirestoreDatabase")
 
+app = FirebaseApp.admin("bullfrog-reader-1")
+
 
 class TestFirestoreDatabase(unittest.TestCase):
     def test_save_items(self):
         os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
-        db = FirestoreDatabase.emulator("bullfrog-reader-1")
-        db.save_items(
+        db = FirestoreDatabase.emulator(app)
+        db.add_items(
             "user@blfrg.xyz",
             [
                 {
@@ -34,7 +37,7 @@ class TestFirestoreDatabase(unittest.TestCase):
 
     def test_get_latest(self):
         os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
-        db = FirestoreDatabase.emulator("bullfrog-reader-1")
+        db = FirestoreDatabase.emulator(app)
         bm = db.get_latest_bookmark("user@blfrg.xyz")
 
 
