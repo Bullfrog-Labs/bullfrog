@@ -7,6 +7,7 @@ import sys
 from pocket_bookmarks import PocketBookmarks
 from firestore_database import BookmarkRecord, FirestoreDatabase
 from firebase_app import FirebaseApp
+from typing import List, Tuple
 import requests
 
 app = FirebaseApp.admin("bullfrog-reader-1")
@@ -18,15 +19,20 @@ def load_json(file_name):
 
 single_bookmark = load_json("single_bookmark.json")
 
+single_record: List[Tuple] = [(single_bookmark, {})]
+multiple_pages: List[Tuple] = [(single_bookmark, {}), (single_bookmark, {})]
+no_records: List[Tuple] = [({}, {})]
 
-class SingleBMPocket(object):
+
+class IterMockPocket(object):
+    def __init__(self, result_set):
+        self.result_set = iter(result_set)
+
     def get(self, **args):
-        return (single_bookmark, {})
-
-
-class EmptyPocket(object):
-    def get(self, **args):
-        return ({}, {})
+        try:
+            return next(self.result_set)
+        except StopIteration:
+            return ({}, {})
 
 
 logging.basicConfig(level="DEBUG")
@@ -50,23 +56,36 @@ class TestPocketBookmarks(unittest.TestCase):
 
     def test_sync_latest_single_page(self):
         os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
-        pocket = SingleBMPocket()
+        pocket = IterMockPocket(single_record)
         db = FirestoreDatabase.emulator(app)
         bookmarks = PocketBookmarks(user_name, pocket, db)
-        bookmarks.sync_latest()
+        count = bookmarks.sync_latest()
         logger.info("done")
         latest = db.get_latest_bookmark(user_name)
         self.assertIsNotNone(latest)
+        self.assertEqual(count, 1)
 
     def test_sync_latest_no_results(self):
         os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
-        pocket = EmptyPocket()
+        pocket = IterMockPocket(no_records)
         db = FirestoreDatabase.emulator(app)
         bookmarks = PocketBookmarks(user_name, pocket, db)
-        bookmarks.sync_latest()
+        count = bookmarks.sync_latest()
         logger.info("done")
         latest = db.get_latest_bookmark(user_name)
         self.assertIsNone(latest)
+        self.assertEqual(count, 0)
+
+    def test_sync_latest_paging(self):
+        os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
+        pocket = IterMockPocket(multiple_pages)
+        db = FirestoreDatabase.emulator(app)
+        bookmarks = PocketBookmarks(user_name, pocket, db)
+        count = bookmarks.sync_latest()
+        logger.info("done")
+        latest = db.get_latest_bookmark(user_name)
+        self.assertIsNotNone(latest)
+        self.assertEqual(count, 2)
 
 
 if __name__ == "__main__":

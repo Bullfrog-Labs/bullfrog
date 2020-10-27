@@ -28,18 +28,36 @@ class PocketBookmarks(object):
         self.db = db
         self.user_name = user_name
 
-    def sync_latest(self):
-        # page = self.pocket_api.get(count=1)
+    # This algo is really dumb, it just fetches everything since last and then
+    # saves them all. There may be some overlap but it doesn't try to address that.
+    # Overlap will anyway just result in updating of the old value which generally
+    # wont change it.
+    def sync_latest(self) -> int:
         latest_bm = self.db.get_latest_bookmark(self.user_name)
         self.logger.debug(f"latest: {latest_bm}")
         start_time = None
         if latest_bm is not None and latest_bm["pocket_created_at"]:
             start_time = latest_bm["pocket_created_at"]
-        results = self.pocket.get(since=start_time)
-        self.logger.debug(f"results: {results}")
+
+        # Iterator
+        done = False
+        offset = 0
         items = []
-        for (item_id, item) in results[0].items():
-            self.logger.debug(f"got item with key {item_id}")
-            items.append(BookmarkRecords.from_pocket_record(item))
+
+        # Page results
+        while not done:
+            (bookmarks, response_info) = self.pocket.get(
+                since=start_time, count=10, offset=offset
+            )
+            self.logger.debug(f"results: {bookmarks}")
+            for (item_id, item) in bookmarks.items():
+                self.logger.debug(f"got item with key {item_id}")
+                items.append(BookmarkRecords.from_pocket_record(item))
+            offset += len(bookmarks)
+            if len(bookmarks) == 0:
+                done = True
+
+        # Collect
         self.db.add_items(self.user_name, items)
         self.logger.debug(f"added {len(items)} items")
+        return len(items)
