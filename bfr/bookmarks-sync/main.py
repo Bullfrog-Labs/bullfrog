@@ -1,24 +1,28 @@
 #!/usr/bin/python3
 from flask import escape
+from pocket_bookmarks import PocketBookmarks
+from pocket import Pocket
+import logging
+
+consumer_key = "93907-4bc0f7edcc3af162423e8b53"
+access_token = "a0af4686-b342-6348-386c-719575"
+project_id = "bullfrog-reader"
 
 
 def main(request):
-    """HTTP Cloud Function.
-    Args:
-        request (flask.Request): The request object.
-        <https://flask.palletsprojects.com/en/1.1.x/api/#incoming-request-data>
-    Returns:
-        The response text, or any set of values that can be turned into a
-        Response object using `make_response`
-        <https://flask.palletsprojects.com/en/1.1.x/api/#flask.make_response>.
-    """
+    logger = logging.getLogger("main")
     request_json = request.get_json(silent=True)
     request_args = request.args
 
-    if request_json and 'name' in request_json:
-        name = request_json['name']
-    elif request_args and 'name' in request_args:
-        name = request_args['name']
-    else:
-        name = 'World'
-    return 'Hello {}!'.format(escape(name))
+    logger.debug(f"got request; json={request_json}")
+    app = FirebaseApp.admin(project_id)
+    db = FirestoreDatabase.emulator(app)
+    pocket = Pocket(consumer_key, access_token)
+    bookmarks = PocketBookmarks(user_name, pocket, db)
+
+    logger.debug(f"initialized, syncing")
+    count = bookmarks.sync_latest()
+
+    logger.debug(f"done; count={count}")
+
+    return None
