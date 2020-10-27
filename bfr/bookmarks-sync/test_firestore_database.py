@@ -49,10 +49,10 @@ class BookmarkRecords(object):
 
 class TestFirestoreDatabase(unittest.TestCase):
     def setUp(self):
+        os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
         clear_database()
 
     def test_save_items(self):
-        os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
         db = FirestoreDatabase.emulator(app)
         db.add_items(
             "user@blfrg.xyz",
@@ -60,7 +60,6 @@ class TestFirestoreDatabase(unittest.TestCase):
         )
 
     def test_get_latest(self):
-        os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
         db = FirestoreDatabase.emulator(app)
         bm0 = db.get_latest_bookmark("user@blfrg.xyz")
         self.assertEqual(bm0, None)

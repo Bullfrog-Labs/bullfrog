@@ -52,10 +52,10 @@ user_name = "user@blfrg.xyz"
 
 class TestPocketBookmarks(unittest.TestCase):
     def setUp(self):
+        os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
         clear_database()
 
     def test_sync_latest_single_page(self):
-        os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
         pocket = IterMockPocket(single_record)
         db = FirestoreDatabase.emulator(app)
         bookmarks = PocketBookmarks(user_name, pocket, db)
@@ -66,7 +66,6 @@ class TestPocketBookmarks(unittest.TestCase):
         self.assertEqual(count, 1)
 
     def test_sync_latest_no_results(self):
-        os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
         pocket = IterMockPocket(no_records)
         db = FirestoreDatabase.emulator(app)
         bookmarks = PocketBookmarks(user_name, pocket, db)
@@ -77,7 +76,6 @@ class TestPocketBookmarks(unittest.TestCase):
         self.assertEqual(count, 0)
 
     def test_sync_latest_paging(self):
-        os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
         pocket = IterMockPocket(multiple_pages)
         db = FirestoreDatabase.emulator(app)
         bookmarks = PocketBookmarks(user_name, pocket, db)
