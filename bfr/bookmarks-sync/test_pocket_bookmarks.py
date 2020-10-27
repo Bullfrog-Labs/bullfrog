@@ -18,9 +18,24 @@ def load_json(file_name):
 
 
 single_bookmark = load_json("single_bookmark.json")
+single_bookmark_contents = single_bookmark["item_0"]
 
-single_record: List[Tuple] = [(single_bookmark, {})]
-multiple_pages: List[Tuple] = [(single_bookmark, {}), (single_bookmark, {})]
+single_record: List[Tuple] = [({"list": single_bookmark}, {})]
+multiple_pages: List[Tuple] = [
+    ({"list": single_bookmark}, {}),
+    ({"list": single_bookmark}, {}),
+]
+multiple_records: List[Tuple] = [
+    (
+        {
+            "list": {
+                "item_0": single_bookmark_contents,
+                "item_1": single_bookmark_contents,
+            }
+        },
+        {},
+    )
+]
 no_records: List[Tuple] = [({}, {})]
 
 
