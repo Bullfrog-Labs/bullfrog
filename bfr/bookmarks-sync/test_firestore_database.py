@@ -6,6 +6,8 @@ import time
 import sys
 from firestore_database import FirestoreDatabase, BookmarkRecord
 from firebase_app import FirebaseApp
+import datetime
+import uuid
 
 
 def load_json(file_name):
@@ -20,25 +22,47 @@ logger = logging.getLogger("TestFirestoreDatabase")
 app = FirebaseApp.admin("bullfrog-reader-1")
 
 
+class BookmarkRecords(object):
+    @classmethod
+    def from_pocket_record(cls, pocket_record):
+        return {
+            "uid": "A84FB302-F7B6-4D88-BC36-5369812BBA90",
+            "url": pocket_record["given_url"],
+            "pocket_created_at": datetime.datetime.fromtimestamp(
+                int(pocket_record["time_added"])
+            ),
+            "pocket_updated_at": datetime.datetime.fromtimestamp(
+                int(pocket_record["time_updated"])
+            ),
+            "pocket_json": json.dumps(pocket_record),
+        }
+
+
 class TestFirestoreDatabase(unittest.TestCase):
     def test_save_items(self):
         os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
         db = FirestoreDatabase.emulator(app)
         db.add_items(
             "user@blfrg.xyz",
-            [
-                {
-                    "uid": "A84FB302-F7B6-4D88-BC36-5369812BBA90",
-                    "url": "http://data.com",
-                    "pocket_json": "{}",
-                }
-            ],
+            [BookmarkRecords.from_pocket_record(single_bookmark["item_0"])],
         )
 
     def test_get_latest(self):
         os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
         db = FirestoreDatabase.emulator(app)
+        bm1 = BookmarkRecords.from_pocket_record(single_bookmark["item_0"])
+        bm2 = BookmarkRecords.from_pocket_record(single_bookmark["item_0"])
+        bm2["url"] = "http://last.com"
+        db.add_items(
+            "user@blfrg.xyz",
+            [bm1],
+        )
+        db.add_items(
+            "user@blfrg.xyz",
+            [bm2],
+        )
         bm = db.get_latest_bookmark("user@blfrg.xyz")
+        self.assertEquals(bm["url"], "http://last.com")
 
 
 if __name__ == "__main__":

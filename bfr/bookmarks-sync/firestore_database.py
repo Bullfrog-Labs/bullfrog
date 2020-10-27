@@ -15,17 +15,20 @@ class DocumentResourceRecord(TypedDict):
 class BookmarkRecord(TypedDict):
     uid: str
     url: str
-    created_at: datetime
+    pocket_created_at: datetime
+    pocket_updated_at: datetime
     pocket_json: str
+    created_at: datetime
+    updated_at: datetime
 
 
 class FirestoreDatabase(object):
     def __init__(self, db):
         self.logger = logging.getLogger("FirestoreDatabase")
         self.db = db
-   
-   # Data access
-    def get_latest_bookmark(self, user_name: str):
+
+    # Data access
+    def get_latest_bookmark(self, user_name: str) -> BookmarkRecord:
         self.logger.debug("get latest")
         query_ref = (
             self.db.collection("users")
@@ -34,10 +37,10 @@ class FirestoreDatabase(object):
             .order_by("created_at", direction=firestore.Query.DESCENDING)
             .limit(1)
         )
-        self.logger.debug(f"got {query_ref}")
-        return query_ref
+        self.logger.debug(f"got {query_ref.get()[0].to_dict()}")
+        return query_ref.get()[0].to_dict()
 
-    def add_items(self, user_name: str, bookmarks: List[BookmarkRecord]):
+    def add_items(self, user_name: str, bookmarks: List[BookmarkRecord]) -> None:
         self.logger.debug(f"saving bookmarks {len(bookmarks)}")
         for bookmark in bookmarks:
             self.apply_new_record_timestamps(bookmark)
