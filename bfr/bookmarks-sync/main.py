@@ -6,9 +6,11 @@ import logging
 from firebase_app import FirebaseApp
 from firestore_database import FirestoreDatabase
 from datetime import datetime
+import os
 
-consumer_key = "93907-4bc0f7edcc3af162423e8b53"
-access_token = "a0af4686-b342-6348-386c-719575"
+# Obv. not secure, but its ok its just pocket. Will reset it later.
+consumer_key = os.environ["CONSUMER_KEY"]
+access_token = os.environ["ACCESS_TOKEN"]
 project_id = "bullfrog-reader"
 user_name = "agrodellic@gmail.com"
 
@@ -20,7 +22,7 @@ def main(request):
     if request:
         request_json = request.get_json(silent=True)
         request_args = request.args
-        logger.debug(f"got requests; json={request_json}")
+        logger.debug(f"got requests; json={request_json}, args={request_args}")
 
     app = FirebaseApp.admin(project_id)
     db = FirestoreDatabase.emulator(app)
