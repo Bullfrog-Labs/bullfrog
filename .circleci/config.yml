@@ -16,6 +16,8 @@ workflows:
     jobs:
       - install-lts-node
       - node/test:
+          requires:
+            - install-lts-node
           name: run-tests
           pkg-manager: yarn
           run-command: ci-test
