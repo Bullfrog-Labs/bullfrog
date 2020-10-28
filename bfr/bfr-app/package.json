@@ -32,6 +32,9 @@
     "extends": [
       "react-app",
       "react-app/jest"
+    ],
+    "plugins": [
+      "@typescript-eslint/tslint"
     ]
   },
   "browserslist": {
