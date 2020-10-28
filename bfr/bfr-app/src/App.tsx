@@ -1,7 +1,6 @@
 import * as log from "loglevel";
 
 import React, { useState } from "react";
-import logo from "./logo.svg";
 import "./App.css";
 
 import { Logging } from "kmgmt-common";
@@ -10,6 +9,7 @@ import { initializeFirebaseApp } from "./services/Firebase";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
 import { AuthContext } from "./services/auth/Auth";
 import LoginView from "./components/auth/LoginView";
+import { BrowserRouter } from "react-router-dom";
 
 Logging.configure(log);
 const app = initializeFirebaseApp();
@@ -31,9 +31,11 @@ function App() {
   }
 
   return (
-    <AuthContext.Provider value={authState}>
-      <LoginView authProvider={authProvider} />
-    </AuthContext.Provider>
+    <BrowserRouter>
+      <AuthContext.Provider value={authState}>
+        <LoginView authProvider={authProvider} />
+      </AuthContext.Provider>
+    </BrowserRouter>
   );
 }
 
