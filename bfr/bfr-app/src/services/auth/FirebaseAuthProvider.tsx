@@ -2,6 +2,8 @@ import * as log from "loglevel";
 import firebase from "firebase/app";
 import { AuthProvider, OnAuthStateChangedHandle } from "./Auth";
 
+const DEFAULT_EMULATOR_URL = "http://localhost:9099/";
+
 export default class FirebaseAuthProvider implements AuthProvider {
   logger = log.getLogger("FirebaseAuth");
   firebase: firebase.app.App;
@@ -11,8 +13,13 @@ export default class FirebaseAuthProvider implements AuthProvider {
     // available.
   };
 
-  constructor(firebase: firebase.app.App) {
+  constructor(firebase: firebase.app.App, useEmulator?: boolean) {
     this.firebase = firebase;
+
+    if (!!useEmulator) {
+      this.firebase.auth().useEmulator(DEFAULT_EMULATOR_URL);
+    }
+
     this.firebase.auth().onAuthStateChanged((userAuth) => {
       this.onAuthStateChanged(userAuth);
     });
@@ -20,8 +27,8 @@ export default class FirebaseAuthProvider implements AuthProvider {
     this.logger.debug("created FirebaseAuth");
   }
 
-  static create(firebase: firebase.app.App) {
-    return new FirebaseAuthProvider(firebase);
+  static create(firebase: firebase.app.App, useEmulator?: boolean) {
+    return new FirebaseAuthProvider(firebase, useEmulator);
   }
 
   getInitialAuthState() {
