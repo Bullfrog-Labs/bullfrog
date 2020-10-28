@@ -34,6 +34,12 @@ resource "google_service_account" "default_service_account" {
   display_name = "Default Service Account"
 }
 
+resource "google_project_iam_member" "dsa_datastore_owner" {
+  project = "bullfrog-reader"
+  role    = "roles/datastore.owner"
+  member  = "serviceAccount:${google_service_account.default_service_account.email}"
+}
+
 # Create the storage bucket
 resource "google_storage_bucket" "deploy_packages_bucket" {
   name = "deploy_packages"

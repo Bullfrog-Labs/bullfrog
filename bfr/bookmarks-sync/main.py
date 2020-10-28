@@ -32,7 +32,7 @@ def main(request):
 
     logger.debug(f"done; count={count}")
 
-    return None
+    return "Success"
 
 
 if __name__ == "__main__":
