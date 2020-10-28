@@ -3,7 +3,8 @@
   "workspaces": [
     "kmgmt/kmgmt-app",
     "kmgmt/kmgmt-native-app",
-    "kmgmt/kmgmt-common"
+    "kmgmt/kmgmt-common",
+    "bfr/bfr-app"
   ],
   "scripts": {
     "ci-test": "CI=1 yarn workspaces run test"
