@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  node: circleci/node@3.0.0
+  node: circleci/node@4.1.0
 workflows:
   node-tests:
     jobs:
@@ -8,4 +8,5 @@ workflows:
           name: run-tests
           pkg-manager: yarn
           run-command: ci-test
+          version: 14.9.0
           cache-version: v3
