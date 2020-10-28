@@ -19,7 +19,7 @@
     "react-firebaseui": "^4.1.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.0",
-    "typescript": "^4.0.3",
+    "typescript": "^4.0.5",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
@@ -29,11 +29,14 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
     "extends": [
       "react-app",
       "react-app/jest"
     ],
-    "plugins": []
+    "plugins": [
+      "@typescript-eslint"
+    ]
   },
   "browserslist": {
     "production": [
@@ -48,6 +51,9 @@
     ]
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.6.0",
+    "@typescript-eslint/parser": "^4.6.0",
+    "eslint": "^7.12.1",
     "eslint-config-react-app": "^6.0.0"
   }
 }
