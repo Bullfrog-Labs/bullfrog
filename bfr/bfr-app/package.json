@@ -33,9 +33,7 @@
       "react-app",
       "react-app/jest"
     ],
-    "plugins": [
-      "@typescript-eslint/tslint"
-    ]
+    "plugins": []
   },
   "browserslist": {
     "production": [
