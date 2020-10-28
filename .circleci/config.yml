@@ -1,9 +1,20 @@
+jobs:
+  install-lts-node:
+    docker:
+      - image: "cimg/base:stable"
+    steps:
+      - checkout
+      - node/install:
+          install-yarn: true
+          lts: true
+      - run: node --version
 version: 2.1
 orbs:
-  node: circleci/node@3.0.0
+  node: circleci/node@3.0.1
 workflows:
   node-tests:
     jobs:
+      - install-lts-node
       - node/test:
           name: run-tests
           pkg-manager: yarn
