@@ -12,9 +12,9 @@ import LoginView from "./components/auth/LoginView";
 import { BrowserRouter } from "react-router-dom";
 
 Logging.configure(log);
-const app = initializeFirebaseApp();
-const useAuthEmulator = process.env.NODE_ENV !== "production";
-const authProvider = FirebaseAuthProvider.create(app, useAuthEmulator);
+const useEmulators = process.env.NODE_ENV !== "production";
+const app = initializeFirebaseApp(useEmulators);
+const authProvider = FirebaseAuthProvider.create(app, useEmulators);
 
 function App() {
   const logger = log.getLogger("App");

@@ -19,7 +19,9 @@ const firebaseConfig = {
 const logger = log.getLogger("Firebase");
 
 let app: firebase.app.App | undefined = undefined;
-export const initializeFirebaseApp = (): firebase.app.App => {
+export const initializeFirebaseApp = (
+  useEmulator?: boolean
+): firebase.app.App => {
   if (!app) {
     logger.debug("initializing Firebase app");
     app = firebase.initializeApp(firebaseConfig);
