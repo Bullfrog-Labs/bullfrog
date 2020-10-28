@@ -16,13 +16,18 @@ interface LocationState {
 export default function FirebaseAuthComponent(props: {
   authProvider: FirebaseAuthProvider;
 }) {
-  let logger = log.getLogger("FirebaseAuthComponent");
+  const logger = log.getLogger("FirebaseAuthComponent");
 
-  let history = useHistory();
-  let location = useLocation<LocationState>();
+  const history = useHistory();
+  const location = useLocation<LocationState>();
 
-  // Determine where login was from, so we can redirect back there.
-  let redirectTo = location.state.from || { pathname: "/" };
+  // Determine where the user should be redirected after login. If the user was
+  // directed to the login page from a particular URL, they will be redirected
+  // back there. If not, they will be redirected back to the default URL.
+  const DEFAULT_POST_LOGIN_URL = "/";
+  const redirectTo = (location.state && location.state.from) || {
+    pathname: DEFAULT_POST_LOGIN_URL,
+  };
 
   return (
     <AuthContext.Consumer>
