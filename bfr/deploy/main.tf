@@ -1,15 +1,31 @@
 # Provider config
 provider "google" {
-  project = "optimum-habitat-293418"
+  project = "bullfrog-reader"
   region  = "us-central1"
   zone    = "us-central1-c"
 }
 
+resource "google_project_service" "gcp_services_cloudbuild" {
+  project = "bullfrog-reader"
+  service = "cloudbuild.googleapis.com"
+}
+
+resource "google_project_service" "gcp_services_cloudscheduler" {
+  project = "bullfrog-reader"
+  service = "cloudscheduler.googleapis.com"
+}
+
+resource "google_project_service" "gcp_services_cloudfunctions" {
+  project = "bullfrog-reader"
+  service = "cloudfunctions.googleapis.com"
+}
+
 # Some 
 resource "google_app_engine_application" "bookmarks_sync_app" {
-  project       = "optimum-habitat-293418"
+  project       = "bullfrog-reader"
   location_id   = "us-central"
   database_type = "CLOUD_FIRESTORE"
+  depends_on    = [google_project_service.gcp_services_cloudbuild]
 }
 
 # Service account for scheduler
@@ -44,9 +60,11 @@ resource "google_cloudfunctions_function" "bookmarks_sync_function" {
   timeout               = 60
   source_archive_bucket = google_storage_bucket.deploy_packages_bucket.name
   source_archive_object = google_storage_bucket_object.bookmarks_sync_package_object.name
+  service_account_email = google_service_account.default_service_account.email
   entry_point           = "main"
   trigger_http          = true
   runtime               = "python38"
+  depends_on            = [google_project_service.gcp_services_cloudfunctions]
 }
 
 # Scheduler
@@ -61,8 +79,9 @@ resource "google_cloudfunctions_function_iam_member" "scheduler_function_iam_mem
 }
 
 resource "google_cloud_scheduler_job" "bookmarks_sync_scheduler_job" {
-  name     = "bookmarks-sync-scheduler"
-  schedule = "* * * * *"
+  name       = "bookmarks-sync-scheduler"
+  schedule   = "* * * * *"
+  depends_on = [google_project_service.gcp_services_cloudscheduler]
 
   http_target {
     uri = google_cloudfunctions_function.bookmarks_sync_function.https_trigger_url
