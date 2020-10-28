@@ -2,3 +2,8 @@ dist
 **/.terraform
 **/.DS_Store
 **/terraform.tfstate.backup
+
+# Firebase Emulator logs
+firestore-debug.log
+firebase-debug.log
+ui-debug.log
