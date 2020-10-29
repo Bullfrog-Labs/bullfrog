@@ -59,10 +59,6 @@ resource "google_storage_bucket_object" "bookmarks_sync_package_object" {
   source = "${path.root}/../dist/bookmarks-sync-package.zip"
 }
 
-resource "google_secret_manager_secret" "pocket_access_token" {
-  secret_id = "pocket_access_token"
-}
-
 resource "google_cloudfunctions_function" "bookmarks_sync_function" {
   name                  = "bookmarks-sync"
   description           = "Sync bookmarks from external app"
