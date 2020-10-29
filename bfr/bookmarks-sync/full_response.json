@@ -291,7 +291,11 @@
       "listen_duration_estimate": 1142
     }
   },
+<<<<<<< HEAD
+  "error": null,
+=======
   "error": None,
+>>>>>>> master
   "search_meta": { "search_type": "normal" },
   "since": 1603835266
 }
