@@ -1,6 +1,6 @@
 import React from "react";
 import * as log from "loglevel";
-import { auth as FirebaseAppAuth, User as FirebaseAppUser } from "firebase/app";
+import firebase from "firebase/app";
 import { StyledFirebaseAuth } from "react-firebaseui";
 import firebaseui from "firebaseui";
 import FirebaseAuthProvider from "../services/FirebaseAuthProvider";
@@ -33,11 +33,11 @@ export default function FirebaseAuthComponent(props: {
           return <Redirect to={redirectTo.pathname} />;
         } else {
           let config: firebaseui.auth.Config = {
-            signInOptions: [FirebaseAppAuth.GoogleAuthProvider.PROVIDER_ID],
+            signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
             signInFlow: "popup",
             callbacks: {
               signInSuccessWithAuthResult: (
-                authResult: FirebaseAppUser,
+                authResult: firebase.User,
                 redirectUrl
               ) => {
                 logger.debug(

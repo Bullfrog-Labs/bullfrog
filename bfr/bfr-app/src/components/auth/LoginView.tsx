@@ -8,6 +8,7 @@ export default function LoginView(props: { authProvider: AuthProvider }) {
     let fbAuthProvider = props.authProvider as FirebaseAuthProvider;
     return <FirebaseAuthComponent authProvider={fbAuthProvider} />;
   } else {
+    // TODO: This should return an error.
     return <div>Unsupported auth provider</div>;
   }
 }

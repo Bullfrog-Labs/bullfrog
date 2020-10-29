@@ -17,13 +17,13 @@ user_name = "agrodellic@gmail.com"
 
 
 def main(request):
-    logger = logging.getLogger("main")
-    logging.basicConfig(level="DEBUG")
+  logger = logging.getLogger("main")
+  logging.basicConfig(level="DEBUG")
 
-    if request:
-        request_json = request.get_json(silent=True)
-        request_args = request.args
-        logger.debug(f"got requests; json={request_json}, args={request_args}")
+  if request:
+    request_json = request.get_json(silent=True)
+    request_args = request.args
+    logger.debug(f"got requests; json={request_json}, args={request_args}")
 
     app = FirebaseApp.admin(project_id)
     db = FirestoreDatabase.emulator(app)
@@ -32,13 +32,13 @@ def main(request):
         user_name, pocket, db, requests, since=datetime(2020, 9, 1)
     )
 
-    logger.debug(f"initialized, syncing")
-    count = bookmarks.sync_latest()
+  logger.debug(f"initialized, syncing")
+  count = bookmarks.sync_latest()
 
-    logger.debug(f"done; count={count}")
+  logger.debug(f"done; count={count}")
 
-    return "Success"
+  return "Success"
 
 
 if __name__ == "__main__":
-    main(None)
+  main(None)
