@@ -8,8 +8,7 @@ import { Logging } from "kmgmt-common";
 import { initializeFirebaseApp } from "./services/Firebase";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
 import { AuthContext } from "./services/auth/Auth";
-import LoginView from "./components/auth/LoginView";
-import { BrowserRouter } from "react-router-dom";
+import Router from "./routing/Router";
 
 Logging.configure(log);
 const useEmulators = window.location.hostname === "localhost";
@@ -31,11 +30,9 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <AuthContext.Provider value={authState}>
-        <LoginView authProvider={authProvider} />
-      </AuthContext.Provider>
-    </BrowserRouter>
+    <AuthContext.Provider value={authState}>
+      <Router authProvider={authProvider} />
+    </AuthContext.Provider>
   );
 }
 
