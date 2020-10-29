@@ -60,7 +60,7 @@ export default function FirebaseAuthComponent(props: {
           return (
             <StyledFirebaseAuth
               uiConfig={config}
-              firebaseAuth={props.authProvider.firebase.auth()}
+              firebaseAuth={props.authProvider.auth}
             />
           );
         }
