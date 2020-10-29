@@ -33,7 +33,8 @@ export const initializeFirebaseApp = (
 
     auth = app.auth();
 
-    if (!!useEmulator) {
+    const AUTH_EMULATOR_ENABLED = false; // see https://linear.app/bullfrog/issue/BUL-48#comment-7c0452cf
+    if (AUTH_EMULATOR_ENABLED && !!useEmulator) {
       logger.debug(`using auth emulator at ${DEFAULT_EMULATOR_URL}`);
       auth.useEmulator(DEFAULT_EMULATOR_URL);
     }
