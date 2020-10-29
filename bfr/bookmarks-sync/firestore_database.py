@@ -6,21 +6,28 @@ from typing import TypedDict, List, Optional
 from datetime import datetime
 
 
-class DocumentResourceRecord(TypedDict):
-    uid: str
-    url: str
-    pocket_json: str
+class ArticleMetadataRecord(TypedDict):
+    authors: List[str]
+    description: Optional[str]
+    article_type: Optional[str]
+    url: Optional[str]
+    site: Optional[str]
+    twitter: Optional[str]
+    text: Optional[str]
+    publish_date: Optional[datetime]
+    title: Optional[str]
 
 
 class BookmarkRecord(TypedDict):
     uid: str
     url: str
+    pocket_json: str
     pocket_created_at: datetime
     pocket_updated_at: datetime
-    pocket_json: str
-    text: str
-    created_at: datetime
-    updated_at: datetime
+    text: Optional[str]
+    metadata: Optional[ArticleMetadataRecord]
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
 
 
 class FirestoreDatabase(object):
