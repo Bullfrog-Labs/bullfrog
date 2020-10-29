@@ -14,9 +14,9 @@ test("renders single note", async () => {
       { id: "example-1", body: richTextParagraph("Example note text") },
     ]),
     addNote: jest.fn(async (userName: string, noteRecord: NoteRecord) => {}),
-    getUser: jest.fn(async (userName: string) => {
-      userName: "foo";
-    }),
+    getUser: jest.fn(async (userName: string) => ({
+      userName: "foo",
+    })),
     addUser: jest.fn(async (userRecord: UserRecord) => {}),
   };
 
