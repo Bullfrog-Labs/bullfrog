@@ -136,7 +136,7 @@ class PocketBookmarks(object):
         "article_type": extracted.get("type"),
         "url": extracted.get("url"),
         "site": extracted.get("site"),
-        "site_twitter": extracted.get("twitter"),
+        "site_twitter": extracted.get("site_twitter"),
         "publish_date": article.publish_date,
         "title": article.title,
         "text": article.text,
