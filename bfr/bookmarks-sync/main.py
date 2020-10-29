@@ -7,6 +7,7 @@ from firebase_app import FirebaseApp
 from firestore_database import FirestoreDatabase
 from datetime import datetime
 import os
+import requests
 
 # Obv. not secure, but its ok its just pocket. Will reset it later.
 consumer_key = os.environ["CONSUMER_KEY"]
@@ -27,7 +28,9 @@ def main(request):
     app = FirebaseApp.admin(project_id)
     db = FirestoreDatabase.emulator(app)
     pocket = Pocket(consumer_key, access_token)
-    bookmarks = PocketBookmarks(user_name, pocket, db, since=datetime(2020, 9, 1))
+    bookmarks = PocketBookmarks(
+        user_name, pocket, db, requests, since=datetime(2020, 9, 1)
+    )
 
     logger.debug(f"initialized, syncing")
     count = bookmarks.sync_latest()
