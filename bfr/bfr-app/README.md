@@ -6,6 +6,10 @@
 2. Run ``deploy to deploy the app (CAUTION: THIS WILL DEPLOY TO THE LIVE
    CHANNEL AKA PRODUCTION).
 
+## Using Firebase emulators
+
+Run `firebase emulators:start` to run all emulators.
+
 ## Available Scripts
 
 In the project directory, you can run:
