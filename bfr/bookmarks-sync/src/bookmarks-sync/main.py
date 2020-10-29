@@ -25,12 +25,12 @@ def main(request):
     request_args = request.args
     logger.debug(f"got requests; json={request_json}, args={request_args}")
 
-    app = FirebaseApp.admin(project_id)
-    db = FirestoreDatabase.emulator(app)
-    pocket = Pocket(consumer_key, access_token)
-    bookmarks = PocketBookmarks(
-        user_name, pocket, db, requests, since=datetime(2020, 9, 1)
-    )
+  app = FirebaseApp.admin(project_id)
+  db = FirestoreDatabase.emulator(app)
+  pocket = Pocket(consumer_key, access_token)
+  bookmarks = PocketBookmarks(
+      user_name, pocket, db, requests, since=datetime(2020, 9, 1)
+  )
 
   logger.debug(f"initialized, syncing")
   count = bookmarks.sync_latest()
