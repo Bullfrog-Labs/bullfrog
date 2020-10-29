@@ -54,36 +54,39 @@ class PocketBookmarks(object):
     if latest_bm is not None and latest_bm["pocket_created_at"]:
       start_time = latest_bm["pocket_created_at"]
 
-  start_timestamp = None
-  if start_time:
-    start_timestamp = int(datetime.timestamp(start_time))
+    start_timestamp = None
+    if start_time:
+      start_timestamp = int(datetime.timestamp(start_time))
 
-  # Iterator
-  done = False
-  offset = 0
-  items = []
+    # Iterator
+    done = False
+    offset = 0
+    items = []
 
-  # Page results
-  while not done:
-    self.logger.debug(
-        f"fetch; since={start_timestamp}, count={10}, offset={offset}, oldest"
-    )
-    (response, response_info) = self.pocket.get(
-        since=start_timestamp, count=10, offset=offset, sort="oldest"
-    )
-    if len(response) and (type(response["list"]) is dict) > 0:
-      bookmarks = response["list"]
-    else:
-      bookmarks = {}
-    self.logger.debug(f"results: {bookmarks}")
-    for (item_id, item) in bookmarks.items():
-      self.logger.debug(f"got item with key {item_id}")
-      items.append(BookmarkRecords.from_pocket_record(item))
-    offset += len(bookmarks)
-    if len(bookmarks) == 0:
-      done = True
+    # Page results
+    while not done:
+      self.logger.debug(
+          f"fetch; since={start_timestamp}, count={10}, offset={offset}, oldest"
+      )
+      (response, response_info) = self.pocket.get(
+          since=start_timestamp, count=10, offset=offset, sort="oldest"
+      )
+      if len(response) and (type(response["list"]) is dict) > 0:
+        bookmarks = response["list"]
+      else:
+        bookmarks = {}
 
-      return items
+      self.logger.debug(f"results: {bookmarks}")
+
+      for (item_id, item) in bookmarks.items():
+        self.logger.debug(f"got item with key {item_id}")
+        items.append(BookmarkRecords.from_pocket_record(item))
+
+      offset += len(bookmarks)
+      if len(bookmarks) == 0:
+        done = True
+
+    return items
 
   def fetch_resources(self, items: List[BookmarkRecord]) -> Dict[str, str]:
     self.logger.debug("fetching {} urls".format(len(items)))
