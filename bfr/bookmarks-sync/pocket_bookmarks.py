@@ -5,7 +5,6 @@ from firestore_database import FirestoreDatabase, BookmarkRecord
 from requests.exceptions import HTTPError, Timeout, ConnectionError, TooManyRedirects
 import json
 import uuid
-import fetch_resource
 import requests
 from typing import List, Dict
 
@@ -113,7 +112,10 @@ class PocketBookmarks(object):
         for item in items:
             uid = item["uid"]
             if uid in resources:
+                self.logger.debug(f"adding text for {uid}")
                 item["text"] = resources[uid]
 
+        # None of the records will get saved if there's any error, which is a good
+        # way to make sure we never lose track of any items.
         self.save_records(items)
         return len(items)
