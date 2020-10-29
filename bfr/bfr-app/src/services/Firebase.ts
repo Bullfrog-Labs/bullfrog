@@ -16,16 +16,32 @@ const firebaseConfig = {
   measurementId: "G-N4KCV5N686",
 };
 
-const logger = log.getLogger("Firebase");
+const DEFAULT_EMULATOR_URL = "http://localhost:9099/";
 
 let app: firebase.app.App | undefined = undefined;
+let auth: firebase.auth.Auth | undefined = undefined;
+
 export const initializeFirebaseApp = (
   useEmulator?: boolean
-): firebase.app.App => {
+): [firebase.app.App, firebase.auth.Auth] => {
   if (!app) {
+    const logger = log.getLogger("Firebase");
+
     logger.debug("initializing Firebase app");
     app = firebase.initializeApp(firebaseConfig);
     logger.debug("done initializing Firebase app");
+
+    auth = app.auth();
+
+    if (!!useEmulator) {
+      logger.debug(`using auth emulator at ${DEFAULT_EMULATOR_URL}`);
+      auth.useEmulator(DEFAULT_EMULATOR_URL);
+    }
   }
-  return app;
+
+  if (!auth) {
+    throw new Error("logic error");
+  }
+
+  return [app, auth];
 };
