@@ -26,7 +26,7 @@ app = FirebaseApp.admin("bullfrog-reader")
 def clear_database():
     logger.debug("clearing db")
     r = requests.delete(
-        "http://localhost:8080/emulator/v1/projects/bullfrog-reader-1/databases/(default)/documents"
+        "http://localhost:8080/emulator/v1/projects/bullfrog-reader/databases/(default)/documents"
     )
     logger.debug(f"done; status={r.status_code}")
 

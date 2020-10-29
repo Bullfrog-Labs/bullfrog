@@ -18,6 +18,7 @@ class BookmarkRecord(TypedDict):
     pocket_created_at: datetime
     pocket_updated_at: datetime
     pocket_json: str
+    text: str
     created_at: datetime
     updated_at: datetime
 

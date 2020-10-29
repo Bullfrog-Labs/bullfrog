@@ -1,9 +1,13 @@
 from pocket import Pocket
 import logging
 from datetime import datetime
-from firestore_database import FirestoreDatabase
+from firestore_database import FirestoreDatabase, BookmarkRecord
+from requests.exceptions import HTTPError, Timeout, ConnectionError, TooManyRedirects
 import json
 import uuid
+import fetch_resource
+import requests
+from typing import List, Dict
 
 
 class BookmarkRecords(object):
@@ -28,6 +32,7 @@ class PocketBookmarks(object):
         user_name: str,
         pocket: Pocket,
         db: FirestoreDatabase,
+        requests=requests,
         since: datetime = None,
     ):
         self.pocket = pocket
@@ -35,12 +40,9 @@ class PocketBookmarks(object):
         self.db = db
         self.user_name = user_name
         self.since = since
+        self.requests = requests
 
-    # This algo is really dumb, it just fetches everything since last and then
-    # saves them all. There may be some overlap but it doesn't try to address that.
-    # Overlap will anyway just result in updating of the old value which generally
-    # wont change it.
-    def sync_latest(self) -> int:
+    def fetch_latest(self):
         latest_bm = self.db.get_latest_bookmark(self.user_name)
         self.logger.debug(f"latest: {latest_bm}")
         start_time = self.since
@@ -76,7 +78,42 @@ class PocketBookmarks(object):
             if len(bookmarks) == 0:
                 done = True
 
-        # Collect
-        self.db.add_items(self.user_name, items)
-        self.logger.debug(f"added {len(items)} items")
+        return items
+
+    def fetch_resources(self, items: List[BookmarkRecord]) -> Dict:
+        self.logger.debug("fetching {} urls".format(len(items)))
+        pages = {}
+        for i, item in enumerate(items):
+            url = item["url"]
+            uid = item["uid"]
+            try:
+                self.logger.debug(f"fetch url {url}, id {uid}")
+                resp = self.requests.get(url)
+                resp.raise_for_status()
+                self.logger.debug("status=" + str(resp.status_code))
+                pages[uid] = resp.text
+            except (HTTPError, Timeout, ConnectionError, TooManyRedirects) as e:
+                # Record the error and move on
+                self.logger.error("url fetch failed for {}".format(url))
+        return pages
+
+    def save_records(self, records: List[BookmarkRecord]):
+        self.db.add_items(self.user_name, records)
+        self.logger.debug(f"added {len(records)} items")
+
+    # This algo is really dumb, it just fetches everything since last and then
+    # saves them all. There may be some overlap but it doesn't try to address that.
+    # Overlap will anyway just result in updating of the old value which generally
+    # wont change it.
+    def sync_latest(self) -> int:
+        items = self.fetch_latest()
+
+        # Fetch urls and meta
+        resources = self.fetch_resources(items)
+        for item in items:
+            uid = item["uid"]
+            if uid in resources:
+                item["text"] = resources[uid]
+
+        self.save_records(items)
         return len(items)
