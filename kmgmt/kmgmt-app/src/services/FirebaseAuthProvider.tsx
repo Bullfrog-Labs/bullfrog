@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import * as firebase from "firebase/app";
+import firebase from "firebase/app";
 import Firebase from "./Firebase";
 import { AuthProvider, OnAuthStateChangedHandle } from "./Auth";
 
