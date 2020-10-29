@@ -59,6 +59,10 @@ resource "google_storage_bucket_object" "bookmarks_sync_package_object" {
   source = "${path.root}/../dist/bookmarks-sync-package.zip"
 }
 
+resource "google_secret_manager_secret" "pocket_access_token" {
+  secret_id = "pocket_access_token"
+}
+
 resource "google_cloudfunctions_function" "bookmarks_sync_function" {
   name                  = "bookmarks-sync"
   description           = "Sync bookmarks from external app"
@@ -71,6 +75,10 @@ resource "google_cloudfunctions_function" "bookmarks_sync_function" {
   trigger_http          = true
   runtime               = "python38"
   depends_on            = [google_project_service.gcp_services_cloudfunctions]
+  environment_variables = {
+    ACCESS_TOKEN = "a0af4686-b342-6348-386c-719575"
+    CONSUMER_KEY = "93907-4bc0f7edcc3af162423e8b53"
+  }
 }
 
 # Scheduler
