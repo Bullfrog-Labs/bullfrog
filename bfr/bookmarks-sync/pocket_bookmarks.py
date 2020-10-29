@@ -112,7 +112,7 @@ class PocketBookmarks(object):
         "type": ["og.type"],
         "url": ["og.url"],
         "site": ["og.site_name"],
-        "twitter": ["twitter.site"],
+        "site_twitter": ["twitter.site"],
     }
     result = {}
     for key, locations in tags.items():
@@ -136,7 +136,7 @@ class PocketBookmarks(object):
         "article_type": extracted.get("type"),
         "url": extracted.get("url"),
         "site": extracted.get("site"),
-        "twitter": extracted.get("twitter"),
+        "site_twitter": extracted.get("twitter"),
         "publish_date": article.publish_date,
         "title": article.title,
         "text": article.text,
@@ -166,10 +166,12 @@ class PocketBookmarks(object):
         article.parse()
         self.logger.debug(f"done parsing")
         article_metadata = self.extract_metadata_from_article(article)
+        extracted_text_len = len(
+          article_metadata['text']) if article_metadata['text'] is not None else 0
         self.logger.debug(
             f"done; authors={article_metadata['authors']}, "
             + f"title={article_metadata['title']}, "
-            + f"text={len(article_metadata['text'])}"
+            + f"text={extracted_text_len}"
         )
         metadata[uid] = article_metadata
       except Exception as e:

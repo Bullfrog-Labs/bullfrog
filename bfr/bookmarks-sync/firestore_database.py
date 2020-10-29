@@ -12,7 +12,7 @@ class ArticleMetadataRecord(TypedDict):
   article_type: Optional[str]
   url: Optional[str]
   site: Optional[str]
-  twitter: Optional[str]
+  site_twitter: Optional[str]
   text: Optional[str]
   publish_date: Optional[datetime]
   title: Optional[str]
