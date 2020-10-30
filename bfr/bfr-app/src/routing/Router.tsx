@@ -1,10 +1,11 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 import { Switch, Route, BrowserRouter, useLocation } from "react-router-dom";
 import { AuthProvider } from "../services/auth/Auth";
 import AppContainer from "../components/AppContainer";
-import LoginView from "../components/auth/LoginView";
+import { LoginView } from "../components/auth/LoginView";
 import PrivateRoute from "./PrivateRoute";
 import MainView from "../components/MainView";
+import { Database } from "../services/store/Database";
 
 function Sad404() {
   let location = useLocation();
@@ -18,16 +19,21 @@ function Sad404() {
   );
 }
 
-export default function Router(props: {
-  // database: Database;
+export type RouterProps = {
   authProvider: AuthProvider;
-}) {
+  database: Database;
+};
+
+export const Router: FunctionComponent<RouterProps> = ({
+  database,
+  authProvider,
+}) => {
   return (
     <BrowserRouter>
       <Switch>
         <Route path="/login">
           <AppContainer>
-            <LoginView authProvider={props.authProvider} />
+            <LoginView authProvider={authProvider} database={database} />
           </AppContainer>
         </Route>
         <PrivateRoute exact path="/">
@@ -41,4 +47,4 @@ export default function Router(props: {
       </Switch>
     </BrowserRouter>
   );
-}
+};

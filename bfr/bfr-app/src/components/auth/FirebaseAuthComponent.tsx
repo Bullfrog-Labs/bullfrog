@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FunctionComponent } from "react";
 import * as log from "loglevel";
 import firebase from "firebase/app";
 import { StyledFirebaseAuth } from "react-firebaseui";
@@ -6,6 +6,7 @@ import firebaseui from "firebaseui";
 import FirebaseAuthProvider from "../../services/auth/FirebaseAuthProvider";
 import { useHistory, useLocation, Redirect } from "react-router-dom";
 import { AuthContext } from "../../services/auth/Auth";
+import { Database } from "../../services/store/Database";
 
 interface LocationState {
   from: {
@@ -13,9 +14,15 @@ interface LocationState {
   };
 }
 
-export default function FirebaseAuthComponent(props: {
+export type FirebaseAuthComponentProps = {
   authProvider: FirebaseAuthProvider;
-}) {
+  database: Database;
+};
+
+export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps> = ({
+  authProvider,
+  database,
+}) => {
   const logger = log.getLogger("FirebaseAuthComponent");
 
   const history = useHistory();
@@ -42,11 +49,17 @@ export default function FirebaseAuthComponent(props: {
             signInFlow: "popup",
             callbacks: {
               signInSuccessWithAuthResult: (
-                authResult: firebase.User,
+                authResult: firebase.auth.UserCredential,
                 redirectUrl
               ) => {
+                if (!authResult.user) {
+                  throw new Error(
+                    "Authed user should not be null after successful signin"
+                  );
+                }
+
                 logger.debug(
-                  `successful signin, got authResult = ${authResult}`
+                  `successful signin, got user ${authResult.user.uid} : ${authResult.user.displayName}, ${authResult.user.email}`
                 );
                 logger.debug(`redirecting to ${redirectTo.pathname}`);
 
@@ -60,11 +73,11 @@ export default function FirebaseAuthComponent(props: {
           return (
             <StyledFirebaseAuth
               uiConfig={config}
-              firebaseAuth={props.authProvider.auth}
+              firebaseAuth={authProvider.auth}
             />
           );
         }
       }}
     </AuthContext.Consumer>
   );
-}
+};

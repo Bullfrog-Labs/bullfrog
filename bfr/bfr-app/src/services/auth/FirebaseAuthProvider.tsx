@@ -2,8 +2,6 @@ import * as log from "loglevel";
 import firebase from "firebase/app";
 import { AuthProvider, OnAuthStateChangedHandle } from "./Auth";
 
-const DEFAULT_EMULATOR_URL = "http://localhost:9099/";
-
 export default class FirebaseAuthProvider implements AuthProvider {
   logger = log.getLogger("FirebaseAuth");
   app: firebase.app.App;
