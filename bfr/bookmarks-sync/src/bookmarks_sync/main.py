@@ -21,7 +21,7 @@ def sync_all_users():
   app = FirebaseApp.admin(project_id)
   db = FirestoreDatabase.admin(app)
 
-  users = db.get_users()
+  users = db.get_users_private()
   for user in users:
     if user["pocket_sync_enabled"] and user["pocket_access_token"]:
       logger.debug(f"syncing {user['user_name']}")

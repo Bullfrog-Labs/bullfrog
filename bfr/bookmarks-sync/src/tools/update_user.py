@@ -1,6 +1,6 @@
 import logging
 import argparse
-from bookmarks_sync.firestore_database import FirestoreDatabase
+from bookmarks_sync.firestore_database import FirestoreDatabase, UserRecord, UserPrivateRecord
 from bookmarks_sync.firebase_app import FirebaseApp
 
 
@@ -42,15 +42,17 @@ def main():
   app = FirebaseApp.admin(project_id)
   db = FirestoreDatabase.admin(app)
 
-  user_record = {"user_name": args.user_name}
+  user_record: UserRecord = {"user_name": args.user_name}
+  user_private_record: UserPrivateRecord = {"user_name": args.user_name}
   if args.pocket_sync_enabled is not None:
-    user_record["pocket_sync_enabled"] = args.pocket_sync_enabled
+    user_private_record["pocket_sync_enabled"] = args.pocket_sync_enabled
   if args.pocket_access_token:
-    user_record["pocket_access_token"] = args.pocket_access_token
+    user_private_record["pocket_access_token"] = args.pocket_access_token
 
-  logger.debug(f"setting record {user_record}")
+  logger.debug(
+    f"setting record; user={user_record} , user_private={user_private_record}")
 
-  db.update_user(args.user_name, user_record)
+  db.update_user(args.user_name, user_record, user_private_record)
 
 
 main()
