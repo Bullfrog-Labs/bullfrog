@@ -80,7 +80,8 @@ class PocketBookmarks(object):
 
       for (item_id, item) in bookmarks.items():
         self.logger.debug(f"got item with key {item_id}")
-        items.append(BookmarkRecords.from_pocket_record(item))
+        if item["status"] != "2":
+          items.append(BookmarkRecords.from_pocket_record(item))
 
       offset += len(bookmarks)
       if len(bookmarks) == 0:
