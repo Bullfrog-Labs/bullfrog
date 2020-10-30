@@ -53,14 +53,14 @@ class TestFirestoreDatabase(unittest.TestCase):
     clear_database()
 
   def test_save_items(self):
-    db = FirestoreDatabase.emulator(app)
+    db = FirestoreDatabase.admin(app)
     db.add_items(
         "user@blfrg.xyz",
         [BookmarkRecords.from_pocket_record(single_bookmark["item_0"])],
     )
 
   def test_get_latest(self):
-    db = FirestoreDatabase.emulator(app)
+    db = FirestoreDatabase.admin(app)
     bm0 = db.get_latest_bookmark("user@blfrg.xyz")
     self.assertEqual(bm0, None)
     bm1 = BookmarkRecords.from_pocket_record(single_bookmark["item_0"])

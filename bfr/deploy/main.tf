@@ -48,7 +48,7 @@ resource "google_storage_bucket" "deploy_packages_bucket" {
 # Zip up our source code
 data "archive_file" "bookmark_sync_package" {
   type        = "zip"
-  source_dir  = "${path.root}/../bookmarks-sync/src/bookmarks-sync/"
+  source_dir  = "${path.root}/../bookmarks-sync/src/bookmarks_sync/"
   output_path = "${path.root}/../dist/bookmarks-sync-package.zip"
 }
 

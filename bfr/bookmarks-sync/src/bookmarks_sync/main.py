@@ -26,7 +26,7 @@ def main(request):
     logger.debug(f"got requests; json={request_json}, args={request_args}")
 
   app = FirebaseApp.admin(project_id)
-  db = FirestoreDatabase.emulator(app)
+  db = FirestoreDatabase.admin(app)
   pocket = Pocket(consumer_key, access_token)
   bookmarks = PocketBookmarks(
       user_name, pocket, db, requests, since=datetime(2020, 9, 1)

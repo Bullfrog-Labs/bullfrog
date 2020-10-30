@@ -73,6 +73,6 @@ class FirestoreDatabase(object):
 
   # Named constructors
   @classmethod
-  def emulator(cls, app: firebase_admin.App):
+  def admin(cls, app: firebase_admin.App):
     db = firestore.client(app)
     return FirestoreDatabase(db)
