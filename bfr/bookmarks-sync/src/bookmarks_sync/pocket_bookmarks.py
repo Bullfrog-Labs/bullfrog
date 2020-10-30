@@ -47,7 +47,7 @@ class PocketBookmarks(object):
     self.since = since
     self.requests = requests
 
-  def fetch_latest(self) -> List[BookmarkRecord]:
+  def fetch_latest(self, max_pages=5) -> List[BookmarkRecord]:
     latest_bm = self.db.get_latest_bookmark(self.user_name)
     self.logger.debug(f"latest: {latest_bm}")
     start_time = self.since
@@ -59,6 +59,7 @@ class PocketBookmarks(object):
       start_timestamp = int(datetime.timestamp(start_time))
 
     # Iterator
+    pages = 0
     done = False
     offset = 0
     items = []
@@ -84,7 +85,8 @@ class PocketBookmarks(object):
           items.append(BookmarkRecords.from_pocket_record(item))
 
       offset += len(bookmarks)
-      if len(bookmarks) == 0:
+      pages += 1
+      if len(bookmarks) == 0 or pages >= max_pages - 1:
         done = True
 
     return items
