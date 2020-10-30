@@ -16,6 +16,26 @@ project_id = "bullfrog-reader"
 user_name = "agrodellic@gmail.com"
 
 
+def sync_all_users():
+  logger = logging.getLogger("main")
+  app = FirebaseApp.admin(project_id)
+  db = FirestoreDatabase.admin(app)
+
+  users = db.get_users_private()
+  for user in users:
+    if user["pocket_sync_enabled"] and user["pocket_access_token"]:
+      logger.debug(f"syncing {user['user_name']}")
+      pocket = Pocket(consumer_key, user["pocket_access_token"])
+      bookmarks = PocketBookmarks(
+          user["user_name"], pocket, db, requests, since=datetime(2020, 9, 1)
+      )
+      logger.debug(f"initialized, syncing")
+      count = bookmarks.sync_latest()
+      logger.debug(f"done; count={count}")
+    else:
+      logger.debug(f"syncing disabled for {user['user_name']}, skipping")
+
+
 def main(request):
   logger = logging.getLogger("main")
   logging.basicConfig(level="DEBUG")
@@ -25,17 +45,7 @@ def main(request):
     request_args = request.args
     logger.debug(f"got requests; json={request_json}, args={request_args}")
 
-    app = FirebaseApp.admin(project_id)
-    db = FirestoreDatabase.emulator(app)
-    pocket = Pocket(consumer_key, access_token)
-    bookmarks = PocketBookmarks(
-        user_name, pocket, db, requests, since=datetime(2020, 9, 1)
-    )
-
-  logger.debug(f"initialized, syncing")
-  count = bookmarks.sync_latest()
-
-  logger.debug(f"done; count={count}")
+  sync_all_users()
 
   return "Success"
 

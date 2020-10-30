@@ -94,7 +94,7 @@ class TestPocketBookmarks(unittest.TestCase):
 
   def test_sync_latest_single_page(self):
     pocket = IterMockPocket(single_record)
-    db = FirestoreDatabase.emulator(app)
+    db = FirestoreDatabase.admin(app)
     mock_requests = IterMockRequests([MockResponse()])
     bookmarks = PocketBookmarks(user_name, pocket, db, mock_requests)
     count = bookmarks.sync_latest()
@@ -104,7 +104,7 @@ class TestPocketBookmarks(unittest.TestCase):
 
   def test_sync_latest_no_results(self):
     pocket = IterMockPocket(no_records)
-    db = FirestoreDatabase.emulator(app)
+    db = FirestoreDatabase.admin(app)
     mock_requests = IterMockRequests([])
     bookmarks = PocketBookmarks(user_name, pocket, db, mock_requests)
     count = bookmarks.sync_latest()
@@ -114,7 +114,7 @@ class TestPocketBookmarks(unittest.TestCase):
 
   def test_sync_latest_paging(self):
     pocket = IterMockPocket(multiple_pages)
-    db = FirestoreDatabase.emulator(app)
+    db = FirestoreDatabase.admin(app)
     mock_requests = IterMockRequests([MockResponse(), MockResponse()])
     bookmarks = PocketBookmarks(user_name, pocket, db, mock_requests)
     count = bookmarks.sync_latest()

@@ -1,0 +1,3 @@
+#!/bin/sh
+BF_ROOT=$(git rev-parse --show-toplevel)
+python3 $BF_ROOT/bfr/bookmarks-sync/src/tools/login_pocket.py $*
