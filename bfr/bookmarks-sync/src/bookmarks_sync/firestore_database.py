@@ -71,6 +71,8 @@ class FirestoreDatabase(object):
     for bookmark in bookmarks:
       self.apply_new_record_timestamps(bookmark)
       self.logger.debug(f"saving bookmark {bookmark}")
+      if "text" in bookmark and bookmark["text"] is not None and len(bookmark["text"]) > 500000:
+        bookmark["text"] = None
       result = (
           self.db.collection("users")
           .document(user_name)

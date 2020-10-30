@@ -165,6 +165,8 @@ class PocketBookmarks(object):
       try:
         self.logger.debug(f"parse url {url} id {uid}")
         article = Article(url, fetch_images=False)
+        if text is None:
+          continue
         article.download(input_html=text)
         article.parse()
         self.logger.debug(f"done parsing")
