@@ -1,0 +1,7 @@
+Flask==1.0.2
+pocket==0.3.6
+firebase-admin==4.4.0
+requests
+newspaper3k
+dict_deep
+argparse
