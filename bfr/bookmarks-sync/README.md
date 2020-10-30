@@ -53,6 +53,6 @@ Run the command to modify your user record
 
 5.  Run the update-user script using the login email for BFR
 
-        bin/update-user --pocket-access-token <ACCESS_TOKEN> --user-name <your login email> --log-level DEBUG --pocket-sync-enabled
+        bin/update-user --pocket-access-token <ACCESS_TOKEN> --uid <your BFR user id (get it from the Firebase Auth page or debug console logs)> --log-level DEBUG --pocket-sync-enabled
 
 6.  Confirm your bookmarks show up in firebase after a few minutes
