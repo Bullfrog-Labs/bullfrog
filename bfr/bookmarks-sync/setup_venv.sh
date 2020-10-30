@@ -1,0 +1,6 @@
+if [[ "$VIRTUAL_ENV" = "" ]]; then
+  echo "Not in virtual env. Run 'activate_venv.sh' first"
+fi
+
+pip3 install --upgrade pip
+pip3 install -r requirements.txt

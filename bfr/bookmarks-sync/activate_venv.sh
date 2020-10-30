@@ -1,0 +1,15 @@
+if [ "$0" = "$BASH_SOURCE" ]; then
+    echo "Error: Script must be sourced"
+    exit 1
+fi
+
+echo "Creating Python venv"
+python3 -m venv venv
+
+echo "Activating Python venv"
+echo "Run 'deactivate' to deactivate it"
+
+activate () {
+    source venv/bin/activate
+}
+activate

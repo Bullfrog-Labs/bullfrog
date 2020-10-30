@@ -1,18 +1,24 @@
 # Setup
 
-    pip3 install -r requirements.txt
+    . ./activate_venv.sh
+    . ./setup_venv.sh
 
 # Scripts
 
 ## login_pocket.py
 
-Use this script to "log in" to pocket by fetching an access token using your consumer key. Find your consumer key at the pocket developer portal.
+Use this script to "log in" to pocket by fetching an access token using your
+consumer key. Find your consumer key at the Pocket developer portal after
+creating a Pocket application here: http://getpocket.com/developer/apps/new.
 
-        python3 login_pocket.py --log-level=DEBUG --login --consumer-key=<consumer key from pocket>
+    python3 login_pocket.py --log-level=DEBUG --login --consumer-key=<consumer key from pocket>
 
-When the auth URL is displayed, open it in your browser and approve the oauth connection.
+When the auth URL is displayed, open it in your browser and approve the oauth
+connection. The access_token and consumer_key will be printed out in the
+logs.
 
-To use the pocket api you need an access_token and a consumer_token. See main.py for an example.
+To use the Pocket API, you need this access_token and consumer_key. See
+main.py for example usage of these tokens.
 
 ## main.py
 
