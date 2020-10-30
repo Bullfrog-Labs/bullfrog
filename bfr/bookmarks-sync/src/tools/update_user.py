@@ -26,11 +26,13 @@ def main():
     "--pocket-sync-enabled",
     action='store_true',
     dest='pocket_sync_enabled',
+    default=None
   )
   parser.add_argument(
     "--pocket-sync-disabled",
     action='store_false',
     dest='pocket_sync_enabled',
+    default=None
   )
   args = parser.parse_args()
   logging.basicConfig(level=args.log_level)
