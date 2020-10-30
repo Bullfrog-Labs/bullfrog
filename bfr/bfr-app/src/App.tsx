@@ -39,7 +39,6 @@ function App() {
       throw new Error("Authed user uid should not be null");
     }
 
-    // TODO: do user state setup stuff here
     const userExists = await checkIfUserExists(database, authedUser.uid);
     if (!userExists) {
       logger.debug(
