@@ -10,7 +10,7 @@ import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
 import { AuthContext, OnAuthStateChangedHandle } from "./services/auth/Auth";
 import { Router } from "./routing/Router";
 import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
-import { checkIfUserExists } from "./services/store/Users";
+import { checkIfUserExists, createNewUserRecord } from "./services/store/Users";
 
 Logging.configure(log);
 const useEmulators = window.location.hostname === "localhost";
@@ -35,13 +35,18 @@ function App() {
       return;
     }
 
-    if (!authedUser.email) {
-      throw new Error("Authed user email should not be null");
+    if (!authedUser.uid) {
+      throw new Error("Authed user uid should not be null");
     }
 
     // TODO: do user state setup stuff here
-    const userExists = await checkIfUserExists(database, authedUser.email);
-    logger.debug(`userExists: ${userExists}`);
+    const userExists = await checkIfUserExists(database, authedUser.uid);
+    if (!userExists) {
+      logger.debug(
+        `User document does not exist for user ${authedUser.uid}, creating new one.`
+      );
+      await createNewUserRecord(database, authedUser);
+    }
 
     logger.debug("User logged in. Done updating auth state.");
   };
@@ -49,7 +54,9 @@ function App() {
   authProvider.onAuthStateChanged = onAuthStateChanged;
 
   if (authState) {
-    logger.debug(`Logged in as ${authState.displayName} / ${authState.email}`);
+    logger.debug(
+      `Logged in as user ${authState.uid} with ${authState.displayName} / ${authState.email}`
+    );
   } else {
     logger.info(`Not logged in`);
   }
