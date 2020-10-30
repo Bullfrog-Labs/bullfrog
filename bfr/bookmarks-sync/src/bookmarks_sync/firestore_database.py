@@ -82,6 +82,9 @@ class FirestoreDatabase(object):
       self.apply_new_record_timestamps(user_record)
       self.db.collection("users").document(user_name).set(user_record)
 
+  def get_users(self) -> List[UserRecord]:
+    return [doc.to_dict() for doc in self.db.collection("users").get()]
+
   # Helper functions
   def apply_new_record_timestamps(self, record):
     record["created_at"] = datetime.now()
