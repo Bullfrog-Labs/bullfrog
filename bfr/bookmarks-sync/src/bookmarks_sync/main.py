@@ -13,8 +13,6 @@ import requests
 consumer_key = os.environ["CONSUMER_KEY"]
 access_token = os.environ["ACCESS_TOKEN"]
 project_id = "bullfrog-reader"
-user_name = "agrodellic@gmail.com"
-
 
 def sync_all_users():
   logger = logging.getLogger("main")
@@ -24,16 +22,16 @@ def sync_all_users():
   users = db.get_users_private()
   for user in users:
     if user["pocket_sync_enabled"] and user["pocket_access_token"]:
-      logger.debug(f"syncing {user['user_name']}")
+      logger.debug(f"syncing {user['uid']}")
       pocket = Pocket(consumer_key, user["pocket_access_token"])
       bookmarks = PocketBookmarks(
-          user["user_name"], pocket, db, requests, since=datetime(2020, 9, 1)
+          user["uid"], pocket, db, requests, since=datetime(2020, 9, 1)
       )
       logger.debug(f"initialized, syncing")
       count = bookmarks.sync_latest()
       logger.debug(f"done; count={count}")
     else:
-      logger.debug(f"syncing disabled for {user['user_name']}, skipping")
+      logger.debug(f"syncing disabled for {user['uid']}, skipping")
 
 
 def main(request):
