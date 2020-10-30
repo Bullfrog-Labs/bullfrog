@@ -1,7 +1,6 @@
 import * as log from "loglevel";
 
-import firebase from "firebase/app";
-import "firebase/auth";
+import firebase from "firebase";
 
 // See https://support.google.com/firebase/answer/7015592 for instructions on
 // retrieving this config object.
@@ -15,8 +14,6 @@ const firebaseConfig = {
   appId: "1:447136209695:web:787b2fcbf3b534a2226e2a",
   measurementId: "G-N4KCV5N686",
 };
-
-const DEFAULT_EMULATOR_URL = "http://localhost:9099/";
 
 let app: firebase.app.App | undefined = undefined;
 let auth: firebase.auth.Auth | undefined = undefined;
@@ -33,10 +30,12 @@ export const initializeFirebaseApp = (
 
     auth = app.auth();
 
+    // TODO: Enable Auth emulator once available
+    const DEFAULT_AUTH_EMULATOR_URL = "http://localhost:9099/";
     const AUTH_EMULATOR_ENABLED = false; // see https://linear.app/bullfrog/issue/BUL-48#comment-7c0452cf
     if (AUTH_EMULATOR_ENABLED && !!useEmulator) {
-      logger.debug(`using auth emulator at ${DEFAULT_EMULATOR_URL}`);
-      auth.useEmulator(DEFAULT_EMULATOR_URL);
+      logger.debug(`using auth emulator at ${DEFAULT_AUTH_EMULATOR_URL}`);
+      auth.useEmulator(DEFAULT_AUTH_EMULATOR_URL);
     }
   }
 
