@@ -7,18 +7,14 @@ test("renders AppContainer", async () => {
   // this authProvider always authenticates the user automatically
   const authProvider: AuthProvider = {
     onAuthStateChanged: (authState) => {},
-    getInitialAuthState: () => ({ displayName: "Test user" }),
+    getInitialAuthState: () => ({ displayName: "Test user", uid: "123" }),
   };
 
-  // TODO: Add ability to use database emulator here
-
   // Smoke test
-  /*
   const router = (
     <AuthContext.Provider value={authProvider.getInitialAuthState()}>
       <Router authProvider={authProvider} />
     </AuthContext.Provider>
   );
   render(router);
-  */
 });
