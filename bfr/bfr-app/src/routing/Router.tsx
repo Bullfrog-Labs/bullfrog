@@ -5,7 +5,6 @@ import AppContainer from "../components/AppContainer";
 import { LoginView } from "../components/auth/LoginView";
 import PrivateRoute from "./PrivateRoute";
 import MainView from "../components/MainView";
-import { Database } from "../services/store/Database";
 
 function Sad404() {
   let location = useLocation();
@@ -21,19 +20,15 @@ function Sad404() {
 
 export type RouterProps = {
   authProvider: AuthProvider;
-  database: Database;
 };
 
-export const Router: FunctionComponent<RouterProps> = ({
-  database,
-  authProvider,
-}) => {
+export const Router: FunctionComponent<RouterProps> = ({ authProvider }) => {
   return (
     <BrowserRouter>
       <Switch>
         <Route path="/login">
           <AppContainer>
-            <LoginView authProvider={authProvider} database={database} />
+            <LoginView authProvider={authProvider} />
           </AppContainer>
         </Route>
         <PrivateRoute exact path="/">

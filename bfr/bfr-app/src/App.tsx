@@ -62,7 +62,7 @@ function App() {
 
   return (
     <AuthContext.Provider value={authState}>
-      <Router authProvider={authProvider} database={database} />
+      <Router authProvider={authProvider} />
     </AuthContext.Provider>
   );
 }
