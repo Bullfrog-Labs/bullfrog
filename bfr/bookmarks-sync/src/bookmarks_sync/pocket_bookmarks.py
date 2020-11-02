@@ -9,6 +9,7 @@ import requests
 from newspaper import Article
 from typing import List, Dict, Any, Union, Optional
 from dict_deep import deep_get
+import cchardet
 
 
 class BookmarkRecords(object):
@@ -104,6 +105,12 @@ class PocketBookmarks(object):
         resp = self.requests.get(url)
         resp.raise_for_status()
         self.logger.debug("status=" + str(resp.status_code))
+        if resp.encoding is None:
+          resp.encoding = cchardet.detect(resp.content)['encoding']
+          self.logger.debug("used encoding " + str(resp.encoding))
+        if resp.encoding is None:
+          self.logger.debug("encoding cannot be determined, skipping")
+          continue
         pages[uid] = resp.text
       except (HTTPError, Timeout, ConnectionError, TooManyRedirects) as e:
         # Record the error and move on

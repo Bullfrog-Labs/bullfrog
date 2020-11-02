@@ -61,7 +61,6 @@ class FirestoreDatabase(object):
     )
     results = query_ref.get()
     if len(results) > 0:
-      self.logger.debug(f"got {query_ref.get()[0].to_dict()}")
       return query_ref.get()[0].to_dict()
     else:
       return None
@@ -70,9 +69,14 @@ class FirestoreDatabase(object):
     self.logger.debug(f"saving bookmarks {len(bookmarks)}")
     for bookmark in bookmarks:
       self.apply_new_record_timestamps(bookmark)
-      self.logger.debug(f"saving bookmark {bookmark}")
+      self.logger.debug(f"saving bookmark {bookmark['url']}")
+
+      # This is a hack - this means the text is probably too large tp store in FB, so
+      # null it out. Need to fix eventually.
       if "text" in bookmark and bookmark["text"] is not None and len(bookmark["text"]) > 500000:
+        self.logger.debug(f"not saving html text because its too big")
         bookmark["text"] = None
+
       result = (
           self.db.collection("users")
           .document(user_name)
