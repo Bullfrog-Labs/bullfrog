@@ -5,6 +5,15 @@ if [ "$0" = "$BASH_SOURCE" ]; then
     exit 1
 fi
 
+BF_ROOT=$(git rev-parse --show-toplevel)
+BOOKMARKS_SYNC_ROOT=$BF_ROOT/bfr/bookmarks-sync
+
+PUSHED=0
+if [ ! "$PWD" = "$BOOKMARKS_SYNC_ROOT" ]; then
+    pushd $BOOKMARKS_SYNC_ROOT
+    PUSHED=1
+fi
+
 echo "Creating Python venv"
 python3 -m venv venv
 
@@ -15,3 +24,8 @@ activate () {
     source venv/bin/activate
 }
 activate
+
+
+if [ $PUSHED = 1 ]; then
+    popd
+fi
