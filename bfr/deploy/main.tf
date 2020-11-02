@@ -72,7 +72,6 @@ resource "google_cloudfunctions_function" "bookmarks_sync_function" {
   runtime               = "python38"
   depends_on            = [google_project_service.gcp_services_cloudfunctions]
   environment_variables = {
-    ACCESS_TOKEN = "a0af4686-b342-6348-386c-719575"
     CONSUMER_KEY = "93907-4bc0f7edcc3af162423e8b53"
   }
 }
@@ -90,7 +89,7 @@ resource "google_cloudfunctions_function_iam_member" "scheduler_function_iam_mem
 
 resource "google_cloud_scheduler_job" "bookmarks_sync_scheduler_job" {
   name       = "bookmarks-sync-scheduler"
-  schedule   = "* * * * *"
+  schedule   = "*/5 * * * *"
   depends_on = [google_project_service.gcp_services_cloudscheduler]
 
   http_target {

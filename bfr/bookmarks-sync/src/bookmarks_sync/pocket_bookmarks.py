@@ -49,7 +49,7 @@ class PocketBookmarks(object):
 
   def fetch_latest(self, max_pages=5) -> List[BookmarkRecord]:
     latest_bm = self.db.get_latest_bookmark(self.user_name)
-    self.logger.debug(f"latest: {latest_bm}")
+    self.logger.debug(f"latest: {latest_bm['url']}")
     start_time = self.since
     if latest_bm is not None and latest_bm["pocket_created_at"]:
       start_time = latest_bm["pocket_created_at"]
@@ -77,7 +77,7 @@ class PocketBookmarks(object):
       else:
         bookmarks = {}
 
-      self.logger.debug(f"results: {bookmarks}")
+      self.logger.debug(f"results: {len(bookmarks)}")
 
       for (item_id, item) in bookmarks.items():
         self.logger.debug(f"got item with key {item_id}")
@@ -97,6 +97,8 @@ class PocketBookmarks(object):
     for i, item in enumerate(items):
       url = item["url"]
       uid = item["uid"]
+      if url is None or url == "":
+        continue
       try:
         self.logger.debug(f"fetch url {url}, id {uid}")
         resp = self.requests.get(url)

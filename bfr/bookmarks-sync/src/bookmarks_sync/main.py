@@ -11,7 +11,6 @@ import requests
 
 # Obv. not secure, but its ok its just pocket. Will reset it later.
 consumer_key = os.environ["CONSUMER_KEY"]
-access_token = os.environ["ACCESS_TOKEN"]
 project_id = "bullfrog-reader"
 user_name = "agrodellic@gmail.com"
 
