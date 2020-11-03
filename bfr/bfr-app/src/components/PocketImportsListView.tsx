@@ -6,7 +6,7 @@ import { Database } from "../services/store/Database";
 import { getItemSet } from "../services/store/ItemSets";
 import { UserId } from "../services/store/Users";
 
-interface PocketImportItemRecord {
+export interface PocketImportItemRecord {
   pocket_item_id: string;
   title?: string | undefined;
   url: string;
@@ -18,7 +18,7 @@ type PocketImportItemCardProps = {
   pocketImportItem: PocketImportItemRecord;
 };
 
-const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> = ({
+export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> = ({
   pocketImportItem,
 }) => {
   const cardTitle = pocketImportItem.title
