@@ -1,10 +1,23 @@
-import { Card, CardContent, Link, List, Typography } from "@material-ui/core";
+import {
+  Card,
+  CardContent,
+  Link,
+  List,
+  makeStyles,
+  Typography,
+} from "@material-ui/core";
 import * as log from "loglevel";
 import React, { FunctionComponent, useContext, useState } from "react";
 import { AuthContext } from "../services/auth/Auth";
 import { Database } from "../services/store/Database";
 import { getItemSet } from "../services/store/ItemSets";
 import { UserId } from "../services/store/Users";
+
+const useStyles = makeStyles((theme) => ({
+  pocketImportItemCard: {
+    margin: theme.spacing(1),
+  },
+}));
 
 export interface PocketImportItemRecord {
   pocket_item_id: string;
@@ -21,6 +34,8 @@ export type PocketImportItemCardProps = {
 export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> = ({
   pocketImportItem,
 }) => {
+  const classes = useStyles();
+
   const cardTitle = pocketImportItem.title
     ? pocketImportItem.title
     : pocketImportItem.url;
@@ -45,7 +60,7 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
   );
 
   return (
-    <Card variant={"outlined"}>
+    <Card className={classes.pocketImportItemCard} variant={"outlined"}>
       <CardContent>
         {titleFragment}
         {authorFragment}
