@@ -14,7 +14,7 @@ export interface PocketImportItemRecord {
   description?: string;
 }
 
-type PocketImportItemCardProps = {
+export type PocketImportItemCardProps = {
   pocketImportItem: PocketImportItemRecord;
 };
 
@@ -34,7 +34,7 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
   const authorFragment = pocketImportItem.authors &&
     pocketImportItem.authors.length > 0 && (
       <Typography variant="body1" color="textPrimary">
-        by {pocketImportItem.authors}
+        by {pocketImportItem.authors.join(", ")}
       </Typography>
     );
 
