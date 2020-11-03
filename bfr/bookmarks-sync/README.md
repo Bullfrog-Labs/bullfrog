@@ -54,4 +54,9 @@ Run the command to modify your user record
 
         bin/update-user --pocket-access-token <ACCESS_TOKEN> --uid <your BFR user id (get it from the Firebase Auth page or debug console logs)> --log-level DEBUG --pocket-sync-enabled
 
-6.  Confirm your bookmarks show up in firebase after a few minutes
+6.  Run the run-sync script to sync the bookmarks
+
+        Set ACCESS_TOKEN and CONSUMER_KEY
+        bin/run-sync
+
+7.  Confirm your bookmarks show up in firebase after a few minutes
