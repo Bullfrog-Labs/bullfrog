@@ -1,11 +1,13 @@
 #!/bin/sh
 
+if [[ "$VIRTUAL_ENV" = "" ]]; then
+  echo "Not in virtual env. Run 'activate_venv.sh' first"
+fi
+
 BF_ROOT=$(git rev-parse --show-toplevel)
+
 BOOKMARKS_SYNC=$BF_ROOT/bfr/bookmarks-sync
 BOOKMARKS_SYNC_PYTHONPATH=$BOOKMARKS_SYNC/src
-
 export PYTHONPATH=$BOOKMARKS_SYNC_PYTHONPATH:$PYTHONPATH
 
-cd $BOOKMARKS_SYNC && 
-  pip3 install --user -r src/tools/requirements.txt 1>/dev/null &&
-  python3 src/tools/update_user.py $*
+python3 $BF_ROOT/bfr/bookmarks-sync/src/tools/update_user.py $*

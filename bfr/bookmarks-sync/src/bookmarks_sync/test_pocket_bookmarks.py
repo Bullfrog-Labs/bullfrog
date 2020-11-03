@@ -86,7 +86,7 @@ def clear_database():
   logger.debug(f"done; status={r.status_code}")
 
 
-user_name = "user@blfrg.xyz"
+uid = "1234567890"
 
 
 class TestPocketBookmarks(unittest.TestCase):
@@ -98,9 +98,9 @@ class TestPocketBookmarks(unittest.TestCase):
     pocket = IterMockPocket(single_record)
     db = FirestoreDatabase.admin(app)
     mock_requests = IterMockRequests([MockResponse()])
-    bookmarks = PocketBookmarks(user_name, pocket, db, mock_requests)
+    bookmarks = PocketBookmarks(uid, pocket, db, mock_requests)
     count = bookmarks.sync_latest()
-    latest = db.get_latest_bookmark(user_name)
+    latest = db.get_latest_bookmark(uid)
     self.assertIsNotNone(latest)
     self.assertEqual(count, 1)
 
@@ -108,9 +108,9 @@ class TestPocketBookmarks(unittest.TestCase):
     pocket = IterMockPocket(no_records)
     db = FirestoreDatabase.admin(app)
     mock_requests = IterMockRequests([])
-    bookmarks = PocketBookmarks(user_name, pocket, db, mock_requests)
+    bookmarks = PocketBookmarks(uid, pocket, db, mock_requests)
     count = bookmarks.sync_latest()
-    latest = db.get_latest_bookmark(user_name)
+    latest = db.get_latest_bookmark(uid)
     self.assertIsNone(latest)
     self.assertEqual(count, 0)
 
@@ -118,9 +118,9 @@ class TestPocketBookmarks(unittest.TestCase):
     pocket = IterMockPocket(multiple_pages)
     db = FirestoreDatabase.admin(app)
     mock_requests = IterMockRequests([MockResponse(), MockResponse()])
-    bookmarks = PocketBookmarks(user_name, pocket, db, mock_requests)
+    bookmarks = PocketBookmarks(uid, pocket, db, mock_requests)
     count = bookmarks.sync_latest()
-    latest = db.get_latest_bookmark(user_name)
+    latest = db.get_latest_bookmark(uid)
     self.assertIsNotNone(latest)
     self.assertEqual(count, 2)
 

@@ -11,10 +11,10 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("--log-level", type=str, default="INFO")
   parser.add_argument(
-    "--user-name",
+    "--uid",
     type=str,
     required=True,
-    help="User name to update",
+    help="User id to update",
   )
   parser.add_argument(
     "--pocket-access-token",
@@ -42,8 +42,8 @@ def main():
   app = FirebaseApp.admin(project_id)
   db = FirestoreDatabase.admin(app)
 
-  user_record: UserRecord = {"user_name": args.user_name}
-  user_private_record: UserPrivateRecord = {"user_name": args.user_name}
+  user_record: UserRecord = {"uid": args.uid}
+  user_private_record: UserPrivateRecord = {"uid": args.uid}
   if args.pocket_sync_enabled is not None:
     user_private_record["pocket_sync_enabled"] = args.pocket_sync_enabled
   if args.pocket_access_token:
@@ -52,7 +52,7 @@ def main():
   logger.debug(
     f"setting record; user={user_record} , user_private={user_private_record}")
 
-  db.update_user(args.user_name, user_record, user_private_record)
+  db.update_user(args.uid, user_record, user_private_record)
 
 
 main()

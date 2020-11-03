@@ -19,7 +19,7 @@ class ArticleMetadataRecord(TypedDict):
 
 
 class BookmarkRecord(TypedDict):
-  uid: str
+  pocket_item_id: str
   url: str
   pocket_json: str
   pocket_created_at: datetime
@@ -31,13 +31,13 @@ class BookmarkRecord(TypedDict):
 
 
 class UserRecord(TypedDict):
-  user_name: str
+  uid: str
   created_at: Optional[datetime]
   updated_at: Optional[datetime]
 
 
 class UserPrivateRecord(TypedDict):
-  user_name: str
+  uid: str
   pocket_access_token: str
   pocket_sync_enabled: bool
   created_at: Optional[datetime]
@@ -50,11 +50,11 @@ class FirestoreDatabase(object):
     self.db = db
 
   # Data access
-  def get_latest_bookmark(self, user_name: str) -> Optional[BookmarkRecord]:
+  def get_latest_bookmark(self, uid: str) -> Optional[BookmarkRecord]:
     self.logger.debug("get latest")
     query_ref = (
         self.db.collection("users")
-        .document(user_name)
+        .document(uid)
         .collection("bookmarks")
         .order_by("created_at", direction=firestore.Query.DESCENDING)
         .limit(1)
@@ -65,7 +65,7 @@ class FirestoreDatabase(object):
     else:
       return None
 
-  def add_items(self, user_name: str, bookmarks: List[BookmarkRecord]) -> None:
+  def add_items(self, uid: str, bookmarks: List[BookmarkRecord]) -> None:
     self.logger.debug(f"saving bookmarks {len(bookmarks)}")
     for bookmark in bookmarks:
       self.apply_new_record_timestamps(bookmark)
@@ -77,24 +77,24 @@ class FirestoreDatabase(object):
 
       result = (
           self.db.collection("users")
-          .document(user_name)
+          .document(uid)
           .collection("bookmarks")
-          .document(bookmark["uid"])
+          .document(bookmark["pocket_item_id"])
           .set(bookmark)
       )
       self.logger.debug(f"done; result={result}")
 
-  def update_user(self, user_name: str, user_record: UserRecord, user_private_record: UserPrivateRecord):
-    if self.db.collection("users").document(user_name).get().exists:
+  def update_user(self, uid: str, user_record: UserRecord, user_private_record: UserPrivateRecord):
+    if self.db.collection("users").document(uid).get().exists:
       self.apply_updated_record_timestamps(user_record)
-      self.db.collection("users").document(user_name).update(user_record)
-      self.db.collection("users").document(user_name).collection(
-        "users_private").document(user_name).update(user_private_record)
+      self.db.collection("users").document(uid).update(user_record)
+      self.db.collection("users").document(uid).collection(
+        "users_private").document(uid).update(user_private_record)
     else:
       self.apply_new_record_timestamps(user_record)
-      self.db.collection("users").document(user_name).set(user_record)
-      self.db.collection("users").document(user_name).collection(
-        "users_private").document(user_name).set(user_private_record)
+      self.db.collection("users").document(uid).set(user_record)
+      self.db.collection("users").document(uid).collection(
+        "users_private").document(uid).set(user_private_record)
 
   def get_users(self) -> List[UserRecord]:
     return [doc.to_dict() for doc in self.db.collection("users").get()]
