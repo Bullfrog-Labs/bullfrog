@@ -1,4 +1,4 @@
-import { List, ListItem, ListItemProps, ListItemText } from "@material-ui/core";
+import { Link, List, ListItem, ListItemText } from "@material-ui/core";
 import * as log from "loglevel";
 import React, { FunctionComponent, useContext, useState } from "react";
 import { AuthContext } from "../services/auth/Auth";
@@ -80,15 +80,15 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   const makePocketImportItemCard = (
     pocketImportItem: PocketImportItemRecord
   ) => {
+    const cardTitle = pocketImportItem.title
+      ? pocketImportItem.title
+      : pocketImportItem.url;
+
     return (
       <ListItem alignItems="flex-start" key={pocketImportItem.pocket_item_id}>
-        <ListItemText
-          primary={
-            pocketImportItem.title
-              ? pocketImportItem.title
-              : pocketImportItem.url
-          }
-        />
+        <ListItemText>
+          <Link href={pocketImportItem.url}>{cardTitle}</Link>
+        </ListItemText>
       </ListItem>
     );
   };
