@@ -53,7 +53,6 @@ class PocketBookmarks(object):
 
   def fetch_latest(self, max_pages=5) -> List[BookmarkRecord]:
     latest_bm = self.db.get_latest_bookmark(self.user_name)
-    self.logger.debug(f"latest: {latest_bm['url']}")
     start_time = self.since
     if latest_bm is not None and latest_bm["pocket_created_at"]:
       start_time = latest_bm["pocket_created_at"]

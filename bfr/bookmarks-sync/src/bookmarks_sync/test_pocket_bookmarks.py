@@ -7,7 +7,7 @@ import sys
 from pocket_bookmarks import PocketBookmarks
 from firestore_database import BookmarkRecord, FirestoreDatabase
 from firebase_app import FirebaseApp
-from typing import List, Tuple
+from typing import List, Tuple, Any
 import requests
 
 app = FirebaseApp.admin("bullfrog-reader")
@@ -67,6 +67,8 @@ fixture_page_1 = open("./fixture_page_1.html").read()
 class MockResponse(object):
   status_code: int = 200
   text: str = fixture_page_1
+  encoding: Any = None
+  content: Any = bytes(fixture_page_1, 'utf-8')
 
   def raise_for_status(self):
     return
