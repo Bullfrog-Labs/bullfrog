@@ -1,6 +1,6 @@
 import * as log from "loglevel";
 import { Database } from "./Database";
-import { getUser, UserId, USERS_COLLECTION } from "./Users";
+import { UserId, USERS_COLLECTION } from "./Users";
 
 export type ItemType = "article";
 
@@ -49,11 +49,10 @@ export interface ItemListRecord {
 const ITEMS_COLLECTION = "items";
 const ITEM_LISTS_COLLECTION = "item_lists";
 
-export const getItemList = async (
+const getItemList = async (
   database: Database,
   uid: UserId,
   itemListId: ItemListId
-  // TODO: Filtering/sorting arguments will go here eventually.
 ): Promise<ItemListRecord | null> => {
   const itemListRef = database
     .getHandle()
@@ -86,4 +85,23 @@ export const getItemList = async (
     title: itemListDoc.get("title"),
     items: allItems,
   };
+};
+
+export const getItemSet = async <T>(
+  database: Database,
+  itemRecordConverter: firebase.firestore.FirestoreDataConverter<T>,
+  path: string // this path should refer to a collection of items
+): Promise<T[]> => {
+  // TODO: Implement Filtering/sorting/paging
+  // TODO: What happens if the collection is not present?
+  const querySnapshot = await database
+    .getHandle()
+    .collection(path)
+    .withConverter(itemRecordConverter)
+    .get();
+
+  const allItems: T[] = [];
+  querySnapshot.forEach((item) => allItems.push(item.data()));
+
+  return allItems;
 };

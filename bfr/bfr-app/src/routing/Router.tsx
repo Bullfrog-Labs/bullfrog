@@ -5,6 +5,8 @@ import AppContainer from "../components/AppContainer";
 import { LoginView } from "../components/auth/LoginView";
 import PrivateRoute from "./PrivateRoute";
 import MainView from "../components/MainView";
+import { PocketImportsListView } from "../components/PocketImportsListView";
+import { Database } from "../services/store/Database";
 
 function Sad404() {
   let location = useLocation();
@@ -20,9 +22,13 @@ function Sad404() {
 
 export type RouterProps = {
   authProvider: AuthProvider;
+  database: Database;
 };
 
-export const Router: FunctionComponent<RouterProps> = ({ authProvider }) => {
+export const Router: FunctionComponent<RouterProps> = ({
+  authProvider,
+  database,
+}) => {
   return (
     <BrowserRouter>
       <Switch>
@@ -34,6 +40,11 @@ export const Router: FunctionComponent<RouterProps> = ({ authProvider }) => {
         <PrivateRoute exact path="/">
           <AppContainer>
             <MainView />
+          </AppContainer>
+        </PrivateRoute>
+        <PrivateRoute exact path="/pocket_imports">
+          <AppContainer>
+            <PocketImportsListView database={database} />
           </AppContainer>
         </PrivateRoute>
         <Route path="*">

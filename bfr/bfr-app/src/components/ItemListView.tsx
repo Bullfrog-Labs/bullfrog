@@ -2,12 +2,7 @@ import * as log from "loglevel";
 import React, { FunctionComponent, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Database } from "../services/store/Database";
-import {
-  ItemListId,
-  ItemListRecord,
-  getItemList,
-  ItemRecord,
-} from "../services/store/ItemLists";
+import { ItemListRecord } from "../services/store/ItemSets";
 import { UserId } from "../services/store/Users";
 
 // Make this less hacky - use an actual 404 page instead of relying on the
@@ -20,6 +15,7 @@ const ITEM_LIST_404_REDIRECT_URL = "/404";
 //       list query. e.g. "Unread", "Saved", "Favorites", etc. These can probably just
 //       be different component types.
 
+/*
 export type PocketImportsListViewProps = {
   database: Database;
   uid: UserId;
@@ -66,6 +62,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     );
   }
 };
+*/
 
 export type ItemListViewProps = {
   itemListRecord: ItemListRecord;
