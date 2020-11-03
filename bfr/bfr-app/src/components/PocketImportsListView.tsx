@@ -1,4 +1,4 @@
-import { Link, List, ListItem, ListItemText } from "@material-ui/core";
+import { Card, CardContent, Link, List, Typography } from "@material-ui/core";
 import * as log from "loglevel";
 import React, { FunctionComponent, useContext, useState } from "react";
 import { AuthContext } from "../services/auth/Auth";
@@ -8,9 +8,52 @@ import { UserId } from "../services/store/Users";
 
 interface PocketImportItemRecord {
   pocket_item_id: string;
-  title: string | undefined;
+  title?: string | undefined;
   url: string;
+  authors?: string[];
+  description?: string;
 }
+
+type PocketImportItemCardProps = {
+  pocketImportItem: PocketImportItemRecord;
+};
+
+const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> = ({
+  pocketImportItem,
+}) => {
+  const cardTitle = pocketImportItem.title
+    ? pocketImportItem.title
+    : pocketImportItem.url;
+
+  const titleFragment = (
+    <Typography variant="h6" color="textPrimary">
+      <Link href={pocketImportItem.url}>{cardTitle}</Link>
+    </Typography>
+  );
+
+  const authorFragment = pocketImportItem.authors &&
+    pocketImportItem.authors.length > 0 && (
+      <Typography variant="body1" color="textPrimary">
+        by {pocketImportItem.authors}
+      </Typography>
+    );
+
+  const descriptionFragment = pocketImportItem.description && (
+    <Typography variant="body2" color="textSecondary">
+      {pocketImportItem.description}
+    </Typography>
+  );
+
+  return (
+    <Card variant={"outlined"}>
+      <CardContent>
+        {titleFragment}
+        {authorFragment}
+        {descriptionFragment}
+      </CardContent>
+    </Card>
+  );
+};
 
 const PocketImportItemRecordConverter = {
   toFirestore: (
@@ -27,10 +70,13 @@ const PocketImportItemRecordConverter = {
     options: firebase.firestore.SnapshotOptions
   ): PocketImportItemRecord => {
     const data = snapshot.data(options);
+    console.log(data);
     return {
       pocket_item_id: data.pocket_item_id,
       title: data.metadata?.title,
       url: data.url,
+      authors: data.metadata?.authors,
+      description: data.metadata?.description,
     };
   },
 };
@@ -77,22 +123,8 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     loadPocketImports();
   }, [database, uid, logger]);
 
-  const makePocketImportItemCard = (
-    pocketImportItem: PocketImportItemRecord
-  ) => {
-    const cardTitle = pocketImportItem.title
-      ? pocketImportItem.title
-      : pocketImportItem.url;
-
-    return (
-      <ListItem alignItems="flex-start" key={pocketImportItem.pocket_item_id}>
-        <ListItemText>
-          <Link href={pocketImportItem.url}>{cardTitle}</Link>
-        </ListItemText>
-      </ListItem>
-    );
-  };
-
-  const pocketImportCards = pocketImports.map(makePocketImportItemCard);
+  const pocketImportCards = pocketImports.map((x) => (
+    <PocketImportItemCard pocketImportItem={x} />
+  ));
   return <List>{pocketImportCards}</List>;
 };
