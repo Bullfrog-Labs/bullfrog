@@ -10,4 +10,6 @@ BOOKMARKS_SYNC=$BF_ROOT/bfr/bookmarks-sync
 BOOKMARKS_SYNC_PYTHONPATH=$BOOKMARKS_SYNC/src
 export PYTHONPATH=$BOOKMARKS_SYNC_PYTHONPATH:$PYTHONPATH
 
-python3 $BF_ROOT/bfr/bookmarks-sync/src/tools/update_user.py $*
+cd $BOOKMARKS_SYNC && 
+  pip3 install -r src/tools/requirements.txt 1>/dev/null &&
+  python3 src/tools/update_user.py $*
