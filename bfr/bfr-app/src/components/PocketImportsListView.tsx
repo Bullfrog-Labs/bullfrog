@@ -39,6 +39,7 @@ export type PocketImportsListViewProps = {
   database: Database;
 };
 
+// TODO: Switch to a generic and clearly-demarcated collection path for Pocket imports
 /*
 const getPocketImportsItemSetPath = (uid: UserId) =>
   `users/${uid}/item_sets/pocket_imports/items`;
