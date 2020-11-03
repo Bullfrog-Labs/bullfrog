@@ -1,7 +1,6 @@
 # Setup
 
-    . ./activate_venv.sh
-    . ./setup_venv.sh
+    . ./bin/activate_venv
 
 # Scripts
 
