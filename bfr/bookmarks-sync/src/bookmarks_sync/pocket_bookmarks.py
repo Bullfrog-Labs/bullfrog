@@ -4,7 +4,6 @@ from datetime import datetime
 from firestore_database import FirestoreDatabase, BookmarkRecord, ArticleMetadataRecord
 from requests.exceptions import HTTPError, Timeout, ConnectionError, TooManyRedirects
 import json
-import uuid
 import requests
 from newspaper import Article
 from typing import List, Dict, Any, Union, Optional
@@ -15,7 +14,7 @@ class BookmarkRecords(object):
   @classmethod
   def from_pocket_record(cls, pocket_record) -> BookmarkRecord:
     return {
-        "uid": pocket_record["item_id"],
+        "pocket_item_id": pocket_record["item_id"],
         "url": pocket_record["resolved_url"],
         "pocket_created_at": datetime.fromtimestamp(
             int(pocket_record["time_added"])
@@ -34,7 +33,7 @@ class BookmarkRecords(object):
 class PocketBookmarks(object):
   def __init__(
       self,
-      user_name: str,
+      uid: str,
       pocket: Pocket,
       db: FirestoreDatabase,
       requests=requests,
@@ -43,12 +42,12 @@ class PocketBookmarks(object):
     self.pocket = pocket
     self.logger = logging.getLogger("PocketBookmarks")
     self.db = db
-    self.user_name = user_name
+    self.uid = uid
     self.since = since
     self.requests = requests
 
   def fetch_latest(self) -> List[BookmarkRecord]:
-    latest_bm = self.db.get_latest_bookmark(self.user_name)
+    latest_bm = self.db.get_latest_bookmark(self.uid)
     self.logger.debug(f"latest: {latest_bm}")
     start_time = self.since
     if latest_bm is not None and latest_bm["pocket_created_at"]:
@@ -93,13 +92,13 @@ class PocketBookmarks(object):
     pages = {}
     for i, item in enumerate(items):
       url = item["url"]
-      uid = item["uid"]
+      pocket_item_id = item["pocket_item_id"]
       try:
-        self.logger.debug(f"fetch url {url}, id {uid}")
+        self.logger.debug(f"fetch url {url}, id {pocket_item_id}")
         resp = self.requests.get(url)
         resp.raise_for_status()
         self.logger.debug("status=" + str(resp.status_code))
-        pages[uid] = resp.text
+        pages[pocket_item_id] = resp.text
       except (HTTPError, Timeout, ConnectionError, TooManyRedirects) as e:
         # Record the error and move on
         self.logger.error("url fetch failed for {}".format(url))
@@ -157,10 +156,10 @@ class PocketBookmarks(object):
     metadata: Dict = {}
     for i, item in enumerate(items):
       text = item["text"]
-      uid = item["uid"]
+      pocket_item_id = item["pocket_item_id"]
       url = item["url"]
       try:
-        self.logger.debug(f"parse url {url} id {uid}")
+        self.logger.debug(f"parse url {url} id {pocket_item_id}")
         article = Article(url, fetch_images=False)
         article.download(input_html=text)
         article.parse()
@@ -173,7 +172,7 @@ class PocketBookmarks(object):
             + f"title={article_metadata['title']}, "
             + f"text={extracted_text_len}"
         )
-        metadata[uid] = article_metadata
+        metadata[pocket_item_id] = article_metadata
       except Exception as e:
         # Record the error and move on
         self.logger.error(f"extract failed for {url}; e={e}")
@@ -181,7 +180,7 @@ class PocketBookmarks(object):
     return metadata
 
   def save_records(self, records: List[BookmarkRecord]):
-    self.db.add_items(self.user_name, records)
+    self.db.add_items(self.uid, records)
     self.logger.debug(f"added {len(records)} items")
 
   # This algo is really dumb, it just fetches everything since last and then
@@ -194,18 +193,18 @@ class PocketBookmarks(object):
     # Fetch urls
     resources = self.fetch_resources(items)
     for item in items:
-      uid = item["uid"]
-      if uid in resources:
-        self.logger.debug(f"adding text for {uid}")
-        item["text"] = resources[uid]
+      pocket_item_id = item["pocket_item_id"]
+      if pocket_item_id in resources:
+        self.logger.debug(f"adding text for {pocket_item_id}")
+        item["text"] = resources[pocket_item_id]
 
     # Extract metadata
     metadata = self.extract_metadata(items)
     for item in items:
-      uid = item["uid"]
-      if uid in metadata:
-        self.logger.debug(f"adding metadata for {uid}")
-        item["metadata"] = metadata[uid]
+      pocket_item_id = item["pocket_item_id"]
+      if pocket_item_id in metadata:
+        self.logger.debug(f"adding metadata for {pocket_item_id}")
+        item["metadata"] = metadata[pocket_item_id]
 
     # None of the records will get saved if there's any error, which is a good
     # way to make sure we never lose track of any items.

@@ -35,7 +35,7 @@ class BookmarkRecords(object):
   @classmethod
   def from_pocket_record(cls, pocket_record):
     return {
-        "uid": "A84FB302-F7B6-4D88-BC36-5369812BBA90",
+        "pocket_item_id": "A84FB302-F7B6-4D88-BC36-5369812BBA90",
         "url": pocket_record["given_url"],
         "pocket_created_at": datetime.datetime.fromtimestamp(
             int(pocket_record["time_added"])
