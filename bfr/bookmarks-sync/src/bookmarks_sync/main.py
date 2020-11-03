@@ -13,6 +13,7 @@ import requests
 consumer_key = os.environ["CONSUMER_KEY"]
 project_id = "bullfrog-reader"
 
+
 def sync_all_users():
   logger = logging.getLogger("main")
   app = FirebaseApp.admin(project_id)
