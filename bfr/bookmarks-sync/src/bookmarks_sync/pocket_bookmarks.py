@@ -8,6 +8,10 @@ import requests
 from newspaper import Article
 from typing import List, Dict, Any, Union, Optional
 from dict_deep import deep_get
+import cchardet
+
+
+POCKET_ITEM_STATUS_DELETED = "2"
 
 
 class BookmarkRecords(object):
@@ -46,9 +50,8 @@ class PocketBookmarks(object):
     self.since = since
     self.requests = requests
 
-  def fetch_latest(self) -> List[BookmarkRecord]:
+  def fetch_latest(self, max_pages=5) -> List[BookmarkRecord]:
     latest_bm = self.db.get_latest_bookmark(self.uid)
-    self.logger.debug(f"latest: {latest_bm}")
     start_time = self.since
     if latest_bm is not None and latest_bm["pocket_created_at"]:
       start_time = latest_bm["pocket_created_at"]
@@ -58,6 +61,7 @@ class PocketBookmarks(object):
       start_timestamp = int(datetime.timestamp(start_time))
 
     # Iterator
+    pages = 0
     done = False
     offset = 0
     items = []
@@ -75,14 +79,16 @@ class PocketBookmarks(object):
       else:
         bookmarks = {}
 
-      self.logger.debug(f"results: {bookmarks}")
+      self.logger.debug(f"results: {len(bookmarks)}")
 
       for (item_id, item) in bookmarks.items():
         self.logger.debug(f"got item with key {item_id}")
-        items.append(BookmarkRecords.from_pocket_record(item))
+        if item["status"] != POCKET_ITEM_STATUS_DELETED:
+          items.append(BookmarkRecords.from_pocket_record(item))
 
       offset += len(bookmarks)
-      if len(bookmarks) == 0:
+      pages += 1
+      if len(bookmarks) == 0 or pages >= max_pages:
         done = True
 
     return items
@@ -93,11 +99,20 @@ class PocketBookmarks(object):
     for i, item in enumerate(items):
       url = item["url"]
       pocket_item_id = item["pocket_item_id"]
+      if url is None or url == "":
+        self.logger.debug(f"skipping item where url is empty; uid={uid}")
+        continue
       try:
         self.logger.debug(f"fetch url {url}, id {pocket_item_id}")
         resp = self.requests.get(url)
         resp.raise_for_status()
         self.logger.debug("status=" + str(resp.status_code))
+        if resp.encoding is None:
+          resp.encoding = cchardet.detect(resp.content)['encoding']
+          self.logger.debug("used encoding " + str(resp.encoding))
+        if resp.encoding is None:
+          self.logger.debug("encoding cannot be determined, skipping")
+          continue
         pages[pocket_item_id] = resp.text
       except (HTTPError, Timeout, ConnectionError, TooManyRedirects) as e:
         # Record the error and move on
@@ -161,6 +176,9 @@ class PocketBookmarks(object):
       try:
         self.logger.debug(f"parse url {url} id {pocket_item_id}")
         article = Article(url, fetch_images=False)
+        if text is None:
+          self.logger.debug(f"skipping item where text is empty; url={url}")
+          continue
         article.download(input_html=text)
         article.parse()
         self.logger.debug(f"done parsing")

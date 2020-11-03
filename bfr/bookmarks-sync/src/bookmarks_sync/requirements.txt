@@ -4,3 +4,4 @@ firebase-admin==4.4.0
 requests
 newspaper3k
 dict_deep
+cchardet
