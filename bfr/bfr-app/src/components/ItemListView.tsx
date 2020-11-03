@@ -27,50 +27,61 @@ export type PocketImportsListViewProps = {
 export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps> = ({
   database,
   uid,
-}) => {};
-database: Database;
-uid: UserId;
-itemListId: ItemListId;
+}) => {
+  const POCKET_IMPORTS_LIST_NAME = "pocket_imports";
+
+  const logger = log.getLogger("PocketImportsListView");
+
+  const [pocketImported, setPocketImported] = useState(false);
+  const [items, setItems] = useState<ItemRecord[]>();
+
+  React.useEffect(() => {
+    const loadItemList = async () => {
+      logger.debug(`Getting Pocket imports item list for uid ${uid}`);
+      const itemList: ItemListRecord | null = await getItemList(
+        database,
+        uid,
+        POCKET_IMPORTS_LIST_NAME
+      );
+
+      if (!itemList) {
+        logger.debug(`Pocket imports item list not found for uid ${uid}`);
+      } else {
+        logger.debug(`Done getting Pocket imports item list for uid ${uid}`);
+        setPocketImported(true);
+        setItems(itemList.items);
+      }
+    };
+
+    loadItemList();
+  }, [database, uid, pocketImported]);
+
+  if (!pocketImported) {
+    return <div>Import from pocket</div>;
+  } else {
+    return (
+      <ItemListView
+        itemListRecord={{ id: "id", title: "Pocket Imports", items: items! }}
+      />
+    );
+  }
+};
 
 export type ItemListViewProps = {
   itemListRecord: ItemListRecord;
 };
 
+// TODO: Make this generic
+
 export const ItemListView: FunctionComponent<ItemListViewProps> = ({
-  database,
-  uid,
-  itemListId,
+  itemListRecord,
 }) => {
   const logger = log.getLogger("ItemListView");
-  const history = useHistory();
-
-  const [title, setTitle] = useState<string>();
-  const [items, setItems] = useState<ItemRecord[]>();
-
-  React.useEffect(() => {
-    // Get list contents
-    // TODO: support filtering, ordering and paging
-    const loadItemList = async () => {
-      logger.debug(`Getting item list ${itemListId} for uid ${uid}`);
-      const itemList: ItemListRecord | null = await getItemList(
-        database,
-        uid,
-        itemListId
-      );
-
-      if (!itemList) {
-        logger.debug(
-          `Item list ${itemListId} not found for uid ${uid}, redirecting`
-        );
-        history.replace(ITEM_LIST_404_REDIRECT_URL);
-      } else {
-        logger.debug(`Done getting item list ${itemListId} for uid ${uid}`);
-        setTitle(itemList.title);
-        setItems(itemList.items);
-      }
-    };
-  }, [database, uid, itemListId]);
 
   // Render list contents
-  return <div>${title}</div>;
+  return (
+    <div>
+      Title: ${itemListRecord.title}, num items: ${itemListRecord.items.length}
+    </div>
+  );
 };
