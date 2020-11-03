@@ -71,11 +71,9 @@ class FirestoreDatabase(object):
       self.apply_new_record_timestamps(bookmark)
       self.logger.debug(f"saving bookmark {bookmark['url']}")
 
-      # This is a hack - this means the text is probably too large tp store in FB, so
+      # This is a hack - the html text is generally too large tp store in FB, so
       # null it out. Need to fix eventually.
-      if "text" in bookmark and bookmark["text"] is not None and len(bookmark["text"]) > 500000:
-        self.logger.debug(f"not saving html text because its too big")
-        bookmark["text"] = None
+      bookmark["text"] = None
 
       result = (
           self.db.collection("users")

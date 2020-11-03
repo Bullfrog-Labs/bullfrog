@@ -12,6 +12,9 @@ from dict_deep import deep_get
 import cchardet
 
 
+POCKET_ITEM_STATUS_DELETED = "2"
+
+
 class BookmarkRecords(object):
   @classmethod
   def from_pocket_record(cls, pocket_record) -> BookmarkRecord:
@@ -82,12 +85,12 @@ class PocketBookmarks(object):
 
       for (item_id, item) in bookmarks.items():
         self.logger.debug(f"got item with key {item_id}")
-        if item["status"] != "2":
+        if item["status"] != POCKET_ITEM_STATUS_DELETED:
           items.append(BookmarkRecords.from_pocket_record(item))
 
       offset += len(bookmarks)
       pages += 1
-      if len(bookmarks) == 0 or pages >= max_pages - 1:
+      if len(bookmarks) == 0 or pages >= max_pages:
         done = True
 
     return items
@@ -99,6 +102,7 @@ class PocketBookmarks(object):
       url = item["url"]
       uid = item["uid"]
       if url is None or url == "":
+        self.logger.debug(f"skipping item where url is empty; uid={uid}")
         continue
       try:
         self.logger.debug(f"fetch url {url}, id {uid}")
@@ -175,6 +179,7 @@ class PocketBookmarks(object):
         self.logger.debug(f"parse url {url} id {uid}")
         article = Article(url, fetch_images=False)
         if text is None:
+          self.logger.debug(f"skipping item where text is empty; url={url}")
           continue
         article.download(input_html=text)
         article.parse()
