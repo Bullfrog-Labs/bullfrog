@@ -81,7 +81,13 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   ) => {
     return (
       <ListItem alignItems="flex-start" key={pocketImportItem.pocket_item_id}>
-        <ListItemText primary={pocketImportItem.title} />
+        <ListItemText
+          primary={
+            pocketImportItem.title
+              ? pocketImportItem.title
+              : pocketImportItem.url
+          }
+        />
       </ListItem>
     );
   };
