@@ -21,6 +21,7 @@ test("renders fully-populated pocket import item card", () => {
   const expectedElements = [
     getByText(mockPocketImportItem.title!),
     getByText(mockPocketImportItem.description!),
+    getByText(new RegExp(mockPocketImportItem.authors!.join(", "))),
   ];
 
   expectedElements.forEach((el) => expect(el).toBeInTheDocument());
