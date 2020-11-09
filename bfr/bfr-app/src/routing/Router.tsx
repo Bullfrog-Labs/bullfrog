@@ -5,6 +5,7 @@ import AppContainer from "../components/AppContainer";
 import { LoginView } from "../components/auth/LoginView";
 import PrivateRoute from "./PrivateRoute";
 import MainView from "../components/MainView";
+import { PocketImportsListView } from "../components/PocketImportsListView";
 import { Database } from "../services/store/Database";
 
 function Sad404() {
@@ -25,20 +26,25 @@ export type RouterProps = {
 };
 
 export const Router: FunctionComponent<RouterProps> = ({
-  database,
   authProvider,
+  database,
 }) => {
   return (
     <BrowserRouter>
       <Switch>
         <Route path="/login">
           <AppContainer>
-            <LoginView authProvider={authProvider} database={database} />
+            <LoginView authProvider={authProvider} />
           </AppContainer>
         </Route>
         <PrivateRoute exact path="/">
           <AppContainer>
             <MainView />
+          </AppContainer>
+        </PrivateRoute>
+        <PrivateRoute exact path="/pocket_imports">
+          <AppContainer>
+            <PocketImportsListView database={database} />
           </AppContainer>
         </PrivateRoute>
         <Route path="*">

@@ -1,7 +1,7 @@
 import * as log from "loglevel";
 import { Database } from "./Database";
 
-type UserId = string;
+export type UserId = string;
 
 export interface UserRecord {
   uid: UserId;
@@ -24,20 +24,20 @@ const USER_RECORD_CONVERTER = {
   },
 };
 
-const USERS_COLLECTION = "users";
+export const USERS_COLLECTION = "users";
 
 export const getUser = async (
   database: Database,
-  userId: UserId
+  uid: UserId
 ): Promise<UserRecord | null> => {
   const logger = log.getLogger("getUser");
 
-  logger.debug(`Fetching user ${userId}`);
+  logger.debug(`Fetching user ${uid}`);
   const userDoc = await database
     .getHandle()
     .collection(USERS_COLLECTION)
     .withConverter(USER_RECORD_CONVERTER)
-    .doc(userId)
+    .doc(uid)
     .get();
 
   return userDoc.exists ? userDoc.data()! : null;
@@ -45,16 +45,16 @@ export const getUser = async (
 
 export const checkIfUserExists = async (
   database: Database,
-  userId: UserId
+  uid: UserId
 ): Promise<boolean> => {
   const logger = log.getLogger("checkIfUserExists");
 
-  logger.debug(`checking whether user ${userId} exists`);
-  const user = await getUser(database, userId);
+  logger.debug(`checking whether user ${uid} exists`);
+  const user = await getUser(database, uid);
   if (!!user) {
-    logger.debug(`${userId} is an existing user`);
+    logger.debug(`${uid} is an existing user`);
   } else {
-    logger.debug(`${userId} is not an existing user`);
+    logger.debug(`${uid} is not an existing user`);
   }
   return !!user;
 };
