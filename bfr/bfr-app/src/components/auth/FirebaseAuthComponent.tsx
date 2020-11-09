@@ -6,7 +6,6 @@ import firebaseui from "firebaseui";
 import FirebaseAuthProvider from "../../services/auth/FirebaseAuthProvider";
 import { useHistory, useLocation, Redirect } from "react-router-dom";
 import { AuthContext } from "../../services/auth/Auth";
-import { Database } from "../../services/store/Database";
 
 interface LocationState {
   from: {
@@ -16,12 +15,10 @@ interface LocationState {
 
 export type FirebaseAuthComponentProps = {
   authProvider: FirebaseAuthProvider;
-  database: Database;
 };
 
 export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps> = ({
   authProvider,
-  database,
 }) => {
   const logger = log.getLogger("FirebaseAuthComponent");
 

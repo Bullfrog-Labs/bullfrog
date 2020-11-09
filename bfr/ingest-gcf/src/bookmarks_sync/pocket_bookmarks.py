@@ -100,7 +100,8 @@ class PocketBookmarks(object):
       url = item["url"]
       pocket_item_id = item["pocket_item_id"]
       if url is None or url == "":
-        self.logger.debug(f"skipping item where url is empty; uid={uid}")
+        self.logger.debug(
+          f"skipping item where url is empty; pocket_item_id={pocket_item_id}")
         continue
       try:
         self.logger.debug(f"fetch url {url}, id {pocket_item_id}")

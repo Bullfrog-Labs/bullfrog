@@ -25,6 +25,9 @@ activate () {
 }
 activate
 
+echo "Setting up Python venv"
+pip3 install --upgrade pip
+pip3 install -r src/tools/requirements.txt -r src/bookmarks_sync/requirements.txt
 
 if [ $PUSHED = 1 ]; then
     popd
