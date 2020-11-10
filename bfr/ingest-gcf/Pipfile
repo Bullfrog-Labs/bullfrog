@@ -1,7 +1,7 @@
 [[source]]
-url = "https://blfrg.xyz"
+url = "https://pypi.org/simple"
 verify_ssl = true
-name = "ingest-gcf"
+name = "pypi"
 
 [packages]
 pocket = "==0.3.6"
