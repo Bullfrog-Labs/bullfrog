@@ -95,7 +95,7 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
   );
 
   const estReadTimeFragment = pocketImportItem.estReadTimeMinutes && (
-    <em>{" - " + pocketImportItem.estReadTimeMinutes} mins</em>
+    <em>{" - " + pocketImportItem.estReadTimeMinutes + " mins"}</em>
   );
 
   const timesFragment = pocketImportItem.saveTime && (

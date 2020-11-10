@@ -12,6 +12,8 @@ test("renders fully-populated pocket import item card", () => {
     url: "http://test.url/foo",
     authors: ["Alice", "Bob"],
     description: "This is a great article",
+    saveTime: new Date(1995, 11, 17),
+    estReadTimeMinutes: 7,
   };
 
   const { getByText } = render(
@@ -22,6 +24,8 @@ test("renders fully-populated pocket import item card", () => {
     getByText(mockPocketImportItem.title!),
     getByText(mockPocketImportItem.description!),
     getByText(new RegExp(mockPocketImportItem.authors!.join(", "))),
+    getByText("Dec 17, 1995, 12:00 AM"),
+    getByText("- 7 mins"),
   ];
 
   expectedElements.forEach((el) => expect(el).toBeInTheDocument());
