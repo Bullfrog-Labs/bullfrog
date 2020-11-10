@@ -70,3 +70,7 @@ node_modules/
 
 # python virtualenv
 .venv
+
+# Files/dirs built by bin/build
+dist
+requirements.txt

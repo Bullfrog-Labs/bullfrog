@@ -1,0 +1,20 @@
+#!/bin/sh
+
+BF_ROOT=$(git rev-parse --show-toplevel)
+INGEST_GCF_ROOT=$BF_ROOT/bfr/ingest-gcf
+
+PUSHED=0
+if [ ! "$PWD" = "$INGEST_GCF_ROOT" ]; then
+    pushd $INGEST_GCF_ROOT
+    PUSHED=1
+fi
+
+pipenv lock -r > requirements.txt || exit -1
+
+mkdir -p dist
+zip -r dist/ingest-gcf-package.zip bookmarks_sync/ main.py requirements.txt
+
+if [ $PUSHED = 1 ]; then
+    popd
+fi
+
