@@ -12,6 +12,11 @@ From https://github.com/pyenv/pyenv#installation:
     echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.zshrc
     exec "$SHELL"
     pyenv install # Ensures that the specific version of Python in .python-version is used
+    pip install --upgrade pip
+
+## pipenv setup (just once)
+
+    pip install pipenv
 
 ## Poetry setup (just once)
 
@@ -24,25 +29,28 @@ From https://python-poetry.org/docs/#installation.
 
 ## Activate virtual environment (do this for every new shell)
 
-    poetry shell
+    pipenv shell
 
-## Run tests in watch mode
+## Run tests
 
 Keep the Firebase emulator running in a terminal.
 
     firebase emulators:start --only firestore
 
+Run the tests
+
+    pytest
+
 Run the tests in watch mode
 
-    poetry run pytest-watch
+    pytest-watch
 
 ## Test cloud functions locally
 
 Start the function framework server locally, using `--target` to select the
 entry point.
 
-    cd ingest_gcf
-    poetry run functions-framework --target sync_pocket_for_all_users --port 7000
+    functions-framework --target sync_pocket_for_all_users --port 7000
 
 Send requests to the function
 

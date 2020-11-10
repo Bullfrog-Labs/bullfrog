@@ -4,8 +4,8 @@ import os
 import logging
 import time
 import sys
-from ingest_gcf.bookmarks_sync.firestore_database import FirestoreDatabase, BookmarkRecord
-from ingest_gcf.bookmarks_sync.firebase_app import FirebaseApp
+from bookmarks_sync.firestore_database import FirestoreDatabase, BookmarkRecord
+from bookmarks_sync.firebase_app import FirebaseApp
 import datetime
 import uuid
 import requests

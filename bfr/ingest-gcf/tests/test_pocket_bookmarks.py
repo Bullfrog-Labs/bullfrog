@@ -4,9 +4,9 @@ import os
 import logging
 import time
 import sys
-from ingest_gcf.bookmarks_sync.pocket_bookmarks import PocketBookmarks
-from ingest_gcf.bookmarks_sync.firestore_database import BookmarkRecord, FirestoreDatabase
-from ingest_gcf.bookmarks_sync.firebase_app import FirebaseApp
+from bookmarks_sync.pocket_bookmarks import PocketBookmarks
+from bookmarks_sync.firestore_database import BookmarkRecord, FirestoreDatabase
+from bookmarks_sync.firebase_app import FirebaseApp
 from typing import List, Tuple, Any
 import requests
 

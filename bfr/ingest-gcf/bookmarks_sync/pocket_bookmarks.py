@@ -1,7 +1,7 @@
 from pocket import Pocket
 import logging
 from datetime import datetime
-from ingest_gcf.bookmarks_sync.firestore_database import FirestoreDatabase, BookmarkRecord, ArticleMetadataRecord
+from bookmarks_sync.firestore_database import FirestoreDatabase, BookmarkRecord, ArticleMetadataRecord
 from requests.exceptions import HTTPError, Timeout, ConnectionError, TooManyRedirects
 import json
 import requests
