@@ -22,24 +22,27 @@ single_bookmark_contents = single_bookmark["item_0"]
 
 single_record: List[Tuple] = [({"list": single_bookmark}, {})]
 multiple_pages: List[Tuple] = [
-    ({"list": single_bookmark}, {}),
-    ({"list": single_bookmark}, {}),
+    ({
+        "list": single_bookmark
+    }, {}),
+    ({
+        "list": single_bookmark
+    }, {}),
 ]
-multiple_records: List[Tuple] = [
-    (
-        {
-            "list": {
-                "item_0": single_bookmark_contents,
-                "item_1": single_bookmark_contents,
-            }
-        },
-        {},
-    )
-]
+multiple_records: List[Tuple] = [(
+    {
+        "list": {
+            "item_0": single_bookmark_contents,
+            "item_1": single_bookmark_contents,
+        }
+    },
+    {},
+)]
 no_records: List[Tuple] = [({}, {})]
 
 
 class IterMockPocket(object):
+
   def __init__(self, result_set):
     self.result_set = iter(result_set)
 
@@ -51,6 +54,7 @@ class IterMockPocket(object):
 
 
 class IterMockRequests(object):
+
   def __init__(self, result_set):
     self.result_set = iter(result_set)
 
@@ -90,6 +94,7 @@ uid = "1234567890"
 
 
 class TestPocketBookmarks(unittest.TestCase):
+
   def setUp(self):
     os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
     clear_database()

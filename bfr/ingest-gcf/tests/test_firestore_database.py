@@ -32,22 +32,25 @@ def clear_database():
 
 
 class BookmarkRecords(object):
+
   @classmethod
   def from_pocket_record(cls, pocket_record):
     return {
-        "pocket_item_id": "A84FB302-F7B6-4D88-BC36-5369812BBA90",
-        "url": pocket_record["given_url"],
-        "pocket_created_at": datetime.datetime.fromtimestamp(
-            int(pocket_record["time_added"])
-        ),
-        "pocket_updated_at": datetime.datetime.fromtimestamp(
-            int(pocket_record["time_updated"])
-        ),
-        "pocket_json": json.dumps(pocket_record),
+        "pocket_item_id":
+            "A84FB302-F7B6-4D88-BC36-5369812BBA90",
+        "url":
+            pocket_record["given_url"],
+        "pocket_created_at":
+            datetime.datetime.fromtimestamp(int(pocket_record["time_added"])),
+        "pocket_updated_at":
+            datetime.datetime.fromtimestamp(int(pocket_record["time_updated"])),
+        "pocket_json":
+            json.dumps(pocket_record),
     }
 
 
 class TestFirestoreDatabase(unittest.TestCase):
+
   def setUp(self):
     os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
     clear_database()

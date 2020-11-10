@@ -11,17 +11,14 @@ class Handler(BaseHTTPRequestHandler):
   logger = logging.getLogger("Handler")
 
   def do_GET(self):
-    self.logger.debug(
-        f"got redirect; path={self.path}, "
-        + f"content_type={self.headers.get_content_type()}"
-    )
+    self.logger.debug(f"got redirect; path={self.path}, " +
+                      f"content_type={self.headers.get_content_type()}")
 
     self.send_response(200)
     self.send_header("Content-type", "text/html")
     self.end_headers()
     self.wfile.write(
-        "<html><body><p>You are now logged in.</p></body></html>".encode()
-    )
+        "<html><body><p>You are now logged in.</p></body></html>".encode())
 
     # Has to happen on a separate thread, else deadlock.
     def shutdown():
@@ -65,34 +62,30 @@ def main():
 
   if not args.access_token and not args.login:
     raise Exception(
-        "Either pass in your access token or specify --login to log in again"
-    )
+        "Either pass in your access token or specify --login to log in again")
 
   access_token = args.access_token
   consumer_key = args.consumer_key
 
   if args.login:
     server = OAuthRedirectServer()
-    logger.debug(
-      "Login requested, logging in with consumer_key=" + consumer_key)
+    logger.debug("Login requested, logging in with consumer_key=" +
+                 consumer_key)
     request_token = Pocket.get_request_token(
-        consumer_key=consumer_key, redirect_uri="http://localhost:8000/"
-    )
+        consumer_key=consumer_key, redirect_uri="http://localhost:8000/")
     logger.debug(f"Got rt {request_token}")
-    auth_url = Pocket.get_auth_url(
-        code=request_token, redirect_uri="http://localhost:8000/"
-    )
+    auth_url = Pocket.get_auth_url(code=request_token,
+                                   redirect_uri="http://localhost:8000/")
     logger.debug(f"Got auth url {auth_url}")
     server.wait_for_redirect()
 
-    user_credentials = Pocket.get_credentials(
-        consumer_key=consumer_key, code=request_token
-    )
+    user_credentials = Pocket.get_credentials(consumer_key=consumer_key,
+                                              code=request_token)
     logger.debug("Got creds " + str(user_credentials))
     access_token = user_credentials["access_token"]
 
   logger.debug(
-    f"Logged in; access_token={access_token}, consumer_key={consumer_key}")
+      f"Logged in; access_token={access_token}, consumer_key={consumer_key}")
 
 
 main()

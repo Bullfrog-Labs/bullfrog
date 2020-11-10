@@ -24,9 +24,11 @@ def _sync_pocket_for_all_users():
     if user["pocket_sync_enabled"] and user["pocket_access_token"]:
       logger.debug(f"syncing {user['uid']}")
       pocket = Pocket(consumer_key, user["pocket_access_token"])
-      bookmarks = PocketBookmarks(
-          user["uid"], pocket, db, requests, since=datetime(2020, 9, 1)
-      )
+      bookmarks = PocketBookmarks(user["uid"],
+                                  pocket,
+                                  db,
+                                  requests,
+                                  since=datetime(2020, 9, 1))
       logger.debug(f"initialized, syncing")
       count = bookmarks.sync_latest()
       logger.debug(f"done; count={count}")
@@ -46,7 +48,3 @@ def sync_pocket_for_all_users(request):
   _sync_pocket_for_all_users()
 
   return "Success"
-
-
-if __name__ == "__main__":
-  main(None)
