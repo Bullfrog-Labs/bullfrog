@@ -85,7 +85,8 @@ class FirestoreDatabase(object):
       self.logger.debug(f"done; result={result}")
 
   def update_user(self, uid: str, user_record: UserRecord, user_private_record: UserPrivateRecord):
-    if self.db.collection("users").document(uid).get().exists:
+    if self.db.collection("users").document(uid).get().exists and self.db.collection("users").document(uid).collection(
+            "users_private").document(uid).get().exists:
       self.apply_updated_record_timestamps(user_record)
       self.db.collection("users").document(uid).update(user_record)
       self.db.collection("users").document(uid).collection(
