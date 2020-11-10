@@ -4,9 +4,9 @@ import os
 import logging
 import time
 import sys
-from pocket_bookmarks import PocketBookmarks
-from firestore_database import BookmarkRecord, FirestoreDatabase
-from firebase_app import FirebaseApp
+from ingest_gcf.bookmarks_sync.pocket_bookmarks import PocketBookmarks
+from ingest_gcf.bookmarks_sync.firestore_database import BookmarkRecord, FirestoreDatabase
+from ingest_gcf.bookmarks_sync.firebase_app import FirebaseApp
 from typing import List, Tuple, Any
 import requests
 
@@ -17,7 +17,7 @@ def load_json(file_name):
   return json.loads(open(file_name).read())
 
 
-single_bookmark = load_json("single_bookmark.json")
+single_bookmark = load_json("tests/resources/single_bookmark.json")
 single_bookmark_contents = single_bookmark["item_0"]
 
 single_record: List[Tuple] = [({"list": single_bookmark}, {})]
@@ -61,7 +61,7 @@ class IterMockRequests(object):
       return ({}, {})
 
 
-fixture_page_1 = open("./fixture_page_1.html").read()
+fixture_page_1 = open("tests/resources/fixture_page_1.html").read()
 
 
 class MockResponse(object):

@@ -6,28 +6,28 @@ if [ "$0" = "$BASH_SOURCE" ]; then
 fi
 
 BF_ROOT=$(git rev-parse --show-toplevel)
-BOOKMARKS_SYNC_ROOT=$BF_ROOT/bfr/bookmarks-sync
+INGEST_GCF_ROOT=$BF_ROOT/bfr/ingest-gcf
 
 PUSHED=0
-if [ ! "$PWD" = "$BOOKMARKS_SYNC_ROOT" ]; then
-    pushd $BOOKMARKS_SYNC_ROOT
+if [ ! "$PWD" = "$INGEST_GCF_ROOT" ]; then
+    pushd $INGEST_GCF_ROOT
     PUSHED=1
 fi
 
 echo "Creating Python venv"
-python3 -m venv venv
+python3 -m venv .venv
 
 echo "Activating Python venv"
 echo "Run 'deactivate' to deactivate it"
 
 activate () {
-    source venv/bin/activate
+    source .venv/bin/activate
 }
 activate
 
 echo "Setting up Python venv"
 pip3 install --upgrade pip
-pip3 install -r src/tools/requirements.txt -r src/bookmarks_sync/requirements.txt
+pip3 install -r src/requirements.txt -r tools/requirements.txt
 
 if [ $PUSHED = 1 ]; then
     popd

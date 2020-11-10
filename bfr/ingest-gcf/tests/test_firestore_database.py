@@ -4,8 +4,8 @@ import os
 import logging
 import time
 import sys
-from firestore_database import FirestoreDatabase, BookmarkRecord
-from firebase_app import FirebaseApp
+from ingest_gcf.bookmarks_sync.firestore_database import FirestoreDatabase, BookmarkRecord
+from ingest_gcf.bookmarks_sync.firebase_app import FirebaseApp
 import datetime
 import uuid
 import requests
@@ -15,7 +15,7 @@ def load_json(file_name):
   return json.loads(open(file_name).read())
 
 
-single_bookmark = load_json("single_bookmark.json")
+single_bookmark = load_json("tests/resources/single_bookmark.json")
 
 logging.basicConfig(level="DEBUG")
 logger = logging.getLogger("TestFirestoreDatabase")

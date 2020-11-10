@@ -1,6 +1,40 @@
 # Setup
 
-    . ./bin/activate_venv
+## Pyenv setup (just once)
+
+This is needed to ensure that we use a known version of Python. The system
+Python is often 2.7, whereas we want to use some 3.x version.
+
+From https://github.com/pyenv/pyenv#installation:
+
+    brew update
+    brew install pyenv
+    echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.zshrc
+    exec "$SHELL"
+    pyenv install # Ensures that the specific version of Python in .python-version is used
+
+## Poetry setup (just once)
+
+From https://python-poetry.org/docs/#installation.
+
+    curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+    poetry install
+
+# Useful commands in development
+
+## Activate virtual environment (do this for every new shell)
+
+    poetry shell
+
+## Run tests in watch mode
+
+Keep the Firebase emulator running in a terminal.
+
+    firebase emulators:start --only firestore
+
+Run the tests in watch mode
+
+    poetry run pytest-watch
 
 # Scripts
 
@@ -60,3 +94,9 @@ Run the command to modify your user record
         bin/run-sync
 
 7.  Confirm your bookmarks show up in firebase after a few minutes
+
+# Future Python environment improvements
+
+1. Find a way for the venv to be runnable from within VSCode. Currently,
+   VSCode is only able to find the pyenv-managed interpreter, but is unable
+   to find and use the venv.

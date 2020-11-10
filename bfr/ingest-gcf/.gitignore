@@ -69,4 +69,4 @@ node_modules/
 .env
 
 # python virtualenv
-venv
+.venv
