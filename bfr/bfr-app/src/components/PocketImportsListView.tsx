@@ -197,7 +197,8 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
       const loaded: PocketImportItemRecord[] = await getItemSet(
         database,
         PocketImportItemRecordConverter,
-        getPocketImportsItemSetPath(uid)
+        getPocketImportsItemSetPath(uid),
+        ["pocket_created_at", "desc"]
       );
 
       logger.debug(

@@ -9,15 +9,29 @@ import { Database } from "./Database";
 export const getItemSet = async <T>(
   database: Database,
   itemRecordConverter: firebase.firestore.FirestoreDataConverter<T>,
-  path: string // this path should refer to a collection of items
+  path: string, // this path should refer to a collection of items
+  orderBy?: [string, "desc" | "asc" | undefined] | undefined
 ): Promise<T[]> => {
   // TODO: Implement Filtering/sorting/paging
   // TODO: Add ability to page through list content
-  const querySnapshot = await database
-    .getHandle()
-    .collection(path)
-    .withConverter(itemRecordConverter)
-    .get();
+  async function getQuerySnapshot() {
+    if (orderBy) {
+      return database
+        .getHandle()
+        .collection(path)
+        .orderBy(orderBy[0], orderBy[1])
+        .withConverter(itemRecordConverter)
+        .get();
+    } else {
+      return database
+        .getHandle()
+        .collection(path)
+        .withConverter(itemRecordConverter)
+        .get();
+    }
+  }
+
+  const querySnapshot = await getQuerySnapshot();
 
   const allItems: T[] = [];
   querySnapshot.forEach((item) => allItems.push(item.data()));
