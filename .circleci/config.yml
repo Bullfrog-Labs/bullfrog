@@ -3,16 +3,19 @@ orbs:
   node: circleci/node@4.1.0
 jobs:
   install_firebase_cli:
-    steps:
-      - run:
-        name: "Install Firebase CLI"
-        command: npm install -g firebase-tools
 
 workflows:
   node-tests:
     jobs:
-      - install_firebase_cli
+      - install_firebase_cli:
+        steps:
+          - run:
+              name: "Install Firebase CLI"
+              command: npm install -g firebase-tools
+
       - node/test:
+          requires:
+            - install_firebase_cli
           name: run-tests
           pkg-manager: yarn
           run-command: ci-test
