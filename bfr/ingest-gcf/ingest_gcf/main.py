@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 from flask import escape
-from pocket_bookmarks import PocketBookmarks
+from bookmarks_sync.pocket_bookmarks import PocketBookmarks
 from pocket import Pocket
 import logging
-from firebase_app import FirebaseApp
-from firestore_database import FirestoreDatabase
+from bookmarks_sync.firebase_app import FirebaseApp
+from bookmarks_sync.firestore_database import FirestoreDatabase
 from datetime import datetime
 import os
 import requests
@@ -14,7 +14,7 @@ consumer_key = os.environ["CONSUMER_KEY"]
 project_id = "bullfrog-reader"
 
 
-def sync_all_users():
+def _sync_pocket_for_all_users():
   logger = logging.getLogger("main")
   app = FirebaseApp.admin(project_id)
   db = FirestoreDatabase.admin(app)
@@ -34,7 +34,7 @@ def sync_all_users():
       logger.debug(f"syncing disabled for {user['uid']}, skipping")
 
 
-def main(request):
+def sync_pocket_for_all_users(request):
   logger = logging.getLogger("main")
   logging.basicConfig(level="DEBUG")
 
@@ -43,7 +43,7 @@ def main(request):
     request_args = request.args
     logger.debug(f"got requests; json={request_json}, args={request_args}")
 
-  sync_all_users()
+  _sync_pocket_for_all_users()
 
   return "Success"
 

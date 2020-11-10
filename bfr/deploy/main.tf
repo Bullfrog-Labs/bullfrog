@@ -60,14 +60,14 @@ resource "google_storage_bucket_object" "bookmarks_sync_package_object" {
 }
 
 resource "google_cloudfunctions_function" "bookmarks_sync_function" {
-  name                  = "bookmarks-sync"
-  description           = "Sync bookmarks from external app"
+  name                  = "sync_pocket_for_all_users"
+  description           = "Sync bookmarks from Pocket"
   available_memory_mb   = 1024
   timeout               = 60
   source_archive_bucket = google_storage_bucket.deploy_packages_bucket.name
   source_archive_object = google_storage_bucket_object.bookmarks_sync_package_object.name
   service_account_email = google_service_account.default_service_account.email
-  entry_point           = "main"
+  entry_point           = "sync_pocket_for_all_users"
   trigger_http          = true
   runtime               = "python38"
   depends_on            = [google_project_service.gcp_services_cloudfunctions]

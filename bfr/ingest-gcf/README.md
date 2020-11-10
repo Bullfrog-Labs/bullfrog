@@ -36,6 +36,22 @@ Run the tests in watch mode
 
     poetry run pytest-watch
 
+## Test cloud functions locally
+
+Start the function framework server locally, using `--target` to select the
+entry point.
+
+    cd ingest_gcf
+    poetry run functions-framework --target sync_pocket_for_all_users --port 7000
+
+Send requests to the function
+
+    curl localhost:7000
+
+If running `sync_pocket_for_all_users`, `CONSUMER_KEY` needs to be set. This
+particular entry point does not work with the Firestore emulator yet, for
+some reason.
+
 # Scripts
 
 LEIGH SAYS DON'T LOOK AT THIS. Look at the "Setting up sync from pocket"
