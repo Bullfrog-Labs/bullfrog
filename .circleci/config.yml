@@ -8,7 +8,7 @@ workflows:
   node-tests:
     jobs:
       - node/test:
-         name: run-tests
+          name: run-tests
           pkg-manager: yarn
           run-command: ci-test
           version: 14.9.0
