@@ -21,3 +21,4 @@ workflows:
           args: "--dev"
           pkg-manager: pipenv
           test-tool: pytest
+          version: 3.8-node
