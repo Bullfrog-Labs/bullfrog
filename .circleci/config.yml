@@ -3,7 +3,6 @@ version: 2.1
 orbs:
   node: circleci/node@4.1.0
   python: circleci/python@1.2.1
-  openjdk-install: cloudesire/openjdk-install@1.2.3
 
 workflows:
   node-tests:
