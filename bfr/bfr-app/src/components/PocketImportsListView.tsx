@@ -5,7 +5,12 @@ import {
   List,
   makeStyles,
   Typography,
+  Grid,
+  IconButton,
 } from "@material-ui/core";
+import { DateTime } from "luxon";
+import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
+import SnoozeIcon from "@material-ui/icons/Snooze";
 import * as log from "loglevel";
 import React, { FunctionComponent, useContext, useState } from "react";
 import { AuthContext } from "../services/auth/Auth";
@@ -17,6 +22,16 @@ const useStyles = makeStyles((theme) => ({
   pocketImportItemCard: {
     margin: theme.spacing(1),
   },
+  pageTitle: {
+    margin: theme.spacing(1),
+  },
+  itemToolbarButton: {
+    padding: "6px",
+    float: "right",
+  },
+  timesLine: {
+    marginTop: theme.spacing(1),
+  },
 }));
 
 export interface PocketImportItemRecord {
@@ -25,10 +40,30 @@ export interface PocketImportItemRecord {
   url: string;
   authors?: string[];
   description?: string;
+  text?: string;
+  saveTime?: Date;
+  estReadTimeMinutes?: number;
 }
 
 export type PocketImportItemCardProps = {
   pocketImportItem: PocketImportItemRecord;
+};
+
+const extractDescription = (
+  pocketImportItem: PocketImportItemRecord
+): string => {
+  if (pocketImportItem.description) {
+    return pocketImportItem.description;
+  } else if (pocketImportItem.text) {
+    return pocketImportItem.text.substring(0, 280) + "...";
+  } else {
+    return "";
+  }
+};
+
+const formatTime = (date: Date) => {
+  const dt = DateTime.fromJSDate(date);
+  return dt.toLocaleString(DateTime.DATETIME_MED);
 };
 
 export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> = ({
@@ -53,18 +88,51 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
       </Typography>
     );
 
-  const descriptionFragment = pocketImportItem.description && (
+  const descriptionFragment = (
     <Typography variant="body2" color="textSecondary">
-      {pocketImportItem.description}
+      {extractDescription(pocketImportItem)}
+    </Typography>
+  );
+
+  const estReadTimeFragment = pocketImportItem.estReadTimeMinutes && (
+    <em>{" - " + pocketImportItem.estReadTimeMinutes} mins</em>
+  );
+
+  const timesFragment = pocketImportItem.saveTime && (
+    <Typography
+      variant="body2"
+      color="textSecondary"
+      className={classes.timesLine}
+    >
+      {formatTime(pocketImportItem.saveTime)} {estReadTimeFragment}
     </Typography>
   );
 
   return (
     <Card className={classes.pocketImportItemCard} variant={"outlined"}>
       <CardContent>
-        {titleFragment}
-        {authorFragment}
-        {descriptionFragment}
+        <Grid container>
+          <Grid item xs={11}>
+            {titleFragment}
+            {authorFragment}
+            {descriptionFragment}
+            {timesFragment}
+          </Grid>
+          <Grid item xs={1}>
+            <Grid container>
+              <Grid item xs={12}>
+                <IconButton className={classes.itemToolbarButton}>
+                  <LibraryAddCheckIcon fontSize="small" />
+                </IconButton>
+              </Grid>
+              <Grid item xs={12}>
+                <IconButton className={classes.itemToolbarButton}>
+                  <SnoozeIcon fontSize="small" />
+                </IconButton>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
       </CardContent>
     </Card>
   );
@@ -85,13 +153,16 @@ const PocketImportItemRecordConverter = {
     options: firebase.firestore.SnapshotOptions
   ): PocketImportItemRecord => {
     const data = snapshot.data(options);
-    console.log(data);
+    const pocketJSON = JSON.parse(data.pocket_json);
     return {
       pocket_item_id: data.pocket_item_id,
       title: data.metadata?.title,
       url: data.url,
       authors: data.metadata?.authors,
-      description: data.metadata?.description,
+      description: data.metadata?.description || pocketJSON.excerpt,
+      text: data.metadata?.text,
+      saveTime: data.pocket_created_at?.toDate(),
+      estReadTimeMinutes: pocketJSON.time_to_read,
     };
   },
 };
@@ -113,6 +184,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   const logger = log.getLogger("PocketImportsListView");
   const authState = useContext(AuthContext) as firebase.User;
   const uid = authState.uid;
+  const classes = useStyles();
 
   const [pocketImports, setPocketImports] = useState<PocketImportItemRecord[]>(
     []
@@ -141,5 +213,12 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   const pocketImportCards = pocketImports.map((x) => (
     <PocketImportItemCard pocketImportItem={x} />
   ));
-  return <List>{pocketImportCards}</List>;
+  return (
+    <React.Fragment>
+      <Typography variant="h3" className={classes.pageTitle}>
+        Inbox
+      </Typography>
+      <List>{pocketImportCards}</List>
+    </React.Fragment>
+  );
 };
