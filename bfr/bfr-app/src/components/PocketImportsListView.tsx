@@ -7,7 +7,10 @@ import {
   Typography,
   Grid,
   IconButton,
+  MenuItem,
 } from "@material-ui/core";
+import Button from "@material-ui/core/Button";
+import Menu from "@material-ui/core/Menu";
 import { DateTime } from "luxon";
 import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
 import SnoozeIcon from "@material-ui/icons/Snooze";
@@ -29,8 +32,18 @@ const useStyles = makeStyles((theme) => ({
     padding: "6px",
     float: "right",
   },
+  listToolbarButton: {
+    margin: "4px",
+  },
   timesLine: {
     marginTop: theme.spacing(1),
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+  selectEmpty: {
+    marginTop: theme.spacing(2),
   },
 }));
 
@@ -109,7 +122,11 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
   );
 
   return (
-    <Card className={classes.pocketImportItemCard} variant={"outlined"}>
+    <Card
+      className={classes.pocketImportItemCard}
+      variant={"outlined"}
+      key={pocketImportItem.pocket_item_id}
+    >
       <CardContent>
         <Grid container>
           <Grid item xs={11}>
@@ -171,6 +188,113 @@ export type PocketImportsListViewProps = {
   database: Database;
 };
 
+export const InboxToolsHeader = (props: {}) => {
+  const logger = log.getLogger("InboxToolsHeader");
+  const classes = useStyles();
+  return (
+    <React.Fragment>
+      <IntervalFilterTool />
+      <GroupTool />
+    </React.Fragment>
+  );
+};
+
+type IntervalTypes = "" | "1-week" | "2-weeks";
+
+type MenuSelectItem = {
+  id: string;
+  value: string;
+  buttonValue: string;
+};
+
+export const MenuSelect = (props: {
+  items: MenuSelectItem[];
+  defaultValue: string;
+}) => {
+  const logger = log.getLogger("IntervalFilterTool");
+  const classes = useStyles();
+
+  const { items, defaultValue } = props;
+
+  const itemValues = Object.fromEntries(items.map((item) => [item.id, item]));
+
+  const [intervalMenuLabel, setIntervalMenuLabel] = React.useState<string>(
+    defaultValue
+  );
+
+  const [anchorEl, setAnchorEl] = React.useState<
+    (EventTarget & HTMLButtonElement) | undefined
+  >();
+
+  const handleButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuItemClick = (
+    event: React.MouseEvent<HTMLLIElement, MouseEvent>
+  ) => {
+    setIntervalMenuLabel(itemValues[event.currentTarget.id].buttonValue);
+    setAnchorEl(undefined);
+  };
+
+  const handleClose = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    setAnchorEl(undefined);
+  };
+
+  const menuItems = items.map((item) => {
+    return (
+      <MenuItem id={item.id} onClick={handleMenuItemClick}>
+        {item.value}
+      </MenuItem>
+    );
+  });
+
+  return (
+    <React.Fragment>
+      <Button
+        aria-haspopup="true"
+        onClick={handleButtonClick}
+        className={classes.listToolbarButton}
+      >
+        {intervalMenuLabel}
+      </Button>
+      <Menu
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        {menuItems}
+      </Menu>
+    </React.Fragment>
+  );
+};
+
+export const IntervalFilterTool = (props: {}) => {
+  const items = [
+    { id: "filter-time-none", value: "None", buttonValue: "Interval" },
+    { id: "filter-time-1day", value: "Past Day", buttonValue: "Past Day" },
+    { id: "filter-time-1week", value: "Past Week", buttonValue: "Past Week" },
+  ];
+  return <MenuSelect items={items} defaultValue="Interval" />;
+};
+
+export const GroupTool = (props: {}) => {
+  const items = [
+    { id: "group-none", value: "None", buttonValue: "Group" },
+    {
+      id: "group-content-type",
+      value: "Content Type",
+      buttonValue: "Content Type",
+    },
+  ];
+  return <MenuSelect items={items} defaultValue="Group" />;
+};
+
 // TODO: Switch to a generic and clearly-demarcated collection path for Pocket imports
 /*
 const getPocketImportsItemSetPath = (uid: UserId) =>
@@ -211,6 +335,10 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     loadPocketImports();
   }, [database, uid, logger]);
 
+  const handleTimeValueChange = (
+    event: React.ChangeEvent<{ name?: string | undefined; value: unknown }>
+  ) => {};
+
   const pocketImportCards = pocketImports.map((x) => (
     <PocketImportItemCard pocketImportItem={x} />
   ));
@@ -219,6 +347,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
       <Typography variant="h3" className={classes.pageTitle}>
         Inbox
       </Typography>
+      <InboxToolsHeader />
       <List>{pocketImportCards}</List>
     </React.Fragment>
   );
