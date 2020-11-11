@@ -45,18 +45,12 @@ resource "google_storage_bucket" "deploy_packages_bucket" {
   name = "deploy_packages"
 }
 
-# Zip up our source code
-data "archive_file" "bookmark_sync_package" {
-  type        = "zip"
-  source_dir  = "${path.root}/../bookmarks-sync/src/bookmarks_sync/"
-  output_path = "${path.root}/../dist/bookmarks-sync-package.zip"
-}
-
-# Place the zip-ed code in the bucket
+# ingest-gcf-package.zip is built by running bin/build
+# Place the ingest_gcf code package in the bucket
 resource "google_storage_bucket_object" "bookmarks_sync_package_object" {
   name   = "bookmarks-sync-package-${data.archive_file.bookmark_sync_package.output_md5}.zip"
   bucket = google_storage_bucket.deploy_packages_bucket.name
-  source = "${path.root}/../dist/bookmarks-sync-package.zip"
+  source = "${path.root}/../dist/ingest-gcf-package.zip"
 }
 
 resource "google_cloudfunctions_function" "bookmarks_sync_function" {
