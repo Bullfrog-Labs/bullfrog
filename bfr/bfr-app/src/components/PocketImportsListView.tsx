@@ -192,8 +192,6 @@ export const InboxToolsHeader = (props: {
   onIntervalItemSelect: (item: MenuSelectItem) => void;
   onGroupItemSelect: (item: MenuSelectItem) => void;
 }) => {
-  const logger = log.getLogger("InboxToolsHeader");
-  const classes = useStyles();
   return (
     <React.Fragment>
       <IntervalFilterTool onItemSelect={props.onIntervalItemSelect} />
@@ -209,15 +207,12 @@ type MenuSelectItem = {
 };
 
 export const MenuSelect = (props: {
-  items: MenuSelectItem[];
+  items: readonly MenuSelectItem[];
   defaultValue: string;
   onItemSelect: (item: MenuSelectItem) => void;
 }) => {
-  const logger = log.getLogger("IntervalFilterTool");
   const classes = useStyles();
-
   const { items, defaultValue, onItemSelect } = props;
-
   const itemValues = Object.fromEntries(items.map((item) => [item.id, item]));
 
   const [intervalMenuLabel, setIntervalMenuLabel] = React.useState<string>(
@@ -277,37 +272,45 @@ export const MenuSelect = (props: {
   );
 };
 
+const INTERVAL_SELECT_MENU_ITEMS = [
+  { id: "filter-time-none", value: "None", buttonValue: "Interval" },
+  { id: "filter-time-1day", value: "Past Day", buttonValue: "Past Day" },
+  { id: "filter-time-1week", value: "Past Week", buttonValue: "Past Week" },
+];
+
+const intervalSelectIDs = INTERVAL_SELECT_MENU_ITEMS.map((item) => item.id);
+type IntervalSelectIDType = typeof intervalSelectIDs[number];
+
 export const IntervalFilterTool = (props: {
   onItemSelect: (item: MenuSelectItem) => void;
 }) => {
-  const items = [
-    { id: "filter-time-none", value: "None", buttonValue: "Interval" },
-    { id: "filter-time-1day", value: "Past Day", buttonValue: "Past Day" },
-    { id: "filter-time-1week", value: "Past Week", buttonValue: "Past Week" },
-  ];
   return (
     <MenuSelect
-      items={items}
+      items={INTERVAL_SELECT_MENU_ITEMS}
       defaultValue="Interval"
       onItemSelect={props.onItemSelect}
     />
   );
 };
 
+const GROUP_SELECT_MENU_ITEMS = [
+  { id: "group-none", value: "None", buttonValue: "Group" },
+  {
+    id: "group-content-type",
+    value: "Content Type",
+    buttonValue: "Content Type",
+  },
+] as const;
+
+const groupSelectIDs = GROUP_SELECT_MENU_ITEMS.map((item) => item.id);
+type GroupSelectIDType = typeof groupSelectIDs[number];
+
 export const GroupTool = (props: {
   onItemSelect: (item: MenuSelectItem) => void;
 }) => {
-  const items = [
-    { id: "group-none", value: "None", buttonValue: "Group" },
-    {
-      id: "group-content-type",
-      value: "Content Type",
-      buttonValue: "Content Type",
-    },
-  ];
   return (
     <MenuSelect
-      items={items}
+      items={GROUP_SELECT_MENU_ITEMS}
       defaultValue="Group"
       onItemSelect={props.onItemSelect}
     />
@@ -372,7 +375,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   const onIntervalItemSelect = (item: MenuSelectItem) => {
     logger.debug("Selected interval entry " + item.value);
     function getDuration(item: MenuSelectItem): Duration | undefined {
-      switch (item.id) {
+      switch (item.id as IntervalSelectIDType) {
         case "filter-time-none":
           return undefined;
         case "filter-time-1day":
