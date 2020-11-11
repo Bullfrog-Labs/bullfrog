@@ -16,6 +16,8 @@ workflows:
   python-tests:
     jobs:
       - python/test:
+          environment:
+            FIRESTORE_EMULATOR_HOST: localhost:8080
           name: run-ingest-gcf-tests
           app-dir: bfr/ingest-gcf
           args: "--dev"
