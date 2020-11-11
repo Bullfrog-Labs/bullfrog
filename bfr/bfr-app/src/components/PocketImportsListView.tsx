@@ -17,9 +17,8 @@ import SnoozeIcon from "@material-ui/icons/Snooze";
 import * as log from "loglevel";
 import React, { FunctionComponent, useContext, useState } from "react";
 import { AuthContext } from "../services/auth/Auth";
-import { Database } from "../services/store/Database";
-import { getItemSet } from "../services/store/ItemSets";
 import { UserId } from "../services/store/Users";
+import { GetItemSetFn } from "../services/store/ItemSets";
 
 const useStyles = makeStyles((theme) => ({
   pocketImportItemCard: {
@@ -185,7 +184,7 @@ const PocketImportItemRecordConverter = {
 };
 
 export type PocketImportsListViewProps = {
-  database: Database;
+  getItemSet: GetItemSetFn<PocketImportItemRecord>;
 };
 
 export const InboxToolsHeader = (props: {
@@ -325,7 +324,7 @@ const getPocketImportsItemSetPath = (uid: UserId) =>
 const getPocketImportsItemSetPath = (uid: UserId) => `users/${uid}/bookmarks`;
 
 export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps> = ({
-  database,
+  getItemSet,
 }) => {
   const logger = log.getLogger("PocketImportsListView");
   const authState = useContext(AuthContext) as firebase.User;
@@ -356,7 +355,6 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
       logger.debug(`Getting Pocket imports for uid ${uid}`);
 
       const loaded: PocketImportItemRecord[] = await getItemSet(
-        database,
         PocketImportItemRecordConverter,
         getPocketImportsItemSetPath(uid),
         ["pocket_created_at", "desc"]
@@ -370,7 +368,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     };
 
     loadPocketImports();
-  }, [database, uid, logger]);
+  }, [getItemSet, uid, logger]);
 
   const onIntervalItemSelect = (item: MenuSelectItem) => {
     logger.debug("Selected interval entry " + item.value);
