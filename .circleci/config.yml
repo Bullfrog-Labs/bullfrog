@@ -36,3 +36,4 @@ workflows:
             - run:
                 name: Start up Firebase Local Emulator Suite
                 command: firebase emulators:start --only firestore
+                background: true
