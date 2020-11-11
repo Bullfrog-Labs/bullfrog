@@ -11,7 +11,7 @@ import {
 } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import Menu from "@material-ui/core/Menu";
-import { DateTime } from "luxon";
+import { DateTime, Interval, Duration } from "luxon";
 import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
 import SnoozeIcon from "@material-ui/icons/Snooze";
 import * as log from "loglevel";
@@ -188,18 +188,19 @@ export type PocketImportsListViewProps = {
   database: Database;
 };
 
-export const InboxToolsHeader = (props: {}) => {
+export const InboxToolsHeader = (props: {
+  onIntervalItemSelect: (item: MenuSelectItem) => void;
+  onGroupItemSelect: (item: MenuSelectItem) => void;
+}) => {
   const logger = log.getLogger("InboxToolsHeader");
   const classes = useStyles();
   return (
     <React.Fragment>
-      <IntervalFilterTool />
-      <GroupTool />
+      <IntervalFilterTool onItemSelect={props.onIntervalItemSelect} />
+      <GroupTool onItemSelect={props.onGroupItemSelect} />
     </React.Fragment>
   );
 };
-
-type IntervalTypes = "" | "1-week" | "2-weeks";
 
 type MenuSelectItem = {
   id: string;
@@ -210,11 +211,12 @@ type MenuSelectItem = {
 export const MenuSelect = (props: {
   items: MenuSelectItem[];
   defaultValue: string;
+  onItemSelect: (item: MenuSelectItem) => void;
 }) => {
   const logger = log.getLogger("IntervalFilterTool");
   const classes = useStyles();
 
-  const { items, defaultValue } = props;
+  const { items, defaultValue, onItemSelect } = props;
 
   const itemValues = Object.fromEntries(items.map((item) => [item.id, item]));
 
@@ -236,6 +238,7 @@ export const MenuSelect = (props: {
     event: React.MouseEvent<HTMLLIElement, MouseEvent>
   ) => {
     setIntervalMenuLabel(itemValues[event.currentTarget.id].buttonValue);
+    onItemSelect(itemValues[event.currentTarget.id]);
     setAnchorEl(undefined);
   };
 
@@ -274,16 +277,26 @@ export const MenuSelect = (props: {
   );
 };
 
-export const IntervalFilterTool = (props: {}) => {
+export const IntervalFilterTool = (props: {
+  onItemSelect: (item: MenuSelectItem) => void;
+}) => {
   const items = [
     { id: "filter-time-none", value: "None", buttonValue: "Interval" },
     { id: "filter-time-1day", value: "Past Day", buttonValue: "Past Day" },
     { id: "filter-time-1week", value: "Past Week", buttonValue: "Past Week" },
   ];
-  return <MenuSelect items={items} defaultValue="Interval" />;
+  return (
+    <MenuSelect
+      items={items}
+      defaultValue="Interval"
+      onItemSelect={props.onItemSelect}
+    />
+  );
 };
 
-export const GroupTool = (props: {}) => {
+export const GroupTool = (props: {
+  onItemSelect: (item: MenuSelectItem) => void;
+}) => {
   const items = [
     { id: "group-none", value: "None", buttonValue: "Group" },
     {
@@ -292,7 +305,13 @@ export const GroupTool = (props: {}) => {
       buttonValue: "Content Type",
     },
   ];
-  return <MenuSelect items={items} defaultValue="Group" />;
+  return (
+    <MenuSelect
+      items={items}
+      defaultValue="Group"
+      onItemSelect={props.onItemSelect}
+    />
+  );
 };
 
 // TODO: Switch to a generic and clearly-demarcated collection path for Pocket imports
@@ -313,6 +332,21 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   const [pocketImports, setPocketImports] = useState<PocketImportItemRecord[]>(
     []
   );
+
+  const [intervalFilter, setIntervalFilter] = useState<Interval>();
+
+  logger.debug(`filter ${intervalFilter?.toString()}`);
+
+  const filteredPocketImports = pocketImports.filter((item) => {
+    if (!intervalFilter) {
+      return true;
+    }
+    if (!item.saveTime) {
+      return false;
+    }
+    const saveTime = DateTime.fromJSDate(item.saveTime);
+    return intervalFilter?.contains(saveTime);
+  });
 
   React.useEffect(() => {
     const loadPocketImports = async () => {
@@ -335,11 +369,31 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     loadPocketImports();
   }, [database, uid, logger]);
 
-  const handleTimeValueChange = (
-    event: React.ChangeEvent<{ name?: string | undefined; value: unknown }>
-  ) => {};
+  const onIntervalItemSelect = (item: MenuSelectItem) => {
+    logger.debug("Selected interval entry " + item.value);
+    function getDuration(item: MenuSelectItem): Duration | undefined {
+      switch (item.id) {
+        case "filter-time-none":
+          return undefined;
+        case "filter-time-1day":
+          return Duration.fromObject({ days: 1 });
+        case "filter-time-1week":
+          return Duration.fromObject({ weeks: 1 });
+      }
+    }
+    const duration = getDuration(item);
+    if (duration) {
+      const interval = Interval.before(DateTime.local(), duration);
+      setIntervalFilter(interval);
+    } else {
+      setIntervalFilter(undefined);
+    }
+  };
+  const onGroupItemSelect = (item: MenuSelectItem) => {
+    logger.debug("Selected group entry");
+  };
 
-  const pocketImportCards = pocketImports.map((x) => (
+  const pocketImportCards = filteredPocketImports.map((x) => (
     <PocketImportItemCard pocketImportItem={x} />
   ));
   return (
@@ -347,7 +401,10 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
       <Typography variant="h3" className={classes.pageTitle}>
         Inbox
       </Typography>
-      <InboxToolsHeader />
+      <InboxToolsHeader
+        onIntervalItemSelect={onIntervalItemSelect}
+        onGroupItemSelect={onGroupItemSelect}
+      />
       <List>{pocketImportCards}</List>
     </React.Fragment>
   );
