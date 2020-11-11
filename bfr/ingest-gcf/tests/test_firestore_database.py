@@ -53,6 +53,7 @@ class TestFirestoreDatabase(unittest.TestCase):
 
   def setUp(self):
     os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "tests/resources/test-project-4abbf-199fc0e689ec.json"
     clear_database()
 
   def test_save_items(self):
