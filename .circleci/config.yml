@@ -16,8 +16,6 @@ workflows:
   python-tests:
     jobs:
       - python/test:
-          environment:
-            FIRESTORE_EMULATOR_HOST: localhost:8080
           name: run-ingest-gcf-tests
           app-dir: bfr/ingest-gcf
           args: "--dev"
@@ -39,3 +37,6 @@ workflows:
                 name: Start up Firebase Local Emulator Suite
                 command: firebase emulators:start --only firestore
                 background: true
+            - run:
+                name: Set up environment variables
+                command: export FIRESTORE_EMULATOR_HOST="localhost:8080"
