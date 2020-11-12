@@ -7,10 +7,7 @@ import {
   Typography,
   Grid,
   IconButton,
-  MenuItem,
 } from "@material-ui/core";
-import Button from "@material-ui/core/Button";
-import Menu from "@material-ui/core/Menu";
 import { DateTime, Interval, Duration } from "luxon";
 import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
 import SnoozeIcon from "@material-ui/icons/Snooze";
@@ -20,6 +17,8 @@ import { AuthContext } from "../services/auth/Auth";
 import { UserId } from "../services/store/Users";
 import { GetItemSetFn } from "../services/store/ItemSets";
 import * as R from "ramda";
+import { MenuSelect, MenuSelectItem } from "./MenuSelect";
+import { getContentType, ContentType } from "./util/ContentType";
 
 const useStyles = makeStyles((theme) => ({
   pocketImportItemCard: {
@@ -35,9 +34,6 @@ const useStyles = makeStyles((theme) => ({
     padding: "6px",
     float: "right",
   },
-  listToolbarButton: {
-    margin: "4px",
-  },
   timesLine: {
     marginTop: theme.spacing(1),
   },
@@ -49,14 +45,6 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(2),
   },
 }));
-
-type ContentType =
-  | "Long Read"
-  | "Quick Read"
-  | "Tweet"
-  | "Mainstream Media"
-  | "Blog or Newsletter"
-  | "Other";
 
 export interface PocketImportItemRecord {
   pocket_item_id: string;
@@ -146,7 +134,6 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
             {authorFragment}
             {descriptionFragment}
             {timesFragment}
-            {pocketImportItem.contentType}
           </Grid>
           <Grid item xs={1}>
             <Grid container>
@@ -167,83 +154,6 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
     </Card>
   );
 };
-
-function isTweet(itemURL: string | undefined) {
-  if (itemURL) {
-    const url = new URL(itemURL);
-    if (url.hostname.indexOf("twitter.com") > -1) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function isBlogOrNewsletter(itemURL: string | undefined) {
-  const blogOrNewsletterHostnames = [
-    "substack.com",
-    "blogger.com",
-    "medium.com",
-    "ribbonfarm.com",
-  ];
-  if (itemURL) {
-    const url = new URL(itemURL);
-    for (const hostname of blogOrNewsletterHostnames) {
-      if (url.hostname.indexOf(hostname) > -1) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function isMSM(itemURL: string | undefined) {
-  const msmHostnames = [
-    "nytimes.com",
-    "newyorker.com",
-    "politico.com",
-    "washingtonpost.com",
-    "theatlantic.com",
-  ];
-  if (itemURL) {
-    const url = new URL(itemURL);
-    for (const hostname of msmHostnames) {
-      if (url.hostname.indexOf(hostname) > -1) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function isLongRead(text: string) {
-  if (text && text.split(/\s+/).length >= 3000) {
-    return true;
-  }
-  return false;
-}
-
-function isQuickRead(text: string) {
-  if (text && text.split(/\s+/).length < 300) {
-    return true;
-  }
-  return false;
-}
-
-function getContentType(data: firebase.firestore.DocumentData): ContentType {
-  if (isTweet(data.url)) {
-    return "Tweet";
-  } else if (isLongRead(data.text)) {
-    return "Long Read";
-  } else if (isQuickRead(data.text)) {
-    return "Quick Read";
-  } else if (isBlogOrNewsletter(data.url)) {
-    return "Blog or Newsletter";
-  } else if (isMSM(data.url)) {
-    return "Mainstream Media";
-  } else {
-    return "Other";
-  }
-}
 
 const PocketImportItemRecordConverter = {
   toFirestore: (
@@ -291,77 +201,9 @@ export const InboxToolsHeader = (props: {
   );
 };
 
-type MenuSelectItem = {
-  id: string;
-  value: string;
-  buttonValue: string;
-};
-
-export const MenuSelect = (props: {
-  items: readonly MenuSelectItem[];
-  defaultValue: string;
-  onItemSelect: (item: MenuSelectItem) => void;
-}) => {
-  const classes = useStyles();
-  const { items, defaultValue, onItemSelect } = props;
-  const itemValues = Object.fromEntries(items.map((item) => [item.id, item]));
-
-  const [intervalMenuLabel, setIntervalMenuLabel] = React.useState<string>(
-    defaultValue
-  );
-
-  const [anchorEl, setAnchorEl] = React.useState<
-    (EventTarget & HTMLButtonElement) | undefined
-  >();
-
-  const handleButtonClick = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuItemClick = (
-    event: React.MouseEvent<HTMLLIElement, MouseEvent>
-  ) => {
-    setIntervalMenuLabel(itemValues[event.currentTarget.id].buttonValue);
-    onItemSelect(itemValues[event.currentTarget.id]);
-    setAnchorEl(undefined);
-  };
-
-  const handleClose = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    setAnchorEl(undefined);
-  };
-
-  const menuItems = items.map((item) => {
-    return (
-      <MenuItem id={item.id} onClick={handleMenuItemClick}>
-        {item.value}
-      </MenuItem>
-    );
-  });
-
-  return (
-    <React.Fragment>
-      <Button
-        aria-haspopup="true"
-        onClick={handleButtonClick}
-        className={classes.listToolbarButton}
-      >
-        {intervalMenuLabel}
-      </Button>
-      <Menu
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-      >
-        {menuItems}
-      </Menu>
-    </React.Fragment>
-  );
-};
+/**
+ * Interval menu select button.
+ */
 
 const INTERVAL_SELECT_MENU_ITEMS = [
   { id: "filter-time-none", value: "None", buttonValue: "Interval" },
@@ -383,6 +225,10 @@ export const IntervalFilterTool = (props: {
     />
   );
 };
+
+/**
+ * Group menu select button.
+ */
 
 const GROUP_SELECT_MENU_ITEMS = [
   { id: "group-none", value: "None", buttonValue: "Group" },
@@ -408,6 +254,44 @@ export const GroupTool = (props: {
   );
 };
 
+/**
+ * Filter and grouping functions.
+ */
+
+const itemListFilterFn = (intervalFilter: Interval | undefined) => (
+  item: PocketImportItemRecord
+) => {
+  if (!intervalFilter) {
+    return true;
+  }
+  if (!item.saveTime) {
+    return false;
+  }
+  const saveTime = DateTime.fromJSDate(item.saveTime);
+  return intervalFilter?.contains(saveTime);
+};
+
+const groupByFn = (groupBy: GroupSelectIDType) => (
+  item: PocketImportItemRecord
+): string => {
+  function getGroupProp(groupBy: GroupSelectIDType | undefined) {
+    switch (groupBy) {
+      case "group-content-type":
+        return "contentType";
+      default:
+        return undefined;
+    }
+  }
+  const groupProp = getGroupProp(groupBy);
+
+  // Dumb ts issue here - it doesnt detect that item[groupProp] must be string.
+  if (groupProp && item[groupProp] !== undefined) {
+    return item[groupProp] as string;
+  } else {
+    return "Other";
+  }
+};
+
 // TODO: Switch to a generic and clearly-demarcated collection path for Pocket imports
 /*
 const getPocketImportsItemSetPath = (uid: UserId) =>
@@ -430,18 +314,10 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   const [intervalFilter, setIntervalFilter] = useState<Interval>();
   const [groupBy, setGroupBy] = useState<GroupSelectIDType>();
 
-  logger.debug(`filter ${intervalFilter?.toString()}`);
-
-  const filteredPocketImports = pocketImports.filter((item) => {
-    if (!intervalFilter) {
-      return true;
-    }
-    if (!item.saveTime) {
-      return false;
-    }
-    const saveTime = DateTime.fromJSDate(item.saveTime);
-    return intervalFilter?.contains(saveTime);
-  });
+  logger.debug(`Filtering; interval=${intervalFilter?.toString()}`);
+  const filteredPocketImports = pocketImports.filter(
+    itemListFilterFn(intervalFilter)
+  );
 
   React.useEffect(() => {
     const loadPocketImports = async () => {
@@ -518,42 +394,13 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     return <List>{pocketImportCards}</List>;
   }
 
-  type GroupByFn = (item: PocketImportItemRecord) => string;
-
-  function groupByFn(
-    groupBy: GroupSelectIDType,
-    item: PocketImportItemRecord
-  ): string {
-    function getGroupProp(groupBy: GroupSelectIDType | undefined) {
-      switch (groupBy) {
-        case "group-content-type":
-          return "contentType";
-        default:
-          return undefined;
-      }
-    }
-    const groupProp = getGroupProp(groupBy);
-
-    // Dumb ts issue here - it doesnt detect that item[groupProp] must be string.
-    if (groupProp && item[groupProp] !== undefined) {
-      return item[groupProp] as string;
-    } else {
-      return "Other";
-    }
-  }
-
   function ItemList(props: {
     items: PocketImportItemRecord[];
     groupBy: GroupSelectIDType | undefined;
   }) {
     const { items, groupBy } = props;
     if (groupBy) {
-      return (
-        <GroupedList
-          items={items}
-          groupBy={R.curry(groupByFn)(groupBy) as GroupByFn}
-        />
-      );
+      return <GroupedList items={items} groupBy={groupByFn(groupBy)} />;
     } else {
       return <FlatList items={items} />;
     }
