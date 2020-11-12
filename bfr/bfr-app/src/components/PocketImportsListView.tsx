@@ -19,6 +19,7 @@ import React, { FunctionComponent, useContext, useState } from "react";
 import { AuthContext } from "../services/auth/Auth";
 import { UserId } from "../services/store/Users";
 import { GetItemSetFn } from "../services/store/ItemSets";
+import * as R from "ramda";
 
 const useStyles = makeStyles((theme) => ({
   pocketImportItemCard: {
@@ -26,6 +27,9 @@ const useStyles = makeStyles((theme) => ({
   },
   pageTitle: {
     margin: theme.spacing(1),
+  },
+  sectionTitle: {
+    margin: "10px",
   },
   itemToolbarButton: {
     padding: "6px",
@@ -46,6 +50,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+type ContentType =
+  | "Long Read"
+  | "Quick Read"
+  | "Tweet"
+  | "Mainstream Media"
+  | "Blog or Newsletter"
+  | "Other";
+
 export interface PocketImportItemRecord {
   pocket_item_id: string;
   title?: string | undefined;
@@ -55,6 +67,7 @@ export interface PocketImportItemRecord {
   text?: string;
   saveTime?: Date;
   estReadTimeMinutes?: number;
+  contentType?: ContentType;
 }
 
 export type PocketImportItemCardProps = {
@@ -133,6 +146,7 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
             {authorFragment}
             {descriptionFragment}
             {timesFragment}
+            {pocketImportItem.contentType}
           </Grid>
           <Grid item xs={1}>
             <Grid container>
@@ -153,6 +167,83 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
     </Card>
   );
 };
+
+function isTweet(itemURL: string | undefined) {
+  if (itemURL) {
+    const url = new URL(itemURL);
+    if (url.hostname.indexOf("twitter.com") > -1) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isBlogOrNewsletter(itemURL: string | undefined) {
+  const blogOrNewsletterHostnames = [
+    "substack.com",
+    "blogger.com",
+    "medium.com",
+    "ribbonfarm.com",
+  ];
+  if (itemURL) {
+    const url = new URL(itemURL);
+    for (const hostname of blogOrNewsletterHostnames) {
+      if (url.hostname.indexOf(hostname) > -1) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function isMSM(itemURL: string | undefined) {
+  const msmHostnames = [
+    "nytimes.com",
+    "newyorker.com",
+    "politico.com",
+    "washingtonpost.com",
+    "theatlantic.com",
+  ];
+  if (itemURL) {
+    const url = new URL(itemURL);
+    for (const hostname of msmHostnames) {
+      if (url.hostname.indexOf(hostname) > -1) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function isLongRead(text: string) {
+  if (text && text.split(/\s+/).length >= 3000) {
+    return true;
+  }
+  return false;
+}
+
+function isQuickRead(text: string) {
+  if (text && text.split(/\s+/).length < 300) {
+    return true;
+  }
+  return false;
+}
+
+function getContentType(data: firebase.firestore.DocumentData): ContentType {
+  if (isTweet(data.url)) {
+    return "Tweet";
+  } else if (isLongRead(data.text)) {
+    return "Long Read";
+  } else if (isQuickRead(data.text)) {
+    return "Quick Read";
+  } else if (isBlogOrNewsletter(data.url)) {
+    return "Blog or Newsletter";
+  } else if (isMSM(data.url)) {
+    return "Mainstream Media";
+  } else {
+    return "Other";
+  }
+}
 
 const PocketImportItemRecordConverter = {
   toFirestore: (
@@ -179,6 +270,7 @@ const PocketImportItemRecordConverter = {
       text: data.metadata?.text,
       saveTime: data.pocket_created_at?.toDate(),
       estReadTimeMinutes: pocketJSON.time_to_read,
+      contentType: getContentType(data),
     };
   },
 };
@@ -336,6 +428,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   );
 
   const [intervalFilter, setIntervalFilter] = useState<Interval>();
+  const [groupBy, setGroupBy] = useState<GroupSelectIDType>();
 
   logger.debug(`filter ${intervalFilter?.toString()}`);
 
@@ -391,12 +484,81 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     }
   };
   const onGroupItemSelect = (item: MenuSelectItem) => {
-    logger.debug("Selected group entry");
+    logger.debug("Selected group entry " + item.id);
+    if (item.id && item.id !== "group-none") {
+      setGroupBy(item.id as GroupSelectIDType);
+    } else {
+      setGroupBy(undefined);
+    }
   };
 
-  const pocketImportCards = filteredPocketImports.map((x) => (
-    <PocketImportItemCard pocketImportItem={x} />
-  ));
+  function GroupedList(props: {
+    items: PocketImportItemRecord[];
+    groupBy: (item: PocketImportItemRecord) => string;
+  }) {
+    const { items, groupBy } = props;
+    const grouped = R.groupBy(groupBy, items);
+    const els = Object.keys(grouped).map((group) => {
+      return (
+        <React.Fragment>
+          <Typography variant="h6" className={classes.sectionTitle}>
+            {group}
+          </Typography>
+          <FlatList items={grouped[group]} />
+        </React.Fragment>
+      );
+    });
+    return <React.Fragment>{els}</React.Fragment>;
+  }
+
+  function FlatList(props: { items: PocketImportItemRecord[] }) {
+    const pocketImportCards = props.items.map((x) => (
+      <PocketImportItemCard pocketImportItem={x} />
+    ));
+    return <List>{pocketImportCards}</List>;
+  }
+
+  type GroupByFn = (item: PocketImportItemRecord) => string;
+
+  function groupByFn(
+    groupBy: GroupSelectIDType,
+    item: PocketImportItemRecord
+  ): string {
+    function getGroupProp(groupBy: GroupSelectIDType | undefined) {
+      switch (groupBy) {
+        case "group-content-type":
+          return "contentType";
+        default:
+          return undefined;
+      }
+    }
+    const groupProp = getGroupProp(groupBy);
+
+    // Dumb ts issue here - it doesnt detect that item[groupProp] must be string.
+    if (groupProp && item[groupProp] !== undefined) {
+      return item[groupProp] as string;
+    } else {
+      return "Other";
+    }
+  }
+
+  function ItemList(props: {
+    items: PocketImportItemRecord[];
+    groupBy: GroupSelectIDType | undefined;
+  }) {
+    const { items, groupBy } = props;
+    if (groupBy) {
+      return (
+        <GroupedList
+          items={items}
+          groupBy={R.curry(groupByFn)(groupBy) as GroupByFn}
+        />
+      );
+    } else {
+      return <FlatList items={items} />;
+    }
+  }
+
   return (
     <React.Fragment>
       <Typography variant="h3" className={classes.pageTitle}>
@@ -406,7 +568,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
         onIntervalItemSelect={onIntervalItemSelect}
         onGroupItemSelect={onGroupItemSelect}
       />
-      <List>{pocketImportCards}</List>
+      <ItemList items={filteredPocketImports} groupBy={groupBy} />
     </React.Fragment>
   );
 };
