@@ -1,5 +1,10 @@
 import { Database } from "./Database";
 
+/**
+ * getItemSet: Get a set of items.
+ * @param database
+ */
+
 // If the collection cannot be accessed according Firestore security rules, an
 // exception will be thrown. If the collection can be accessed, but is not
 // actually present, an empty list will be returned.
@@ -8,24 +13,30 @@ import { Database } from "./Database";
 const getItemSet = (database: Database) => async <T>(
   itemRecordConverter: firebase.firestore.FirestoreDataConverter<T>,
   path: string, // this path should refer to a collection of items
-  orderBy?: [string, "desc" | "asc" | undefined] | undefined
+  orderBy?: [[string, "desc" | "asc" | undefined]],
+  where?: [string, firebase.firestore.WhereFilterOp, any]
 ): Promise<T[]> => {
   // TODO: Implement Filtering/sorting/paging
   // TODO: Add ability to page through list content
   async function getQuerySnapshot() {
+    let query: firebase.firestore.Query<firebase.firestore.DocumentData> = database
+      .getHandle()
+      .collection(path);
+
+    if (where) {
+      query = query.where(where[0], where[1], where[2]);
+    }
+
     if (orderBy) {
-      return database
-        .getHandle()
-        .collection(path)
-        .orderBy(orderBy[0], orderBy[1])
-        .withConverter(itemRecordConverter)
-        .get();
+      orderBy.forEach((clause) => {
+        query = query.orderBy(clause[0], clause[1]);
+      });
+    }
+
+    if (query) {
+      return query.withConverter(itemRecordConverter).get();
     } else {
-      return database
-        .getHandle()
-        .collection(path)
-        .withConverter(itemRecordConverter)
-        .get();
+      return [];
     }
   }
 
@@ -40,7 +51,33 @@ const getItemSet = (database: Database) => async <T>(
 export type GetItemSetFn<T> = (
   itemRecordConverter: firebase.firestore.FirestoreDataConverter<T>,
   path: string, // this path should refer to a collection of items
-  orderBy?: [string, "desc" | "asc" | undefined] | undefined
+  orderBy?: [[string, "desc" | "asc" | undefined]],
+  where?: [string, firebase.firestore.WhereFilterOp, any]
 ) => Promise<T[]>;
 
-export { getItemSet };
+/**
+ * updateItem: Update an item.
+ * @param database
+ */
+const updateItem = (database: Database) => async <T>(
+  itemRecordConverter: firebase.firestore.FirestoreDataConverter<T>,
+  path: string, // this path should refer to a collection of items
+  id: string,
+  item: T
+) => {
+  database
+    .getHandle()
+    .collection(path)
+    .withConverter(itemRecordConverter)
+    .doc(id)
+    .update(item);
+};
+
+export type UpdateItemFn<T> = (
+  itemRecordConverter: firebase.firestore.FirestoreDataConverter<T>,
+  path: string, // this path should refer to a collection of items
+  id: string,
+  item: T
+) => Promise<void>;
+
+export { getItemSet, updateItem };

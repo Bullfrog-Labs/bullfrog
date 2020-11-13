@@ -30,6 +30,15 @@ const mockPocketImportItem2: PocketImportItemRecord = {
   contentType: "Long Read",
 };
 
+async function updateItem<PocketImportItemRecord>(
+  itemRecordConverter: firebase.firestore.FirestoreDataConverter<
+    PocketImportItemRecord
+  >,
+  path: string,
+  id: string,
+  item: PocketImportItemRecord
+) {}
+
 test("renders fully-populated pocket import item card", () => {
   const { getByText } = render(
     <PocketImportItemCard pocketImportItem={mockPocketImportItem1} />
@@ -52,7 +61,7 @@ test("renders fully-populated pocket import item card in list view", async () =>
       PocketImportItemRecord
     >,
     path: string, // this path should refer to a collection of items
-    orderBy?: [string, "desc" | "asc" | undefined] | undefined
+    orderBy?: [[string, "desc" | "asc" | undefined]]
   ) {
     return [mockPocketImportItem1];
   }
@@ -63,7 +72,7 @@ test("renders fully-populated pocket import item card in list view", async () =>
 
   const { getByText } = render(
     <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView getItemSet={getItemSet} />
+      <PocketImportsListView getItemSet={getItemSet} updateItem={updateItem} />
     </AuthContext.Provider>
   );
 
@@ -82,7 +91,7 @@ test("filters old items when interval selected", async () => {
       PocketImportItemRecord
     >,
     path: string, // this path should refer to a collection of items
-    orderBy?: [string, "desc" | "asc" | undefined] | undefined
+    orderBy?: [[string, "desc" | "asc" | undefined]]
   ) {
     return [mockPocketImportItem1, mockPocketImportItem2];
   }
@@ -93,7 +102,7 @@ test("filters old items when interval selected", async () => {
 
   const { getByText, queryByText } = render(
     <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView getItemSet={getItemSet} />
+      <PocketImportsListView getItemSet={getItemSet} updateItem={updateItem} />
     </AuthContext.Provider>
   );
 
@@ -118,7 +127,7 @@ test("group items when groupBy selected", async () => {
       PocketImportItemRecord
     >,
     path: string, // this path should refer to a collection of items
-    orderBy?: [string, "desc" | "asc" | undefined] | undefined
+    orderBy?: [[string, "desc" | "asc" | undefined]]
   ) {
     return [mockPocketImportItem1, mockPocketImportItem2];
   }
@@ -129,7 +138,7 @@ test("group items when groupBy selected", async () => {
 
   const { getByText, queryByText } = render(
     <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView getItemSet={getItemSet} />
+      <PocketImportsListView getItemSet={getItemSet} updateItem={updateItem} />
     </AuthContext.Provider>
   );
 

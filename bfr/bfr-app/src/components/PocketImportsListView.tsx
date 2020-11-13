@@ -15,7 +15,7 @@ import * as log from "loglevel";
 import React, { FunctionComponent, useContext, useState } from "react";
 import { AuthContext } from "../services/auth/Auth";
 import { UserId } from "../services/store/Users";
-import { GetItemSetFn } from "../services/store/ItemSets";
+import { GetItemSetFn, UpdateItemFn } from "../services/store/ItemSets";
 import * as R from "ramda";
 import { MenuSelect, MenuSelectItem } from "./MenuSelect";
 import { getContentType, ContentType } from "./util/ContentType";
@@ -60,6 +60,8 @@ export interface PocketImportItemRecord {
 
 export type PocketImportItemCardProps = {
   pocketImportItem: PocketImportItemRecord;
+  onArchiveItem?: (pocketImportItem: PocketImportItemRecord) => void;
+  onSnoozeItem?: (pocketImportItem: PocketImportItemRecord) => void;
 };
 
 const extractDescription = (
@@ -81,6 +83,8 @@ const formatTime = (date: Date) => {
 
 export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> = ({
   pocketImportItem,
+  onArchiveItem = (pocketImportItem: PocketImportItemRecord) => {},
+  onSnoozeItem = (pocketImportItem: PocketImportItemRecord) => {},
 }) => {
   const classes = useStyles();
 
@@ -121,6 +125,18 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
     </Typography>
   );
 
+  const handleArchiveClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    onArchiveItem(pocketImportItem);
+  };
+
+  const handleSnoozeClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    onSnoozeItem(pocketImportItem);
+  };
+
   return (
     <Card
       className={classes.pocketImportItemCard}
@@ -138,12 +154,18 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
           <Grid item xs={1}>
             <Grid container>
               <Grid item xs={12}>
-                <IconButton className={classes.itemToolbarButton}>
+                <IconButton
+                  className={classes.itemToolbarButton}
+                  onClick={handleArchiveClick}
+                >
                   <LibraryAddCheckIcon fontSize="small" />
                 </IconButton>
               </Grid>
               <Grid item xs={12}>
-                <IconButton className={classes.itemToolbarButton}>
+                <IconButton
+                  className={classes.itemToolbarButton}
+                  onClick={handleSnoozeClick}
+                >
                   <SnoozeIcon fontSize="small" />
                 </IconButton>
               </Grid>
@@ -187,6 +209,7 @@ const PocketImportItemRecordConverter = {
 
 export type PocketImportsListViewProps = {
   getItemSet: GetItemSetFn<PocketImportItemRecord>;
+  updateItem: UpdateItemFn<PocketImportItemRecord>;
 };
 
 export const InboxToolsHeader = (props: {
@@ -301,6 +324,7 @@ const getPocketImportsItemSetPath = (uid: UserId) => `users/${uid}/bookmarks`;
 
 export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps> = ({
   getItemSet,
+  updateItem,
 }) => {
   const logger = log.getLogger("PocketImportsListView");
   const authState = useContext(AuthContext) as firebase.User;
@@ -326,7 +350,8 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
       const loaded: PocketImportItemRecord[] = await getItemSet(
         PocketImportItemRecordConverter,
         getPocketImportsItemSetPath(uid),
-        ["pocket_created_at", "desc"]
+        [["pocket_created_at", "desc"]],
+        ["archived", "!=", false]
       );
 
       logger.debug(
@@ -359,6 +384,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
       setIntervalFilter(undefined);
     }
   };
+
   const onGroupItemSelect = (item: MenuSelectItem) => {
     logger.debug("Selected group entry " + item.id);
     if (item.id && item.id !== "group-none") {
@@ -368,9 +394,30 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     }
   };
 
+  const onArchiveItem = async (pocketImportItem: PocketImportItemRecord) => {
+    logger.debug("archive item request " + pocketImportItem.pocket_item_id);
+    const updatedItem = Object.assign({}, pocketImportItem, { archived: true });
+    const filteredPocketImports = pocketImports.filter(
+      (item) => item.pocket_item_id !== pocketImportItem.pocket_item_id
+    );
+    const updatedPocketImports = [...filteredPocketImports, updatedItem];
+    setPocketImports(updatedPocketImports);
+    logger.debug("set new items");
+    await updateItem(
+      PocketImportItemRecordConverter,
+      getPocketImportsItemSetPath(uid),
+      pocketImportItem.pocket_item_id,
+      updatedItem
+    );
+    logger.debug("finished archive item " + pocketImportItem.pocket_item_id);
+  };
+  const onSnoozeItem = (pocketImportItem: PocketImportItemRecord) => {};
+
   function GroupedList(props: {
     items: PocketImportItemRecord[];
     groupBy: (item: PocketImportItemRecord) => string;
+    onArchiveItem: (pocketImportItem: PocketImportItemRecord) => void;
+    onSnoozeItem: (pocketImportItem: PocketImportItemRecord) => void;
   }) {
     const { items, groupBy } = props;
     const grouped = R.groupBy(groupBy, items);
@@ -380,16 +427,28 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
           <Typography variant="h6" className={classes.sectionTitle}>
             {group}
           </Typography>
-          <FlatList items={grouped[group]} />
+          <FlatList
+            items={grouped[group]}
+            onArchiveItem={onArchiveItem}
+            onSnoozeItem={onSnoozeItem}
+          />
         </React.Fragment>
       );
     });
     return <React.Fragment>{els}</React.Fragment>;
   }
 
-  function FlatList(props: { items: PocketImportItemRecord[] }) {
+  function FlatList(props: {
+    items: PocketImportItemRecord[];
+    onArchiveItem: (pocketImportItem: PocketImportItemRecord) => void;
+    onSnoozeItem: (pocketImportItem: PocketImportItemRecord) => void;
+  }) {
     const pocketImportCards = props.items.map((x) => (
-      <PocketImportItemCard pocketImportItem={x} />
+      <PocketImportItemCard
+        pocketImportItem={x}
+        onArchiveItem={onArchiveItem}
+        onSnoozeItem={onSnoozeItem}
+      />
     ));
     return <List>{pocketImportCards}</List>;
   }
@@ -397,12 +456,27 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   function ItemList(props: {
     items: PocketImportItemRecord[];
     groupBy: GroupSelectIDType | undefined;
+    onArchiveItem: (pocketImportItem: PocketImportItemRecord) => void;
+    onSnoozeItem: (pocketImportItem: PocketImportItemRecord) => void;
   }) {
     const { items, groupBy } = props;
     if (groupBy) {
-      return <GroupedList items={items} groupBy={groupByFn(groupBy)} />;
+      return (
+        <GroupedList
+          items={items}
+          groupBy={groupByFn(groupBy)}
+          onArchiveItem={onArchiveItem}
+          onSnoozeItem={onSnoozeItem}
+        />
+      );
     } else {
-      return <FlatList items={items} />;
+      return (
+        <FlatList
+          items={items}
+          onArchiveItem={onArchiveItem}
+          onSnoozeItem={onSnoozeItem}
+        />
+      );
     }
   }
 
@@ -415,7 +489,12 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
         onIntervalItemSelect={onIntervalItemSelect}
         onGroupItemSelect={onGroupItemSelect}
       />
-      <ItemList items={filteredPocketImports} groupBy={groupBy} />
+      <ItemList
+        items={filteredPocketImports}
+        groupBy={groupBy}
+        onArchiveItem={onArchiveItem}
+        onSnoozeItem={onSnoozeItem}
+      />
     </React.Fragment>
   );
 };
