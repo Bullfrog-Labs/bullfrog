@@ -7,12 +7,9 @@ import {
   Typography,
   Grid,
   IconButton,
-  Menu,
-  MenuItem,
 } from "@material-ui/core";
 import { DateTime, Interval, Duration } from "luxon";
 import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
-import SnoozeIcon from "@material-ui/icons/Snooze";
 import * as log from "loglevel";
 import React, { FunctionComponent, useContext, useState } from "react";
 import { AuthContext } from "../services/auth/Auth";
@@ -20,6 +17,7 @@ import { UserId } from "../services/store/Users";
 import { GetItemSetFn, UpdateItemFn } from "../services/store/ItemSets";
 import * as R from "ramda";
 import { MenuSelect, MenuSelectItem } from "./MenuSelect";
+import { SnoozeSelectButton } from "./SnoozeSelectButton";
 import { getContentType, ContentType } from "./util/ContentType";
 
 const useStyles = makeStyles((theme) => ({
@@ -95,86 +93,6 @@ const formatTime = (date: Date) => {
   const dt = DateTime.fromJSDate(date);
   return dt.toLocaleString(DateTime.DATETIME_MED);
 };
-
-type SnoozeMenuItemsIDs =
-  | "snooze-menu-button-none"
-  | "snooze-menu-button-1minute"
-  | "snooze-menu-button-1day"
-  | "snooze-menu-button-1week";
-
-function SnoozeSelectButton(props: {
-  onSnoozeItem: (snoozeDuration: Duration) => void;
-}) {
-  const classes = useStyles();
-  const { onSnoozeItem } = props;
-  const [anchorEl, setAnchorEl] = React.useState<
-    (EventTarget & HTMLButtonElement) | undefined
-  >();
-
-  const handleButtonClick = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    setAnchorEl(undefined);
-  };
-
-  const handleMenuItemClick = (
-    event: React.MouseEvent<HTMLLIElement, MouseEvent>
-  ) => {
-    const id = event.currentTarget.id;
-    function toDuration(id: SnoozeMenuItemsIDs): Duration {
-      switch (id) {
-        case "snooze-menu-button-none":
-          return EMPTY_DURATION;
-        case "snooze-menu-button-1minute":
-          return Duration.fromObject({ minutes: 1 });
-        case "snooze-menu-button-1day":
-          return Duration.fromObject({ days: 1 });
-        case "snooze-menu-button-1week":
-          return Duration.fromObject({ weeks: 1 });
-        default:
-          return EMPTY_DURATION;
-      }
-    }
-    const duration = toDuration(id as SnoozeMenuItemsIDs);
-    onSnoozeItem(duration);
-  };
-
-  return (
-    <React.Fragment>
-      <IconButton
-        className={classes.itemToolbarButton}
-        onClick={handleButtonClick}
-      >
-        <SnoozeIcon fontSize="small" />
-      </IconButton>
-      <Menu
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-      >
-        <MenuItem id="snooze-menu-button-none" onClick={handleMenuItemClick}>
-          None
-        </MenuItem>
-        <MenuItem id="snooze-menu-button-1minute" onClick={handleMenuItemClick}>
-          1 Minute
-        </MenuItem>
-        <MenuItem id="snooze-menu-button-1day" onClick={handleMenuItemClick}>
-          1 Day
-        </MenuItem>
-        <MenuItem id="snooze-menu-button-1week" onClick={handleMenuItemClick}>
-          1 Week
-        </MenuItem>
-      </Menu>
-    </React.Fragment>
-  );
-}
 
 export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> = ({
   pocketImportItem,
