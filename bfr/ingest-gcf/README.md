@@ -17,6 +17,7 @@ From https://github.com/pyenv/pyenv#installation:
 ## pipenv setup (just once)
 
     pip install pipenv
+    pipenv install -d # needs to be done for every new virtualenv
 
 # Setting up sync from Pocket
 
