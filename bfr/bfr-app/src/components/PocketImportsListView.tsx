@@ -56,6 +56,13 @@ export interface PocketImportItemRecord {
   saveTime?: Date;
   estReadTimeMinutes?: number;
   contentType?: ContentType;
+  status?: number;
+}
+
+enum ItemStatus {
+  Unread = 0,
+  Archived = 1,
+  Deleted = 2,
 }
 
 export type PocketImportItemCardProps = {
@@ -203,6 +210,7 @@ const PocketImportItemRecordConverter = {
       saveTime: data.pocket_created_at?.toDate(),
       estReadTimeMinutes: pocketJSON.time_to_read,
       contentType: getContentType(data),
+      status: data.status || 0,
     };
   },
 };
@@ -281,17 +289,24 @@ export const GroupTool = (props: {
  * Filter and grouping functions.
  */
 
-const itemListFilterFn = (intervalFilter: Interval | undefined) => (
-  item: PocketImportItemRecord
-) => {
-  if (!intervalFilter) {
-    return true;
+const itemListFilterFn = (
+  intervalFilter: Interval | undefined,
+  status: ItemStatus
+) => (item: PocketImportItemRecord) => {
+  console.log(`${item.pocket_item_id} ${item.status}`);
+
+  // Interval
+  let intervalInclude = true;
+  if (item.saveTime && intervalFilter) {
+    const saveTime = DateTime.fromJSDate(item.saveTime);
+    intervalInclude = intervalFilter?.contains(saveTime);
   }
-  if (!item.saveTime) {
-    return false;
-  }
-  const saveTime = DateTime.fromJSDate(item.saveTime);
-  return intervalFilter?.contains(saveTime);
+
+  // Status
+  const statusInclude = item.status === status;
+
+  // Combine
+  return intervalInclude && statusInclude;
 };
 
 const groupByFn = (groupBy: GroupSelectIDType) => (
@@ -340,7 +355,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
 
   logger.debug(`Filtering; interval=${intervalFilter?.toString()}`);
   const filteredPocketImports = pocketImports.filter(
-    itemListFilterFn(intervalFilter)
+    itemListFilterFn(intervalFilter, ItemStatus.Unread)
   );
 
   React.useEffect(() => {
@@ -350,11 +365,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
       const loaded: PocketImportItemRecord[] = await getItemSet(
         PocketImportItemRecordConverter,
         getPocketImportsItemSetPath(uid),
-        [
-          ["archived", "desc"],
-          ["pocket_created_at", "desc"],
-        ],
-        ["archived", "!=", false]
+        [["pocket_created_at", "desc"]]
       );
 
       logger.debug(
@@ -399,7 +410,8 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
 
   const onArchiveItem = async (pocketImportItem: PocketImportItemRecord) => {
     logger.debug("archive item request " + pocketImportItem.pocket_item_id);
-    const updatedItem = Object.assign({}, pocketImportItem, { archived: true });
+    const updatedItem = Object.assign({}, pocketImportItem);
+    updatedItem.status = ItemStatus.Archived;
     const filteredPocketImports = pocketImports.filter(
       (item) => item.pocket_item_id !== pocketImportItem.pocket_item_id
     );
