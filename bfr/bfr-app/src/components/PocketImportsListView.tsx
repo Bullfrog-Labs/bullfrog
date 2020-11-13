@@ -171,6 +171,7 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
                 <IconButton
                   className={classes.itemToolbarButton}
                   onClick={handleArchiveClick}
+                  data-testid={`archive-button-${pocketImportItem.pocket_item_id}`}
                 >
                   <LibraryAddCheckIcon fontSize="small" />
                 </IconButton>
