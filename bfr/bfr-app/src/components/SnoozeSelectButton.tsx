@@ -19,13 +19,15 @@ type SnoozeMenuItemsIDs =
   | "snooze-menu-button-1week";
 
 export function SnoozeSelectButton(props: {
+  id: string;
   onSnoozeItem: (snoozeDuration: Duration) => void;
 }) {
   const classes = useStyles();
-  const { onSnoozeItem } = props;
+  const { onSnoozeItem, id } = props;
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & HTMLButtonElement) | undefined
   >();
+  const menuShowing = !!anchorEl;
 
   const handleButtonClick = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -58,12 +60,31 @@ export function SnoozeSelectButton(props: {
       }
     }
     const duration = toDuration(id as SnoozeMenuItemsIDs);
+    setAnchorEl(undefined);
     onSnoozeItem(duration);
   };
+
+  const menuItems = (
+    <div>
+      <MenuItem id="snooze-menu-button-none" onClick={handleMenuItemClick}>
+        None
+      </MenuItem>
+      <MenuItem id="snooze-menu-button-1minute" onClick={handleMenuItemClick}>
+        1 Minute
+      </MenuItem>
+      <MenuItem id="snooze-menu-button-1day" onClick={handleMenuItemClick}>
+        1 Day
+      </MenuItem>
+      <MenuItem id="snooze-menu-button-1week" onClick={handleMenuItemClick}>
+        1 Week
+      </MenuItem>
+    </div>
+  );
 
   return (
     <React.Fragment>
       <IconButton
+        data-testid={id}
         className={classes.itemToolbarButton}
         onClick={handleButtonClick}
       >
@@ -75,18 +96,7 @@ export function SnoozeSelectButton(props: {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <MenuItem id="snooze-menu-button-none" onClick={handleMenuItemClick}>
-          None
-        </MenuItem>
-        <MenuItem id="snooze-menu-button-1minute" onClick={handleMenuItemClick}>
-          1 Minute
-        </MenuItem>
-        <MenuItem id="snooze-menu-button-1day" onClick={handleMenuItemClick}>
-          1 Day
-        </MenuItem>
-        <MenuItem id="snooze-menu-button-1week" onClick={handleMenuItemClick}>
-          1 Week
-        </MenuItem>
+        {menuShowing && menuItems}
       </Menu>
     </React.Fragment>
   );

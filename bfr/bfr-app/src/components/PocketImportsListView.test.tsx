@@ -171,3 +171,40 @@ test("group items when groupBy selected", async () => {
   await waitFor(() => getByText("Long Read"));
   await waitFor(() => getByText("Quick Read"));
 });
+
+test("archive removes item", async () => {
+  async function getItemSet<PocketImportItemRecord>(
+    itemRecordConverter: firebase.firestore.FirestoreDataConverter<
+      PocketImportItemRecord
+    >,
+    path: string, // this path should refer to a collection of items
+    orderBy?: [string, "desc" | "asc" | undefined][],
+    where?: [string, firebase.firestore.WhereFilterOp, any]
+  ) {
+    return [mockPocketImportItem1, mockPocketImportItem2];
+  }
+
+  const authState = {
+    uid: "foobar",
+  };
+
+  const { getByText, queryByText, getByTestId } = render(
+    <AuthContext.Provider value={authState as firebase.User}>
+      <PocketImportsListView getItemSet={getItemSet} updateItem={updateItem} />
+    </AuthContext.Provider>
+  );
+
+  await waitFor(() => getByText(mockPocketImportItem1.title!));
+  await waitFor(() => getByText(mockPocketImportItem2.title!));
+
+  const select = await waitFor(() => getByTestId("snooze-button-123"));
+  expect(select).toBeInstanceOf(HTMLButtonElement);
+  fireEvent.click(select);
+
+  const pastDayItem = await waitFor(() => getByText("1 Day"));
+  expect(select).toBeInstanceOf(HTMLButtonElement);
+  fireEvent.click(pastDayItem);
+
+  await waitFor(() => getByText(mockPocketImportItem2.title!));
+  expect(queryByText(mockPocketImportItem1.title!)).toBeNull();
+});

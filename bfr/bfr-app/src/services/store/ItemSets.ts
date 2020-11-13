@@ -65,12 +65,8 @@ const updateItem = (database: Database) => async <T>(
   id: string,
   item: T
 ) => {
-  database
-    .getHandle()
-    .collection(path)
-    .withConverter(itemRecordConverter)
-    .doc(id)
-    .update(item);
+  const fbItem = itemRecordConverter.toFirestore(item);
+  database.getHandle().collection(path).doc(id).update(fbItem);
 };
 
 export type UpdateItemFn<T> = (

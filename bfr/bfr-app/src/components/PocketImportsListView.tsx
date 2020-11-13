@@ -54,7 +54,7 @@ export interface PocketImportItemRecord {
   description?: string;
   text?: string;
   saveTime?: Date;
-  estReadTimeMinutes?: number;
+  estReadTimeMinutes?: number | undefined;
   contentType?: ContentType;
   status?: number;
   snoozeEndTime?: Date;
@@ -178,6 +178,7 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
               <Grid item xs={12}>
                 <SnoozeSelectButton
                   onSnoozeItem={handleSnoozeClick}
+                  id={`snooze-button-${pocketImportItem.pocket_item_id}`}
                 ></SnoozeSelectButton>
               </Grid>
             </Grid>
@@ -189,13 +190,21 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
 };
 
 const PocketImportItemRecordConverter = {
+  /**
+   * This can only be used to update the mutable fields.
+   * @param pocketItem
+   */
   toFirestore: (
     pocketItem: PocketImportItemRecord
   ): firebase.firestore.DocumentData => {
-    // should not be used, since only reads are supported now
-    throw Error(
-      "PocketImportItemRecordConverter::toFirestore should not be used"
-    );
+    let data = {};
+    if (pocketItem.status) {
+      data = Object.assign(data, { status: pocketItem.status });
+    }
+    if (pocketItem.snoozeEndTime) {
+      data = Object.assign(data, { snoozeEndTime: pocketItem.snoozeEndTime });
+    }
+    return data;
   },
 
   fromFirestore: (
@@ -451,7 +460,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     snoozeDuration: Duration
   ) => {
     logger.debug("snooze item request " + pocketImportItem.pocket_item_id);
-    if (snoozeDuration === EMPTY_DURATION) {
+    if (snoozeDuration.equals(EMPTY_DURATION)) {
       logger.debug("empty snooze duration, ignoring");
       return;
     }
