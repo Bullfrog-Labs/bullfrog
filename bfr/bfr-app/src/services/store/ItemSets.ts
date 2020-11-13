@@ -13,7 +13,7 @@ import { Database } from "./Database";
 const getItemSet = (database: Database) => async <T>(
   itemRecordConverter: firebase.firestore.FirestoreDataConverter<T>,
   path: string, // this path should refer to a collection of items
-  orderBy?: [[string, "desc" | "asc" | undefined]],
+  orderBy?: [string, "desc" | "asc" | undefined][],
   where?: [string, firebase.firestore.WhereFilterOp, any]
 ): Promise<T[]> => {
   // TODO: Implement Filtering/sorting/paging
@@ -51,7 +51,7 @@ const getItemSet = (database: Database) => async <T>(
 export type GetItemSetFn<T> = (
   itemRecordConverter: firebase.firestore.FirestoreDataConverter<T>,
   path: string, // this path should refer to a collection of items
-  orderBy?: [[string, "desc" | "asc" | undefined]],
+  orderBy?: [string, "desc" | "asc" | undefined][],
   where?: [string, firebase.firestore.WhereFilterOp, any]
 ) => Promise<T[]>;
 
