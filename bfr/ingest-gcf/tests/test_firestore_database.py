@@ -1,14 +1,16 @@
-import unittest
-import json
-import os
-import logging
-import time
-import sys
-from bookmarks_sync.firestore_database import FirestoreDatabase, BookmarkRecord
-from bookmarks_sync.firebase_app import FirebaseApp
 import datetime
+import json
+import logging
+import os
+import sys
+import time
+import unittest
 import uuid
+
 import requests
+
+from bookmarks_sync.firebase_app import FirebaseApp
+from bookmarks_sync.firestore_database import BookmarkRecord, FirestoreDatabase
 
 
 def load_json(file_name):

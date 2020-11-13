@@ -19,6 +19,7 @@ functions-framework = "*"
 pylint = "*"
 yapf = "*"
 mypy = "*"
+isort = "*"
 
 [requires]
 python_version = "3.8"

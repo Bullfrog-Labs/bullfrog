@@ -1,7 +1,9 @@
-import logging
 import argparse
-from bookmarks_sync.firestore_database import FirestoreDatabase, UserRecord, UserPrivateRecord
+import logging
+
 from bookmarks_sync.firebase_app import FirebaseApp
+from bookmarks_sync.firestore_database import (FirestoreDatabase,
+                                               UserPrivateRecord, UserRecord)
 
 project_id = "bullfrog-reader"
 

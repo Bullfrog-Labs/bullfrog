@@ -10,6 +10,7 @@
     "python.venvPath": "~/.virtualenvs",
     "python.linting.lintOnSave": true,
     "python.linting.pylintEnabled": true,
-    "python.linting.mypyEnabled": true
+    "python.linting.mypyEnabled": true,
+    "python.sortImports.path": "isort"
   }
 }

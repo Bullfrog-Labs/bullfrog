@@ -1,14 +1,16 @@
-import unittest
 import json
-import os
 import logging
-import time
+import os
 import sys
-from bookmarks_sync.pocket_bookmarks import PocketBookmarks
-from bookmarks_sync.firestore_database import BookmarkRecord, FirestoreDatabase
-from bookmarks_sync.firebase_app import FirebaseApp
-from typing import List, Tuple, Any
+import time
+import unittest
+from typing import Any, List, Tuple
+
 import requests
+
+from bookmarks_sync.firebase_app import FirebaseApp
+from bookmarks_sync.firestore_database import BookmarkRecord, FirestoreDatabase
+from bookmarks_sync.pocket_bookmarks import PocketBookmarks
 
 app = FirebaseApp.admin("bullfrog-reader")
 

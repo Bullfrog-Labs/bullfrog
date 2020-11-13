@@ -1,9 +1,9 @@
 import logging
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
-from typing import TypedDict, List, Optional
 from datetime import datetime
+from typing import List, Optional, TypedDict
+
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 
 class ArticleMetadataRecord(TypedDict):

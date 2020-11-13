@@ -1,10 +1,11 @@
-from pocket import Pocket
-import logging
 import argparse
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import time
-from threading import Thread
 import cgi
+import logging
+import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from threading import Thread
+
+from pocket import Pocket
 
 
 class Handler(BaseHTTPRequestHandler):

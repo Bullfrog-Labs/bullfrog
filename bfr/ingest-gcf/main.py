@@ -1,13 +1,15 @@
 #!/usr/bin/python3
-from flask import escape
-from bookmarks_sync.pocket_bookmarks import PocketBookmarks
-from pocket import Pocket
 import logging
+import os
+from datetime import datetime
+
+import requests
+from flask import escape
+from pocket import Pocket
+
 from bookmarks_sync.firebase_app import FirebaseApp
 from bookmarks_sync.firestore_database import FirestoreDatabase
-from datetime import datetime
-import os
-import requests
+from bookmarks_sync.pocket_bookmarks import PocketBookmarks
 
 # Obv. not secure, but its ok its just pocket. Will reset it later.
 consumer_key = os.environ["CONSUMER_KEY"]

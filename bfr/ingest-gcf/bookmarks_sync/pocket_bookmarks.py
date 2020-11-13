@@ -1,14 +1,19 @@
-from pocket import Pocket
+import json
 import logging
 from datetime import datetime
-from bookmarks_sync.firestore_database import FirestoreDatabase, BookmarkRecord, ArticleMetadataRecord
-from requests.exceptions import HTTPError, Timeout, ConnectionError, TooManyRedirects
-import json
-import requests
-from newspaper import Article
-from typing import List, Dict, Any, Union, Optional
-from dict_deep import deep_get
+from typing import Any, Dict, List, Optional, Union
+
 import cchardet
+import requests
+from dict_deep import deep_get
+from newspaper import Article
+from pocket import Pocket
+from requests.exceptions import (ConnectionError, HTTPError, Timeout,
+                                 TooManyRedirects)
+
+from bookmarks_sync.firestore_database import (ArticleMetadataRecord,
+                                               BookmarkRecord,
+                                               FirestoreDatabase)
 
 POCKET_ITEM_STATUS_DELETED = "2"
 
