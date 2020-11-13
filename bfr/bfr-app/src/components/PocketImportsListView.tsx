@@ -7,6 +7,8 @@ import {
   Typography,
   Grid,
   IconButton,
+  Menu,
+  MenuItem,
 } from "@material-ui/core";
 import { DateTime, Interval, Duration } from "luxon";
 import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
@@ -57,7 +59,10 @@ export interface PocketImportItemRecord {
   estReadTimeMinutes?: number;
   contentType?: ContentType;
   status?: number;
+  snoozeEndTime?: Date;
 }
+
+const EMPTY_DURATION = Duration.fromObject({ minutes: 0 });
 
 enum ItemStatus {
   Unread = 0,
@@ -68,7 +73,10 @@ enum ItemStatus {
 export type PocketImportItemCardProps = {
   pocketImportItem: PocketImportItemRecord;
   onArchiveItem?: (pocketImportItem: PocketImportItemRecord) => void;
-  onSnoozeItem?: (pocketImportItem: PocketImportItemRecord) => void;
+  onSnoozeItem?: (
+    pocketImportItem: PocketImportItemRecord,
+    snoozeDuration: Duration
+  ) => void;
 };
 
 const extractDescription = (
@@ -88,10 +96,93 @@ const formatTime = (date: Date) => {
   return dt.toLocaleString(DateTime.DATETIME_MED);
 };
 
+type SnoozeMenuItemsIDs =
+  | "snooze-menu-button-none"
+  | "snooze-menu-button-1minute"
+  | "snooze-menu-button-1day"
+  | "snooze-menu-button-1week";
+
+function SnoozeSelectButton(props: {
+  onSnoozeItem: (snoozeDuration: Duration) => void;
+}) {
+  const classes = useStyles();
+  const { onSnoozeItem } = props;
+  const [anchorEl, setAnchorEl] = React.useState<
+    (EventTarget & HTMLButtonElement) | undefined
+  >();
+
+  const handleButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    setAnchorEl(undefined);
+  };
+
+  const handleMenuItemClick = (
+    event: React.MouseEvent<HTMLLIElement, MouseEvent>
+  ) => {
+    const id = event.currentTarget.id;
+    function toDuration(id: SnoozeMenuItemsIDs): Duration {
+      switch (id) {
+        case "snooze-menu-button-none":
+          return EMPTY_DURATION;
+        case "snooze-menu-button-1minute":
+          return Duration.fromObject({ minutes: 1 });
+        case "snooze-menu-button-1day":
+          return Duration.fromObject({ days: 1 });
+        case "snooze-menu-button-1week":
+          return Duration.fromObject({ weeks: 1 });
+        default:
+          return EMPTY_DURATION;
+      }
+    }
+    const duration = toDuration(id as SnoozeMenuItemsIDs);
+    onSnoozeItem(duration);
+  };
+
+  return (
+    <React.Fragment>
+      <IconButton
+        className={classes.itemToolbarButton}
+        onClick={handleButtonClick}
+      >
+        <SnoozeIcon fontSize="small" />
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        <MenuItem id="snooze-menu-button-none" onClick={handleMenuItemClick}>
+          None
+        </MenuItem>
+        <MenuItem id="snooze-menu-button-1minute" onClick={handleMenuItemClick}>
+          1 Minute
+        </MenuItem>
+        <MenuItem id="snooze-menu-button-1day" onClick={handleMenuItemClick}>
+          1 Day
+        </MenuItem>
+        <MenuItem id="snooze-menu-button-1week" onClick={handleMenuItemClick}>
+          1 Week
+        </MenuItem>
+      </Menu>
+    </React.Fragment>
+  );
+}
+
 export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> = ({
   pocketImportItem,
   onArchiveItem = (pocketImportItem: PocketImportItemRecord) => {},
-  onSnoozeItem = (pocketImportItem: PocketImportItemRecord) => {},
+  onSnoozeItem = (
+    pocketImportItem: PocketImportItemRecord,
+    snoozeDuration: Duration
+  ) => {},
 }) => {
   const classes = useStyles();
 
@@ -138,10 +229,8 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
     onArchiveItem(pocketImportItem);
   };
 
-  const handleSnoozeClick = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    onSnoozeItem(pocketImportItem);
+  const handleSnoozeClick = (snoozeDuration: Duration) => {
+    onSnoozeItem(pocketImportItem, snoozeDuration);
   };
 
   return (
@@ -169,12 +258,9 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
                 </IconButton>
               </Grid>
               <Grid item xs={12}>
-                <IconButton
-                  className={classes.itemToolbarButton}
-                  onClick={handleSnoozeClick}
-                >
-                  <SnoozeIcon fontSize="small" />
-                </IconButton>
+                <SnoozeSelectButton
+                  onSnoozeItem={handleSnoozeClick}
+                ></SnoozeSelectButton>
               </Grid>
             </Grid>
           </Grid>
@@ -211,6 +297,7 @@ const PocketImportItemRecordConverter = {
       estReadTimeMinutes: pocketJSON.time_to_read,
       contentType: getContentType(data),
       status: data.status || 0,
+      snoozeEndTime: data.snoozeEndTime?.toDate(),
     };
   },
 };
@@ -293,8 +380,6 @@ const itemListFilterFn = (
   intervalFilter: Interval | undefined,
   status: ItemStatus
 ) => (item: PocketImportItemRecord) => {
-  console.log(`${item.pocket_item_id} ${item.status}`);
-
   // Interval
   let intervalInclude = true;
   if (item.saveTime && intervalFilter) {
@@ -302,11 +387,18 @@ const itemListFilterFn = (
     intervalInclude = intervalFilter?.contains(saveTime);
   }
 
+  // Snooze time
+  let snoozeTimeInclude = true;
+  if (item.snoozeEndTime) {
+    const currentTime = DateTime.local();
+    snoozeTimeInclude = DateTime.fromJSDate(item.snoozeEndTime) <= currentTime;
+  }
+
   // Status
   const statusInclude = item.status === status;
 
   // Combine
-  return intervalInclude && statusInclude;
+  return intervalInclude && statusInclude && snoozeTimeInclude;
 };
 
 const groupByFn = (groupBy: GroupSelectIDType) => (
@@ -417,7 +509,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     );
     const updatedPocketImports = [...filteredPocketImports, updatedItem];
     setPocketImports(updatedPocketImports);
-    logger.debug("set new items");
+    logger.debug(`set ${updatedPocketImports.length} items`);
     await updateItem(
       PocketImportItemRecordConverter,
       getPocketImportsItemSetPath(uid),
@@ -426,13 +518,44 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     );
     logger.debug("finished archive item " + pocketImportItem.pocket_item_id);
   };
-  const onSnoozeItem = (pocketImportItem: PocketImportItemRecord) => {};
+
+  const onSnoozeItem = async (
+    pocketImportItem: PocketImportItemRecord,
+    snoozeDuration: Duration
+  ) => {
+    logger.debug("snooze item request " + pocketImportItem.pocket_item_id);
+    if (snoozeDuration === EMPTY_DURATION) {
+      logger.debug("empty snooze duration, ignoring");
+      return;
+    }
+    const updatedItem = Object.assign({}, pocketImportItem);
+    logger.debug("snoozing for " + snoozeDuration);
+    updatedItem.snoozeEndTime = DateTime.local()
+      .plus(snoozeDuration)
+      .toJSDate();
+    const filteredPocketImports = pocketImports.filter(
+      (item) => item.pocket_item_id !== pocketImportItem.pocket_item_id
+    );
+    const updatedPocketImports = [...filteredPocketImports, updatedItem];
+    setPocketImports(updatedPocketImports);
+    logger.debug(`set ${updatedPocketImports.length} items`);
+    await updateItem(
+      PocketImportItemRecordConverter,
+      getPocketImportsItemSetPath(uid),
+      pocketImportItem.pocket_item_id,
+      updatedItem
+    );
+    logger.debug("finished snooze item " + pocketImportItem.pocket_item_id);
+  };
 
   function GroupedList(props: {
     items: PocketImportItemRecord[];
     groupBy: (item: PocketImportItemRecord) => string;
     onArchiveItem: (pocketImportItem: PocketImportItemRecord) => void;
-    onSnoozeItem: (pocketImportItem: PocketImportItemRecord) => void;
+    onSnoozeItem: (
+      pocketImportItem: PocketImportItemRecord,
+      snoozeDuration: Duration
+    ) => void;
   }) {
     const { items, groupBy } = props;
     const grouped = R.groupBy(groupBy, items);
@@ -456,7 +579,10 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   function FlatList(props: {
     items: PocketImportItemRecord[];
     onArchiveItem: (pocketImportItem: PocketImportItemRecord) => void;
-    onSnoozeItem: (pocketImportItem: PocketImportItemRecord) => void;
+    onSnoozeItem: (
+      pocketImportItem: PocketImportItemRecord,
+      snoozeDuration: Duration
+    ) => void;
   }) {
     const pocketImportCards = props.items.map((x) => (
       <PocketImportItemCard
@@ -472,7 +598,10 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     items: PocketImportItemRecord[];
     groupBy: GroupSelectIDType | undefined;
     onArchiveItem: (pocketImportItem: PocketImportItemRecord) => void;
-    onSnoozeItem: (pocketImportItem: PocketImportItemRecord) => void;
+    onSnoozeItem: (
+      pocketImportItem: PocketImportItemRecord,
+      snoozeDuration: Duration
+    ) => void;
   }) {
     const { items, groupBy } = props;
     if (groupBy) {
