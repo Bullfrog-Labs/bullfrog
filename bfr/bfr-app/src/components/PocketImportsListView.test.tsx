@@ -4,9 +4,14 @@ import {
   PocketImportItemCard,
   PocketImportItemRecord,
   PocketImportsListView,
+  ItemStatus,
 } from "./PocketImportsListView";
 import { AuthContext } from "../services/auth/Auth";
 import { DateTime } from "luxon";
+import * as log from "loglevel";
+import { Logging } from "kmgmt-common";
+
+Logging.configure(log);
 
 const mockPocketImportItem1: PocketImportItemRecord = {
   pocket_item_id: "123",
@@ -17,6 +22,7 @@ const mockPocketImportItem1: PocketImportItemRecord = {
   saveTime: new Date(1995, 11, 17),
   estReadTimeMinutes: 7,
   contentType: "Quick Read",
+  status: ItemStatus.Unread,
 };
 
 const mockPocketImportItem2: PocketImportItemRecord = {
@@ -28,6 +34,7 @@ const mockPocketImportItem2: PocketImportItemRecord = {
   saveTime: DateTime.local().toJSDate(),
   estReadTimeMinutes: 7,
   contentType: "Long Read",
+  status: ItemStatus.Unread,
 };
 
 async function updateItem<PocketImportItemRecord>(
@@ -61,7 +68,8 @@ test("renders fully-populated pocket import item card in list view", async () =>
       PocketImportItemRecord
     >,
     path: string, // this path should refer to a collection of items
-    orderBy?: [[string, "desc" | "asc" | undefined]]
+    orderBy?: [string, "desc" | "asc" | undefined][],
+    where?: [string, firebase.firestore.WhereFilterOp, any]
   ) {
     return [mockPocketImportItem1];
   }
@@ -91,7 +99,8 @@ test("filters old items when interval selected", async () => {
       PocketImportItemRecord
     >,
     path: string, // this path should refer to a collection of items
-    orderBy?: [[string, "desc" | "asc" | undefined]]
+    orderBy?: [string, "desc" | "asc" | undefined][],
+    where?: [string, firebase.firestore.WhereFilterOp, any]
   ) {
     return [mockPocketImportItem1, mockPocketImportItem2];
   }
@@ -127,7 +136,8 @@ test("group items when groupBy selected", async () => {
       PocketImportItemRecord
     >,
     path: string, // this path should refer to a collection of items
-    orderBy?: [[string, "desc" | "asc" | undefined]]
+    orderBy?: [string, "desc" | "asc" | undefined][],
+    where?: [string, firebase.firestore.WhereFilterOp, any]
   ) {
     return [mockPocketImportItem1, mockPocketImportItem2];
   }

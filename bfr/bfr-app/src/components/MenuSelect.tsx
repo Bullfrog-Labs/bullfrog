@@ -54,7 +54,7 @@ export const MenuSelect = (props: {
 
   const menuItems = items.map((item) => {
     return (
-      <MenuItem id={item.id} onClick={handleMenuItemClick}>
+      <MenuItem id={item.id} key={item.id} onClick={handleMenuItemClick}>
         {item.value}
       </MenuItem>
     );

@@ -62,7 +62,7 @@ export interface PocketImportItemRecord {
 
 const EMPTY_DURATION = Duration.fromObject({ minutes: 0 });
 
-enum ItemStatus {
+export enum ItemStatus {
   Unread = 0,
   Archived = 1,
   Deleted = 2,
@@ -298,6 +298,7 @@ const itemListFilterFn = (
   intervalFilter: Interval | undefined,
   status: ItemStatus
 ) => (item: PocketImportItemRecord) => {
+  const logger = log.getLogger("itemListFilterFn");
   // Interval
   let intervalInclude = true;
   if (item.saveTime && intervalFilter) {
@@ -316,6 +317,10 @@ const itemListFilterFn = (
   const statusInclude = item.status === status;
 
   // Combine
+  logger.debug(
+    `Filter: intervalInclude=${intervalInclude}, statusInclude=${statusInclude},` +
+      ` snoozeTimeInclude=${snoozeTimeInclude}`
+  );
   return intervalInclude && statusInclude && snoozeTimeInclude;
 };
 
@@ -363,10 +368,14 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   const [intervalFilter, setIntervalFilter] = useState<Interval>();
   const [groupBy, setGroupBy] = useState<GroupSelectIDType>();
 
+  logger.debug("render in list " + pocketImports.length);
+
   logger.debug(`Filtering; interval=${intervalFilter?.toString()}`);
   const filteredPocketImports = pocketImports.filter(
     itemListFilterFn(intervalFilter, ItemStatus.Unread)
   );
+
+  logger.debug("render daf list " + filteredPocketImports.length);
 
   React.useEffect(() => {
     const loadPocketImports = async () => {
@@ -479,7 +488,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     const grouped = R.groupBy(groupBy, items);
     const els = Object.keys(grouped).map((group) => {
       return (
-        <React.Fragment>
+        <React.Fragment key={group}>
           <Typography variant="h6" className={classes.sectionTitle}>
             {group}
           </Typography>
@@ -502,9 +511,11 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
       snoozeDuration: Duration
     ) => void;
   }) {
+    logger.debug("Render flat list " + props.items.length);
     const pocketImportCards = props.items.map((x) => (
       <PocketImportItemCard
         pocketImportItem={x}
+        key={x.pocket_item_id}
         onArchiveItem={onArchiveItem}
         onSnoozeItem={onSnoozeItem}
       />
@@ -522,6 +533,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     ) => void;
   }) {
     const { items, groupBy } = props;
+    logger.debug("Render item list");
     if (groupBy) {
       return (
         <GroupedList
