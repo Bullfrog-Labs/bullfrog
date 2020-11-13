@@ -21,7 +21,7 @@ resource "google_project_service" "gcp_services_cloudfunctions" {
 }
 
 # Some 
-resource "google_app_engine_application" "bfr_app" {
+resource "google_app_engine_application" "bookmarks_sync_app" {
   project       = "bullfrog-reader"
   location_id   = "us-central"
   database_type = "CLOUD_FIRESTORE"
