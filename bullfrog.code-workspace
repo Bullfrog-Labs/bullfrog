@@ -9,6 +9,7 @@
     "editor.formatOnSave": true,
     "python.venvPath": "~/.virtualenvs",
     "python.linting.lintOnSave": true,
-    "python.linting.pylintEnabled": true
+    "python.linting.pylintEnabled": true,
+    "python.linting.mypyEnabled": true
   }
 }

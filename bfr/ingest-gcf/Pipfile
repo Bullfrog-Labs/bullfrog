@@ -18,6 +18,7 @@ pytest-watch = "*"
 functions-framework = "*"
 pylint = "*"
 yapf = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.8"
