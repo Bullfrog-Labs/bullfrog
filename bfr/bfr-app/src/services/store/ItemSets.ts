@@ -1,12 +1,13 @@
 import * as log from "loglevel";
 import { Database } from "./Database";
+import * as R from "ramda";
 
 // If the collection cannot be accessed according Firestore security rules, an
 // exception will be thrown. If the collection can be accessed, but is not
 // actually present, an empty list will be returned.
 // NOTE: The representation of items will likely change if/when paging is
 // implemented.
-export const getItemSet = async <T>(
+const getItemSetFn = async <T>(
   database: Database,
   itemRecordConverter: firebase.firestore.FirestoreDataConverter<T>,
   path: string, // this path should refer to a collection of items
@@ -38,3 +39,13 @@ export const getItemSet = async <T>(
 
   return allItems;
 };
+
+const getItemSet = R.curry(getItemSetFn);
+
+export type GetItemSetFn<T> = (
+  itemRecordConverter: firebase.firestore.FirestoreDataConverter<T>,
+  path: string, // this path should refer to a collection of items
+  orderBy?: [string, "desc" | "asc" | undefined] | undefined
+) => Promise<T[]>;
+
+export { getItemSet };
