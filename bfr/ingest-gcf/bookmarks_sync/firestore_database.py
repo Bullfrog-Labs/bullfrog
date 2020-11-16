@@ -26,8 +26,6 @@ class BookmarkRecord(TypedDict):
   pocket_updated_at: datetime
   text: Optional[str]
   metadata: Optional[ArticleMetadataRecord]
-  created_at: Optional[datetime]
-  updated_at: Optional[datetime]
 
 
 class UserRecord(TypedDict):
@@ -50,7 +48,7 @@ class FirestoreDatabase(object):
   def get_latest_bookmark(self, uid: str) -> Optional[BookmarkRecord]:
     self.logger.debug("get latest")
     query_ref = (self.db.collection("users").document(uid).collection(
-        "bookmarks").order_by("created_at",
+        "bookmarks").order_by("pocket_created_at",
                               direction=firestore.Query.DESCENDING).limit(1)) # type: ignore
     results = query_ref.get()
     if len(results) > 0:
@@ -61,7 +59,6 @@ class FirestoreDatabase(object):
   def add_items(self, uid: str, bookmarks: List[BookmarkRecord]) -> None:
     self.logger.debug(f"saving bookmarks {len(bookmarks)}")
     for bookmark in bookmarks:
-      self.apply_new_record_timestamps(bookmark)
       self.logger.debug(f"saving bookmark {bookmark['url']}")
 
       # This is a hack - the html text is generally too large tp store in FB, so
@@ -83,11 +80,9 @@ class FirestoreDatabase(object):
   def update_user(self, uid: str, user_record: UserRecord, user_private_record: UserPrivateRecord):
     if self.db.collection("users").document(uid).get().exists and self.db.collection("users").document(uid).collection(
             "users_private").document(uid).get().exists:
-      self.apply_updated_record_timestamps(user_record)
       self.db.collection("users").document(uid).update(user_record)
       self.update_users_private(uid, user_private_record)
     else:
-      self.apply_new_record_timestamps(user_record)
       self.db.collection("users").document(uid).set(user_record)
       self.add_users_private(uid, user_private_record)
 
@@ -99,14 +94,6 @@ class FirestoreDatabase(object):
         doc.to_dict()
         for doc in self.db.collection_group("users_private").get()
     ]
-
-  # Helper functions
-  def apply_new_record_timestamps(self, record):
-    record["created_at"] = datetime.now()
-    record["updated_at"] = record["created_at"]
-
-  def apply_updated_record_timestamps(self, record):
-    record["updated_at"] = datetime.now()
 
   # Named constructors
   @classmethod

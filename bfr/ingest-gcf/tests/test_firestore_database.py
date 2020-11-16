@@ -2,10 +2,7 @@ import datetime
 import json
 import logging
 import os
-import sys
-import time
 import unittest
-import uuid
 
 import requests
 
@@ -50,11 +47,6 @@ class BookmarkRecords(object):
             json.dumps(pocket_record),
         "text": "foo",
         "metadata": None,
-        "created_at": 
-            datetime.datetime.fromtimestamp(int(pocket_record["time_added"])),
-        "updated_at":
-            datetime.datetime.fromtimestamp(int(pocket_record["time_updated"])),
-
     }
 
 

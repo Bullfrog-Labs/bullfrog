@@ -37,10 +37,6 @@ class BookmarkRecords(object):
             None,
         "metadata":
             None,
-        "created_at":
-            None,
-        "updated_at":
-            None,
     }
 
 
