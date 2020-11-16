@@ -1,15 +1,16 @@
 import json
 import logging
 import os
-import sys
-import time
 import unittest
+from unittest.mock import Mock
 from typing import Any, List, Tuple
+
+import pocket
 
 import requests
 
 from bookmarks_sync.firebase_app import FirebaseApp
-from bookmarks_sync.firestore_database import BookmarkRecord, FirestoreDatabase
+from bookmarks_sync.firestore_database import FirestoreDatabase
 from bookmarks_sync.pocket_bookmarks import PocketBookmarks
 
 app = FirebaseApp.admin("bullfrog-reader")
@@ -43,16 +44,19 @@ multiple_records: List[Tuple] = [(
 no_records: List[Tuple] = [({}, {})]
 
 
-class IterMockPocket(object):
+def make_mock_pocket(result_set):
+  result_set_iter = iter(result_set)
 
-  def __init__(self, result_set):
-    self.result_set = iter(result_set)
-
-  def get(self, **args):
-    try:
-      return next(self.result_set)
+  def mock_get(**args):
+    try: 
+      return next(result_set_iter)
     except StopIteration:
       return ({}, {})
+      
+  mock_pocket = Mock(spec=pocket.Pocket)
+  mock_pocket.get = mock_get
+
+  return mock_pocket
 
 
 class IterMockRequests(object):
@@ -103,30 +107,30 @@ class TestPocketBookmarks(unittest.TestCase):
     clear_database()
 
   def test_sync_latest_single_page(self):
-    pocket = IterMockPocket(single_record)
+    mock_pocket = make_mock_pocket(single_record)
     db = FirestoreDatabase.admin(app)
     mock_requests = IterMockRequests([MockResponse()])
-    bookmarks = PocketBookmarks(uid, pocket, db, mock_requests)
+    bookmarks = PocketBookmarks(uid, mock_pocket, db, mock_requests)
     count = bookmarks.sync_latest()
     latest = db.get_latest_bookmark(uid)
     self.assertIsNotNone(latest)
     self.assertEqual(count, 1)
 
   def test_sync_latest_no_results(self):
-    pocket = IterMockPocket(no_records)
+    mock_pocket = make_mock_pocket(no_records)
     db = FirestoreDatabase.admin(app)
     mock_requests = IterMockRequests([])
-    bookmarks = PocketBookmarks(uid, pocket, db, mock_requests)
+    bookmarks = PocketBookmarks(uid, mock_pocket, db, mock_requests)
     count = bookmarks.sync_latest()
     latest = db.get_latest_bookmark(uid)
     self.assertIsNone(latest)
     self.assertEqual(count, 0)
 
   def test_sync_latest_paging(self):
-    pocket = IterMockPocket(multiple_pages)
+    mock_pocket = make_mock_pocket(multiple_pages)
     db = FirestoreDatabase.admin(app)
     mock_requests = IterMockRequests([MockResponse(), MockResponse()])
-    bookmarks = PocketBookmarks(uid, pocket, db, mock_requests)
+    bookmarks = PocketBookmarks(uid, mock_pocket, db, mock_requests)
     count = bookmarks.sync_latest()
     latest = db.get_latest_bookmark(uid)
     self.assertIsNotNone(latest)

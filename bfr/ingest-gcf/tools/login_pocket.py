@@ -1,5 +1,4 @@
 import argparse
-import cgi
 import logging
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -83,7 +82,7 @@ def main():
     user_credentials = Pocket.get_credentials(consumer_key=consumer_key,
                                               code=request_token)
     logger.debug("Got creds " + str(user_credentials))
-    access_token = user_credentials["access_token"]
+    access_token = user_credentials["access_token"] # type: ignore
 
   logger.debug(
       f"Logged in; access_token={access_token}, consumer_key={consumer_key}")

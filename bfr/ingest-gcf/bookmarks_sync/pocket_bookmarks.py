@@ -196,8 +196,12 @@ class PocketBookmarks(object):
         article.parse()
         self.logger.debug(f"done parsing")
         article_metadata = self.extract_metadata_from_article(article)
-        extracted_text_len = len(article_metadata['text']
-                                ) if article_metadata['text'] is not None else 0
+
+        if article_metadata['text'] is None:
+          extracted_text_len = 0
+        else:
+          extracted_text_len = article_metadata['text']
+
         self.logger.debug(f"done; authors={article_metadata['authors']}, " +
                           f"title={article_metadata['title']}, " +
                           f"text={extracted_text_len}")

@@ -5,7 +5,6 @@ from typing import List, Optional, TypedDict
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-
 class ArticleMetadataRecord(TypedDict):
   authors: List[str]
   description: Optional[str]
@@ -32,16 +31,12 @@ class BookmarkRecord(TypedDict):
 
 class UserRecord(TypedDict):
   uid: str
-  created_at: Optional[datetime]
-  updated_at: Optional[datetime]
 
 
 class UserPrivateRecord(TypedDict):
   uid: str
-  pocket_access_token: str
+  pocket_access_token: Optional[str]
   pocket_sync_enabled: bool
-  created_at: Optional[datetime]
-  updated_at: Optional[datetime]
 
 
 class FirestoreDatabase(object):
@@ -55,7 +50,7 @@ class FirestoreDatabase(object):
     self.logger.debug("get latest")
     query_ref = (self.db.collection("users").document(uid).collection(
         "bookmarks").order_by("created_at",
-                              direction=firestore.Query.DESCENDING).limit(1))
+                              direction=firestore.Query.DESCENDING).limit(1)) # type: ignore
     results = query_ref.get()
     if len(results) > 0:
       return query_ref.get()[0].to_dict()

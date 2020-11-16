@@ -39,12 +39,12 @@ def main():
   app = FirebaseApp.admin(project_id)
   db = FirestoreDatabase.admin(app)
 
-  user_record: UserRecord = {"uid": args.uid}
-  user_private_record: UserPrivateRecord = {"uid": args.uid}
-  if args.pocket_sync_enabled is not None:
-    user_private_record["pocket_sync_enabled"] = args.pocket_sync_enabled
-  if args.pocket_access_token:
-    user_private_record["pocket_access_token"] = args.pocket_access_token
+  user_record: UserRecord = {"uid": str(args.uid)}
+  user_private_record: UserPrivateRecord = {
+    "uid": str(args.uid),
+    "pocket_sync_enabled": bool(args.pocket_sync_enabled),
+    "pocket_access_token": args.pocket_access_token
+  }
 
   logger.debug(
       f"setting record; user={user_record} , user_private={user_private_record}"
