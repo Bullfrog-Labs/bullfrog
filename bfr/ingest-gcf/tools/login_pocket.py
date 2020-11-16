@@ -69,14 +69,16 @@ def main():
 
   if args.login:
     server = OAuthRedirectServer()
-    logger.debug("Login requested, logging in with consumer_key=" +
-                 consumer_key)
+    print(
+      "Login requested, logging in with consumer_key=" + consumer_key)
     request_token = Pocket.get_request_token(
         consumer_key=consumer_key, redirect_uri="http://localhost:8000/")
     logger.debug(f"Got rt {request_token}")
-    auth_url = Pocket.get_auth_url(code=request_token,
-                                   redirect_uri="http://localhost:8000/")
-    logger.debug(f"Got auth url {auth_url}")
+    auth_url = Pocket.get_auth_url(
+        code=request_token, redirect_uri="http://localhost:8000/"
+    )
+    print(f"Please visit the following URL to complete login:")
+    print(f"{auth_url}")
     server.wait_for_redirect()
 
     user_credentials = Pocket.get_credentials(consumer_key=consumer_key,
@@ -86,6 +88,8 @@ def main():
 
   logger.debug(
       f"Logged in; access_token={access_token}, consumer_key={consumer_key}")
+
+  print(f"Success. Your access token is: {access_token}")
 
 
 main()
