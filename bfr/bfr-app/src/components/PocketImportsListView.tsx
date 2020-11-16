@@ -11,14 +11,14 @@ import {
 } from "@material-ui/core";
 import { DateTime, Interval, Duration } from "luxon";
 import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
-import SnoozeIcon from "@material-ui/icons/Snooze";
 import * as log from "loglevel";
 import React, { FunctionComponent, useContext, useState } from "react";
 import { AuthContext } from "../services/auth/Auth";
 import { UserId } from "../services/store/Users";
-import { GetItemSetFn } from "../services/store/ItemSets";
+import { GetItemSetFn, UpdateItemFn } from "../services/store/ItemSets";
 import * as R from "ramda";
 import { MenuSelect, MenuSelectItem } from "./MenuSelect";
+import { SnoozeSelectButton } from "./SnoozeSelectButton";
 import { getContentType, ContentType } from "./util/ContentType";
 
 const useStyles = makeStyles((theme) => ({
@@ -58,12 +58,27 @@ export interface PocketImportItemRecord {
   description?: string;
   text?: string;
   saveTime?: Date;
-  estReadTimeMinutes?: number;
+  estReadTimeMinutes?: number | undefined;
   contentType?: ContentType;
+  status?: number;
+  snoozeEndTime?: Date;
+}
+
+const EMPTY_DURATION = Duration.fromObject({ minutes: 0 });
+
+export enum ItemStatus {
+  Unread = 0,
+  Archived = 1,
+  Deleted = 2,
 }
 
 export type PocketImportItemCardProps = {
   pocketImportItem: PocketImportItemRecord;
+  onArchiveItem?: (pocketImportItem: PocketImportItemRecord) => void;
+  onSnoozeItem?: (
+    pocketImportItem: PocketImportItemRecord,
+    snoozeDuration: Duration
+  ) => void;
 };
 
 const extractDescription = (
@@ -85,6 +100,11 @@ const formatTime = (date: Date) => {
 
 export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> = ({
   pocketImportItem,
+  onArchiveItem = (pocketImportItem: PocketImportItemRecord) => {},
+  onSnoozeItem = (
+    pocketImportItem: PocketImportItemRecord,
+    snoozeDuration: Duration
+  ) => {},
 }) => {
   const classes = useStyles();
 
@@ -125,6 +145,16 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
     </Typography>
   );
 
+  const handleArchiveClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    onArchiveItem(pocketImportItem);
+  };
+
+  const handleSnoozeClick = (snoozeDuration: Duration) => {
+    onSnoozeItem(pocketImportItem, snoozeDuration);
+  };
+
   return (
     <Card
       className={classes.pocketImportItemCard}
@@ -142,14 +172,19 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
           <Grid item xs={1}>
             <Grid container>
               <Grid item xs={12}>
-                <IconButton className={classes.itemToolbarButton}>
+                <IconButton
+                  className={classes.itemToolbarButton}
+                  onClick={handleArchiveClick}
+                  data-testid={`archive-button-${pocketImportItem.pocket_item_id}`}
+                >
                   <LibraryAddCheckIcon fontSize="small" />
                 </IconButton>
               </Grid>
               <Grid item xs={12}>
-                <IconButton className={classes.itemToolbarButton}>
-                  <SnoozeIcon fontSize="small" />
-                </IconButton>
+                <SnoozeSelectButton
+                  onSnoozeItem={handleSnoozeClick}
+                  id={`snooze-button-${pocketImportItem.pocket_item_id}`}
+                ></SnoozeSelectButton>
               </Grid>
             </Grid>
           </Grid>
@@ -160,13 +195,21 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
 };
 
 const PocketImportItemRecordConverter = {
+  /**
+   * This can only be used to update the mutable fields.
+   * @param pocketItem
+   */
   toFirestore: (
     pocketItem: PocketImportItemRecord
   ): firebase.firestore.DocumentData => {
-    // should not be used, since only reads are supported now
-    throw Error(
-      "PocketImportItemRecordConverter::toFirestore should not be used"
-    );
+    let data = {};
+    if (pocketItem.status) {
+      data = Object.assign(data, { status: pocketItem.status });
+    }
+    if (pocketItem.snoozeEndTime) {
+      data = Object.assign(data, { snoozeEndTime: pocketItem.snoozeEndTime });
+    }
+    return data;
   },
 
   fromFirestore: (
@@ -185,12 +228,15 @@ const PocketImportItemRecordConverter = {
       saveTime: data.pocket_created_at?.toDate(),
       estReadTimeMinutes: pocketJSON.time_to_read,
       contentType: getContentType(data),
+      status: data.status || 0,
+      snoozeEndTime: data.snoozeEndTime?.toDate(),
     };
   },
 };
 
 export type PocketImportsListViewProps = {
   getItemSet: GetItemSetFn<PocketImportItemRecord>;
+  updateItem: UpdateItemFn<PocketImportItemRecord>;
 };
 
 export const InboxToolsHeader = (props: {
@@ -262,17 +308,34 @@ export const GroupTool = (props: {
  * Filter and grouping functions.
  */
 
-const itemListFilterFn = (intervalFilter: Interval | undefined) => (
-  item: PocketImportItemRecord
-) => {
-  if (!intervalFilter) {
-    return true;
+const itemListFilterFn = (
+  intervalFilter: Interval | undefined,
+  status: ItemStatus
+) => (item: PocketImportItemRecord) => {
+  const logger = log.getLogger("itemListFilterFn");
+  // Interval
+  let intervalInclude = true;
+  if (item.saveTime && intervalFilter) {
+    const saveTime = DateTime.fromJSDate(item.saveTime);
+    intervalInclude = intervalFilter?.contains(saveTime);
   }
-  if (!item.saveTime) {
-    return false;
+
+  // Snooze time
+  let snoozeTimeInclude = true;
+  if (item.snoozeEndTime) {
+    const currentTime = DateTime.local();
+    snoozeTimeInclude = DateTime.fromJSDate(item.snoozeEndTime) <= currentTime;
   }
-  const saveTime = DateTime.fromJSDate(item.saveTime);
-  return intervalFilter?.contains(saveTime);
+
+  // Status
+  const statusInclude = item.status === status;
+
+  // Combine
+  logger.debug(
+    `Filter: intervalInclude=${intervalInclude}, statusInclude=${statusInclude},` +
+      ` snoozeTimeInclude=${snoozeTimeInclude}`
+  );
+  return intervalInclude && statusInclude && snoozeTimeInclude;
 };
 
 const groupByFn = (groupBy: GroupSelectIDType) => (
@@ -305,6 +368,7 @@ const getPocketImportsItemSetPath = (uid: UserId) => `users/${uid}/bookmarks`;
 
 export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps> = ({
   getItemSet,
+  updateItem,
 }) => {
   const logger = log.getLogger("PocketImportsListView");
   const authState = useContext(AuthContext) as firebase.User;
@@ -318,10 +382,14 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   const [intervalFilter, setIntervalFilter] = useState<Interval>();
   const [groupBy, setGroupBy] = useState<GroupSelectIDType>();
 
+  logger.debug("render in list " + pocketImports.length);
+
   logger.debug(`Filtering; interval=${intervalFilter?.toString()}`);
   const filteredPocketImports = pocketImports.filter(
-    itemListFilterFn(intervalFilter)
+    itemListFilterFn(intervalFilter, ItemStatus.Unread)
   );
+
+  logger.debug("render daf list " + filteredPocketImports.length);
 
   React.useEffect(() => {
     const loadPocketImports = async () => {
@@ -330,7 +398,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
       const loaded: PocketImportItemRecord[] = await getItemSet(
         PocketImportItemRecordConverter,
         getPocketImportsItemSetPath(uid),
-        ["pocket_created_at", "desc"]
+        [["pocket_created_at", "desc"]]
       );
 
       logger.debug(
@@ -363,6 +431,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
       setIntervalFilter(undefined);
     }
   };
+
   const onGroupItemSelect = (item: MenuSelectItem) => {
     logger.debug("Selected group entry " + item.id);
     if (item.id && item.id !== "group-none") {
@@ -372,28 +441,98 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     }
   };
 
+  const onArchiveItem = async (pocketImportItem: PocketImportItemRecord) => {
+    logger.debug("archive item request " + pocketImportItem.pocket_item_id);
+    const updatedItem = Object.assign({}, pocketImportItem);
+    updatedItem.status = ItemStatus.Archived;
+    const filteredPocketImports = pocketImports.filter(
+      (item) => item.pocket_item_id !== pocketImportItem.pocket_item_id
+    );
+    const updatedPocketImports = [...filteredPocketImports, updatedItem];
+    setPocketImports(updatedPocketImports);
+    logger.debug(`set ${updatedPocketImports.length} items`);
+    await updateItem(
+      PocketImportItemRecordConverter,
+      getPocketImportsItemSetPath(uid),
+      pocketImportItem.pocket_item_id,
+      updatedItem
+    );
+    logger.debug("finished archive item " + pocketImportItem.pocket_item_id);
+  };
+
+  const onSnoozeItem = async (
+    pocketImportItem: PocketImportItemRecord,
+    snoozeDuration: Duration
+  ) => {
+    logger.debug("snooze item request " + pocketImportItem.pocket_item_id);
+    if (snoozeDuration.equals(EMPTY_DURATION)) {
+      logger.debug("empty snooze duration, ignoring");
+      return;
+    }
+    const updatedItem = Object.assign({}, pocketImportItem);
+    logger.debug("snoozing for " + snoozeDuration);
+    updatedItem.snoozeEndTime = DateTime.local()
+      .plus(snoozeDuration)
+      .toJSDate();
+    const filteredPocketImports = pocketImports.filter(
+      (item) => item.pocket_item_id !== pocketImportItem.pocket_item_id
+    );
+    const updatedPocketImports = [...filteredPocketImports, updatedItem];
+    setPocketImports(updatedPocketImports);
+    logger.debug(`set ${updatedPocketImports.length} items`);
+    await updateItem(
+      PocketImportItemRecordConverter,
+      getPocketImportsItemSetPath(uid),
+      pocketImportItem.pocket_item_id,
+      updatedItem
+    );
+    logger.debug("finished snooze item " + pocketImportItem.pocket_item_id);
+  };
+
   function GroupedList(props: {
     items: PocketImportItemRecord[];
     groupBy: (item: PocketImportItemRecord) => string;
+    onArchiveItem: (pocketImportItem: PocketImportItemRecord) => void;
+    onSnoozeItem: (
+      pocketImportItem: PocketImportItemRecord,
+      snoozeDuration: Duration
+    ) => void;
   }) {
     const { items, groupBy } = props;
     const grouped = R.groupBy(groupBy, items);
-    const els = Object.entries(grouped).map(([group, groupedItems]) => {
+    const els = Object.keys(grouped).map((group) => {
       return (
-        <React.Fragment>
+        <React.Fragment key={group}>
           <Typography variant="h6" className={classes.sectionTitle}>
             {group}
           </Typography>
-          <FlatList items={groupedItems} />
+          <FlatList
+            items={grouped[group]}
+            onArchiveItem={onArchiveItem}
+            onSnoozeItem={onSnoozeItem}
+          />
         </React.Fragment>
       );
     });
     return <React.Fragment>{els}</React.Fragment>;
   }
 
-  function FlatList(props: { items: PocketImportItemRecord[] }) {
+  function FlatList(props: {
+    items: PocketImportItemRecord[];
+    onArchiveItem: (pocketImportItem: PocketImportItemRecord) => void;
+    onSnoozeItem: (
+      pocketImportItem: PocketImportItemRecord,
+      snoozeDuration: Duration
+    ) => void;
+  }) {
+    logger.debug("Render flat list " + props.items.length);
     const pocketImportCards = props.items.map((x) => (
-      <PocketImportItemCard pocketImportItem={x} />
+      <PocketImportItemCard
+        pocketImportItem={x}
+        key={x.pocket_item_id}
+        onArchiveItem={onArchiveItem}
+        onSnoozeItem={onSnoozeItem}
+      />
     ));
     return <List>{pocketImportCards}</List>;
   }
@@ -401,12 +540,31 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   function ItemList(props: {
     items: PocketImportItemRecord[];
     groupBy: GroupSelectIDType | undefined;
+    onArchiveItem: (pocketImportItem: PocketImportItemRecord) => void;
+    onSnoozeItem: (
+      pocketImportItem: PocketImportItemRecord,
+      snoozeDuration: Duration
+    ) => void;
   }) {
     const { items, groupBy } = props;
+    logger.debug("Render item list");
     if (groupBy) {
-      return <GroupedList items={items} groupBy={groupByFn(groupBy)} />;
+      return (
+        <GroupedList
+          items={items}
+          groupBy={groupByFn(groupBy)}
+          onArchiveItem={onArchiveItem}
+          onSnoozeItem={onSnoozeItem}
+        />
+      );
     } else {
-      return <FlatList items={items} />;
+      return (
+        <FlatList
+          items={items}
+          onArchiveItem={onArchiveItem}
+          onSnoozeItem={onSnoozeItem}
+        />
+      );
     }
   }
 
@@ -419,7 +577,12 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
         onIntervalItemSelect={onIntervalItemSelect}
         onGroupItemSelect={onGroupItemSelect}
       />
-      <ItemList items={filteredPocketImports} groupBy={groupBy} />
+      <ItemList
+        items={filteredPocketImports}
+        groupBy={groupBy}
+        onArchiveItem={onArchiveItem}
+        onSnoozeItem={onSnoozeItem}
+      />
     </React.Fragment>
   );
 };
