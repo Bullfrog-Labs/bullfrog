@@ -15,6 +15,21 @@ workflows:
           cache-version: v3
   python-tests:
     jobs:
+      - python_type_checks:
+          executor: python/3.8/node
+          steps:
+            - checkout
+            - python/install-packages:
+                app-dir: bfr/ingest-gcf
+                args: "--dev"
+                pkg-manager: pipenv
+            - run:
+                name: Install pyright
+                command: sudo npm install -g pyright
+            - run:
+                name: Do typechecks
+                command: pyright --lib
+                working_directory: bfr/ingest-gcf
       - python/test:
           name: run-ingest-gcf-tests
           app-dir: bfr/ingest-gcf
