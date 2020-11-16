@@ -25,6 +25,10 @@ From https://github.com/pyenv/pyenv#installation:
 
 2. Ensure that PyLance is set up as the default python language server.
 
+## Type-checking setup (optional, just once)
+
+    npm install -g pyright
+
 # Setting up sync from Pocket
 
 1.  Activate virtual environment (do this for every new shell)
@@ -69,6 +73,12 @@ Run the tests
 Run the tests in watch mode
 
     pytest-watch
+
+## Run type-checker in watch mode
+
+Make sure you used npm to install pyright (see above).
+
+    pyright --lib --watch
 
 ## Test cloud functions locally
 
