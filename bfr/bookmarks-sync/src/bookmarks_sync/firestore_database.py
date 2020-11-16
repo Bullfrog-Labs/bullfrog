@@ -84,17 +84,24 @@ class FirestoreDatabase(object):
       )
       self.logger.debug(f"done; result={result}")
 
+  def add_users_private(self, uid: str, user_private_record: UserPrivateRecord):
+    self.db.collection("users").document(uid).collection(
+        "users_private").document(uid).set(user_private_record)
+
+  def update_users_private(self, uid: str, user_private_record: UserPrivateRecord):
+    self.db.collection("users").document(uid).collection(
+        "users_private").document(uid).update(user_private_record)
+
   def update_user(self, uid: str, user_record: UserRecord, user_private_record: UserPrivateRecord):
-    if self.db.collection("users").document(uid).get().exists:
+    if self.db.collection("users").document(uid).get().exists and self.db.collection("users").document(uid).collection(
+            "users_private").document(uid).get().exists:
       self.apply_updated_record_timestamps(user_record)
       self.db.collection("users").document(uid).update(user_record)
-      self.db.collection("users").document(uid).collection(
-        "users_private").document(uid).update(user_private_record)
+      self.update_users_private(uid, user_private_record)
     else:
       self.apply_new_record_timestamps(user_record)
       self.db.collection("users").document(uid).set(user_record)
-      self.db.collection("users").document(uid).collection(
-        "users_private").document(uid).set(user_private_record)
+      self.add_users_private(uid, user_private_record)
 
   def get_users(self) -> List[UserRecord]:
     return [doc.to_dict() for doc in self.db.collection("users").get()]
