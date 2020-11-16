@@ -1,21 +1,23 @@
-import unittest
-import json
-import os
-import logging
-import time
-import sys
-from firestore_database import FirestoreDatabase, BookmarkRecord
-from firebase_app import FirebaseApp
 import datetime
+import json
+import logging
+import os
+import sys
+import time
+import unittest
 import uuid
+
 import requests
+
+from bookmarks_sync.firebase_app import FirebaseApp
+from bookmarks_sync.firestore_database import BookmarkRecord, FirestoreDatabase
 
 
 def load_json(file_name):
   return json.loads(open(file_name).read())
 
 
-single_bookmark = load_json("single_bookmark.json")
+single_bookmark = load_json("tests/resources/single_bookmark.json")
 
 logging.basicConfig(level="DEBUG")
 logger = logging.getLogger("TestFirestoreDatabase")
@@ -32,24 +34,36 @@ def clear_database():
 
 
 class BookmarkRecords(object):
+
   @classmethod
-  def from_pocket_record(cls, pocket_record):
+  def from_pocket_record(cls, pocket_record) -> BookmarkRecord:
     return {
-        "pocket_item_id": "A84FB302-F7B6-4D88-BC36-5369812BBA90",
-        "url": pocket_record["given_url"],
-        "pocket_created_at": datetime.datetime.fromtimestamp(
-            int(pocket_record["time_added"])
-        ),
-        "pocket_updated_at": datetime.datetime.fromtimestamp(
-            int(pocket_record["time_updated"])
-        ),
-        "pocket_json": json.dumps(pocket_record),
+        "pocket_item_id":
+            "A84FB302-F7B6-4D88-BC36-5369812BBA90",
+        "url":
+            pocket_record["given_url"],
+        "pocket_created_at":
+            datetime.datetime.fromtimestamp(int(pocket_record["time_added"])),
+        "pocket_updated_at":
+            datetime.datetime.fromtimestamp(int(pocket_record["time_updated"])),
+        "pocket_json":
+            json.dumps(pocket_record),
+        "text": "foo",
+        "metadata": None,
+        "created_at": 
+            datetime.datetime.fromtimestamp(int(pocket_record["time_added"])),
+        "updated_at":
+            datetime.datetime.fromtimestamp(int(pocket_record["time_updated"])),
+
     }
 
 
+
 class TestFirestoreDatabase(unittest.TestCase):
+
   def setUp(self):
     os.environ["FIRESTORE_EMULATOR_HOST"] = "localhost:8080"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "tests/resources/test-project-4abbf-199fc0e689ec.json"
     clear_database()
 
   def test_save_items(self):

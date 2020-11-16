@@ -1,20 +1,22 @@
 #!/usr/bin/python3
-from flask import escape
-from pocket_bookmarks import PocketBookmarks
-from pocket import Pocket
 import logging
-from firebase_app import FirebaseApp
-from firestore_database import FirestoreDatabase
-from datetime import datetime
 import os
+from datetime import datetime
+
 import requests
+from flask import escape
+from pocket import Pocket
+
+from bookmarks_sync.firebase_app import FirebaseApp
+from bookmarks_sync.firestore_database import FirestoreDatabase
+from bookmarks_sync.pocket_bookmarks import PocketBookmarks
 
 # Obv. not secure, but its ok its just pocket. Will reset it later.
 consumer_key = os.environ["CONSUMER_KEY"]
 project_id = "bullfrog-reader"
 
 
-def sync_all_users():
+def _sync_pocket_for_all_users():
   logger = logging.getLogger("main")
   app = FirebaseApp.admin(project_id)
   db = FirestoreDatabase.admin(app)
@@ -24,9 +26,11 @@ def sync_all_users():
     if user["pocket_sync_enabled"] and user["pocket_access_token"]:
       logger.debug(f"syncing {user['uid']}")
       pocket = Pocket(consumer_key, user["pocket_access_token"])
-      bookmarks = PocketBookmarks(
-          user["uid"], pocket, db, requests, since=datetime(2020, 9, 1)
-      )
+      bookmarks = PocketBookmarks(user["uid"],
+                                  pocket,
+                                  db,
+                                  requests,
+                                  since=datetime(2020, 9, 1))
       logger.debug(f"initialized, syncing")
       count = bookmarks.sync_latest()
       logger.debug(f"done; count={count}")
@@ -34,7 +38,7 @@ def sync_all_users():
       logger.debug(f"syncing disabled for {user['uid']}, skipping")
 
 
-def main(request):
+def sync_pocket_for_all_users(request):
   logger = logging.getLogger("main")
   logging.basicConfig(level="DEBUG")
 
@@ -43,10 +47,6 @@ def main(request):
     request_args = request.args
     logger.debug(f"got requests; json={request_json}, args={request_args}")
 
-  sync_all_users()
+  _sync_pocket_for_all_users()
 
   return "Success"
-
-
-if __name__ == "__main__":
-  main(None)

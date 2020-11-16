@@ -1,9 +1,9 @@
 import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+from firebase_admin import credentials, firestore
 
 
 class FirebaseApp(object):
+
   @classmethod
   def admin(cls, project_id):
     admin_app_name = f"{project_id}-admin"

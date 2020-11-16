@@ -1,7 +1,0 @@
-#!/bin/sh
-
-BF_ROOT=$(git rev-parse --show-toplevel)
-BOOKMARKS_SYNC=$BF_ROOT/bfr/bookmarks-sync/src/bookmarks_sync
-
-cd $BOOKMARKS_SYNC &&
-  python3 -m unittest $*

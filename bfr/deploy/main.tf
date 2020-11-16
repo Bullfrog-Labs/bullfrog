@@ -21,7 +21,7 @@ resource "google_project_service" "gcp_services_cloudfunctions" {
 }
 
 # Some 
-resource "google_app_engine_application" "bookmarks_sync_app" {
+resource "google_app_engine_application" "bfr_app" {
   project       = "bullfrog-reader"
   location_id   = "us-central"
   database_type = "CLOUD_FIRESTORE"
@@ -45,29 +45,27 @@ resource "google_storage_bucket" "deploy_packages_bucket" {
   name = "deploy_packages"
 }
 
-# Zip up our source code
-data "archive_file" "bookmark_sync_package" {
-  type        = "zip"
-  source_dir  = "${path.root}/../bookmarks-sync/src/bookmarks_sync/"
-  output_path = "${path.root}/../dist/bookmarks-sync-package.zip"
+data "local_file" "ingest_gcf_package" {
+  filename = "${path.root}/../ingest-gcf/dist/ingest-gcf-package.zip"
 }
 
-# Place the zip-ed code in the bucket
-resource "google_storage_bucket_object" "bookmarks_sync_package_object" {
-  name   = "bookmarks-sync-package-${data.archive_file.bookmark_sync_package.output_md5}.zip"
+# ingest-gcf-package.zip is built by running bin/build
+# Place the ingest_gcf code package in the bucket
+resource "google_storage_bucket_object" "ingest_gcf_package_object" {
+  name   = "ingest-gcf-package-${filemd5(data.local_file.ingest_gcf_package.filename)}.zip"
   bucket = google_storage_bucket.deploy_packages_bucket.name
-  source = "${path.root}/../dist/bookmarks-sync-package.zip"
+  source = data.local_file.ingest_gcf_package.filename
 }
 
 resource "google_cloudfunctions_function" "bookmarks_sync_function" {
-  name                  = "bookmarks-sync"
-  description           = "Sync bookmarks from external app"
+  name                  = "sync_pocket_for_all_users"
+  description           = "Sync bookmarks from Pocket"
   available_memory_mb   = 1024
   timeout               = 60
   source_archive_bucket = google_storage_bucket.deploy_packages_bucket.name
-  source_archive_object = google_storage_bucket_object.bookmarks_sync_package_object.name
+  source_archive_object = google_storage_bucket_object.ingest_gcf_package_object.name
   service_account_email = google_service_account.default_service_account.email
-  entry_point           = "main"
+  entry_point           = "sync_pocket_for_all_users"
   trigger_http          = true
   runtime               = "python38"
   depends_on            = [google_project_service.gcp_services_cloudfunctions]

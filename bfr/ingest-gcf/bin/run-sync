@@ -1,0 +1,7 @@
+#!/bin/sh
+
+BF_ROOT=$(git rev-parse --show-toplevel)
+cd $BF_ROOT/bfr/ingest-gcf
+
+export PYTHONPATH=`pwd`:$PYTHONPATH
+python -c "import main; main.sync_pocket_for_all_users(None)"

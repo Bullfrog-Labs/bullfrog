@@ -1,40 +1,51 @@
-from pocket import Pocket
+import json
 import logging
 from datetime import datetime
-from firestore_database import FirestoreDatabase, BookmarkRecord, ArticleMetadataRecord
-from requests.exceptions import HTTPError, Timeout, ConnectionError, TooManyRedirects
-import json
-import requests
-from newspaper import Article
-from typing import List, Dict, Any, Union, Optional
-from dict_deep import deep_get
-import cchardet
+from typing import Any, Dict, List, Optional, Union
 
+import cchardet
+import requests
+from dict_deep import deep_get
+from newspaper import Article
+from pocket import Pocket
+from requests.exceptions import (ConnectionError, HTTPError, Timeout,
+                                 TooManyRedirects)
+
+from bookmarks_sync.firestore_database import (ArticleMetadataRecord,
+                                               BookmarkRecord,
+                                               FirestoreDatabase)
 
 POCKET_ITEM_STATUS_DELETED = "2"
 
 
 class BookmarkRecords(object):
+
   @classmethod
   def from_pocket_record(cls, pocket_record) -> BookmarkRecord:
     return {
-        "pocket_item_id": pocket_record["item_id"],
-        "url": pocket_record["resolved_url"],
-        "pocket_created_at": datetime.fromtimestamp(
-            int(pocket_record["time_added"])
-        ),
-        "pocket_updated_at": datetime.fromtimestamp(
-            int(pocket_record["time_updated"])
-        ),
-        "pocket_json": json.dumps(pocket_record),
-        "text": None,
-        "metadata": None,
-        "created_at": None,
-        "updated_at": None,
+        "pocket_item_id":
+            pocket_record["item_id"],
+        "url":
+            pocket_record["resolved_url"],
+        "pocket_created_at":
+            datetime.fromtimestamp(int(pocket_record["time_added"])),
+        "pocket_updated_at":
+            datetime.fromtimestamp(int(pocket_record["time_updated"])),
+        "pocket_json":
+            json.dumps(pocket_record),
+        "text":
+            None,
+        "metadata":
+            None,
+        "created_at":
+            None,
+        "updated_at":
+            None,
     }
 
 
 class PocketBookmarks(object):
+
   def __init__(
       self,
       uid: str,
@@ -71,9 +82,10 @@ class PocketBookmarks(object):
       self.logger.debug(
           f"fetch; since={start_timestamp}, count={10}, offset={offset}, oldest"
       )
-      (response, response_info) = self.pocket.get(
-          since=start_timestamp, count=10, offset=offset, sort="oldest"
-      )
+      (response, response_info) = self.pocket.get(since=start_timestamp,
+                                                  count=10,
+                                                  offset=offset,
+                                                  sort="oldest")
       if len(response) and (type(response["list"]) is dict) > 0:
         bookmarks = response["list"]
       else:
@@ -101,7 +113,8 @@ class PocketBookmarks(object):
       pocket_item_id = item["pocket_item_id"]
       if url is None or url == "":
         self.logger.debug(
-          f"skipping item where url is empty; pocket_item_id={pocket_item_id}")
+            f"skipping item where url is empty; pocket_item_id={pocket_item_id}"
+        )
         continue
       try:
         self.logger.debug(f"fetch url {url}, id {pocket_item_id}")
@@ -166,8 +179,7 @@ class PocketBookmarks(object):
     return article_metadata
 
   def extract_metadata(
-      self, items: List[BookmarkRecord]
-  ) -> Dict[str, ArticleMetadataRecord]:
+      self, items: List[BookmarkRecord]) -> Dict[str, ArticleMetadataRecord]:
     self.logger.debug("parsing {} articles".format(len(items)))
     metadata: Dict = {}
     for i, item in enumerate(items):
@@ -184,13 +196,15 @@ class PocketBookmarks(object):
         article.parse()
         self.logger.debug(f"done parsing")
         article_metadata = self.extract_metadata_from_article(article)
-        extracted_text_len = len(
-          article_metadata['text']) if article_metadata['text'] is not None else 0
-        self.logger.debug(
-            f"done; authors={article_metadata['authors']}, "
-            + f"title={article_metadata['title']}, "
-            + f"text={extracted_text_len}"
-        )
+
+        if article_metadata['text'] is None:
+          extracted_text_len = 0
+        else:
+          extracted_text_len = article_metadata['text']
+
+        self.logger.debug(f"done; authors={article_metadata['authors']}, " +
+                          f"title={article_metadata['title']}, " +
+                          f"text={extracted_text_len}")
         metadata[pocket_item_id] = article_metadata
       except Exception as e:
         # Record the error and move on

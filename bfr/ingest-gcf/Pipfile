@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pocket = "==0.3.6"
+firebase-admin = "==4.4.0"
+requests = "*"
+newspaper3k = "*"
+dict-deep = "*"
+cchardet = "*"
+Flask = "==1.1.2"
+
+[dev-packages]
+pytest = "*"
+pytest-watch = "*"
+functions-framework = "*"
+pylint = "*"
+yapf = "*"
+isort = "*"
+
+[requires]
+python_version = "3.8"

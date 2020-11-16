@@ -1,8 +1,0 @@
-#!/bin/sh
-
-if [[ "$VIRTUAL_ENV" = "" ]]; then
-  echo "Not in virtual env. Run 'activate_venv.sh' first"
-fi
-
-BF_ROOT=$(git rev-parse --show-toplevel)
-python3 $BF_ROOT/bfr/bookmarks-sync/src/tools/login_pocket.py $*

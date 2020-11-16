@@ -1,0 +1,5 @@
+#!/bin/sh
+
+BF_ROOT=$(git rev-parse --show-toplevel)
+cd $BF_ROOT/bfr/ingest-gcf
+python tools/login_pocket.py $*

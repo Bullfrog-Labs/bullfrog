@@ -1,12 +1,62 @@
 version: 2.1
+
 orbs:
   node: circleci/node@4.1.0
+  python: circleci/python@1.2.1
+
+jobs:
+  run-ingest-gcf-type-checks:
+    executor:
+      name: python/default
+      tag: 3.8-node
+    steps:
+      - checkout
+      - python/install-packages:
+          app-dir: bfr/ingest-gcf
+          args: "--dev"
+          pkg-manager: pipenv
+      - run:
+          name: Install pyright
+          command: sudo npm install -g pyright
+      - run:
+          name: Do typechecks
+          command: pipenv run pyright --lib
+          working_directory: bfr/ingest-gcf
+
 workflows:
   node-tests:
     jobs:
       - node/test:
-          name: run-tests
+          name: run-node-tests
           pkg-manager: yarn
           run-command: ci-test
           version: 14.9.0
           cache-version: v3
+  python-tests:
+    jobs:
+      - run-ingest-gcf-type-checks
+      - python/test:
+          name: run-ingest-gcf-tests
+          app-dir: bfr/ingest-gcf
+          args: "--dev"
+          pkg-manager: pipenv
+          test-tool: pytest
+          version: 3.8-node
+          setup:
+            - run:
+                name: Install OpenJDK
+                command: |
+                  sudo apt-get update && sudo apt-get install openjdk-11-jdk
+                  sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+                  sudo update-alternatives --set javac /usr/lib/jvm/java-11-openjdk-amd64/bin/javac
+                  java -version
+            - run:
+                name: Install Firebase CLI
+                command: sudo npm install -g firebase-tools
+            - run:
+                name: Start up Firebase Local Emulator Suite
+                command: firebase emulators:start --only firestore
+                background: true
+            - run:
+                name: Set up environment variables
+                command: export FIRESTORE_EMULATOR_HOST="localhost:8080"

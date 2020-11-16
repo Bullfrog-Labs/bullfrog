@@ -1,0 +1,7 @@
+#!/bin/sh
+
+BF_ROOT=$(git rev-parse --show-toplevel)
+cd $BF_ROOT/bfr/ingest-gcf
+
+export PYTHONPATH=`pwd`:$PYTHONPATH
+python tools/update_user.py $*
