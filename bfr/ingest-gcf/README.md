@@ -80,6 +80,10 @@ Make sure you used npm to install pyright (see above).
 
     pyright --lib --watch
 
+## Sort all imports
+
+    isort .
+
 ## Test cloud functions locally
 
 Start the function framework server locally, using `--target` to select the

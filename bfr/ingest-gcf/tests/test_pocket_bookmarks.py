@@ -2,11 +2,10 @@ import json
 import logging
 import os
 import unittest
-from unittest.mock import Mock
 from typing import Any, List, Tuple
+from unittest.mock import Mock
 
 import pocket
-
 import requests
 
 from bookmarks_sync.firebase_app import FirebaseApp

@@ -5,6 +5,7 @@ from typing import List, Optional, TypedDict
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+
 class ArticleMetadataRecord(TypedDict):
   authors: List[str]
   description: Optional[str]
