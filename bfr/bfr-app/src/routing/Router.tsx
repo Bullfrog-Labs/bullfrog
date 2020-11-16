@@ -5,8 +5,12 @@ import AppContainer from "../components/AppContainer";
 import { LoginView } from "../components/auth/LoginView";
 import PrivateRoute from "./PrivateRoute";
 import MainView from "../components/MainView";
-import { PocketImportsListView } from "../components/PocketImportsListView";
+import {
+  PocketImportsListView,
+  PocketImportItemRecord,
+} from "../components/PocketImportsListView";
 import { Database } from "../services/store/Database";
+import { getItemSet, GetItemSetFn } from "../services/store/ItemSets";
 
 function Sad404() {
   let location = useLocation();
@@ -44,7 +48,11 @@ export const Router: FunctionComponent<RouterProps> = ({
         </PrivateRoute>
         <PrivateRoute exact path="/pocket_imports">
           <AppContainer>
-            <PocketImportsListView database={database} />
+            <PocketImportsListView
+              getItemSet={
+                getItemSet(database) as GetItemSetFn<PocketImportItemRecord>
+              }
+            />
           </AppContainer>
         </PrivateRoute>
         <Route path="*">
