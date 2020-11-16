@@ -6,7 +6,7 @@ orbs:
 
 jobs:
   python_type_checks:
-    executor: python/3.8/node
+    executor: python/3.8-node
     steps:
       - checkout
       - python/install-packages:
