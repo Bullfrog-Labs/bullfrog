@@ -19,6 +19,12 @@ From https://github.com/pyenv/pyenv#installation:
     pip install pipenv
     pipenv install -d # needs to be done for every new virtualenv
 
+## VSCode setup (just once)
+
+1. Set up PyLance extension.
+
+2. Ensure that PyLance is set up as the default python language server.
+
 # Setting up sync from Pocket
 
 1.  Activate virtual environment (do this for every new shell)

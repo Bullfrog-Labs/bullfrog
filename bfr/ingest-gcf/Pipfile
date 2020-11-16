@@ -18,7 +18,6 @@ pytest-watch = "*"
 functions-framework = "*"
 pylint = "*"
 yapf = "*"
-mypy = "*"
 isort = "*"
 
 [requires]

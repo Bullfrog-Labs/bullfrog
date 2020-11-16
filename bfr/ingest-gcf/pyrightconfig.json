@@ -1,0 +1,8 @@
+{
+  "include": ["bookmarks_sync", "tests", "tools"],
+  "exclude": ["**/node_modules", "**/__pycache__"],
+  "venvPath": "~/.virtualenvs",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "pythonVersion": "3.8"
+}
