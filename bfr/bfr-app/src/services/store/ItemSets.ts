@@ -1,4 +1,5 @@
 import { Database } from "./Database";
+import * as R from "ramda";
 
 // If the collection cannot be accessed according Firestore security rules, an
 // exception will be thrown. If the collection can be accessed, but is not

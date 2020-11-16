@@ -7,6 +7,7 @@ import {
   Typography,
   Grid,
   IconButton,
+  MenuItem,
 } from "@material-ui/core";
 import { DateTime, Interval, Duration } from "luxon";
 import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
@@ -33,6 +34,9 @@ const useStyles = makeStyles((theme) => ({
   itemToolbarButton: {
     padding: "6px",
     float: "right",
+  },
+  listToolbarButton: {
+    margin: "4px",
   },
   timesLine: {
     marginTop: theme.spacing(1),
