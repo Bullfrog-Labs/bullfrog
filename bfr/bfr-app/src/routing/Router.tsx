@@ -10,7 +10,7 @@ import {
   PocketImportItemRecord,
 } from "../components/PocketImportsListView";
 import { Database } from "../services/store/Database";
-import { getItemSet, GetItemSetFn } from "../services/store/ItemSets";
+import { getItemSet } from "../services/store/ItemSets";
 
 function Sad404() {
   let location = useLocation();
@@ -48,11 +48,7 @@ export const Router: FunctionComponent<RouterProps> = ({
         </PrivateRoute>
         <PrivateRoute exact path="/pocket_imports">
           <AppContainer>
-            <PocketImportsListView
-              getItemSet={
-                getItemSet(database) as GetItemSetFn<PocketImportItemRecord>
-              }
-            />
+            <PocketImportsListView getItemSet={getItemSet(database)} />
           </AppContainer>
         </PrivateRoute>
         <Route path="*">

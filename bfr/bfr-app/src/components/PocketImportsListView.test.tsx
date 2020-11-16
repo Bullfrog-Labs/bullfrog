@@ -16,6 +16,7 @@ const mockPocketImportItem1: PocketImportItemRecord = {
   description: "This is a great article",
   saveTime: new Date(1995, 11, 17),
   estReadTimeMinutes: 7,
+  contentType: "Quick Read",
 };
 
 const mockPocketImportItem2: PocketImportItemRecord = {
@@ -26,6 +27,7 @@ const mockPocketImportItem2: PocketImportItemRecord = {
   description: "This is a great article",
   saveTime: DateTime.local().toJSDate(),
   estReadTimeMinutes: 7,
+  contentType: "Long Read",
 };
 
 test("renders fully-populated pocket import item card", () => {
@@ -108,4 +110,45 @@ test("filters old items when interval selected", async () => {
 
   await waitFor(() => getByText(mockPocketImportItem2.title!));
   expect(queryByText(mockPocketImportItem1.title!)).toBeNull();
+});
+
+test("group items when groupBy selected", async () => {
+  async function getItemSet<PocketImportItemRecord>(
+    itemRecordConverter: firebase.firestore.FirestoreDataConverter<
+      PocketImportItemRecord
+    >,
+    path: string, // this path should refer to a collection of items
+    orderBy?: [string, "desc" | "asc" | undefined] | undefined
+  ) {
+    return [mockPocketImportItem1, mockPocketImportItem2];
+  }
+
+  const authState = {
+    uid: "foobar",
+  };
+
+  const { getByText, queryByText } = render(
+    <AuthContext.Provider value={authState as firebase.User}>
+      <PocketImportsListView getItemSet={getItemSet} />
+    </AuthContext.Provider>
+  );
+
+  await waitFor(() => getByText(mockPocketImportItem1.title!));
+  await waitFor(() => getByText(mockPocketImportItem2.title!));
+
+  expect(queryByText("Long Read")).toBeNull();
+  expect(queryByText("Quick Read")).toBeNull();
+
+  const select = await waitFor(() => getByText("Group"));
+  expect(select).toBeInstanceOf(HTMLSpanElement);
+  fireEvent.click(select);
+
+  const pastDayItem = await waitFor(() => getByText("Content Type"));
+  expect(select).toBeInstanceOf(HTMLSpanElement);
+  fireEvent.click(pastDayItem);
+
+  await waitFor(() => getByText(mockPocketImportItem1.title!));
+  await waitFor(() => getByText(mockPocketImportItem2.title!));
+  await waitFor(() => getByText("Long Read"));
+  await waitFor(() => getByText("Quick Read"));
 });
