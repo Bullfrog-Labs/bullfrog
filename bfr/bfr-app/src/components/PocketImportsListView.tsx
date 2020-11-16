@@ -378,13 +378,13 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   }) {
     const { items, groupBy } = props;
     const grouped = R.groupBy(groupBy, items);
-    const els = Object.keys(grouped).map((group) => {
+    const els = Object.entries(grouped).map(([group, groupedItems]) => {
       return (
         <React.Fragment>
           <Typography variant="h6" className={classes.sectionTitle}>
             {group}
           </Typography>
-          <FlatList items={grouped[group]} />
+          <FlatList items={groupedItems} />
         </React.Fragment>
       );
     });
