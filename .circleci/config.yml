@@ -4,6 +4,23 @@ orbs:
   node: circleci/node@4.1.0
   python: circleci/python@1.2.1
 
+jobs:
+  python_type_checks:
+    executor: python/3.8/node
+    steps:
+      - checkout
+      - python/install-packages:
+          app-dir: bfr/ingest-gcf
+          args: "--dev"
+          pkg-manager: pipenv
+      - run:
+          name: Install pyright
+                comsudo npm install -g pyright
+      - run:
+          name: Do typechecks
+          command: pyright --lib
+                g_directory: bfr/ingest-gcf
+
 workflows:
   node-tests:
     jobs:
@@ -15,22 +32,8 @@ workflows:
           cache-version: v3
   python-tests:
     jobs:
-      - python_type_checks:
-          executor: python/3.8/node
-          steps:
-            - checkout
-            - python/install-packages:
-                app-dir: bfr/ingest-gcf
-                args: "--dev"
-                pkg-manager: pipenv
-            - run:
-                name: Install pyright
-                command: sudo npm install -g pyright
-            - run:
-                name: Do typechecks
-                command: pyright --lib
-                working_directory: bfr/ingest-gcf
-      - python/test:
+     - python_type_checks
+     - python/test:
           name: run-ingest-gcf-tests
           app-dir: bfr/ingest-gcf
           args: "--dev"
