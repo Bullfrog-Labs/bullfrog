@@ -5,7 +5,10 @@ import AppContainer from "../components/AppContainer";
 import { LoginView } from "../components/auth/LoginView";
 import PrivateRoute from "./PrivateRoute";
 import MainView from "../components/MainView";
-import { PocketImportsListView } from "../components/PocketImportsListView";
+import {
+  PocketImportsListView,
+  PocketImportItemRecord,
+} from "../components/PocketImportsListView";
 import { Database } from "../services/store/Database";
 import { getItemSet, updateItem } from "../services/store/ItemSets";
 

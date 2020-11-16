@@ -1,4 +1,5 @@
 import { Database } from "./Database";
+import * as R from "ramda";
 
 /**
  * getItemSet: Get a set of items.
