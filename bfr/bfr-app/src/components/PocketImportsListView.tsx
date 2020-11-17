@@ -7,7 +7,6 @@ import {
   Typography,
   Grid,
   IconButton,
-  MenuItem,
 } from "@material-ui/core";
 import { DateTime, Interval, Duration } from "luxon";
 import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";

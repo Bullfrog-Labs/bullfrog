@@ -5,10 +5,7 @@ import AppContainer from "../components/AppContainer";
 import { LoginView } from "../components/auth/LoginView";
 import PrivateRoute from "./PrivateRoute";
 import MainView from "../components/MainView";
-import {
-  PocketImportsListView,
-  PocketImportItemRecord,
-} from "../components/PocketImportsListView";
+import { PocketImportsListView } from "../components/PocketImportsListView";
 import { Database } from "../services/store/Database";
 import { getItemSet, updateItem } from "../services/store/ItemSets";
 
@@ -47,6 +44,14 @@ export const Router: FunctionComponent<RouterProps> = ({
           </AppContainer>
         </PrivateRoute>
         <PrivateRoute exact path="/pocket_imports">
+          <AppContainer>
+            <PocketImportsListView
+              getItemSet={getItemSet(database)}
+              updateItem={updateItem(database)}
+            />
+          </AppContainer>
+        </PrivateRoute>
+        <PrivateRoute exact path="/library">
           <AppContainer>
             <PocketImportsListView
               getItemSet={getItemSet(database)}
