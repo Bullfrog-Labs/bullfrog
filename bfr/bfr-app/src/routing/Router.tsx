@@ -49,6 +49,7 @@ const LibraryView: FunctionComponent<LibraryViewProps> = ({ database }) => {
       title="Library"
       statusFilter={[ItemStatus.Unread, ItemStatus.Archived]}
       showSnoozed={true}
+      hideSnoozeControl={true}
     />
   );
 };

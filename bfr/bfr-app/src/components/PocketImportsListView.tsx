@@ -52,6 +52,7 @@ export type PocketImportsListViewProps = {
   title: string;
   statusFilter?: ItemStatus[];
   showSnoozed?: boolean;
+  hideSnoozeControl?: boolean;
 };
 
 export const InboxToolsHeader = (props: {
@@ -147,7 +148,7 @@ const itemListFilterFn = (
   const statusInclude = !item.status || status.indexOf(item.status) > -1;
 
   // Combine
-  logger.debug(
+  logger.trace(
     `Filter: intervalInclude=${intervalInclude}, statusInclude=${statusInclude},` +
       ` snoozeTimeInclude=${snoozeTimeInclude}`
   );
@@ -188,6 +189,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   title,
   statusFilter = [ItemStatus.Unread],
   showSnoozed = false,
+  hideSnoozeControl = false,
 }) => {
   const logger = log.getLogger("PocketImportsListView");
   const authState = useContext(AuthContext) as firebase.User;
@@ -199,14 +201,9 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   const [intervalFilter, setIntervalFilter] = useState<Interval>();
   const [groupBy, setGroupBy] = useState<GroupSelectIDType>();
 
-  logger.debug("render in list " + pocketImports.length);
-
-  logger.debug(`Filtering; interval=${intervalFilter?.toString()}`);
   const filteredPocketImports = pocketImports.filter(
     itemListFilterFn(intervalFilter, statusFilter, showSnoozed)
   );
-
-  logger.debug("render daf list " + filteredPocketImports.length);
 
   React.useEffect(() => {
     const loadPocketImports = async () => {
@@ -258,23 +255,49 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     }
   };
 
-  const onArchiveItem = async (pocketImportItem: PocketImportItemRecord) => {
-    logger.debug("archive item request " + pocketImportItem.pocket_item_id);
-    const updatedItem = Object.assign({}, pocketImportItem);
-    updatedItem.status = ItemStatus.Archived;
-    const filteredPocketImports = pocketImports.filter(
-      (item) => item.pocket_item_id !== pocketImportItem.pocket_item_id
+  const onArchiveToggleItem = async (
+    pocketImportItem: PocketImportItemRecord
+  ) => {
+    logger.debug(
+      "archive toggle item request " + pocketImportItem.pocket_item_id
     );
-    const updatedPocketImports = [...filteredPocketImports, updatedItem];
+
+    const itemToUpdate = pocketImports.find((item) => {
+      return item.pocket_item_id === pocketImportItem.pocket_item_id;
+    });
+
+    if (!itemToUpdate) {
+      logger.error("missing item, ignoring");
+      return;
+    }
+
+    const updatedStatus =
+      pocketImportItem.status === ItemStatus.Archived
+        ? ItemStatus.Unread
+        : ItemStatus.Archived;
+
+    logger.debug(
+      `item was ${
+        ItemStatus[pocketImportItem.status || ItemStatus.Unread]
+      }, toggling to ${ItemStatus[updatedStatus]}`
+    );
+
+    itemToUpdate.status = updatedStatus;
+
+    const updatedPocketImports = Array.from(pocketImports);
     setPocketImports(updatedPocketImports);
+
     logger.debug(`set ${updatedPocketImports.length} items`);
     await updateItem(
       PocketImportItemRecordConverter,
       getPocketImportsItemSetPath(uid),
-      pocketImportItem.pocket_item_id,
-      updatedItem
+      itemToUpdate.pocket_item_id,
+      itemToUpdate
     );
-    logger.debug("finished archive item " + pocketImportItem.pocket_item_id);
+
+    logger.debug(
+      `finished marking item ${pocketImportItem.pocket_item_id} ${ItemStatus[updatedStatus]}`
+    );
   };
 
   const onSnoozeItem = async (
@@ -309,7 +332,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   function GroupedList(props: {
     items: PocketImportItemRecord[];
     groupBy: (item: PocketImportItemRecord) => string;
-    onArchiveItem: (pocketImportItem: PocketImportItemRecord) => void;
+    onArchiveToggleItem: (pocketImportItem: PocketImportItemRecord) => void;
     onSnoozeItem: (
       pocketImportItem: PocketImportItemRecord,
       snoozeDuration: Duration
@@ -325,7 +348,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
           </Typography>
           <FlatList
             items={grouped[group]}
-            onArchiveItem={onArchiveItem}
+            onArchiveToggleItem={onArchiveToggleItem}
             onSnoozeItem={onSnoozeItem}
           />
         </React.Fragment>
@@ -336,19 +359,19 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
 
   function FlatList(props: {
     items: PocketImportItemRecord[];
-    onArchiveItem: (pocketImportItem: PocketImportItemRecord) => void;
+    onArchiveToggleItem: (pocketImportItem: PocketImportItemRecord) => void;
     onSnoozeItem: (
       pocketImportItem: PocketImportItemRecord,
       snoozeDuration: Duration
     ) => void;
   }) {
-    logger.debug("Render flat list " + props.items.length);
     const pocketImportCards = props.items.map((x) => (
       <PocketImportItemCard
         pocketImportItem={x}
         key={x.pocket_item_id}
-        onArchiveItem={onArchiveItem}
+        onArchiveToggleItem={onArchiveToggleItem}
         onSnoozeItem={onSnoozeItem}
+        hideSnoozeControl={hideSnoozeControl}
       />
     ));
     return <List>{pocketImportCards}</List>;
@@ -357,20 +380,19 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   function ItemList(props: {
     items: PocketImportItemRecord[];
     groupBy: GroupSelectIDType | undefined;
-    onArchiveItem: (pocketImportItem: PocketImportItemRecord) => void;
+    onArchiveToggleItem: (pocketImportItem: PocketImportItemRecord) => void;
     onSnoozeItem: (
       pocketImportItem: PocketImportItemRecord,
       snoozeDuration: Duration
     ) => void;
   }) {
     const { items, groupBy } = props;
-    logger.debug("Render item list");
     if (groupBy) {
       return (
         <GroupedList
           items={items}
           groupBy={groupByFn(groupBy)}
-          onArchiveItem={onArchiveItem}
+          onArchiveToggleItem={onArchiveToggleItem}
           onSnoozeItem={onSnoozeItem}
         />
       );
@@ -378,7 +400,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
       return (
         <FlatList
           items={items}
-          onArchiveItem={onArchiveItem}
+          onArchiveToggleItem={onArchiveToggleItem}
           onSnoozeItem={onSnoozeItem}
         />
       );
@@ -397,7 +419,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
       <ItemList
         items={filteredPocketImports}
         groupBy={groupBy}
-        onArchiveItem={onArchiveItem}
+        onArchiveToggleItem={onArchiveToggleItem}
         onSnoozeItem={onSnoozeItem}
       />
     </React.Fragment>

@@ -7,7 +7,7 @@ import {
   Grid,
   IconButton,
 } from "@material-ui/core";
-import { PocketImportItemRecord } from "../services/store/ItemSets";
+import { ItemStatus, PocketImportItemRecord } from "../services/store/ItemSets";
 import { DateTime, Duration } from "luxon";
 import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
 import React, { FunctionComponent } from "react";
@@ -24,6 +24,10 @@ const useStyles = makeStyles((theme) => ({
     margin: "10px",
   },
   itemToolbarButton: {
+    padding: "6px",
+    float: "right",
+  },
+  itemToolbarButtonDisabled: {
     padding: "6px",
     float: "right",
   },
@@ -44,7 +48,8 @@ const useStyles = makeStyles((theme) => ({
 
 export type PocketImportItemCardProps = {
   pocketImportItem: PocketImportItemRecord;
-  onArchiveItem?: (pocketImportItem: PocketImportItemRecord) => void;
+  hideSnoozeControl: boolean;
+  onArchiveToggleItem?: (pocketImportItem: PocketImportItemRecord) => void;
   onSnoozeItem?: (
     pocketImportItem: PocketImportItemRecord,
     snoozeDuration: Duration
@@ -70,7 +75,8 @@ const formatTime = (date: Date) => {
 
 export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> = ({
   pocketImportItem,
-  onArchiveItem = (pocketImportItem: PocketImportItemRecord) => {},
+  hideSnoozeControl = false,
+  onArchiveToggleItem = (pocketImportItem: PocketImportItemRecord) => {},
   onSnoozeItem = (
     pocketImportItem: PocketImportItemRecord,
     snoozeDuration: Duration
@@ -118,11 +124,44 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
   const handleArchiveClick = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    onArchiveItem(pocketImportItem);
+    onArchiveToggleItem(pocketImportItem);
   };
 
   const handleSnoozeClick = (snoozeDuration: Duration) => {
     onSnoozeItem(pocketImportItem, snoozeDuration);
+  };
+
+  const SnoozeSelectButtonRow = () => {
+    if (!hideSnoozeControl) {
+      return (
+        <Grid item xs={12}>
+          <SnoozeSelectButton
+            onSnoozeItem={handleSnoozeClick}
+            id={`snooze-button-${pocketImportItem.pocket_item_id}`}
+          />
+        </Grid>
+      );
+    } else {
+      return <React.Fragment />;
+    }
+  };
+
+  const ArchiveButton = () => {
+    const className =
+      pocketImportItem.status === ItemStatus.Archived
+        ? classes.itemToolbarButtonDisabled
+        : classes.itemToolbarButton;
+    const color =
+      pocketImportItem.status === ItemStatus.Archived ? "disabled" : "primary";
+    return (
+      <IconButton
+        className={className}
+        onClick={handleArchiveClick}
+        data-testid={`archive-button-${pocketImportItem.pocket_item_id}`}
+      >
+        <LibraryAddCheckIcon fontSize="small" color={color} />
+      </IconButton>
+    );
   };
 
   return (
@@ -142,19 +181,10 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
           <Grid item xs={1}>
             <Grid container>
               <Grid item xs={12}>
-                <IconButton
-                  className={classes.itemToolbarButton}
-                  onClick={handleArchiveClick}
-                  data-testid={`archive-button-${pocketImportItem.pocket_item_id}`}
-                >
-                  <LibraryAddCheckIcon fontSize="small" />
-                </IconButton>
+                <ArchiveButton />
               </Grid>
               <Grid item xs={12}>
-                <SnoozeSelectButton
-                  onSnoozeItem={handleSnoozeClick}
-                  id={`snooze-button-${pocketImportItem.pocket_item_id}`}
-                ></SnoozeSelectButton>
+                <SnoozeSelectButtonRow />
               </Grid>
             </Grid>
           </Grid>
