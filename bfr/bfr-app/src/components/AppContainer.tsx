@@ -75,7 +75,7 @@ export default function AppContainer(props: { children: React.ReactNode }) {
   const history = useHistory();
 
   const onInboxClick = () => {
-    history.push("/pocket_imports");
+    history.push("/inbox");
   };
 
   const onLibraryClick = () => {

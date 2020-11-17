@@ -75,7 +75,7 @@ export const Router: FunctionComponent<RouterProps> = ({
             <MainView />
           </AppContainer>
         </PrivateRoute>
-        <PrivateRoute exact path="/pocket_imports">
+        <PrivateRoute exact path="/inbox">
           <AppContainer>
             <InboxView database={database} />
           </AppContainer>
