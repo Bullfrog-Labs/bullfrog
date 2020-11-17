@@ -1,7 +1,11 @@
 import React from "react";
 import { render, waitFor, fireEvent } from "@testing-library/react";
 import { PocketImportsListView } from "./PocketImportsListView";
-import { PocketImportItemRecord, ItemStatus } from "../services/store/ItemSets";
+import {
+  PocketImportItemRecord,
+  ItemStatus,
+  GetItemSetFn,
+} from "../services/store/ItemSets";
 import { PocketImportItemCard } from "./PocketImportItemCard";
 import { AuthContext } from "../services/auth/Auth";
 import { DateTime } from "luxon";
@@ -34,6 +38,10 @@ const mockPocketImportItem2: PocketImportItemRecord = {
   status: ItemStatus.Unread,
 };
 
+function copy(records: PocketImportItemRecord[]) {
+  return records.map((record) => Object.assign({}, record));
+}
+
 async function updateItem<PocketImportItemRecord>(
   itemRecordConverter: firebase.firestore.FirestoreDataConverter<
     PocketImportItemRecord
@@ -42,6 +50,34 @@ async function updateItem<PocketImportItemRecord>(
   id: string,
   item: PocketImportItemRecord
 ) {}
+
+const getItemSetFromRecords = (records: PocketImportItemRecord[]) => async (
+  itemRecordConverter: firebase.firestore.FirestoreDataConverter<
+    PocketImportItemRecord
+  >,
+  path: string, // this path should refer to a collection of items
+  orderBy?: [string, "desc" | "asc" | undefined][],
+  where?: [string, firebase.firestore.WhereFilterOp, any]
+) => {
+  return copy(records);
+};
+
+const AuthdListView = (props: {
+  getItemSet: GetItemSetFn<PocketImportItemRecord>;
+}) => {
+  const authState = {
+    uid: "foobar",
+  };
+  return (
+    <AuthContext.Provider value={authState as firebase.User}>
+      <PocketImportsListView
+        getItemSet={props.getItemSet}
+        updateItem={updateItem}
+        title="Inbox"
+      />
+    </AuthContext.Provider>
+  );
+};
 
 test("renders fully-populated pocket import item card", () => {
   const { getByText } = render(
@@ -60,30 +96,8 @@ test("renders fully-populated pocket import item card", () => {
 });
 
 test("renders fully-populated pocket import item card in list view", async () => {
-  async function getItemSet<PocketImportItemRecord>(
-    itemRecordConverter: firebase.firestore.FirestoreDataConverter<
-      PocketImportItemRecord
-    >,
-    path: string, // this path should refer to a collection of items
-    orderBy?: [string, "desc" | "asc" | undefined][],
-    where?: [string, firebase.firestore.WhereFilterOp, any]
-  ) {
-    return [mockPocketImportItem1];
-  }
-
-  const authState = {
-    uid: "foobar",
-  };
-
-  const { getByText } = render(
-    <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView
-        getItemSet={getItemSet}
-        updateItem={updateItem}
-        title="Inbox"
-      />
-    </AuthContext.Provider>
-  );
+  const getItemSet = getItemSetFromRecords([mockPocketImportItem1]);
+  const { getByText } = render(<AuthdListView getItemSet={getItemSet} />);
 
   await waitFor(() => getByText(mockPocketImportItem1.title!));
   await waitFor(() => getByText(mockPocketImportItem1.description!));
@@ -95,29 +109,13 @@ test("renders fully-populated pocket import item card in list view", async () =>
 });
 
 test("filters old items when interval selected", async () => {
-  async function getItemSet<PocketImportItemRecord>(
-    itemRecordConverter: firebase.firestore.FirestoreDataConverter<
-      PocketImportItemRecord
-    >,
-    path: string, // this path should refer to a collection of items
-    orderBy?: [string, "desc" | "asc" | undefined][],
-    where?: [string, firebase.firestore.WhereFilterOp, any]
-  ) {
-    return [mockPocketImportItem1, mockPocketImportItem2];
-  }
-
-  const authState = {
-    uid: "foobar",
-  };
+  const getItemSet = getItemSetFromRecords([
+    mockPocketImportItem1,
+    mockPocketImportItem2,
+  ]);
 
   const { getByText, queryByText } = render(
-    <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView
-        getItemSet={getItemSet}
-        updateItem={updateItem}
-        title="Inbox"
-      />
-    </AuthContext.Provider>
+    <AuthdListView getItemSet={getItemSet} />
   );
 
   await waitFor(() => getByText(mockPocketImportItem1.title!));
@@ -136,29 +134,13 @@ test("filters old items when interval selected", async () => {
 });
 
 test("group items when groupBy selected", async () => {
-  async function getItemSet<PocketImportItemRecord>(
-    itemRecordConverter: firebase.firestore.FirestoreDataConverter<
-      PocketImportItemRecord
-    >,
-    path: string, // this path should refer to a collection of items
-    orderBy?: [string, "desc" | "asc" | undefined][],
-    where?: [string, firebase.firestore.WhereFilterOp, any]
-  ) {
-    return [mockPocketImportItem1, mockPocketImportItem2];
-  }
-
-  const authState = {
-    uid: "foobar",
-  };
+  const getItemSet = getItemSetFromRecords([
+    mockPocketImportItem1,
+    mockPocketImportItem2,
+  ]);
 
   const { getByText, queryByText } = render(
-    <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView
-        getItemSet={getItemSet}
-        updateItem={updateItem}
-        title="Inbox"
-      />
-    </AuthContext.Provider>
+    <AuthdListView getItemSet={getItemSet} />
   );
 
   await waitFor(() => getByText(mockPocketImportItem1.title!));
@@ -182,29 +164,13 @@ test("group items when groupBy selected", async () => {
 });
 
 test("snooze removes item", async () => {
-  async function getItemSet<PocketImportItemRecord>(
-    itemRecordConverter: firebase.firestore.FirestoreDataConverter<
-      PocketImportItemRecord
-    >,
-    path: string, // this path should refer to a collection of items
-    orderBy?: [string, "desc" | "asc" | undefined][],
-    where?: [string, firebase.firestore.WhereFilterOp, any]
-  ) {
-    return [mockPocketImportItem1, mockPocketImportItem2];
-  }
-
-  const authState = {
-    uid: "foobar",
-  };
+  const getItemSet = getItemSetFromRecords([
+    mockPocketImportItem1,
+    mockPocketImportItem2,
+  ]);
 
   const { getByText, queryByText, getByTestId } = render(
-    <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView
-        getItemSet={getItemSet}
-        updateItem={updateItem}
-        title="Inbox"
-      />
-    </AuthContext.Provider>
+    <AuthdListView getItemSet={getItemSet} />
   );
 
   await waitFor(() => getByText(mockPocketImportItem1.title!));
@@ -223,35 +189,40 @@ test("snooze removes item", async () => {
 });
 
 test("archive removes item", async () => {
-  async function getItemSet<PocketImportItemRecord>(
-    itemRecordConverter: firebase.firestore.FirestoreDataConverter<
-      PocketImportItemRecord
-    >,
-    path: string, // this path should refer to a collection of items
-    orderBy?: [string, "desc" | "asc" | undefined][],
-    where?: [string, firebase.firestore.WhereFilterOp, any]
-  ) {
-    return [mockPocketImportItem1, mockPocketImportItem2];
-  }
-
-  const authState = {
-    uid: "foobar",
-  };
+  const getItemSet = getItemSetFromRecords([
+    mockPocketImportItem1,
+    mockPocketImportItem2,
+  ]);
 
   const { getByText, queryByText, getByTestId } = render(
-    <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView
-        getItemSet={getItemSet}
-        updateItem={updateItem}
-        title="Inbox"
-      />
-    </AuthContext.Provider>
+    <AuthdListView getItemSet={getItemSet} />
   );
 
   await waitFor(() => getByText(mockPocketImportItem1.title!));
   await waitFor(() => getByText(mockPocketImportItem2.title!));
 
   const select = await waitFor(() => getByTestId("archive-button-123"));
+  expect(select).toBeInstanceOf(HTMLButtonElement);
+  fireEvent.click(select);
+
+  await waitFor(() => getByText(mockPocketImportItem2.title!));
+  expect(queryByText(mockPocketImportItem1.title!)).toBeNull();
+});
+
+test("delete removes item", async () => {
+  const getItemSet = getItemSetFromRecords([
+    mockPocketImportItem1,
+    mockPocketImportItem2,
+  ]);
+
+  const { getByText, queryByText, getByTestId } = render(
+    <AuthdListView getItemSet={getItemSet} />
+  );
+
+  await waitFor(() => getByText(mockPocketImportItem1.title!));
+  await waitFor(() => getByText(mockPocketImportItem2.title!));
+
+  const select = await waitFor(() => getByTestId("delete-button-123"));
   expect(select).toBeInstanceOf(HTMLButtonElement);
   fireEvent.click(select);
 
