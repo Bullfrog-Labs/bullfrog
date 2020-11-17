@@ -37,10 +37,6 @@ class BookmarkRecords(object):
             None,
         "metadata":
             None,
-        "created_at":
-            None,
-        "updated_at":
-            None,
     }
 
 
@@ -82,7 +78,7 @@ class PocketBookmarks(object):
       self.logger.debug(
           f"fetch; since={start_timestamp}, count={10}, offset={offset}, oldest"
       )
-      (response, response_info) = self.pocket.get(since=start_timestamp,
+      (response, _) = self.pocket.get(since=start_timestamp,
                                                   count=10,
                                                   offset=offset,
                                                   sort="oldest")
@@ -108,7 +104,7 @@ class PocketBookmarks(object):
   def fetch_resources(self, items: List[BookmarkRecord]) -> Dict[str, str]:
     self.logger.debug("fetching {} urls".format(len(items)))
     pages = {}
-    for i, item in enumerate(items):
+    for _, item in enumerate(items):
       url = item["url"]
       pocket_item_id = item["pocket_item_id"]
       if url is None or url == "":
@@ -128,7 +124,7 @@ class PocketBookmarks(object):
           self.logger.debug("encoding cannot be determined, skipping")
           continue
         pages[pocket_item_id] = resp.text
-      except (HTTPError, Timeout, ConnectionError, TooManyRedirects) as e:
+      except (HTTPError, Timeout, ConnectionError, TooManyRedirects) as _:
         # Record the error and move on
         self.logger.error("url fetch failed for {}".format(url))
     return pages
@@ -182,7 +178,7 @@ class PocketBookmarks(object):
       self, items: List[BookmarkRecord]) -> Dict[str, ArticleMetadataRecord]:
     self.logger.debug("parsing {} articles".format(len(items)))
     metadata: Dict = {}
-    for i, item in enumerate(items):
+    for _, item in enumerate(items):
       text = item["text"]
       pocket_item_id = item["pocket_item_id"]
       url = item["url"]
