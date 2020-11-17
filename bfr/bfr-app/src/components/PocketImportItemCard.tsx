@@ -8,6 +8,7 @@ import {
   IconButton,
   Chip,
 } from "@material-ui/core";
+import DeleteIcon from "@material-ui/icons/Delete";
 import { ItemStatus, PocketImportItemRecord } from "../services/store/ItemSets";
 import { DateTime, Duration } from "luxon";
 import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
@@ -58,6 +59,7 @@ export type PocketImportItemCardProps = {
     pocketImportItem: PocketImportItemRecord,
     snoozeDuration: Duration
   ) => void;
+  onDeleteItem?: (pocketImportItem: PocketImportItemRecord) => {};
 };
 
 const extractDescription = (
@@ -85,6 +87,7 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
     pocketImportItem: PocketImportItemRecord,
     snoozeDuration: Duration
   ) => {},
+  onDeleteItem = (pocketImportItem: PocketImportItemRecord) => {},
 }) => {
   const classes = useStyles();
 
@@ -144,6 +147,12 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
     </Typography>
   );
 
+  const handleDeleteClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    onDeleteItem(pocketImportItem);
+  };
+
   const handleArchiveClick = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -187,6 +196,18 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
     );
   };
 
+  const DeleteButton = () => {
+    return (
+      <IconButton
+        className={classes.itemToolbarButton}
+        onClick={handleDeleteClick}
+        data-testid={`delete-button-${pocketImportItem.pocket_item_id}`}
+      >
+        <DeleteIcon fontSize="small" />
+      </IconButton>
+    );
+  };
+
   return (
     <Card
       className={classes.pocketImportItemCard}
@@ -206,8 +227,9 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
               <Grid item xs={12}>
                 <ArchiveButton />
               </Grid>
+              <SnoozeSelectButtonRow />
               <Grid item xs={12}>
-                <SnoozeSelectButtonRow />
+                <DeleteButton />
               </Grid>
             </Grid>
           </Grid>

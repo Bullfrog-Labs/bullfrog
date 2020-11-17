@@ -300,6 +300,42 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
     );
   };
 
+  const onDeleteItem = async (pocketImportItem: PocketImportItemRecord) => {
+    logger.debug("delete item request " + pocketImportItem.pocket_item_id);
+
+    const itemToDelete = pocketImports.find((item) => {
+      return item.pocket_item_id === pocketImportItem.pocket_item_id;
+    });
+
+    if (!itemToDelete) {
+      logger.error("missing item, ignoring");
+      return;
+    }
+
+    logger.debug(
+      `item was ${
+        ItemStatus[pocketImportItem.status || ItemStatus.Unread]
+      }, setting to ${ItemStatus[ItemStatus.Deleted]}`
+    );
+
+    itemToDelete.status = ItemStatus.Deleted;
+
+    const updatedPocketImports = Array.from(pocketImports);
+    setPocketImports(updatedPocketImports);
+
+    logger.debug(`set ${updatedPocketImports.length} items`);
+    await updateItem(
+      PocketImportItemRecordConverter,
+      getPocketImportsItemSetPath(uid),
+      itemToDelete.pocket_item_id,
+      itemToDelete
+    );
+
+    logger.debug(
+      `finished marking item ${pocketImportItem.pocket_item_id} ${ItemStatus.Deleted}`
+    );
+  };
+
   const onSnoozeItem = async (
     pocketImportItem: PocketImportItemRecord,
     snoozeDuration: Duration
@@ -371,6 +407,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
         key={x.pocket_item_id}
         onArchiveToggleItem={onArchiveToggleItem}
         onSnoozeItem={onSnoozeItem}
+        onDeleteItem={onDeleteItem}
         hideSnoozeControl={hideSnoozeControl}
       />
     ));
