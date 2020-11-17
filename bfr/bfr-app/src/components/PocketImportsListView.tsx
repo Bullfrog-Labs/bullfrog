@@ -1,24 +1,19 @@
-import {
-  Card,
-  CardContent,
-  Link,
-  List,
-  makeStyles,
-  Typography,
-  Grid,
-  IconButton,
-} from "@material-ui/core";
+import { List, makeStyles, Typography } from "@material-ui/core";
 import { DateTime, Interval, Duration } from "luxon";
-import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
 import * as log from "loglevel";
 import React, { FunctionComponent, useContext, useState } from "react";
 import { AuthContext } from "../services/auth/Auth";
 import { UserId } from "../services/store/Users";
-import { GetItemSetFn, UpdateItemFn } from "../services/store/ItemSets";
+import {
+  GetItemSetFn,
+  UpdateItemFn,
+  PocketImportItemRecord,
+  ItemStatus,
+  PocketImportItemRecordConverter,
+} from "../services/store/ItemSets";
+import { PocketImportItemCard } from "./PocketImportItemCard";
 import * as R from "ramda";
 import { MenuSelect, MenuSelectItem } from "./MenuSelect";
-import { SnoozeSelectButton } from "./SnoozeSelectButton";
-import { getContentType, ContentType } from "./util/ContentType";
 
 const useStyles = makeStyles((theme) => ({
   pocketImportItemCard: {
@@ -49,193 +44,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export interface PocketImportItemRecord {
-  pocket_item_id: string;
-  title?: string | undefined;
-  url: string;
-  authors?: string[];
-  description?: string;
-  text?: string;
-  saveTime?: Date;
-  estReadTimeMinutes?: number | undefined;
-  contentType?: ContentType;
-  status?: number;
-  snoozeEndTime?: Date;
-}
-
 const EMPTY_DURATION = Duration.fromObject({ minutes: 0 });
-
-export enum ItemStatus {
-  Unread = 0,
-  Archived = 1,
-  Deleted = 2,
-}
-
-export type PocketImportItemCardProps = {
-  pocketImportItem: PocketImportItemRecord;
-  onArchiveItem?: (pocketImportItem: PocketImportItemRecord) => void;
-  onSnoozeItem?: (
-    pocketImportItem: PocketImportItemRecord,
-    snoozeDuration: Duration
-  ) => void;
-};
-
-const extractDescription = (
-  pocketImportItem: PocketImportItemRecord
-): string => {
-  if (pocketImportItem.description) {
-    return pocketImportItem.description;
-  } else if (pocketImportItem.text) {
-    return pocketImportItem.text.substring(0, 280) + "...";
-  } else {
-    return "";
-  }
-};
-
-const formatTime = (date: Date) => {
-  const dt = DateTime.fromJSDate(date);
-  return dt.toLocaleString(DateTime.DATETIME_MED);
-};
-
-export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> = ({
-  pocketImportItem,
-  onArchiveItem = (pocketImportItem: PocketImportItemRecord) => {},
-  onSnoozeItem = (
-    pocketImportItem: PocketImportItemRecord,
-    snoozeDuration: Duration
-  ) => {},
-}) => {
-  const classes = useStyles();
-
-  const cardTitle = pocketImportItem.title
-    ? pocketImportItem.title
-    : pocketImportItem.url;
-
-  const titleFragment = (
-    <Typography variant="h6" color="textPrimary">
-      <Link href={pocketImportItem.url}>{cardTitle}</Link>
-    </Typography>
-  );
-
-  const authorFragment = pocketImportItem.authors &&
-    pocketImportItem.authors.length > 0 && (
-      <Typography variant="body1" color="textPrimary">
-        by {pocketImportItem.authors.join(", ")}
-      </Typography>
-    );
-
-  const descriptionFragment = (
-    <Typography variant="body2" color="textSecondary">
-      {extractDescription(pocketImportItem)}
-    </Typography>
-  );
-
-  const estReadTimeFragment = pocketImportItem.estReadTimeMinutes && (
-    <em>{" - " + pocketImportItem.estReadTimeMinutes + " mins"}</em>
-  );
-
-  const timesFragment = pocketImportItem.saveTime && (
-    <Typography
-      variant="body2"
-      color="textSecondary"
-      className={classes.timesLine}
-    >
-      {formatTime(pocketImportItem.saveTime)} {estReadTimeFragment}
-    </Typography>
-  );
-
-  const handleArchiveClick = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    onArchiveItem(pocketImportItem);
-  };
-
-  const handleSnoozeClick = (snoozeDuration: Duration) => {
-    onSnoozeItem(pocketImportItem, snoozeDuration);
-  };
-
-  return (
-    <Card
-      className={classes.pocketImportItemCard}
-      variant={"outlined"}
-      key={pocketImportItem.pocket_item_id}
-    >
-      <CardContent>
-        <Grid container>
-          <Grid item xs={11}>
-            {titleFragment}
-            {authorFragment}
-            {descriptionFragment}
-            {timesFragment}
-          </Grid>
-          <Grid item xs={1}>
-            <Grid container>
-              <Grid item xs={12}>
-                <IconButton
-                  className={classes.itemToolbarButton}
-                  onClick={handleArchiveClick}
-                  data-testid={`archive-button-${pocketImportItem.pocket_item_id}`}
-                >
-                  <LibraryAddCheckIcon fontSize="small" />
-                </IconButton>
-              </Grid>
-              <Grid item xs={12}>
-                <SnoozeSelectButton
-                  onSnoozeItem={handleSnoozeClick}
-                  id={`snooze-button-${pocketImportItem.pocket_item_id}`}
-                ></SnoozeSelectButton>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </CardContent>
-    </Card>
-  );
-};
-
-const PocketImportItemRecordConverter = {
-  /**
-   * This can only be used to update the mutable fields.
-   * @param pocketItem
-   */
-  toFirestore: (
-    pocketItem: PocketImportItemRecord
-  ): firebase.firestore.DocumentData => {
-    let data = {};
-    if (pocketItem.status) {
-      data = Object.assign(data, { status: pocketItem.status });
-    }
-    if (pocketItem.snoozeEndTime) {
-      data = Object.assign(data, { snoozeEndTime: pocketItem.snoozeEndTime });
-    }
-    return data;
-  },
-
-  fromFirestore: (
-    snapshot: firebase.firestore.QueryDocumentSnapshot,
-    options: firebase.firestore.SnapshotOptions
-  ): PocketImportItemRecord => {
-    const data = snapshot.data(options);
-    const pocketJSON = JSON.parse(data.pocket_json);
-    return {
-      pocket_item_id: data.pocket_item_id,
-      title: data.metadata?.title,
-      url: data.url,
-      authors: data.metadata?.authors,
-      description: data.metadata?.description || pocketJSON.excerpt,
-      text: data.metadata?.text,
-      saveTime: data.pocket_created_at?.toDate(),
-      estReadTimeMinutes: pocketJSON.time_to_read,
-      contentType: getContentType(data),
-      status: data.status || 0,
-      snoozeEndTime: data.snoozeEndTime?.toDate(),
-    };
-  },
-};
 
 export type PocketImportsListViewProps = {
   getItemSet: GetItemSetFn<PocketImportItemRecord>;
   updateItem: UpdateItemFn<PocketImportItemRecord>;
+  title: string;
+  statusFilter?: ItemStatus[];
+  showSnoozed?: boolean;
 };
 
 export const InboxToolsHeader = (props: {
@@ -309,7 +125,8 @@ export const GroupTool = (props: {
 
 const itemListFilterFn = (
   intervalFilter: Interval | undefined,
-  status: ItemStatus
+  status: ItemStatus[],
+  showSnoozed: boolean
 ) => (item: PocketImportItemRecord) => {
   const logger = log.getLogger("itemListFilterFn");
   // Interval
@@ -321,13 +138,13 @@ const itemListFilterFn = (
 
   // Snooze time
   let snoozeTimeInclude = true;
-  if (item.snoozeEndTime) {
+  if (!showSnoozed && item.snoozeEndTime) {
     const currentTime = DateTime.local();
     snoozeTimeInclude = DateTime.fromJSDate(item.snoozeEndTime) <= currentTime;
   }
 
   // Status
-  const statusInclude = item.status === status;
+  const statusInclude = !item.status || status.indexOf(item.status) > -1;
 
   // Combine
   logger.debug(
@@ -368,16 +185,17 @@ const getPocketImportsItemSetPath = (uid: UserId) => `users/${uid}/bookmarks`;
 export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps> = ({
   getItemSet,
   updateItem,
+  title,
+  statusFilter = [ItemStatus.Unread],
+  showSnoozed = false,
 }) => {
   const logger = log.getLogger("PocketImportsListView");
   const authState = useContext(AuthContext) as firebase.User;
   const uid = authState.uid;
   const classes = useStyles();
-
   const [pocketImports, setPocketImports] = useState<PocketImportItemRecord[]>(
     []
   );
-
   const [intervalFilter, setIntervalFilter] = useState<Interval>();
   const [groupBy, setGroupBy] = useState<GroupSelectIDType>();
 
@@ -385,7 +203,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
 
   logger.debug(`Filtering; interval=${intervalFilter?.toString()}`);
   const filteredPocketImports = pocketImports.filter(
-    itemListFilterFn(intervalFilter, ItemStatus.Unread)
+    itemListFilterFn(intervalFilter, statusFilter, showSnoozed)
   );
 
   logger.debug("render daf list " + filteredPocketImports.length);
@@ -570,7 +388,7 @@ export const PocketImportsListView: FunctionComponent<PocketImportsListViewProps
   return (
     <React.Fragment>
       <Typography variant="h3" className={classes.pageTitle}>
-        Inbox
+        {title}
       </Typography>
       <InboxToolsHeader
         onIntervalItemSelect={onIntervalItemSelect}
