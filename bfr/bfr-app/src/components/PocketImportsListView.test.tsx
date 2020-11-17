@@ -1,11 +1,8 @@
 import React from "react";
 import { render, waitFor, fireEvent } from "@testing-library/react";
-import {
-  PocketImportItemCard,
-  PocketImportItemRecord,
-  PocketImportsListView,
-  ItemStatus,
-} from "./PocketImportsListView";
+import { PocketImportsListView } from "./PocketImportsListView";
+import { PocketImportItemRecord, ItemStatus } from "../services/store/ItemSets";
+import { PocketImportItemCard } from "./PocketImportItemCard";
 import { AuthContext } from "../services/auth/Auth";
 import { DateTime } from "luxon";
 import * as log from "loglevel";
@@ -80,7 +77,11 @@ test("renders fully-populated pocket import item card in list view", async () =>
 
   const { getByText } = render(
     <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView getItemSet={getItemSet} updateItem={updateItem} />
+      <PocketImportsListView
+        getItemSet={getItemSet}
+        updateItem={updateItem}
+        title="Inbox"
+      />
     </AuthContext.Provider>
   );
 
@@ -111,7 +112,11 @@ test("filters old items when interval selected", async () => {
 
   const { getByText, queryByText } = render(
     <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView getItemSet={getItemSet} updateItem={updateItem} />
+      <PocketImportsListView
+        getItemSet={getItemSet}
+        updateItem={updateItem}
+        title="Inbox"
+      />
     </AuthContext.Provider>
   );
 
@@ -148,7 +153,11 @@ test("group items when groupBy selected", async () => {
 
   const { getByText, queryByText } = render(
     <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView getItemSet={getItemSet} updateItem={updateItem} />
+      <PocketImportsListView
+        getItemSet={getItemSet}
+        updateItem={updateItem}
+        title="Inbox"
+      />
     </AuthContext.Provider>
   );
 
@@ -190,7 +199,11 @@ test("snooze removes item", async () => {
 
   const { getByText, queryByText, getByTestId } = render(
     <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView getItemSet={getItemSet} updateItem={updateItem} />
+      <PocketImportsListView
+        getItemSet={getItemSet}
+        updateItem={updateItem}
+        title="Inbox"
+      />
     </AuthContext.Provider>
   );
 
@@ -227,7 +240,11 @@ test("archive removes item", async () => {
 
   const { getByText, queryByText, getByTestId } = render(
     <AuthContext.Provider value={authState as firebase.User}>
-      <PocketImportsListView getItemSet={getItemSet} updateItem={updateItem} />
+      <PocketImportsListView
+        getItemSet={getItemSet}
+        updateItem={updateItem}
+        title="Inbox"
+      />
     </AuthContext.Provider>
   );
 

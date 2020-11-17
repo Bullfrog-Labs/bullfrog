@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 
 export type PocketImportItemCardProps = {
   pocketImportItem: PocketImportItemRecord;
-  hideSnoozeControl: boolean;
+  hideSnoozeControl?: boolean;
   onArchiveToggleItem?: (pocketImportItem: PocketImportItemRecord) => void;
   onSnoozeItem?: (
     pocketImportItem: PocketImportItemRecord,
