@@ -6,6 +6,7 @@ import {
   Typography,
   Grid,
   IconButton,
+  Chip,
 } from "@material-ui/core";
 import { ItemStatus, PocketImportItemRecord } from "../services/store/ItemSets";
 import { DateTime, Duration } from "luxon";
@@ -43,6 +44,9 @@ const useStyles = makeStyles((theme) => ({
   },
   selectEmpty: {
     marginTop: theme.spacing(2),
+  },
+  stateChip: {
+    margin: theme.spacing(1),
   },
 }));
 
@@ -88,9 +92,28 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
     ? pocketImportItem.title
     : pocketImportItem.url;
 
+  const SnoozedChip = () => {
+    const snoozeEndTime = pocketImportItem.snoozeEndTime;
+    if (
+      snoozeEndTime &&
+      DateTime.fromJSDate(snoozeEndTime) > DateTime.local()
+    ) {
+      return (
+        <Chip
+          className={classes.stateChip}
+          label={`Snoozed until ${formatTime(snoozeEndTime)}`}
+          size="small"
+        />
+      );
+    } else {
+      return <React.Fragment />;
+    }
+  };
+
   const titleFragment = (
     <Typography variant="h6" color="textPrimary">
       <Link href={pocketImportItem.url}>{cardTitle}</Link>
+      <SnoozedChip />
     </Typography>
   );
 
@@ -152,7 +175,7 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
         ? classes.itemToolbarButtonDisabled
         : classes.itemToolbarButton;
     const color =
-      pocketImportItem.status === ItemStatus.Archived ? "disabled" : "primary";
+      pocketImportItem.status === ItemStatus.Archived ? "disabled" : undefined;
     return (
       <IconButton
         className={className}
