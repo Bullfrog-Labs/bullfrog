@@ -7,6 +7,7 @@ import {
   Grid,
   IconButton,
   Chip,
+  Tooltip,
 } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { ItemStatus, PocketImportItemRecord } from "../services/store/ItemSets";
@@ -102,11 +103,9 @@ export const PocketImportItemCard: FunctionComponent<PocketImportItemCardProps> 
       DateTime.fromJSDate(snoozeEndTime) > DateTime.local()
     ) {
       return (
-        <Chip
-          className={classes.stateChip}
-          label={`Snoozed until ${formatTime(snoozeEndTime)}`}
-          size="small"
-        />
+        <Tooltip title={`Snoozed until ${formatTime(snoozeEndTime)}`}>
+          <Chip className={classes.stateChip} label={`Snoozed`} size="small" />
+        </Tooltip>
       );
     } else {
       return <React.Fragment />;
