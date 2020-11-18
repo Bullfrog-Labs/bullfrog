@@ -3,7 +3,7 @@ import { Story, Meta } from "@storybook/react/types-6-0";
 import {
   PocketImportItemCard,
   PocketImportItemCardProps,
-} from "./PocketImportsListView";
+} from "./PocketImportItemCard";
 
 export default {
   title: "PocketImportItemCard",
