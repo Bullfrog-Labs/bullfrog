@@ -1,0 +1,7 @@
+#!/bin/bash
+BF_ROOT=$(git rev-parse --show-toplevel)
+TA_DIR=$BF_ROOT/threads-analysis
+cd $TA_DIR &&
+  python3 src/extract_entities.py --log-level=DEBUG \
+    --dest=/Users/leigh/Workspace/bullfrog/threads-analysis/data \
+    --article-doc data/diff_substack_com_p_how_bubbles_and_megaprojects_parallelize/article_parts.json

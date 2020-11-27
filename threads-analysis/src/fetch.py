@@ -33,16 +33,18 @@ def main():
   logger.debug(
     f"entities: {article.keywords}")
 
+  article_parsed_url = urlparse(url)
+  url_path_part = article_parsed_url.hostname + '_' + article_parsed_url.path
+  url_path_part = re.sub(r'[/:.\-_]+', '_', url_path_part)
+
   article_doc = {
+    "id": url_path_part,
     "url": article.url,
     "text": article.text,
     "html": article.html,
     "keywords": article.keywords,
   }
 
-  article_parsed_url = urlparse(url)
-  url_path_part = article_parsed_url.hostname + '_' + article_parsed_url.path
-  url_path_part = re.sub(r'[/:.\-_]+', '_', url_path_part)
   article_dirname = os.path.join(args.dest, url_path_part)
   os.makedirs(article_dirname, exist_ok=True)
   article_filename = os.path.join(article_dirname, "article_parts.json")
