@@ -2,3 +2,4 @@ newspaper3k
 spacy
 argparse
 nltk
+google-cloud-language

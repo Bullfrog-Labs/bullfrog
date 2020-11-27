@@ -5,11 +5,13 @@ import os
 from urllib.parse import urlparse
 import re
 import spacy
+from google.cloud import language_v1
+from google.protobuf.json_format import MessageToDict
 
 
 def save_entities(entities_doc, base_dir, article_id):
   article_dirname = os.path.join(base_dir, article_id)
-  entities_filename = os.path.join(article_dirname, "spacy_entities.json")
+  entities_filename = os.path.join(article_dirname, "google_entities.json")
   with open(entities_filename, 'w') as entities_file:
     json.dump(entities_doc, entities_file)
 
@@ -22,28 +24,41 @@ def main():
 
   args = parser.parse_args()
   logging.basicConfig(level=args.log_level)
-  logger = logging.getLogger("extract_entities")
+  logger = logging.getLogger()
   logger.debug("starting...")
 
-  # need to run this first: python3 -m spacy download en_core_web_sm
-  nlp = spacy.load("en_core_web_sm")
-
   article_doc = json.loads(open(args.article_doc).read())
-
   logger.debug(f"loaded article doc {article_doc['id']}")
 
   article_text = article_doc["text"]
   if article_text is None:
     raise Exception("missing text for doc, aborting")
 
-  doc = nlp(article_text)
-  logger.debug(f"got ents; num={len(doc.ents)}")
-  for ent in doc.ents:
-    print(f"{ent.label_} | {ent.text}".strip())
+  logger.debug(f"running google nlp...")
+  client = language_v1.LanguageServiceClient()
+  document = {"content": article_text,
+              "type_": language_v1.Document.Type.PLAIN_TEXT}
 
-  entities_doc = doc.to_json()
+  response = client.analyze_entities(request={'document': document})
+  logger.debug(f"ents: num={len(response.entities)}")
 
-  logger.debug(f"writing entities")
+  for e in response.entities:
+    print(f"{e.name}\t{language_v1.Entity.Type(e.type_).name}\t{e.salience}")
+
+  entities = [{
+    "name": e.name,
+    "type": language_v1.Entity.Type(e.type_).name,
+    "salience": e.salience
+  } for e in response.entities]
+
+  entities_doc = {
+    "bullfrog_id": article_doc['id'],
+    "entities": entities
+  }
+
+  logger.debug(f"finished")
+
+  logger.debug(f"writing entities...")
   save_entities(entities_doc, args.dest, article_doc["id"])
   logger.debug(f"done")
 
