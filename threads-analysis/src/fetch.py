@@ -11,7 +11,8 @@ import nltk
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("--log-level", type=str, default="INFO")
-  parser.add_argument("--dest", type=str, default="INFO", required=True)
+  parser.add_argument("--dest", type=str, required=True)
+  parser.add_argument("--url", type=str, required=True)
 
   nltk.download('punkt')
 
@@ -20,7 +21,7 @@ def main():
   logger = logging.getLogger("fetch")
   logger.debug("starting...")
 
-  url = 'https://diff.substack.com/p/how-bubbles-and-megaprojects-parallelize'
+  url = args.url
   article = Article(url)
   article.download()
   article.parse()

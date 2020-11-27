@@ -1,0 +1,8 @@
+#!/bin/bash
+BF_ROOT=$(git rev-parse --show-toplevel)
+TA_DIR=$BF_ROOT/threads-analysis
+ARTICLE_DOC=$1
+cd $TA_DIR &&
+  python3 src/extract_goog_entities.py --log-level=DEBUG \
+    --dest=/Users/leigh/Workspace/bullfrog/threads-analysis/data \
+    --article-doc $ARTICLE_DOC
