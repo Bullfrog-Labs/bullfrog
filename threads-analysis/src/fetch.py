@@ -5,12 +5,15 @@ import json
 import os
 from urllib.parse import urlparse
 import re
+import nltk
 
 
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("--log-level", type=str, default="INFO")
   parser.add_argument("--dest", type=str, default="INFO", required=True)
+
+  nltk.download('punkt')
 
   args = parser.parse_args()
   logging.basicConfig(level=args.log_level)
@@ -25,10 +28,16 @@ def main():
   logger.debug(
     f"fetched {url}; text={article.text[0:64].strip()}...")
 
+  article.nlp()
+
+  logger.debug(
+    f"entities: {article.keywords}")
+
   article_doc = {
     "url": article.url,
     "text": article.text,
     "html": article.html,
+    "keywords": article.keywords,
   }
 
   article_parsed_url = urlparse(url)
