@@ -3,3 +3,5 @@ spacy
 argparse
 nltk
 google-cloud-language
+graphviz
+pandas
