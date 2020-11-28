@@ -4,5 +4,5 @@ TA_DIR=$BF_ROOT/threads-analysis
 URL=$1
 cd $TA_DIR &&
   python3 src/build_graph.py --log-level=DEBUG \
-    --data-dir=/Users/leigh/Workspace/bullfrog/threads-analysis/data
+    --data-dir=/Users/leigh/Workspace/bullfrog/threads-analysis/data/sources
     

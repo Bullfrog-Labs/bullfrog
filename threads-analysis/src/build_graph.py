@@ -20,7 +20,7 @@ def create_and_filter_df(doc):
   logger.debug(
     f"percentiles={df_group_max.salience.quantile([0.1, 0.5, 0.8, 0.9, 0.99])}")
 
-  df_group_max_top = df_group_max[df_group_max.salience >= 0.002]
+  df_group_max_top = df_group_max[df_group_max.salience >= 0.0025]
   logger.debug(f"shape={df_group_max_top.shape}")
 
   return df_group_max_top

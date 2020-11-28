@@ -2,4 +2,4 @@
 BF_ROOT=$(git rev-parse --show-toplevel)
 TA_DIR=$BF_ROOT/threads-analysis
 cd $TA_DIR &&
-  bin/gcp-ee-one data/diff_substack_com_p_how_bubbles_and_megaprojects_parallelize/article_parts.json
+  bin/gcp-ee-one data/sources/diff_substack_com_p_how_bubbles_and_megaprojects_parallelize/article_parts.json

@@ -31,6 +31,8 @@ def main():
   logger.debug(f"loaded article doc {article_doc['id']}")
 
   article_text = article_doc["text"]
+  article_text = re.sub('[,\.!?]', ' ', article_text)
+  article_text = article_text.lower()
   if article_text is None:
     raise Exception("missing text for doc, aborting")
 
