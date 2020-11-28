@@ -1,0 +1,8 @@
+#!/bin/bash
+BF_ROOT=$(git rev-parse --show-toplevel)
+TA_DIR=$BF_ROOT/threads-analysis
+INSTAPAPER_CSV=$1
+cd $TA_DIR &&
+  python3 src/extract_bookmarks.py --log-level=DEBUG \
+    --data-dir=/Users/leigh/Workspace/bullfrog/threads-analysis/data/sources \
+    --instapaper-csv=$INSTAPAPER_CSV
