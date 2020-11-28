@@ -14,13 +14,18 @@ def create_and_filter_df(doc):
   df = pd.DataFrame(doc["entities"]["entities"],
                     columns=["name", "type", "salience"])
   df_filt = df[~df.type.isin(["DATE", "ADDRESS", "NUMBER"])]
+  if df_filt.shape[0] == 0:
+    return df_filt
+
   df_group = df_filt.groupby(["name"])
 
   df_group_max = df_group.max()
-  logger.debug(
-    f"percentiles={df_group_max.salience.quantile([0.1, 0.5, 0.8, 0.9, 0.99])}")
+  percentiles = df_group_max.salience.quantile([0.1, 0.5, 0.8, 0.9, 0.99])
+  logger.debug(f"percentiles={percentiles}")
+  logger.debug(f"using {percentiles.at[0.80]}")
 
-  df_group_max_top = df_group_max[df_group_max.salience >= 0.0025]
+  df_group_max_top = df_group_max[df_group_max.salience >=
+                                  percentiles.at[0.80]]
   logger.debug(f"shape={df_group_max_top.shape}")
 
   return df_group_max_top
@@ -61,7 +66,7 @@ def main():
   logger.debug(f"got dirs {sources}")
   source_docs = []
 
-  for source in sources[0:100]:
+  for source in sources[0:50]:
     logger.debug(f"loading {data_dir}/{source}")
 
     entities_filename = os.path.join(data_dir, source, "google_entities.json")
@@ -85,7 +90,8 @@ def main():
     source_docs.append(source_doc)
 
   # need to install graphiz first, brew install graphviz
-  graph = Digraph('G', filename='data/topic_graph.gv')
+  graph = Digraph('Topics', filename='data/topic_graph.gv',
+                  graph_attr={"rankdir": "LR"})
 
   for doc_a in source_docs:
     for doc_b in source_docs:
