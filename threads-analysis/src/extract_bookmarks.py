@@ -18,7 +18,7 @@ def save_file(doc, base_dir, id_part):
 
 def url_to_id(url):
   parsed_url = urlparse(url)
-  url_path_part = parsed_url.hostname + '_' + parsed_url.path
+  url_path_part = f"{parsed_url.hostname}_{parsed_url.path}"
   url_path_part = re.sub(r'[/:.\-_]+', '_', url_path_part)
   return url_path_part.strip("_")
 
@@ -37,11 +37,14 @@ def main():
   df_read = df[df.Folder == "Archive"]
   print(df_read)
 
-  for index, row in df.head().iterrows():
-    bookmark_id = url_to_id(row["URL"])
+  for index, row in df.iterrows():
+    url = row["URL"]
+    if url is None or url == "":
+      continue
+    bookmark_id = url_to_id(url)
     bookmark_doc = {
       "bookmark_id": bookmark_id,
-      "url": row["URL"],
+      "url": url,
       "title": row["Title"],
       "saved_date": datetime.fromtimestamp(row["Timestamp"]).isoformat(),
     }

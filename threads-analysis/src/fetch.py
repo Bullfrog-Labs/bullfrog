@@ -12,7 +12,9 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("--log-level", type=str, default="INFO")
   parser.add_argument("--dest", type=str, required=True)
-  parser.add_argument("--url", type=str, required=True)
+  parser.add_argument("--url", type=str, required=False)
+  parser.add_argument("--bookmark-id", type=str, required=False)
+  parser.add_argument("--ignore-cache", action='store_true')
 
   nltk.download('punkt')
 
@@ -22,6 +24,14 @@ def main():
   logger.debug("starting...")
 
   url = args.url
+  if args.bookmark_id:
+    with open(os.path.join(args.dest, args.bookmark_id, "bookmark.json")) as bookmark_file:
+      bookmark_doc = json.load(bookmark_file)
+      url = bookmark_doc["url"]
+
+  if url is None:
+    raise Exception("Invalid url")
+
   article = Article(url)
   article.download()
   article.parse()
@@ -36,7 +46,7 @@ def main():
 
   article_parsed_url = urlparse(url)
   url_path_part = article_parsed_url.hostname + '_' + article_parsed_url.path
-  url_path_part = re.sub(r'[/:.\-_]+', '_', url_path_part)
+  url_path_part = re.sub(r'[/:.\-_]+', '_', url_path_part).strip("_")
 
   article_doc = {
     "id": url_path_part,

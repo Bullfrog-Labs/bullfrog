@@ -40,7 +40,10 @@ def compute_edge_weight(doc_a, doc_b):
   intersection = df_a.index.intersection(df_b.index)
   logger.debug(intersection)
 
-  return intersection.size
+  if intersection.size > 1:
+    return intersection.size
+  else:
+    return 0
 
 
 def main():
@@ -58,14 +61,18 @@ def main():
   logger.debug(f"got dirs {sources}")
   source_docs = []
 
-  for source in sources:
+  for source in sources[0:100]:
     logger.debug(f"loading {data_dir}/{source}")
 
     entities_filename = os.path.join(data_dir, source, "google_entities.json")
+    bookmark_filename = os.path.join(data_dir, source, "bookmark.json")
+
+    if not os.path.exists(entities_filename) or not os.path.exists(bookmark_filename):
+      continue
+
     with open(entities_filename) as entities_file:
       entities_doc = json.load(entities_file)
 
-    bookmark_filename = os.path.join(data_dir, source, "bookmark.json")
     with open(bookmark_filename) as bookmark_file:
       bookmark_doc = json.load(bookmark_file)
 

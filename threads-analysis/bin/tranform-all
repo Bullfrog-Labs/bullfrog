@@ -1,0 +1,7 @@
+#!/bin/bash
+BF_ROOT=$(git rev-parse --show-toplevel)
+TA_DIR=$BF_ROOT/threads-analysis
+
+# brew install parallel
+ls data/sources | parallel -j 4 bin/fetch-one-id {}
+ls data/sources | parallel -j 4 bin/gcp-ee-one data/sources/{}/article_parts.json
