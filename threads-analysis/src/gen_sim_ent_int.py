@@ -39,7 +39,7 @@ def compute_edge_weight(doc_a, doc_b):
   logger.debug(intersection)
 
   if intersection.size > 1:
-    return [intersection.size, intersection]
+    return [intersection.size, intersection.tolist()]
   else:
     return [0, []]
 

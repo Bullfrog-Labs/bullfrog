@@ -13,4 +13,4 @@ pairs() {
   done
 }
 
-pairs | parallel -j 20 bin/gen-sim-ent-int {}
+pairs | parallel -j 2 bin/gen-sim-ent-int {}
