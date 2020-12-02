@@ -1,0 +1,11 @@
+#!/bin/bash
+BF_ROOT=$(git rev-parse --show-toplevel)
+TA_DIR=$BF_ROOT/threads-analysis
+IFS=' ' read -ra ADDR <<< "$1"
+DOC_A=${ADDR[0]}/spacy_entities.json
+DOC_B=${ADDR[1]}/spacy_entities.json
+cd $TA_DIR &&
+  python3 src/gen_sim_spacy.py --log-level=DEBUG \
+    --data-dir=/Users/leigh/Workspace/bullfrog/threads-analysis/data \
+    --entity-doc-a=$DOC_A \
+    --entity-doc-b=$DOC_B
