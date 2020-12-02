@@ -14,6 +14,7 @@ timers = {}
 
 
 def log_timers(timers):
+  logger = logging.getLogger("extract_entities")
   for metric_name in dict(filter(lambda t: t[0].startswith("elapsed"), timers.items())):
     elapsed_ms = timers[metric_name]
     logger.debug(f"{metric_name} = {elapsed_ms}s")

@@ -39,7 +39,7 @@ def main():
   timers["elapsed_load_files_ms"] = time.time() - timers["start_load_files_ms"]
 
   timers["start_load_model_ms"] = time.time()
-  nlp = spacy.load("en_core_web_lg")
+  nlp = spacy.load("en_core_web_md")
   timers["elapsed_load_model_ms"] = time.time() - timers["start_load_model_ms"]
 
   timers["start_decode_ms"] = time.time()
