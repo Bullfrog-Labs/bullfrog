@@ -5,3 +5,4 @@ nltk
 google-cloud-language
 graphviz
 pandas
+matplotlib

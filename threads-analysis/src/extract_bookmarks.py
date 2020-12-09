@@ -37,7 +37,7 @@ def main():
   df_read = df[df.Folder == "Archive"]
   print(df_read)
 
-  for index, row in df.iterrows():
+  for index, row in df_read.iterrows():
     url = row["URL"]
     if url is None or url == "":
       continue

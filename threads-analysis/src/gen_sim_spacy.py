@@ -34,7 +34,6 @@ async def compute_sim(nlp, entity_doc_a, entity_doc_b, data_dir):
 
   doc_loader_a = Doc(nlp.vocab)
   spacy_doc_a = doc_loader_a.from_bytes(bytes_doc_a)
-  logger.debug(len(bytes_doc_b))
   doc_loader_b = Doc(nlp.vocab)
   spacy_doc_b = doc_loader_b.from_bytes(bytes_doc_b)
 
@@ -57,9 +56,10 @@ async def compute_sim(nlp, entity_doc_a, entity_doc_b, data_dir):
     json.dump(sim_spacy_doc, similarity_file)
 
 
-async def compute_sim_all(nlp, data_dir):
+async def compute_sim_all(nlp, data_dir, source_ids):
   logger = logging.getLogger("gen_sim_spacy")
-  source_ids = os.listdir(os.path.join(data_dir, "sources"))
+  if source_ids is None:
+    source_ids = os.listdir(os.path.join(data_dir, "sources"))
   futures = []
 
   for i in range(len(source_ids)):
@@ -73,17 +73,21 @@ async def compute_sim_all(nlp, data_dir):
 def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("--log-level", type=str, default="INFO")
-  parser.add_argument("--entity-doc-a", type=str, required=True)
-  parser.add_argument("--entity-doc-b", type=str, required=True)
   parser.add_argument("--data-dir", type=str, required=True)
+  parser.add_argument("--source-ids", type=str)
 
   args = parser.parse_args()
   logging.basicConfig(level=args.log_level)
   logger = logging.getLogger("gen_sim_spacy")
   logger.debug("Starting...")
 
+  source_ids = []
+  if args.source_ids:
+    source_ids = args.source_ids.split(",")
+    logger.debug(f"Using {len(source_ids)} source ids...")
+
   nlp = spacy.load("en_core_web_lg")
-  asyncio.run(compute_sim_all(nlp, args.data_dir))
+  asyncio.run(compute_sim_all(nlp, args.data_dir, source_ids))
 
   logger.debug("Done")
 
