@@ -12,6 +12,7 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("--log-level", type=str, default="INFO")
   parser.add_argument("--data-dir", type=str, required=True)
+  parser.add_argument("--source-ids", type=str)
 
   args = parser.parse_args()
   logging.basicConfig(level=args.log_level)
@@ -20,11 +21,19 @@ def main():
 
   data_dir = args.data_dir
   sources = os.listdir(data_dir)
+  if args.source_ids:
+    sources = args.source_ids.split(",")
+    logger.debug(f"Using {len(sources)} source ids...")
+
   logger.debug(f"got {len(sources)} dirs")
+
+  sims = os.listdir(os.path.join(data_dir, "../sim_spacy"))
+
   bookmark_docs = []
   ents_docs = []
+  sims_docs = []
 
-  for source in sources[0:3000]:
+  for source in sources:
     bookmark_filename = os.path.join(data_dir, source, "bookmark.json")
     ents_filename = os.path.join(data_dir, source, "google_entities.json")
 
@@ -40,6 +49,16 @@ def main():
     bookmark_docs.append(bookmark_doc)
     ents_docs.append(ents_doc)
 
+  for sim_filename in sims:
+    sim_path = os.path.join(data_dir, "../sim_spacy", sim_filename)
+
+    if not os.path.exists(sim_path):
+      continue
+    with open(sim_path) as sims_file:
+      sims_doc = json.load(sims_file)
+
+    sims_docs.append(sims_doc)
+
   df_ents = pd.DataFrame(ents_docs)
   df_ents['ents'] = df_ents['entities'].apply(top_n_ents)
   df_ents = df_ents.drop(columns=['entities'])
@@ -52,13 +71,27 @@ def main():
 
   df_all = df_all[df_all["ents"].apply(
     lambda x: bool(len(set(["javascript", "browser"]).intersection(x)) != 2))]
+  df_all = df_all[df_all["ents"].apply(lambda x: bool(len(x)) != 0)]
+  df_all = df_all.sort_values(by="ents", key=lambda x: x.str.len())
+
+  ids = df_all.index.tolist()
+
+  # print(df_all)
+
+  # print(ids)
+
+  df_sims = load_sims(sims_docs)
+  df_sims[["left", "right"]] = df_sims["id"].str.split("-", 1, expand=True)
+  df_sims = df_sims[df_sims["left"].isin(ids) & df_sims["right"].isin(ids)]
+  print(df_sims[["left", "right", "similarity"]].to_csv(
+    "data/sim_sept.csv", sep='\t', index=False))
 
   # print("bms")
   # print(df_bms_idx)
   # print("ents")
   # print(df_ents_idx)
   # print("all")
-  print(df_all)
+  # print(df_all)
   df_all.to_csv("data/sept.csv")
 
 
@@ -68,6 +101,19 @@ def top_n_ents(x):
   df = df.tail(10)
   df = df['name'].sort_values()
   return df.tolist()
+
+
+def load_sims(sims_docs):
+  logger = logging.getLogger()
+  df = pd.DataFrame(sims_docs)
+
+  df = df.sort_values("similarity")
+  df = df[~df["id"].str.startswith(
+    "twitter_com") & ~df["id"].str.startswith("t_co")]
+  # print(df.tail(20))
+  # for sim in df.tail(20)["id"].tolist():
+  #  print(sim.split("-"))
+  return df
 
 
 def process_bms_docs(bookmark_docs):

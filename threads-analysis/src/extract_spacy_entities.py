@@ -57,7 +57,7 @@ async def extract_and_save_all(nlp, base_dir):
   logger.debug(f"ids={source_ids}")
 
   futures = []
-  for source_id in source_ids:
+  for source_id in source_ids[0:5]:
     article_doc = f"data/sources/{source_id}/article_parts.json"
     futures.append(extract_and_save(article_doc, nlp, base_dir))
   asyncio.gather(*futures)
