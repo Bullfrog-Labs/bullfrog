@@ -6,3 +6,4 @@ google-cloud-language
 graphviz
 pandas
 matplotlib
+sklearn
