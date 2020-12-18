@@ -1,25 +1,73 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import * as log from "loglevel";
+
+import React, { useState } from "react";
+import "./App.css";
+
+import { Logging } from "kmgmt-common";
+
+import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
+import { initializeFirebaseApp } from "./services/Firebase";
+import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
+import { AuthContext, OnAuthStateChangedHandle } from "./services/auth/Auth";
+import { checkIfUserExists, createNewUserRecord } from "./services/store/Users";
+import { Router } from "./routing/Router";
+
+Logging.configure(log);
+
+const [app, auth] = initializeFirebaseApp();
+const authProvider = FirebaseAuthProvider.create(app, auth);
+const database = FirestoreDatabase.fromApp(app);
 
 function App() {
+  const logger = log.getLogger("App");
+  const [authState, setAuthState] = useState(
+    authProvider.getInitialAuthState()
+  );
+
+  // TODO: uncomment
+  /*
+  const onAuthStateChanged: OnAuthStateChangedHandle = async (
+    authedUser: firebase.User
+  ) => {
+    logger.debug("Auth state changed, updating auth state.");
+    setAuthState(authedUser);
+
+    if (!authedUser) {
+      logger.debug("Empty auth state, not logged in. Done updating auth state");
+      return;
+    }
+
+    if (!authedUser.uid) {
+      throw new Error("Authed user uid should not be null");
+    }
+
+    const userExists = await checkIfUserExists(database, authedUser.uid);
+    if (!userExists) {
+      logger.debug(
+        `User document does not exist for user ${authedUser.uid}, creating new one.`
+      );
+      await createNewUserRecord(database, authedUser);
+    }
+
+    logger.debug("User logged in. Done updating auth state.");
+  };
+  */
+
+  // TODO: uncomment
+  // authProvider.onAuthStateChanged = onAuthStateChanged;
+
+  if (authState) {
+    logger.debug(
+      `Logged in as user ${authState.uid} with ${authState.displayName} / ${authState.email}`
+    );
+  } else {
+    logger.info(`Not logged in`);
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AuthContext.Provider value={authState}>
+      <Router authProvider={authProvider} />
+    </AuthContext.Provider>
   );
 }
 
