@@ -1,6 +1,10 @@
-# Getting Started with Create React App
+# Village
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Deploying to Firebase Hosting
+
+1. Run `yarn build` to create a production build of the app.
+2. Run ``deploy to deploy the app (CAUTION: THIS WILL DEPLOY TO THE LIVE
+   CHANNEL AKA PRODUCTION).
 
 ## Available Scripts
 
