@@ -4,7 +4,8 @@
     "kmgmt/kmgmt-app",
     "kmgmt/kmgmt-native-app",
     "kmgmt/kmgmt-common",
-    "bfr/bfr-app"
+    "bfr/bfr-app",
+    "village/village-web"
   ],
   "scripts": {
     "ci-test": "CI=1 yarn workspaces run test"
