@@ -12,6 +12,8 @@ import { Router } from "./routing/Router";
 import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
 import { checkIfUserExists, createNewUserRecord } from "./services/store/Users";
 
+import firebase from "firebase";
+
 Logging.configure(log);
 const useEmulators = window.location.hostname === "localhost";
 const [app, auth] = initializeFirebaseApp(useEmulators);
