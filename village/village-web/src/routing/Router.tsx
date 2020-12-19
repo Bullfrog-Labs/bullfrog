@@ -27,14 +27,10 @@ export const Router: FunctionComponent<RouterProps> = ({ authProvider }) => {
     <BrowserRouter>
       <Switch>
         <Route path="/login">
-          <AppContainer>
-            <LoginView authProvider={authProvider} />
-          </AppContainer>
+          <div>login</div>
         </Route>
         <PrivateRoute exact path="/">
-          <AppContainer>
-            <MainView />
-          </AppContainer>
+          <div>root</div>
         </PrivateRoute>
         <Route path="*">
           <Sad404 />
