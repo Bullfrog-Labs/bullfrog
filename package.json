@@ -10,9 +10,7 @@
     ],
     "nohoist": [
       "**/babel-loader",
-      "**/babel-loader/**",
-      "kmgmt-common/**/jest",
-      "kmgmt-common/**/jest/**"
+      "**/babel-loader/**"
     ]
   },
   "scripts": {
