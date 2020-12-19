@@ -74,14 +74,6 @@ export default function AppContainer(props: { children: React.ReactNode }) {
   const classes = useStyles();
   const history = useHistory();
 
-  const onInboxClick = () => {
-    history.push("/inbox");
-  };
-
-  const onLibraryClick = () => {
-    history.push("/library");
-  };
-
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
@@ -96,29 +88,6 @@ export default function AppContainer(props: { children: React.ReactNode }) {
         >
           <div className={classes.toolbar} />
           <Divider />
-          <List>
-            <ListItem
-              button
-              className={classes.drawerIcon}
-              onClick={onInboxClick}
-            >
-              <ListItemIcon className={classes.drawerIcon}>
-                <InboxIcon fontSize="large" className={classes.drawerIcon} />
-              </ListItemIcon>
-            </ListItem>
-            <ListItem
-              button
-              className={classes.drawerIcon}
-              onClick={onLibraryClick}
-            >
-              <ListItemIcon className={classes.drawerIcon}>
-                <LibraryBooksIcon
-                  fontSize="large"
-                  className={classes.drawerIcon}
-                />
-              </ListItemIcon>
-            </ListItem>
-          </List>
         </Drawer>
         <main className={classes.content}>
           <Container maxWidth="md">

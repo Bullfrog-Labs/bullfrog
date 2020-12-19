@@ -12,6 +12,8 @@ import { AuthContext, OnAuthStateChangedHandle } from "./services/auth/Auth";
 import { checkIfUserExists, createNewUserRecord } from "./services/store/Users";
 import { Router } from "./routing/Router";
 
+import firebase from "firebase";
+
 Logging.configure(log);
 
 const [app, auth] = initializeFirebaseApp();
@@ -24,8 +26,6 @@ function App() {
     authProvider.getInitialAuthState()
   );
 
-  // TODO: uncomment
-  /*
   const onAuthStateChanged: OnAuthStateChangedHandle = async (
     authedUser: firebase.User
   ) => {
@@ -51,10 +51,8 @@ function App() {
 
     logger.debug("User logged in. Done updating auth state.");
   };
-  */
 
-  // TODO: uncomment
-  // authProvider.onAuthStateChanged = onAuthStateChanged;
+  authProvider.onAuthStateChanged = onAuthStateChanged;
 
   if (authState) {
     logger.debug(
