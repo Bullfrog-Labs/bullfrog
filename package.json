@@ -6,8 +6,7 @@
       "kmgmt/kmgmt-native-app",
       "kmgmt/kmgmt-common",
       "bfr/bfr-app",
-      "village/village-web",
-      "foo"
+      "village/village-web"
     ],
     "nohoist": [
       "**/babel-loader",
