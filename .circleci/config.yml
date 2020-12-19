@@ -32,7 +32,7 @@ workflows:
           run-command: ci-test
           version: 14.9.0
           cache-version: v3
-      - node/build:
+      - node/test:
           name: run-node-builds
           pkg-manager: yarn
           run-command: ci-build
