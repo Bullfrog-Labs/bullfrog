@@ -15,6 +15,6 @@
   },
   "scripts": {
     "ci-test": "CI=1 yarn workspaces run test",
-    "ci-build": "CI=1 yarn workspaces run build"
+    "ci-build": "CI='' yarn workspaces run build"
   }
 }
