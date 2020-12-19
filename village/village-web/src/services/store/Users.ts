@@ -1,5 +1,6 @@
 import * as log from "loglevel";
 import { Database } from "./Database";
+import firebase from "firebase";
 
 export type UserId = string;
 
