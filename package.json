@@ -7,11 +7,10 @@
       "kmgmt/kmgmt-common",
       "bfr/bfr-app",
       "village/village-web"
-    ],
-    "nohoist": [
-      "**/babel-loader",
-      "**/babel-loader/**"
     ]
+  },
+  "resolutions": {
+    "babel-loader": "8.1.0"
   },
   "scripts": {
     "ci-test": "CI=1 yarn workspaces run test",
