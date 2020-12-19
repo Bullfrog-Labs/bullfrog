@@ -32,7 +32,9 @@ export const Router: FunctionComponent<RouterProps> = ({ authProvider }) => {
           </AppContainer>
         </Route>
         <PrivateRoute exact path="/">
-          <div>root</div>
+          <AppContainer>
+            <MainView />
+          </AppContainer>
         </PrivateRoute>
         <Route path="*">
           <Sad404 />
