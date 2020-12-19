@@ -1,12 +1,20 @@
 {
   "private": true,
-  "workspaces": [
-    "kmgmt/kmgmt-app",
-    "kmgmt/kmgmt-native-app",
-    "kmgmt/kmgmt-common",
-    "bfr/bfr-app",
-    "village/village-web"
-  ],
+  "workspaces": {
+    "packages": [
+      "kmgmt/kmgmt-app",
+      "kmgmt/kmgmt-native-app",
+      "kmgmt/kmgmt-common",
+      "bfr/bfr-app",
+      "village/village-web"
+    ],
+    "nohoist": [
+      "**/babel-loader",
+      "**/babel-loader/**",
+      "kmgmt-common/**/jest",
+      "kmgmt-common/**/jest/**"
+    ]
+  },
   "scripts": {
     "ci-test": "CI=1 yarn workspaces run test"
   }
