@@ -5,7 +5,7 @@ import AppContainer from "../components/AppContainer";
 import { LoginView } from "../components/auth/LoginView";
 import PrivateRoute from "./PrivateRoute";
 import MainView from "../components/MainView";
-import ProfileView from "../components/ProfileView";
+import { ProfileViewController } from "../components/ProfileView";
 import StackView from "../components/StackView";
 
 function Sad404() {
@@ -40,7 +40,7 @@ export const Router: FunctionComponent<RouterProps> = ({ authProvider }) => {
         </PrivateRoute>
         <PrivateRoute exact path="/profile">
           <AppContainer>
-            <ProfileView />
+            <ProfileViewController />
           </AppContainer>
         </PrivateRoute>
         <PrivateRoute exact path="/stack">
