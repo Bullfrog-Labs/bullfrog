@@ -32,6 +32,12 @@ workflows:
           run-command: ci-test
           version: 14.9.0
           cache-version: v3
+      - node/test:
+          name: run-node-builds
+          pkg-manager: yarn
+          run-command: ci-build
+          version: 14.9.0
+          cache-version: v3
   python-tests:
     jobs:
       - run-ingest-gcf-type-checks

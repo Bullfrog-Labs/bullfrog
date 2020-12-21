@@ -33,7 +33,7 @@ function configure(log: log.RootLogger) {
   log.methodFactory = (methodName, logLevel, loggerName) => {
     const applied = original(methodName, logLevel, loggerName);
     return (message) => {
-      applied(formatLogLine(methodName, loggerName, message));
+      applied(formatLogLine(methodName, loggerName as string, message));
     };
   };
   const logger = log.getLogger("Logging");

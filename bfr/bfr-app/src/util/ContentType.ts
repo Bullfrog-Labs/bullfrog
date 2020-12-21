@@ -1,3 +1,5 @@
+import firebase from "firebase";
+
 export type ContentType =
   | "Long Read"
   | "Quick Read"
