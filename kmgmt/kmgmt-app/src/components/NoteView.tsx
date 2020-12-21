@@ -10,6 +10,7 @@ import RichTextEditor, {
 import IdleTimer from "react-idle-timer";
 import * as log from "loglevel";
 import { AuthContext } from "../services/Auth";
+import { RichText } from "./richtext/Types";
 
 const useStyles = makeStyles((theme) => ({
   noteView: {
@@ -122,10 +123,14 @@ export function CreateNewNoteView(props: NoteViewProps) {
   );
 }
 
+interface NoteViewParams {
+  id: NoteID;
+}
+
 export function NoteView(props: NoteViewProps) {
   const logger = log.getLogger("NoteView");
   const authState = useContext(AuthContext);
-  const { id } = useParams();
+  const { id } = useParams<NoteViewParams>();
 
   const [noteLoaded, setNoteLoaded] = useState(false);
   const [title, setTitle] = useState(EMPTY_RICH_TEXT_STATE.title);
@@ -148,7 +153,7 @@ export function NoteView(props: NoteViewProps) {
       const note = await props.database.getNote(authState.email, id);
       if (!!note) {
         setTitle(note.title ?? "");
-        setBody(note.body);
+        setBody(note.body as RichText);
       } else {
         // TODO: handle note not found
         logger.debug(`Note ${id} not found during load`);

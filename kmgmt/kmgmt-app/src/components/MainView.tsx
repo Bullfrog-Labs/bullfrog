@@ -21,6 +21,7 @@ import { Breakpoint } from "@material-ui/core/styles/createBreakpoints";
 import sizeMe, { SizeMeProps } from "react-sizeme";
 
 import { Responsive, WidthProvider } from "react-grid-layout";
+import { RichText } from "./richtext/Types";
 
 const ReactGridLayout = WidthProvider(Responsive);
 
@@ -44,7 +45,7 @@ function NotePreviewCard(props: { note: NoteRecord }) {
   const classes = useStyles();
 
   const { note } = props;
-  const notePreview = richTextStringPreview(note.body);
+  const notePreview = richTextStringPreview(note.body as RichText);
 
   let noteLink: string;
   if (!!note.id) {
@@ -76,7 +77,7 @@ function NotePreviewCard(props: { note: NoteRecord }) {
           )}
           {!!notePreview && (
             <Typography variant="body2" component="p">
-              {richTextStringPreview(note.body)}
+              {richTextStringPreview(note.body as RichText)}
             </Typography>
           )}
           {!note.title && !notePreview && (

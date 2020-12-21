@@ -1,5 +1,6 @@
 import { Database } from "./Database";
 import { getContentType, ContentType } from "../../util/ContentType";
+import firebase from "firebase";
 
 /**
  * getItemSet: Get a set of items.

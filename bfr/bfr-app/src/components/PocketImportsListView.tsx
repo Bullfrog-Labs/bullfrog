@@ -15,6 +15,8 @@ import { PocketImportItemCard } from "./PocketImportItemCard";
 import * as R from "ramda";
 import { MenuSelect, MenuSelectItem } from "./MenuSelect";
 
+import firebase from "firebase";
+
 const useStyles = makeStyles((theme) => ({
   pocketImportItemCard: {
     margin: theme.spacing(1),
