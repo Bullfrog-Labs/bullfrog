@@ -2,9 +2,9 @@ import React, { FunctionComponent } from "react";
 import { Switch, Route, BrowserRouter, useLocation } from "react-router-dom";
 import { AuthProvider } from "../services/auth/Auth";
 import AppContainer from "../components/AppContainer";
-import { LoginView } from "../components/auth/LoginView";
+import { LoginView } from "../views/LoginView";
 import PrivateRoute from "./PrivateRoute";
-import MainView from "../components/MainView";
+import MainView from "../views/MainView";
 
 function Sad404() {
   let location = useLocation();
