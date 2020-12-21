@@ -5,6 +5,8 @@ import AppContainer from "../components/AppContainer";
 import { LoginView } from "../components/auth/LoginView";
 import PrivateRoute from "./PrivateRoute";
 import MainView from "../components/MainView";
+import ProfileView from "../components/ProfileView";
+import StackView from "../components/StackView";
 
 function Sad404() {
   let location = useLocation();
@@ -34,6 +36,16 @@ export const Router: FunctionComponent<RouterProps> = ({ authProvider }) => {
         <PrivateRoute exact path="/">
           <AppContainer>
             <MainView />
+          </AppContainer>
+        </PrivateRoute>
+        <PrivateRoute exact path="/profile">
+          <AppContainer>
+            <ProfileView />
+          </AppContainer>
+        </PrivateRoute>
+        <PrivateRoute exact path="/stack">
+          <AppContainer>
+            <StackView />
           </AppContainer>
         </PrivateRoute>
         <Route path="*">
