@@ -31,6 +31,10 @@ export interface UserPost {
   post: PostRecord;
 }
 
+export interface Source {
+  name: string;
+}
+
 export class VillageController {
   handleAddPost(): void {}
   getUserPosts(): PostRecord[] {
