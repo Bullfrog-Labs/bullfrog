@@ -7,7 +7,7 @@ import firebase from "firebase";
 const firebaseConfig = {
   apiKey: "AIzaSyBEFkGDQBec7AABTZh9ONrW46AvHY9Od84",
   authDomain: "village-b4647.firebaseapp.com",
-  databaseURL: "https://bullfrog-reader.firebaseio.com",
+  databaseURL: "https://village-b4647.firebaseio.com",
   projectId: "village-b4647",
   storageBucket: "village-b4647.appspot.com",
   messagingSenderId: "379717164586",
