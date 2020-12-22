@@ -2,7 +2,7 @@ import * as log from "loglevel";
 import { render } from "@testing-library/react";
 import { StackView } from "./StackView";
 import { Logging } from "kmgmt-common";
-import { AuthProvider, AuthContext } from "../services/auth/Auth";
+import { AuthContext } from "../services/auth/Auth";
 import { PostRecord } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
 import { u0, p0, posts0, authProvider } from "./ProfileView.test";

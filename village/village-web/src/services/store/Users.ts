@@ -52,9 +52,11 @@ export const getUsersForIds = async (
   database: Database,
   userIds: UserId[]
 ): Promise<UserRecord[]> => {
+  const logger = log.getLogger("getUsersForIds");
+  logger.debug(`Fetching posts for ids ${userIds}`);
   const userDoc = await database
     .getHandle()
-    .collectionGroup(USERS_COLLECTION)
+    .collection(USERS_COLLECTION)
     .where("uid", "in", userIds)
     .withConverter(USER_RECORD_CONVERTER)
     .get();

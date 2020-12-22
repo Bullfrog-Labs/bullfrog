@@ -60,7 +60,7 @@ export const ProfileView = (props: {
 
   const listItems = posts.map((post) => {
     return (
-      <ListItem alignItems="flex-start">
+      <ListItem alignItems="flex-start" key={user.uid}>
         <ListItemText
           primary={post.title}
           secondary={<React.Fragment>{post.body}</React.Fragment>}

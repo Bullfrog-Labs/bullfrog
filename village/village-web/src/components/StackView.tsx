@@ -74,7 +74,7 @@ export const StackView = (props: { posts: UserPost[]; source: Source }) => {
       </Typography>
     );
     return (
-      <ListItem alignItems="flex-start">
+      <ListItem alignItems="flex-start" key={post.post.id}>
         <ListItemAvatar>
           <Avatar alt={post.user.displayName}>
             <ImageIcon />
