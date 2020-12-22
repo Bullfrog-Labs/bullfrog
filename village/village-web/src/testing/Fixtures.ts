@@ -1,0 +1,31 @@
+export const u0: UserRecord = {
+  displayName: "Leighland",
+  uid: "123",
+  description: "Welcome to leighland!",
+  username: "l4stewar",
+};
+
+export const p0: PostRecord = {
+  title: "Title mane",
+  body: "Body foo",
+  userId: "123",
+  updatedAt: new Date(),
+  id: "123",
+};
+
+export const posts0: PostRecord[] = [p0];
+
+export const up0 = {
+  user: u0,
+  post: p0,
+};
+
+export const userPosts0 = [up0, up0];
+
+export const authProvider: AuthProvider = {
+  onAuthStateChanged: (authState) => {},
+  getInitialAuthState: () => ({
+    displayName: "Test user",
+    email: "testuser@somewhere.com",
+  }),
+};

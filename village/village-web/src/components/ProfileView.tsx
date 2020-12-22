@@ -20,6 +20,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+export type ProfileViewProps = {
+  posts: PostRecord[];
+  user: UserRecord;
+};
+
 export const useProfileState = (
   getUserPosts: GetUserPostsFn,
   userId: UserId
@@ -50,10 +55,7 @@ export const ProfileViewController = (props: {
   return <ProfileView posts={state.posts} user={user} />;
 };
 
-export const ProfileView = (props: {
-  posts: PostRecord[];
-  user: UserRecord;
-}) => {
+export const ProfileView = (props: ProfileViewProps) => {
   const logger = log.getLogger("ProfileView");
   const classes = useStyles();
   const { posts, user } = props;
