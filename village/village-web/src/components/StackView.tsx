@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   Avatar,
   Container,
@@ -14,7 +14,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ImageIcon from "@material-ui/icons/Image";
 import { Link } from "react-router-dom";
-import { UserPost } from "../services/store/Posts";
+import { UserPost, GetStackPostsFn } from "../services/store/Posts";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -30,20 +30,27 @@ export interface Source {
   name: string;
 }
 
-export function useStackState(sourceName: string) {
+export function useStackState(getStackPosts: GetStackPostsFn, title: string) {
   const [posts, setPosts] = useState<UserPost[]>([]);
-  const [source, setSource] = useState<Source>({ name: sourceName });
-  return { posts: posts, source: source };
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const userPosts = await getStackPosts(title);
+      setPosts(userPosts);
+    };
+    fetchPosts();
+  }, [getStackPosts, title]);
+  return { posts: posts };
 }
 
-export function StackViewController() {
+export function StackViewController(props: { getStackPosts: GetStackPostsFn }) {
   const logger = log.getLogger("StackViewController");
   const authState = useContext(AuthContext);
-  const state = useStackState(
-    "Digital gardens let you cultivate your own little bit of the internet"
-  );
+  const { getStackPosts } = props;
+  const title =
+    "Digital gardens let you cultivate your own little bit of the internet";
+  const state = useStackState(getStackPosts, title);
 
-  return <StackView posts={state.posts} source={state.source} />;
+  return <StackView posts={state.posts} source={{ name: title }} />;
 }
 
 export function StackView(props: { posts: UserPost[]; source: Source }) {

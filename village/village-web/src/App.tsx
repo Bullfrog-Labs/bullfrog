@@ -18,7 +18,7 @@ import {
 } from "./services/store/Users";
 import { Router } from "./routing/Router";
 import firebase from "firebase";
-import { getUserPosts } from "./services/store/Posts";
+import { getUserPosts, getStackPosts } from "./services/store/Posts";
 import { useEffect } from "react";
 
 Logging.configure(log);
@@ -92,6 +92,7 @@ function App() {
       <Router
         authProvider={authProvider}
         getUserPosts={getUserPosts(database)}
+        getStackPosts={getStackPosts(database)}
         user={user}
       />
     </AuthContext.Provider>

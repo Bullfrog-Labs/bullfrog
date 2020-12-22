@@ -48,6 +48,22 @@ export const getUser = async (
   return userDoc.exists ? userDoc.data()! : null;
 };
 
+export const getUsersForIds = async (
+  database: Database,
+  userIds: UserId[]
+): Promise<UserRecord[]> => {
+  const userDoc = await database
+    .getHandle()
+    .collectionGroup(USERS_COLLECTION)
+    .where("uid", "in", userIds)
+    .withConverter(USER_RECORD_CONVERTER)
+    .get();
+
+  return userDoc.docs.map((doc) => {
+    return doc.data();
+  });
+};
+
 export const checkIfUserExists = async (
   database: Database,
   uid: UserId

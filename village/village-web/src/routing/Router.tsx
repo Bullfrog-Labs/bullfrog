@@ -7,7 +7,7 @@ import PrivateRoute from "./PrivateRoute";
 import MainView from "../components/MainView";
 import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
-import { GetUserPostsFn } from "../services/store/Posts";
+import { GetStackPostsFn, GetUserPostsFn } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
 
 function Sad404() {
@@ -25,9 +25,10 @@ function Sad404() {
 export const Router = (props: {
   authProvider: AuthProvider;
   getUserPosts: GetUserPostsFn;
+  getStackPosts: GetStackPostsFn;
   user?: UserRecord;
 }) => {
-  const { authProvider, getUserPosts, user } = props;
+  const { authProvider, getUserPosts, getStackPosts, user } = props;
   if (!user) {
     return (
       <BrowserRouter>
@@ -64,7 +65,7 @@ export const Router = (props: {
           </PrivateRoute>
           <PrivateRoute exact path="/stack">
             <AppContainer>
-              <StackViewController />
+              <StackViewController getStackPosts={getStackPosts} />
             </AppContainer>
           </PrivateRoute>
           <Route path="*">
