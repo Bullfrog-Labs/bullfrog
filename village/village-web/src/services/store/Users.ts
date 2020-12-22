@@ -7,6 +7,8 @@ export type UserId = string;
 export interface UserRecord {
   uid: UserId;
   displayName: string;
+  username?: string;
+  description?: string;
 }
 
 const USER_RECORD_CONVERTER = {
@@ -21,6 +23,8 @@ const USER_RECORD_CONVERTER = {
     return {
       uid: data.uid,
       displayName: data.displayName,
+      username: data.username,
+      description: data.description,
     };
   },
 };
@@ -42,6 +46,22 @@ export const getUser = async (
     .get();
 
   return userDoc.exists ? userDoc.data()! : null;
+};
+
+export const getUsersForIds = async (
+  database: Database,
+  userIds: UserId[]
+): Promise<UserRecord[]> => {
+  const userDoc = await database
+    .getHandle()
+    .collectionGroup(USERS_COLLECTION)
+    .where("uid", "in", userIds)
+    .withConverter(USER_RECORD_CONVERTER)
+    .get();
+
+  return userDoc.docs.map((doc) => {
+    return doc.data();
+  });
 };
 
 export const checkIfUserExists = async (
