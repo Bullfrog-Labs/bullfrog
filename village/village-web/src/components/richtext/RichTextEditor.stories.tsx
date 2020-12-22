@@ -8,7 +8,7 @@ import RichTextEditor, {
 } from "./RichTextEditor";
 
 export default {
-  title: "RichTextEditor",
+  title: "Editing/RichTextEditor",
   component: RichTextEditor,
 };
 

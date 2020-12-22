@@ -16,7 +16,7 @@ export type EditableTypographyProps = {
   readOnly?: boolean;
   initialValue?: string;
   variant?: string;
-  handleEscape: KBEventHandler;
+  handleEscape?: KBEventHandler;
   onChange?: (newValue: string) => void;
 };
 
