@@ -7,6 +7,8 @@ export type UserId = string;
 export interface UserRecord {
   uid: UserId;
   displayName: string;
+  username: string;
+  description: string;
 }
 
 const USER_RECORD_CONVERTER = {

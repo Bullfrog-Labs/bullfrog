@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Container, Typography } from "@material-ui/core";
 import { AuthContext } from "../services/auth/Auth";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -7,11 +7,9 @@ import Divider from "@material-ui/core/Divider";
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import {
-  PostRecord,
-  UserRecord,
-  useVillageState,
-} from "../services/VillageController";
+import { posts0, user0 } from "../services/VillageController";
+import { PostRecord } from "../services/store/Posts";
+import { UserRecord } from "../services/store/Users";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -23,8 +21,21 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+export function useProfileState() {
+  const [posts, setPosts] = useState<PostRecord[]>(posts0);
+  const [user, setUser] = useState<UserRecord>(user0);
+
+  useEffect(() => {}, []);
+
+  return {
+    posts: posts,
+    user: user,
+    addPost: (post: PostRecord) => {},
+  };
+}
+
 export function ProfileViewController() {
-  const state = useVillageState();
+  const state = useProfileState();
   const authState = useContext(AuthContext);
   return <ProfileView posts={state.posts} user={state.user} />;
 }
