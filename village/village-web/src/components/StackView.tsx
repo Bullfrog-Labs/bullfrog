@@ -26,6 +26,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+export type StackViewProps = {
+  posts: UserPost[];
+  source: Source;
+};
+
 export interface Source {
   name: string;
 }
@@ -58,7 +63,7 @@ export const StackViewController = (props: {
   return <StackView posts={state.posts} source={{ name: title }} />;
 };
 
-export const StackView = (props: { posts: UserPost[]; source: Source }) => {
+export const StackView = (props: StackViewProps) => {
   const logger = log.getLogger("StackView");
   const { posts, source } = props;
   const classes = useStyles();
