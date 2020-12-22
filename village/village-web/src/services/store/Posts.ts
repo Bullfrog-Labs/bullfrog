@@ -1,7 +1,7 @@
 import * as log from "loglevel";
 import { Database } from "./Database";
 import firebase from "firebase";
-import { UserRecord, UserId } from "./Users";
+import { UserRecord, UserId, USERS_COLLECTION } from "./Users";
 
 export interface PostRecord {
   updatedAt: Date;
@@ -40,3 +40,24 @@ const POST_RECORD_CONVERTER = {
 };
 
 export const POSTS_COLLECTION = "posts";
+
+export const getUserPosts = (database: Database) => async (
+  uid: UserId
+): Promise<PostRecord[]> => {
+  const logger = log.getLogger("getUserPosts");
+
+  logger.debug(`Fetching user posts for user ${uid}`);
+  const postsDoc = await database
+    .getHandle()
+    .collection(USERS_COLLECTION)
+    .doc(uid)
+    .collection(POSTS_COLLECTION)
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  return postsDoc.docs.map((doc) => {
+    return doc.data();
+  });
+};
+
+export type GetUserPostsFn = ReturnType<typeof getUserPosts>;

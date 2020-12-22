@@ -7,9 +7,8 @@ import Divider from "@material-ui/core/Divider";
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import { posts0, user0 } from "../services/VillageController";
-import { PostRecord } from "../services/store/Posts";
-import { UserRecord } from "../services/store/Users";
+import { PostRecord, GetUserPostsFn } from "../services/store/Posts";
+import { UserRecord, UserId } from "../services/store/Users";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -21,23 +20,31 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export function useProfileState() {
-  const [posts, setPosts] = useState<PostRecord[]>(posts0);
-  const [user, setUser] = useState<UserRecord>(user0);
+export function useProfileState(getUserPosts: GetUserPostsFn, userId: UserId) {
+  const [posts, setPosts] = useState<PostRecord[]>([]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const userPosts = await getUserPosts(userId);
+      setPosts(userPosts);
+    };
+    fetchPosts();
+  }, [getUserPosts, userId]);
 
   return {
     posts: posts,
-    user: user,
     addPost: (post: PostRecord) => {},
   };
 }
 
-export function ProfileViewController() {
-  const state = useProfileState();
+export function ProfileViewController(props: {
+  getUserPosts: GetUserPostsFn;
+  user: UserRecord;
+}) {
+  const { getUserPosts, user } = props;
   const authState = useContext(AuthContext);
-  return <ProfileView posts={state.posts} user={state.user} />;
+  const state = useProfileState(getUserPosts, authState.uid);
+  return <ProfileView posts={state.posts} user={user} />;
 }
 
 export function ProfileView(props: { posts: PostRecord[]; user: UserRecord }) {

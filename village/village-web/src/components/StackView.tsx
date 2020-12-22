@@ -7,7 +7,6 @@ import {
   Typography,
 } from "@material-ui/core";
 import { AuthContext } from "../services/auth/Auth";
-import { userPosts0 } from "../services/VillageController";
 import Divider from "@material-ui/core/Divider";
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
@@ -32,7 +31,7 @@ export interface Source {
 }
 
 export function useStackState(sourceName: string) {
-  const [posts, setPosts] = useState<UserPost[]>(userPosts0);
+  const [posts, setPosts] = useState<UserPost[]>([]);
   const [source, setSource] = useState<Source>({ name: sourceName });
   return { posts: posts, source: source };
 }
