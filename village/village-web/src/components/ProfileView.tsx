@@ -8,7 +8,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import { PostRecord, GetUserPostsFn } from "../services/store/Posts";
-import { UserRecord, UserId } from "../services/store/Users";
+import { UserRecord, UserId, GetUserFn } from "../services/store/Users";
+import { useParams } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -20,6 +21,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+type ProfileViewParams = {
+  userId: string;
+};
+
 export type ProfileViewProps = {
   posts: PostRecord[];
   user: UserRecord;
@@ -27,9 +32,11 @@ export type ProfileViewProps = {
 
 export const useProfileState = (
   getUserPosts: GetUserPostsFn,
+  getUser: GetUserFn,
   userId: UserId
 ) => {
   const [posts, setPosts] = useState<PostRecord[]>([]);
+  const [user, setUser] = useState<UserRecord>();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -39,20 +46,39 @@ export const useProfileState = (
     fetchPosts();
   }, [getUserPosts, userId]);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const profileUser = await getUser(userId);
+      if (!profileUser) {
+        throw new Error("Missing user for userId");
+      }
+      setUser(profileUser);
+    };
+    fetchUser();
+  }, [getUserPosts, getUser, userId]);
+
   return {
     posts: posts,
+    user: user,
     addPost: (post: PostRecord) => {},
   };
 };
 
 export const ProfileViewController = (props: {
   getUserPosts: GetUserPostsFn;
+  getUser: GetUserFn;
   user: UserRecord;
 }) => {
-  const { getUserPosts, user } = props;
+  const { getUserPosts, getUser, user } = props;
   const authState = useContext(AuthContext);
-  const state = useProfileState(getUserPosts, authState.uid);
-  return <ProfileView posts={state.posts} user={user} />;
+  const { userId } = useParams<ProfileViewParams>();
+  const profileViewUserId = userId || authState.uid;
+  const state = useProfileState(getUserPosts, getUser, profileViewUserId);
+  if (state && state.user && state.posts) {
+    return <ProfileView posts={state.posts} user={state.user} />;
+  } else {
+    return <React.Fragment />;
+  }
 };
 
 export const ProfileView = (props: ProfileViewProps) => {

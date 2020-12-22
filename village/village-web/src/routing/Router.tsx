@@ -8,7 +8,7 @@ import MainView from "../components/MainView";
 import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
 import { GetStackPostsFn, GetUserPostsFn } from "../services/store/Posts";
-import { UserRecord } from "../services/store/Users";
+import { UserRecord, GetUserFn } from "../services/store/Users";
 
 const Sad404 = () => {
   let location = useLocation();
@@ -26,9 +26,10 @@ export const Router = (props: {
   authProvider: AuthProvider;
   getUserPosts: GetUserPostsFn;
   getStackPosts: GetStackPostsFn;
+  getUser: GetUserFn;
   user?: UserRecord;
 }) => {
-  const { authProvider, getUserPosts, getStackPosts, user } = props;
+  const { authProvider, getUserPosts, getStackPosts, getUser, user } = props;
   if (!user) {
     return (
       <BrowserRouter>
@@ -58,12 +59,16 @@ export const Router = (props: {
               <MainView />
             </AppContainer>
           </PrivateRoute>
-          <PrivateRoute exact path="/profile">
+          <PrivateRoute exact path="/profile/:userId?">
             <AppContainer>
-              <ProfileViewController getUserPosts={getUserPosts} user={user} />
+              <ProfileViewController
+                getUserPosts={getUserPosts}
+                getUser={getUser}
+                user={user}
+              />
             </AppContainer>
           </PrivateRoute>
-          <PrivateRoute exact path="/stack">
+          <PrivateRoute exact path="/stack/:stackId">
             <AppContainer>
               <StackViewController getStackPosts={getStackPosts} />
             </AppContainer>

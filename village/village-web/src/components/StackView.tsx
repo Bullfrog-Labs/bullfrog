@@ -13,7 +13,7 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ImageIcon from "@material-ui/icons/Image";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { UserPost, GetStackPostsFn } from "../services/store/Posts";
 
 const useStyles = makeStyles((theme) => ({
@@ -25,6 +25,10 @@ const useStyles = makeStyles((theme) => ({
     margin: "10px 0 0 0",
   },
 }));
+
+type StackViewParams = {
+  stackId: string;
+};
 
 export type StackViewProps = {
   posts: UserPost[];
@@ -55,12 +59,12 @@ export const StackViewController = (props: {
 }) => {
   const logger = log.getLogger("StackViewController");
   const authState = useContext(AuthContext);
+  const { stackId } = useParams<StackViewParams>();
+  logger.debug(`loading stack for ${stackId}`);
   const { getStackPosts } = props;
-  const title =
-    "Digital gardens let you cultivate your own little bit of the internet";
-  const state = useStackState(getStackPosts, title);
+  const state = useStackState(getStackPosts, stackId);
 
-  return <StackView posts={state.posts} source={{ name: title }} />;
+  return <StackView posts={state.posts} source={{ name: stackId }} />;
 };
 
 export const StackView = (props: StackViewProps) => {

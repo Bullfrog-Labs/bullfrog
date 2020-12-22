@@ -64,7 +64,7 @@ function App() {
   useEffect(() => {
     const fetchUser = async () => {
       if (authState?.uid) {
-        const user = await getUser(database, authState.uid);
+        const user = await getUser(database)(authState.uid);
         if (user != null) {
           logger.debug(`setting user ${user.displayName}`);
           setUser(user);
@@ -93,6 +93,7 @@ function App() {
         authProvider={authProvider}
         getUserPosts={getUserPosts(database)}
         getStackPosts={getStackPosts(database)}
+        getUser={getUser(database)}
         user={user}
       />
     </AuthContext.Provider>

@@ -1,3 +1,7 @@
+import { UserPost, PostRecord } from "../services/store/Posts";
+import { UserRecord } from "../services/store/Users";
+import { AuthProvider } from "../services/auth/Auth";
+
 export const u0: UserRecord = {
   displayName: "Leighland",
   uid: "123",
@@ -20,7 +24,7 @@ export const up0 = {
   post: p0,
 };
 
-export const userPosts0 = [up0, up0];
+export const userPosts0: UserPost[] = [up0, up0];
 
 export const authProvider: AuthProvider = {
   onAuthStateChanged: (authState) => {},
