@@ -30,7 +30,10 @@ export interface Source {
   name: string;
 }
 
-export function useStackState(getStackPosts: GetStackPostsFn, title: string) {
+export const useStackState = (
+  getStackPosts: GetStackPostsFn,
+  title: string
+) => {
   const [posts, setPosts] = useState<UserPost[]>([]);
   useEffect(() => {
     const fetchPosts = async () => {
@@ -40,9 +43,11 @@ export function useStackState(getStackPosts: GetStackPostsFn, title: string) {
     fetchPosts();
   }, [getStackPosts, title]);
   return { posts: posts };
-}
+};
 
-export function StackViewController(props: { getStackPosts: GetStackPostsFn }) {
+export const StackViewController = (props: {
+  getStackPosts: GetStackPostsFn;
+}) => {
   const logger = log.getLogger("StackViewController");
   const authState = useContext(AuthContext);
   const { getStackPosts } = props;
@@ -51,9 +56,9 @@ export function StackViewController(props: { getStackPosts: GetStackPostsFn }) {
   const state = useStackState(getStackPosts, title);
 
   return <StackView posts={state.posts} source={{ name: title }} />;
-}
+};
 
-export function StackView(props: { posts: UserPost[]; source: Source }) {
+export const StackView = (props: { posts: UserPost[]; source: Source }) => {
   const logger = log.getLogger("StackView");
   const { posts, source } = props;
   const classes = useStyles();
@@ -90,4 +95,4 @@ export function StackView(props: { posts: UserPost[]; source: Source }) {
       <List className={classes.root}>{listItems}</List>
     </Container>
   );
-}
+};

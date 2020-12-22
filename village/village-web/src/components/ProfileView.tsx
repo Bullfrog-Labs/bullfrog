@@ -20,7 +20,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export function useProfileState(getUserPosts: GetUserPostsFn, userId: UserId) {
+export const useProfileState = (
+  getUserPosts: GetUserPostsFn,
+  userId: UserId
+) => {
   const [posts, setPosts] = useState<PostRecord[]>([]);
 
   useEffect(() => {
@@ -35,19 +38,22 @@ export function useProfileState(getUserPosts: GetUserPostsFn, userId: UserId) {
     posts: posts,
     addPost: (post: PostRecord) => {},
   };
-}
+};
 
-export function ProfileViewController(props: {
+export const ProfileViewController = (props: {
   getUserPosts: GetUserPostsFn;
   user: UserRecord;
-}) {
+}) => {
   const { getUserPosts, user } = props;
   const authState = useContext(AuthContext);
   const state = useProfileState(getUserPosts, authState.uid);
   return <ProfileView posts={state.posts} user={user} />;
-}
+};
 
-export function ProfileView(props: { posts: PostRecord[]; user: UserRecord }) {
+export const ProfileView = (props: {
+  posts: PostRecord[];
+  user: UserRecord;
+}) => {
   const logger = log.getLogger("ProfileView");
   const classes = useStyles();
   const { posts, user } = props;
@@ -71,4 +77,4 @@ export function ProfileView(props: { posts: PostRecord[]; user: UserRecord }) {
       <List className={classes.root}>{listItems}</List>
     </Container>
   );
-}
+};

@@ -10,7 +10,7 @@ import { StackViewController } from "../components/StackView";
 import { GetStackPostsFn, GetUserPostsFn } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
 
-function Sad404() {
+const Sad404 = () => {
   let location = useLocation();
 
   return (
@@ -20,7 +20,7 @@ function Sad404() {
       </h3>
     </div>
   );
-}
+};
 
 export const Router = (props: {
   authProvider: AuthProvider;
