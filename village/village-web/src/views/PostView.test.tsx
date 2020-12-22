@@ -1,27 +1,30 @@
 import React from "react";
-import { fireEvent, render, waitFor } from "@testing-library/react";
-import { BasePostView } from "./PostView";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { BasePostView, PostRecord } from "./PostView";
 import {
   EMPTY_RICH_TEXT_STATE,
   Title,
   Body,
 } from "../components/richtext/RichTextEditor";
 import { UserRecord } from "../services/store/Users";
+import userEvent from "@testing-library/user-event";
 
 test("Renders BasePostView", async () => {
-  const author: UserRecord = {
-    uid: "123",
-    displayName: "Foo user",
+  let postRecord: PostRecord = {
+    author: {
+      uid: "123",
+      displayName: "Foo user",
+    },
+    title: EMPTY_RICH_TEXT_STATE.title,
+    body: EMPTY_RICH_TEXT_STATE.body,
   };
 
-  let title = EMPTY_RICH_TEXT_STATE.title;
-  const setTitle = (newTitle: Title) => {
-    title = newTitle;
-  };
+  const setTitle = jest.fn((newTitle: Title) => {
+    postRecord.title = newTitle;
+  });
 
-  let body = EMPTY_RICH_TEXT_STATE.body;
   const setBody = (newBody: Body) => {
-    body = newBody;
+    postRecord.body = newBody;
   };
 
   const handleOnIdle = jest.fn();
@@ -29,12 +32,11 @@ test("Renders BasePostView", async () => {
   const { getByText } = render(
     <BasePostView
       idleTime={25}
-      author={author}
-      title={title}
+      readOnly={false}
+      postRecord={postRecord}
       onTitleChange={setTitle}
-      body={body}
       onBodyChange={setBody}
-      handleOnIdle={handleOnIdle}
+      onIdle={handleOnIdle}
     />
   );
 
