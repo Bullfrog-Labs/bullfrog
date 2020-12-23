@@ -1,12 +1,12 @@
-import { Story } from "@storybook/react/types-6-0";
-import React, { FunctionComponent, useState } from "react";
+import { Meta, Story } from "@storybook/react/types-6-0";
+import React, { useState } from "react";
 import {
   Body,
   EMPTY_RICH_TEXT_STATE,
   Title,
 } from "../components/richtext/RichTextEditor";
+import { PostID } from "../services/store/Posts";
 import {
-  PostID,
   PostView,
   PostViewProps,
   RenamePostResult,
@@ -16,7 +16,7 @@ import {
 export default {
   title: "PostView/PostView",
   component: PostView,
-};
+} as Meta;
 
 const PostViewStateWrapper = (props: PostViewProps) => {
   const [title, setTitle] = useState(props.postRecord.title);
@@ -24,9 +24,10 @@ const PostViewStateWrapper = (props: PostViewProps) => {
 
   const postRecord = {
     id: props.postRecord.id,
-    author: props.postRecord.author,
+    authorId: props.postRecord.authorId,
     title: title,
     body: body,
+    updatedAt: new Date(),
   };
 
   return (
@@ -68,12 +69,10 @@ export const BasicPostView = Template.bind({});
 BasicPostView.args = {
   postRecord: {
     id: "456",
-    author: {
-      uid: "123",
-      displayName: "foo user",
-    },
+    authorId: "123",
     title: EMPTY_RICH_TEXT_STATE.title,
     body: EMPTY_RICH_TEXT_STATE.body,
+    updatedAt: new Date(),
   },
   onTitleChange: (newTitle: Title) => {},
   onBodyChange: (newBody: Body) => {},

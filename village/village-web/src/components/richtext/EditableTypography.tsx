@@ -1,11 +1,12 @@
 import React, { FunctionComponent, useMemo, useCallback } from "react";
-import { Node as SlateNode, createEditor } from "slate";
+import { createEditor } from "slate";
 import { KBEventHandler, RichText } from "./Types";
 import { withEditableTypographyLayout } from "./EditorBehaviors";
 import { withHistory } from "slate-history";
 import { withReact, Slate, Editable } from "slate-react";
 
 import { Typography } from "@material-ui/core";
+import { slateNodeToString, stringToSlateNode } from "./Utils";
 
 export type EditableTypographyProps = {
   readOnly?: boolean;
@@ -25,16 +26,6 @@ const handleExitEditable = (handleEscape?: KBEventHandler) => (
     }
   }
 };
-
-const stringToSlateNode = (s: string): RichText => [
-  {
-    type: "paragraph",
-    children: [{ text: s }],
-  },
-];
-
-const slateNodeToString = (text: RichText): string =>
-  SlateNode.leaf(text[0], [0]).text;
 
 export const EditableTypography: FunctionComponent<EditableTypographyProps> = (
   props

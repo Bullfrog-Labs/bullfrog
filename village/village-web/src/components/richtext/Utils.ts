@@ -8,14 +8,15 @@ export const EMPTY_RICH_TEXT: RichText = [
   },
 ];
 
-export const richTextParagraph = (content: string): RichText => {
-  return [
-    {
-      type: "paragraph",
-      children: [{ text: content }],
-    },
-  ];
-};
+export const stringToSlateNode = (s: string): RichText => [
+  {
+    type: "paragraph",
+    children: [{ text: s }],
+  },
+];
+
+export const slateNodeToString = (text: RichText): string =>
+  SlateNode.leaf(text[0], [0]).text;
 
 // TODO: This should probably be converted to a TSX function, so that the
 // preview is a React component. Code from Rendering.tsx can probably be used to

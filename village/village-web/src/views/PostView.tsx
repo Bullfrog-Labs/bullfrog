@@ -4,9 +4,9 @@ import RichTextEditor, {
   Title,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
-import { UserRecord } from "../services/store/Users";
 import { Container, CircularProgress, makeStyles } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
+import { PostRecord, PostID } from "../services/store/Posts";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -20,15 +20,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const DEFAULT_IDLE_TIME = 1 * 1000;
-
-export type PostID = string;
-
-export type PostRecord = {
-  id: PostID;
-  author: UserRecord;
-  title: Title;
-  body: Body;
-};
 
 export type BasePostViewProps = {
   idleTime?: number;
@@ -47,7 +38,7 @@ export const BasePostView = (props: BasePostViewProps) => {
 
   if (props.readOnly) {
     logger.info(
-      `rendering read-only view for ${props.postRecord.author}/${props.postRecord.title}`
+      `rendering read-only view for ${props.postRecord.authorId}/${props.postRecord.title}`
     );
 
     return (

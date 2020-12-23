@@ -10,6 +10,7 @@ import ListItem from "@material-ui/core/ListItem";
 import { PostRecord, GetUserPostsFn } from "../services/store/Posts";
 import { UserRecord, UserId, GetUserFn } from "../services/store/Users";
 import { useParams } from "react-router-dom";
+import { richTextStringPreview } from "./richtext/Utils";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -91,7 +92,9 @@ export const ProfileView = (props: ProfileViewProps) => {
       <ListItem alignItems="flex-start" key={user.uid}>
         <ListItemText
           primary={post.title}
-          secondary={<React.Fragment>{post.body}</React.Fragment>}
+          secondary={
+            <React.Fragment>{richTextStringPreview(post.body)}</React.Fragment>
+          }
         />
       </ListItem>
     );

@@ -1,6 +1,7 @@
 import { UserPost, PostRecord } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
 import { AuthProvider } from "../services/auth/Auth";
+import { stringToSlateNode } from "../components/richtext/Utils";
 
 export const u0: UserRecord = {
   displayName: "Leighland",
@@ -11,8 +12,8 @@ export const u0: UserRecord = {
 
 export const p0: PostRecord = {
   title: "Title mane",
-  body: "Body foo",
-  userId: "123",
+  body: stringToSlateNode("Body foo"),
+  authorId: "123",
   updatedAt: new Date(),
   id: "123",
 };
