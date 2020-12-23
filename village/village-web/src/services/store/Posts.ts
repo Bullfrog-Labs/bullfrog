@@ -2,12 +2,16 @@ import * as log from "loglevel";
 import { Database } from "./Database";
 import firebase from "firebase";
 import { UserRecord, UserId, USERS_COLLECTION, getUsersForIds } from "./Users";
+import { RichText } from "../../components/richtext/Types";
+
+export type PostId = string;
+export type PostBody = RichText;
 
 export interface PostRecord {
   updatedAt: Date;
-  userId: UserId;
-  id: string;
-  body: string;
+  authorId: UserId;
+  id: PostId;
+  body: PostBody;
   title: string;
 }
 
@@ -31,7 +35,7 @@ const POST_RECORD_CONVERTER = {
     const data = snapshot.data(options)!;
     return {
       updatedAt: data.updatedAt,
-      userId: data.userId,
+      authorId: data.userId,
       id: data.id,
       body: data.body,
       title: data.title,
@@ -90,12 +94,12 @@ export const getStackPosts = (database: Database) => async (
   const posts = await getPostsForTitle(database, title);
   const postUserIds: UserId[] = [];
   posts.forEach((post) => {
-    postUserIds.push(post.userId);
+    postUserIds.push(post.authorId);
   });
   const users = await getUsersForIds(database, postUserIds);
 
   return posts.map((post) => {
-    const user = users.find((u) => u.uid === post.userId);
+    const user = users.find((u) => u.uid === post.authorId);
     if (!user) {
       throw new Error("Missing user for post!");
     }

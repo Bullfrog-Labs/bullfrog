@@ -14,6 +14,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ImageIcon from "@material-ui/icons/Image";
 import { Link, useParams } from "react-router-dom";
 import { UserPost, GetStackPostsFn } from "../services/store/Posts";
+import { richTextStringPreview } from "./richtext/Utils";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -97,7 +98,11 @@ export const StackView = (props: StackViewProps) => {
         </ListItemAvatar>
         <ListItemText
           primary={listItemPrimaryText}
-          secondary={<React.Fragment>{post.post.body}</React.Fragment>}
+          secondary={
+            <React.Fragment>
+              {richTextStringPreview(post.post.body)}
+            </React.Fragment>
+          }
         />
       </ListItem>
     );

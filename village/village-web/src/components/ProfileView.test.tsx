@@ -4,6 +4,7 @@ import { ProfileView } from "./ProfileView";
 import { Logging } from "kmgmt-common";
 import { AuthContext } from "../services/auth/Auth";
 import { u0, posts0, authProvider } from "../testing/Fixtures";
+import { richTextStringPreview } from "./richtext/Utils";
 
 Logging.configure(log);
 
@@ -13,8 +14,10 @@ test("displays a few posts", () => {
       <ProfileView user={u0} posts={posts0} />
     </AuthContext.Provider>
   );
+
+  const expectedPreview = richTextStringPreview(posts0[0].body)!;
   expect(getByText(u0.displayName)).toBeInTheDocument();
   expect(getByText(u0.description!)).toBeInTheDocument();
   expect(getByText(posts0[0].title)).toBeInTheDocument();
-  expect(getByText(posts0[0].body)).toBeInTheDocument();
+  expect(getByText(expectedPreview)).toBeInTheDocument();
 });

@@ -5,6 +5,7 @@ import { Logging } from "kmgmt-common";
 import { AuthContext } from "../services/auth/Auth";
 import { u0, p0, posts0, authProvider, userPosts0 } from "../testing/Fixtures";
 import { MemoryRouter } from "react-router-dom";
+import { richTextStringPreview } from "./richtext/Utils";
 
 Logging.configure(log);
 
@@ -16,7 +17,9 @@ test("displays a few posts", () => {
       </MemoryRouter>
     </AuthContext.Provider>
   );
+
+  const expectedPreview = richTextStringPreview(posts0[0].body)!;
   expect(getAllByText(u0.username!)[0]).toBeInTheDocument();
   expect(getAllByText(posts0[0].title)[0]).toBeInTheDocument();
-  expect(getAllByText(posts0[0].body)[0]).toBeInTheDocument();
+  expect(getAllByText(expectedPreview)[0]).toBeInTheDocument();
 });

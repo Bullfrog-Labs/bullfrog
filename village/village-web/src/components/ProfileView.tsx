@@ -9,6 +9,7 @@ import ListItem from "@material-ui/core/ListItem";
 import { PostRecord, GetUserPostsFn } from "../services/store/Posts";
 import { UserRecord, UserId, GetUserFn } from "../services/store/Users";
 import { useParams } from "react-router-dom";
+import { richTextStringPreview } from "./richtext/Utils";
 import ListItemText from "@material-ui/core/ListItemText";
 
 const useStyles = makeStyles((theme) => ({
@@ -102,7 +103,9 @@ export const ProfileView = (props: ProfileViewProps) => {
       >
         <ListItemText
           primary={post.title}
-          secondary={<React.Fragment>{post.body}</React.Fragment>}
+          secondary={
+            <React.Fragment>{richTextStringPreview(post.body)}</React.Fragment>
+          }
         />
       </ListItem>
     );

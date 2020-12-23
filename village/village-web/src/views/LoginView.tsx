@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
-import { AuthProvider } from "../../services/auth/Auth";
-import { FirebaseAuthComponent } from "./FirebaseAuthComponent";
-import FirebaseAuthProvider from "../../services/auth/FirebaseAuthProvider";
+import { AuthProvider } from "../services/auth/Auth";
+import { FirebaseAuthComponent } from "../components/auth/FirebaseAuthComponent";
+import FirebaseAuthProvider from "../services/auth/FirebaseAuthProvider";
 
 export type LoginViewProps = {
   authProvider: AuthProvider;
