@@ -13,6 +13,14 @@ import RichTextEditorToolbar from "./RichTextEditorToolbar";
 import { RichText } from "./Types";
 import { EMPTY_RICH_TEXT } from "./Utils";
 
+import {
+  EditablePlugins,
+  MentionPlugin,
+  MentionSelect,
+  useMention,
+  withInlineVoid,
+} from "@udecode/slate-plugins";
+
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
 
@@ -26,6 +34,13 @@ export type RichTextState = {
   title: Title;
   body: Body;
 };
+
+const MENTIONABLES = [
+  { value: "Aayla Secura" },
+  { value: "Adi Gallia" },
+  { value: "Admiral Dodd Rancit" },
+  { value: "Admiral Firmus Piett" },
+];
 
 export const EMPTY_RICH_TEXT_STATE = {
   title: "",
@@ -48,13 +63,32 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
 const RichTextEditor = (props: RichTextEditorProps) => {
   const { title, body, onTitleChange, onBodyChange, enableToolbar } = props;
 
+  const plugins = [MentionPlugin()];
+  const withMentions = withInlineVoid({ plugins });
+
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
 
   const editor = useMemo(
-    () => withReact(withResetBlockOnInsertBreak(withHistory(createEditor()))),
-    []
+    () =>
+      withReact(
+        withResetBlockOnInsertBreak(withHistory(withMentions(createEditor())))
+      ),
+    [withMentions]
   );
+
+  const {
+    onAddMention,
+    onChangeMention,
+    onKeyDownMention,
+    search,
+    index,
+    target,
+    values,
+  } = useMention(MENTIONABLES, {
+    maxSuggestions: 10,
+    trigger: "@",
+  });
 
   const onChange = {
     title: (newTitle: Title) => {
@@ -92,16 +126,35 @@ const RichTextEditor = (props: RichTextEditorProps) => {
               />
             </Grid>
             <Grid item>
-              <Slate editor={editor} value={body} onChange={onChange.body}>
+              <Slate
+                editor={editor}
+                value={body}
+                onChange={(newValue) => {
+                  onChange.body(newValue);
+                  onChangeMention(editor);
+                }}
+              >
                 {!!enableToolbar && <RichTextEditorToolbar />}
-                <Editable
+                <EditablePlugins
+                  plugins={plugins}
                   readOnly={props.readOnly ?? false}
-                  renderElement={renderElement}
-                  renderLeaf={renderLeaf}
+                  renderElement={[renderElement]}
+                  renderLeaf={[renderLeaf]}
                   placeholder="Enter some text"
                   spellCheck
                   autoFocus
-                  onKeyDown={toReactKBEventHandler(hotkeyHandler(editor))}
+                  onKeyDown={[
+                    toReactKBEventHandler(hotkeyHandler(editor)),
+                    onKeyDownMention,
+                  ]}
+                  onKeyDownDeps={[index, search, target]}
+                />
+
+                <MentionSelect
+                  at={target}
+                  valueIndex={index}
+                  options={values}
+                  onClickMention={onAddMention}
                 />
               </Slate>
             </Grid>
