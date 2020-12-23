@@ -64,6 +64,30 @@ export type SyncBodyFn = (
   newBody: PostBody
 ) => Promise<SyncBodyResult>;
 
+export type GetPostFn = (
+  uid: UserId,
+  postId: PostId
+) => Promise<PostRecord | undefined>;
+
+export const getPost: (database: Database) => GetPostFn = (database) => async (
+  uid,
+  postId
+) => {
+  const logger = log.getLogger("getPost");
+
+  logger.debug(`Fetching post ${postId} for user ${uid}`);
+  const postDoc = await database
+    .getHandle()
+    .collection(USERS_COLLECTION)
+    .doc(uid)
+    .collection(POSTS_COLLECTION)
+    .doc(postId)
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  return postDoc.data();
+};
+
 export const getUserPosts = (database: Database) => async (
   uid: UserId
 ): Promise<PostRecord[]> => {

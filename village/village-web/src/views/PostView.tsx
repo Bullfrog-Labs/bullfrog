@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import RichTextEditor, {
   Body,
   Title,
@@ -16,7 +16,7 @@ import {
   CreatePostFn,
 } from "../services/store/Posts";
 import { UserId, UserRecord } from "../services/store/Users";
-import { useParams } from "react-router-dom";
+import { Redirect, useParams } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -45,6 +45,10 @@ export type BasePostViewProps = {
 export const BasePostView = (props: BasePostViewProps) => {
   const logger = log.getLogger("BasePostView");
   const classes = useStyles();
+
+  if (props.readOnly === undefined) {
+    props.readOnly = true;
+  }
 
   if (props.readOnly) {
     logger.info(
@@ -112,7 +116,7 @@ export type PostViewProps = {
   readOnly?: boolean;
   postRecord: PostRecord;
 
-  getTitle: (postId: PostId) => Promise<Title>;
+  getTitle: () => Promise<Title | undefined>;
 
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
@@ -166,10 +170,24 @@ export const PostView = (props: PostViewProps) => {
         setTitleChanged(false);
         // TODO: Display something to show the user that the rename succeeded
       } else if (renamePostResult === "post-name-taken") {
-        const savedTitle = await props.getTitle(props.postRecord.id); // this should be pulled from DB
+        const savedTitle = await props.getTitle(); // this should be pulled from DB
+
+        if (!savedTitle) {
+          // No post was found, even though it was just being edited.
+          // TODO: This should be handled properly at some point, e.g. attempt to
+          // create the post again, or show an error message saying that the
+          // note has been deleted.
+          // For now it will just be logged, since this is a corner case.
+          logger.info(
+            "Post rename failed, post deleted while being renamed to already-taken post name"
+          );
+          return;
+        }
+
         logger.info(
           `Post rename failed, ${props.postRecord.title} already taken. Reverting to saved title ${savedTitle}`
         );
+
         props.postRecord.title = savedTitle;
         setTitleChanged(false);
         // TODO: Display something to show the user that the rename failed due
@@ -203,8 +221,8 @@ export const PostView = (props: PostViewProps) => {
 
 type PostViewControllerProps = {
   user: UserRecord;
+  getPost: (uid: UserId, postId: PostId) => Promise<PostRecord | undefined>;
   /*
-  getTitle: (postId: PostId) => Promise<Title>;
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
   */
@@ -217,26 +235,53 @@ type PostViewParams = {
 
 export const PostViewController = (props: PostViewControllerProps) => {
   // Determine whether read-only
+  const styles = useStyles();
+
   const { authorId, postId } = useParams<PostViewParams>();
-  const readOnly = props.user.uid === authorId;
+  const readOnly = props.user.uid !== authorId;
+  const [postRecord, setPostRecord] = useState<PostRecord | undefined>(
+    undefined
+  );
+  const [postRecordLoaded, setPostRecordLoaded] = useState(false);
+
+  // Attempt to load post
+  // TODO: Encapsulate this in a use*-style hook
+  useEffect(() => {
+    const loadPostRecord = async () => {
+      setPostRecord(await props.getPost(authorId, postId));
+      setPostRecordLoaded(true);
+    };
+    loadPostRecord();
+  }, [authorId, postId, props]);
+
+  if (!postRecordLoaded) {
+    return <CircularProgress className={styles.loadingIndicator} />;
+  } else if (!postRecord) {
+    // TODO: Is this the right place to redirect?
+    return <Redirect to={"/404"} />;
+  }
+
+  // Define helpers
+  const getTitle: () => Promise<Title | undefined> = async () => {
+    const postRecord = await props.getPost(authorId, postId);
+    return postRecord ? postRecord.title : undefined;
+  };
+
+  const renamePost: RenamePostFn = async () => {
+    return "success";
+  };
+
+  const syncBody: SyncBodyFn = async () => {
+    return "success";
+  };
 
   return (
-    <div>
-      <span>{readOnly ? "true" : "false"}</span> <br />
-      <span>{props.user.uid}</span> <br />
-      <span>{authorId}</span> <br />
-      <span>{postId}</span>
-    </div>
+    <PostView
+      readOnly={readOnly}
+      postRecord={postRecord}
+      getTitle={getTitle}
+      renamePost={renamePost}
+      syncBody={syncBody}
+    />
   );
-  // Load post or redirect to 404
-  // Display post
 };
-/*
-  readOnly?: boolean;
-  postRecord: PostRecord;
-
-  getTitle: (postId: PostId) => Promise<Title>;
-
-  renamePost: RenamePostFn;
-  syncBody: SyncBodyFn;
-  */

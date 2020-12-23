@@ -7,7 +7,11 @@ import PrivateRoute from "./PrivateRoute";
 import MainView from "../views/MainView";
 import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
-import { GetStackPostsFn, GetUserPostsFn } from "../services/store/Posts";
+import {
+  GetPostFn,
+  GetStackPostsFn,
+  GetUserPostsFn,
+} from "../services/store/Posts";
 import { UserRecord, GetUserFn } from "../services/store/Users";
 import { PostViewController } from "../views/PostView";
 
@@ -28,9 +32,17 @@ export const Router = (props: {
   getUserPosts: GetUserPostsFn;
   getStackPosts: GetStackPostsFn;
   getUser: GetUserFn;
+  getPost: GetPostFn;
   user?: UserRecord;
 }) => {
-  const { authProvider, getUserPosts, getStackPosts, getUser, user } = props;
+  const {
+    authProvider,
+    getUserPosts,
+    getStackPosts,
+    getUser,
+    getPost,
+    user,
+  } = props;
   if (!user) {
     return (
       <BrowserRouter>
@@ -76,7 +88,7 @@ export const Router = (props: {
           </PrivateRoute>
           <PrivateRoute exact path="/post/:authorId/:postId">
             <AppContainer>
-              <PostViewController user={user} />
+              <PostViewController user={user} getPost={getPost} />
             </AppContainer>
           </PrivateRoute>
           <Route path="*">

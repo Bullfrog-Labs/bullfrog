@@ -26,7 +26,7 @@ const PostViewStateWrapper = (props: PostViewProps) => {
 
 const Template: Story<PostViewProps> = (args) => <PostView {...args} />;
 
-const getTitleHardcoded: (postId: PostId) => Promise<Title> = async () => {
+const getTitleHardcoded: () => Promise<Title> = async () => {
   return "Original title";
 };
 
