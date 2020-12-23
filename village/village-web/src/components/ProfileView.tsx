@@ -2,7 +2,6 @@ import * as log from "loglevel";
 import React, { useContext, useState, useEffect } from "react";
 import { Container, Typography } from "@material-ui/core";
 import { AuthContext } from "../services/auth/Auth";
-import ListItemText from "@material-ui/core/ListItemText";
 import Divider from "@material-ui/core/Divider";
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
@@ -11,6 +10,7 @@ import { PostRecord, GetUserPostsFn } from "../services/store/Posts";
 import { UserRecord, UserId, GetUserFn } from "../services/store/Users";
 import { useParams } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
+import ListItemText from "@material-ui/core/ListItemText";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -19,6 +19,13 @@ const useStyles = makeStyles((theme) => ({
   },
   profileDivider: {
     margin: "10px 0 0 0",
+  },
+  postListItem: {
+    paddingLeft: "0px",
+    paddingRight: "0px",
+  },
+  postCard: {
+    width: "100%",
   },
 }));
 
@@ -89,7 +96,11 @@ export const ProfileView = (props: ProfileViewProps) => {
 
   const listItems = posts.map((post) => {
     return (
-      <ListItem alignItems="flex-start" key={user.uid}>
+      <ListItem
+        alignItems="flex-start"
+        key={user.uid}
+        className={classes.postListItem}
+      >
         <ListItemText
           primary={post.title}
           secondary={
@@ -103,7 +114,7 @@ export const ProfileView = (props: ProfileViewProps) => {
   return (
     <Container maxWidth="sm">
       <Typography variant="h4">{user.displayName}</Typography>
-      <Typography variant="body1">{user.description}</Typography>
+      <Typography variant="h6">{user.description}</Typography>
       <Divider className={classes.profileDivider} />
       <List className={classes.root}>{listItems}</List>
     </Container>

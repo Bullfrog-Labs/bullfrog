@@ -6,7 +6,6 @@ import {
   ListItemAvatar,
   Typography,
 } from "@material-ui/core";
-import { AuthContext } from "../services/auth/Auth";
 import Divider from "@material-ui/core/Divider";
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
@@ -24,6 +23,10 @@ const useStyles = makeStyles((theme) => ({
   },
   profileDivider: {
     margin: "10px 0 0 0",
+  },
+  postListItem: {
+    paddingLeft: "0px",
+    paddingRight: "0px",
   },
 }));
 
@@ -59,7 +62,6 @@ export const StackViewController = (props: {
   getStackPosts: GetStackPostsFn;
 }) => {
   const logger = log.getLogger("StackViewController");
-  const authState = useContext(AuthContext);
   const { stackId } = useParams<StackViewParams>();
   logger.debug(`loading stack for ${stackId}`);
   const { getStackPosts } = props;
@@ -84,7 +86,11 @@ export const StackView = (props: StackViewProps) => {
       </Typography>
     );
     return (
-      <ListItem alignItems="flex-start" key={post.post.id}>
+      <ListItem
+        alignItems="flex-start"
+        key={post.post.id}
+        className={classes.postListItem}
+      >
         <ListItemAvatar>
           <Avatar alt={post.user.displayName}>
             <ImageIcon />
