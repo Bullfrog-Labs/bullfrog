@@ -5,6 +5,7 @@ import { UserRecord, UserId, USERS_COLLECTION, getUsersForIds } from "./Users";
 import { RichText } from "../../components/richtext/Types";
 
 export type PostId = string;
+export type PostTitle = string;
 export type PostBody = RichText;
 
 export interface PostRecord {
@@ -12,7 +13,7 @@ export interface PostRecord {
   authorId: UserId;
   id: PostId;
   body: PostBody;
-  title: string;
+  title: PostTitle;
 }
 
 /**
@@ -44,6 +45,24 @@ const POST_RECORD_CONVERTER = {
 };
 
 export const POSTS_COLLECTION = "posts";
+
+export type CreatePostResult = ["success" | "post-name-taken", PostId];
+export type CreatePostFn = (
+  newTitle: PostTitle,
+  newBody: PostBody
+) => Promise<CreatePostResult>;
+
+export type RenamePostResult = "success" | "post-name-taken";
+export type RenamePostFn = (
+  postId: PostId,
+  newTitle: PostTitle
+) => Promise<RenamePostResult>;
+
+export type SyncBodyResult = "success" | "failure";
+export type SyncBodyFn = (
+  postId: PostId,
+  newBody: PostBody
+) => Promise<SyncBodyResult>;
 
 export const getUserPosts = (database: Database) => async (
   uid: UserId

@@ -6,7 +6,16 @@ import RichTextEditor, {
 import * as log from "loglevel";
 import { Container, CircularProgress, makeStyles } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
-import { PostRecord, PostId } from "../services/store/Posts";
+import {
+  PostRecord,
+  PostId,
+  RenamePostFn,
+  RenamePostResult,
+  SyncBodyFn,
+  SyncBodyResult,
+  CreatePostFn,
+} from "../services/store/Posts";
+import { UserId } from "../services/store/Users";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -74,16 +83,9 @@ export const BasePostView = (props: BasePostViewProps) => {
   );
 };
 
-export type RenamePostResult = "success" | "post-name-taken";
-
-// const renamePost: async () => RenamePostResult = () => {};
-
-export type SyncBodyResult = "success" | "failure";
-
-// const syncBody: async () => SyncBodyResult = () => {};
-
 interface CreateNewPostViewProps extends BasePostViewProps {
   prepopulatedTitle?: Title;
+  createPost: CreatePostFn;
 }
 
 const CreateNewPostView = (props: CreateNewPostViewProps) => {
@@ -102,8 +104,8 @@ export type PostViewProps = {
   onTitleChange: (newTitle: Title) => void;
   onBodyChange: (newBody: Body) => void;
 
-  renamePost: (newTitle: Title) => Promise<RenamePostResult>;
-  syncBody: (newBody: Body) => Promise<SyncBodyResult>;
+  renamePost: RenamePostFn;
+  syncBody: SyncBodyFn;
 };
 
 export const PostView = (props: PostViewProps) => {
@@ -143,6 +145,7 @@ export const PostView = (props: PostViewProps) => {
     if (bodyChanged) {
       logger.debug("Body changed, syncing body");
       const syncBodyResult: SyncBodyResult = await syncBody(
+        props.postRecord.id,
         props.postRecord.body
       );
 
@@ -160,6 +163,7 @@ export const PostView = (props: PostViewProps) => {
     if (needsPostRename) {
       logger.debug("Title changed, renaming post");
       const renamePostResult: RenamePostResult = await renamePost(
+        props.postRecord.id,
         props.postRecord.title
       );
 

@@ -5,13 +5,8 @@ import {
   EMPTY_RICH_TEXT_STATE,
   Title,
 } from "../components/richtext/RichTextEditor";
-import { PostId } from "../services/store/Posts";
-import {
-  PostView,
-  PostViewProps,
-  RenamePostResult,
-  SyncBodyResult,
-} from "./PostView";
+import { PostId, RenamePostFn, SyncBodyFn } from "../services/store/Posts";
+import { PostView, PostViewProps } from "./PostView";
 
 export default {
   title: "PostView/PostView",
@@ -53,15 +48,11 @@ const getTitleHardcoded: (postId: PostId) => Promise<Title> = async (
   return "Original title";
 };
 
-const renamePostAlwaysSuccessful: (
-  newTitle: Title
-) => Promise<RenamePostResult> = async (newTitle) => {
+const renamePostAlwaysSuccessful: RenamePostFn = async (newTitle) => {
   return "success";
 };
 
-const syncBodyAlwaysSuccessful: (
-  newBody: Body
-) => Promise<SyncBodyResult> = async (newBody) => {
+const syncBodyAlwaysSuccessful: SyncBodyFn = async (newBody) => {
   return "success";
 };
 
