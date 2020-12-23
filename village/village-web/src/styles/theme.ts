@@ -1,4 +1,5 @@
 import { createMuiTheme } from "@material-ui/core/styles";
+
 const theme = createMuiTheme({
   typography: {
     h4: {
@@ -11,7 +12,6 @@ const theme = createMuiTheme({
     },
     body1: {
       fontFamily: "Source Sans Pro",
-      //fontFamily: "Libre Caslon Text",
       fontWeight: 400,
       fontSize: "1.01em",
     },
@@ -40,4 +40,5 @@ const theme = createMuiTheme({
     },
   },
 });
+
 export default theme;
