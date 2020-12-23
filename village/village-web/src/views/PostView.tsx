@@ -21,9 +21,10 @@ const useStyles = makeStyles((theme) => ({
 
 const DEFAULT_IDLE_TIME = 1 * 1000;
 
-// usePostState
+export type PostID = string;
 
 export type PostRecord = {
+  id: PostID;
   author: UserRecord;
   title: Title;
   body: Body;
@@ -104,6 +105,8 @@ export type PostViewProps = {
   readOnly?: boolean;
   postRecord: PostRecord;
 
+  getTitle: (postId: PostID) => Promise<Title>;
+
   onTitleChange: (newTitle: Title) => void;
   onBodyChange: (newBody: Body) => void;
 
@@ -173,9 +176,12 @@ export const PostView = (props: PostViewProps) => {
         setTitleChanged(false);
         // TODO: Display something to show the user that the rename succeeded
       } else if (renamePostResult === "post-name-taken") {
+        const savedTitle = await props.getTitle(props.postRecord.id); // this should be pulled from DB
         logger.info(
-          `Post rename failed, ${props.postRecord.title} already taken`
+          `Post rename failed, ${props.postRecord.title} already taken. Reverting to saved title ${savedTitle}`
         );
+        props.onTitleChange(savedTitle);
+        setTitleChanged(false);
         // TODO: Display something to show the user that the rename failed due
         // to the new name already being taken.
       } else {

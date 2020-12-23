@@ -6,6 +6,7 @@ import {
   Title,
 } from "../components/richtext/RichTextEditor";
 import {
+  PostID,
   PostView,
   PostViewProps,
   RenamePostResult,
@@ -22,6 +23,7 @@ const PostViewStateWrapper = (props: PostViewProps) => {
   const [body, setBody] = useState(props.postRecord.body);
 
   const postRecord = {
+    id: props.postRecord.id,
     author: props.postRecord.author,
     title: title,
     body: body,
@@ -31,6 +33,7 @@ const PostViewStateWrapper = (props: PostViewProps) => {
     <PostView
       readOnly={props.readOnly}
       postRecord={postRecord}
+      getTitle={props.getTitle}
       onTitleChange={setTitle}
       onBodyChange={setBody}
       renamePost={props.renamePost}
@@ -42,6 +45,12 @@ const PostViewStateWrapper = (props: PostViewProps) => {
 const Template: Story<PostViewProps> = (args) => (
   <PostViewStateWrapper {...args} />
 );
+
+const getTitleHardcoded: (postId: PostID) => Promise<Title> = async (
+  postId
+) => {
+  return "Original title";
+};
 
 const renamePostAlwaysSuccessful: (
   newTitle: Title
@@ -58,6 +67,7 @@ const syncBodyAlwaysSuccessful: (
 export const BasicPostView = Template.bind({});
 BasicPostView.args = {
   postRecord: {
+    id: "456",
     author: {
       uid: "123",
       displayName: "foo user",
@@ -67,6 +77,7 @@ BasicPostView.args = {
   },
   onTitleChange: (newTitle: Title) => {},
   onBodyChange: (newBody: Body) => {},
+  getTitle: getTitleHardcoded,
   renamePost: renamePostAlwaysSuccessful,
   syncBody: syncBodyAlwaysSuccessful,
 };
