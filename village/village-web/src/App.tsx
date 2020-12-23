@@ -1,4 +1,3 @@
-import "./App.css";
 import * as log from "loglevel";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Logging } from "kmgmt-common";
