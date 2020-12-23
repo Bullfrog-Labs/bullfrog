@@ -4,7 +4,7 @@ import { AuthProvider } from "../services/auth/Auth";
 import AppContainer from "../components/AppContainer";
 import { LoginView } from "../views/LoginView";
 import PrivateRoute from "./PrivateRoute";
-import MainView from "../components/MainView";
+import MainView from "../views/MainView";
 import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
 import { GetStackPostsFn, GetUserPostsFn } from "../services/store/Posts";
