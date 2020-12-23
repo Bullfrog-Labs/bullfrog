@@ -6,7 +6,7 @@ import RichTextEditor, {
 import * as log from "loglevel";
 import { Container, CircularProgress, makeStyles } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
-import { PostRecord, PostID } from "../services/store/Posts";
+import { PostRecord, PostId } from "../services/store/Posts";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -88,7 +88,8 @@ interface CreateNewPostViewProps extends BasePostViewProps {
 
 const CreateNewPostView = (props: CreateNewPostViewProps) => {
   // Need to be able to pre-populate title, or have empty title.
-  // Changing title triggers a rename. Save note on idle if the title or body is changed.
+  // Changing title triggers a rename. Save note on idle if the title or body is
+  // changed. No saving on blank title.
   const logger = log.getLogger("CreateNewPostView");
 };
 
@@ -96,7 +97,7 @@ export type PostViewProps = {
   readOnly?: boolean;
   postRecord: PostRecord;
 
-  getTitle: (postId: PostID) => Promise<Title>;
+  getTitle: (postId: PostId) => Promise<Title>;
 
   onTitleChange: (newTitle: Title) => void;
   onBodyChange: (newBody: Body) => void;

@@ -5,7 +5,7 @@ import {
   EMPTY_RICH_TEXT_STATE,
   Title,
 } from "../components/richtext/RichTextEditor";
-import { PostID } from "../services/store/Posts";
+import { PostId } from "../services/store/Posts";
 import {
   PostView,
   PostViewProps,
@@ -47,7 +47,7 @@ const Template: Story<PostViewProps> = (args) => (
   <PostViewStateWrapper {...args} />
 );
 
-const getTitleHardcoded: (postId: PostID) => Promise<Title> = async (
+const getTitleHardcoded: (postId: PostId) => Promise<Title> = async (
   postId
 ) => {
   return "Original title";

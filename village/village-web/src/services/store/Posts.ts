@@ -4,13 +4,13 @@ import firebase from "firebase";
 import { UserRecord, UserId, USERS_COLLECTION, getUsersForIds } from "./Users";
 import { RichText } from "../../components/richtext/Types";
 
-export type PostID = string;
+export type PostId = string;
 export type PostBody = RichText;
 
 export interface PostRecord {
   updatedAt: Date;
   authorId: UserId;
-  id: PostID;
+  id: PostId;
   body: PostBody;
   title: string;
 }
