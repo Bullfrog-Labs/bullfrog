@@ -115,24 +115,7 @@ export const PostView = (props: PostViewProps) => {
   const [titleChanged, setTitleChanged] = useState(false);
   const [bodyChanged, setBodyChanged] = useState(false);
 
-  log.setLevel("trace");
-
-  const { renamePost, syncBody, ...basePostViewProps } = props;
-
-  const onTitleChange = (newTitle: Title) => {
-    if (newTitle !== props.postRecord.title) {
-      setTitleChanged(true);
-      props.onTitleChange(newTitle);
-    }
-  };
-  basePostViewProps.onTitleChange = onTitleChange;
-
-  const onBodyChange = (newBody: Body) => {
-    // TODO: Only mark body as changed if it is actually different
-    setBodyChanged(true);
-    props.onBodyChange(newBody);
-  };
-  basePostViewProps.onBodyChange = onBodyChange;
+  const { renamePost, syncBody, ...restProps } = props;
 
   const onIdle = async (event: Event) => {
     // TODO: Post should only be renamed if the user is idle and focus is not on
@@ -176,7 +159,7 @@ export const PostView = (props: PostViewProps) => {
         logger.info(
           `Post rename failed, ${props.postRecord.title} already taken. Reverting to saved title ${savedTitle}`
         );
-        props.onTitleChange(savedTitle);
+        props.postRecord.title = savedTitle;
         setTitleChanged(false);
         // TODO: Display something to show the user that the rename failed due
         // to the new name already being taken.
@@ -186,5 +169,25 @@ export const PostView = (props: PostViewProps) => {
     }
   };
 
-  return <BasePostView onIdle={onIdle} {...basePostViewProps} />;
+  const onTitleChange = (newTitle: Title) => {
+    if (newTitle !== props.postRecord.title) {
+      setTitleChanged(true);
+    }
+  };
+
+  const onBodyChange = (newBody: Body) => {
+    // TODO: Only mark body as changed if it is actually different
+    setBodyChanged(true);
+  };
+
+  return (
+    <BasePostView
+      onIdle={onIdle}
+      onTitleChange={onTitleChange}
+      onBodyChange={onBodyChange}
+      {...restProps}
+    />
+  );
 };
+
+export const PostViewController = () => {};
