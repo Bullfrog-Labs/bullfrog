@@ -13,9 +13,11 @@ const theme = createMuiTheme({
       fontFamily: "Source Sans Pro",
       //fontFamily: "Libre Caslon Text",
       fontWeight: 400,
+      fontSize: "1.01em",
     },
     body2: {
       fontFamily: "Source Sans Pro",
+      fontSize: "1.01em",
     },
   },
   direction: "ltr",

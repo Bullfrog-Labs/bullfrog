@@ -1,6 +1,6 @@
 import * as log from "loglevel";
 import React, { useContext, useState, useEffect } from "react";
-import { CardContent, Container, Typography } from "@material-ui/core";
+import { Container, Typography } from "@material-ui/core";
 import { AuthContext } from "../services/auth/Auth";
 import Divider from "@material-ui/core/Divider";
 import { makeStyles } from "@material-ui/core/styles";
@@ -9,7 +9,6 @@ import ListItem from "@material-ui/core/ListItem";
 import { PostRecord, GetUserPostsFn } from "../services/store/Posts";
 import { UserRecord, UserId, GetUserFn } from "../services/store/Users";
 import { useParams } from "react-router-dom";
-import Card from "@material-ui/core/Card";
 import ListItemText from "@material-ui/core/ListItemText";
 
 const useStyles = makeStyles((theme) => ({
