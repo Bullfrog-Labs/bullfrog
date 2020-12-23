@@ -9,6 +9,7 @@ import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
 import { GetStackPostsFn, GetUserPostsFn } from "../services/store/Posts";
 import { UserRecord, GetUserFn } from "../services/store/Users";
+import { PostViewController } from "../views/PostView";
 
 const Sad404 = () => {
   let location = useLocation();
@@ -71,6 +72,11 @@ export const Router = (props: {
           <PrivateRoute exact path="/stack/:stackId">
             <AppContainer>
               <StackViewController getStackPosts={getStackPosts} />
+            </AppContainer>
+          </PrivateRoute>
+          <PrivateRoute exact path="/post/:authorId/:postId">
+            <AppContainer>
+              <PostViewController user={user} />
             </AppContainer>
           </PrivateRoute>
           <Route path="*">

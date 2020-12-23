@@ -1,7 +1,6 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
-import React, { useState } from "react";
+import React from "react";
 import {
-  Body,
   EMPTY_RICH_TEXT_STATE,
   Title,
 } from "../components/richtext/RichTextEditor";
@@ -14,45 +13,28 @@ export default {
 } as Meta;
 
 const PostViewStateWrapper = (props: PostViewProps) => {
-  const [title, setTitle] = useState(props.postRecord.title);
-  const [body, setBody] = useState(props.postRecord.body);
-
-  const postRecord = {
-    id: props.postRecord.id,
-    authorId: props.postRecord.authorId,
-    title: title,
-    body: body,
-    updatedAt: new Date(),
-  };
-
   return (
     <PostView
       readOnly={props.readOnly}
-      postRecord={postRecord}
+      postRecord={props.postRecord}
       getTitle={props.getTitle}
-      onTitleChange={setTitle}
-      onBodyChange={setBody}
       renamePost={props.renamePost}
       syncBody={props.syncBody}
     />
   );
 };
 
-const Template: Story<PostViewProps> = (args) => (
-  <PostViewStateWrapper {...args} />
-);
+const Template: Story<PostViewProps> = (args) => <PostView {...args} />;
 
-const getTitleHardcoded: (postId: PostId) => Promise<Title> = async (
-  postId
-) => {
+const getTitleHardcoded: (postId: PostId) => Promise<Title> = async () => {
   return "Original title";
 };
 
-const renamePostAlwaysSuccessful: RenamePostFn = async (newTitle) => {
+const renamePostAlwaysSuccessful: RenamePostFn = async () => {
   return "success";
 };
 
-const syncBodyAlwaysSuccessful: SyncBodyFn = async (newBody) => {
+const syncBodyAlwaysSuccessful: SyncBodyFn = async () => {
   return "success";
 };
 
@@ -65,8 +47,6 @@ BasicPostView.args = {
     body: EMPTY_RICH_TEXT_STATE.body,
     updatedAt: new Date(),
   },
-  onTitleChange: (newTitle: Title) => {},
-  onBodyChange: (newBody: Body) => {},
   getTitle: getTitleHardcoded,
   renamePost: renamePostAlwaysSuccessful,
   syncBody: syncBodyAlwaysSuccessful,

@@ -15,7 +15,8 @@ import {
   SyncBodyResult,
   CreatePostFn,
 } from "../services/store/Posts";
-import { UserId } from "../services/store/Users";
+import { UserId, UserRecord } from "../services/store/Users";
+import { useParams } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -93,6 +94,18 @@ const CreateNewPostView = (props: CreateNewPostViewProps) => {
   // Changing title triggers a rename. Save note on idle if the title or body is
   // changed. No saving on blank title.
   const logger = log.getLogger("CreateNewPostView");
+  const [postHasTitle, setPostHasTitle] = useState(
+    !!props.prepopulatedTitle || false
+  );
+  const [postHasBody, setPostHasBody] = useState(false);
+
+  // TODO: Construct PostRecord
+
+  const onIdle = async (event: Event) => {};
+
+  /*
+  return <BasePostView onIdle={onIdle} />;
+  */
 };
 
 export type PostViewProps = {
@@ -101,13 +114,11 @@ export type PostViewProps = {
 
   getTitle: (postId: PostId) => Promise<Title>;
 
-  onTitleChange: (newTitle: Title) => void;
-  onBodyChange: (newBody: Body) => void;
-
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
 };
 
+// TODO: Implement code to load the post data into the PostView
 export const PostView = (props: PostViewProps) => {
   // Changing title triggers a rename. Renames are not allowed if the title is
   // already being used.
@@ -190,4 +201,42 @@ export const PostView = (props: PostViewProps) => {
   );
 };
 
-export const PostViewController = () => {};
+type PostViewControllerProps = {
+  user: UserRecord;
+  /*
+  getTitle: (postId: PostId) => Promise<Title>;
+  renamePost: RenamePostFn;
+  syncBody: SyncBodyFn;
+  */
+};
+
+type PostViewParams = {
+  authorId: UserId;
+  postId: PostId;
+};
+
+export const PostViewController = (props: PostViewControllerProps) => {
+  // Determine whether read-only
+  const { authorId, postId } = useParams<PostViewParams>();
+  const readOnly = props.user.uid === authorId;
+
+  return (
+    <div>
+      <span>{readOnly ? "true" : "false"}</span> <br />
+      <span>{props.user.uid}</span> <br />
+      <span>{authorId}</span> <br />
+      <span>{postId}</span>
+    </div>
+  );
+  // Load post or redirect to 404
+  // Display post
+};
+/*
+  readOnly?: boolean;
+  postRecord: PostRecord;
+
+  getTitle: (postId: PostId) => Promise<Title>;
+
+  renamePost: RenamePostFn;
+  syncBody: SyncBodyFn;
+  */
