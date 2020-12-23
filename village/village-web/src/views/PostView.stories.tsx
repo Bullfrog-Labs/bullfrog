@@ -4,25 +4,13 @@ import {
   EMPTY_RICH_TEXT_STATE,
   Title,
 } from "../components/richtext/RichTextEditor";
-import { PostId, RenamePostFn, SyncBodyFn } from "../services/store/Posts";
+import { RenamePostFn, SyncBodyFn } from "../services/store/Posts";
 import { PostView, PostViewProps } from "./PostView";
 
 export default {
   title: "PostView/PostView",
   component: PostView,
 } as Meta;
-
-const PostViewStateWrapper = (props: PostViewProps) => {
-  return (
-    <PostView
-      readOnly={props.readOnly}
-      postRecord={props.postRecord}
-      getTitle={props.getTitle}
-      renamePost={props.renamePost}
-      syncBody={props.syncBody}
-    />
-  );
-};
 
 const Template: Story<PostViewProps> = (args) => <PostView {...args} />;
 
