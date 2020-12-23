@@ -1,10 +1,7 @@
-import * as log from "loglevel";
-
-import React, { Dispatch, SetStateAction, useState } from "react";
 import "./App.css";
-
+import * as log from "loglevel";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Logging } from "kmgmt-common";
-
 import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
 import { initializeFirebaseApp } from "./services/Firebase";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
@@ -13,10 +10,16 @@ import {
   AuthState,
   OnAuthStateChangedHandle,
 } from "./services/auth/Auth";
-import { checkIfUserExists, createNewUserRecord } from "./services/store/Users";
+import {
+  checkIfUserExists,
+  createNewUserRecord,
+  getUser,
+  UserRecord,
+} from "./services/store/Users";
 import { Router } from "./routing/Router";
-
 import firebase from "firebase";
+import { getUserPosts, getStackPosts } from "./services/store/Posts";
+import { useEffect } from "react";
 
 Logging.configure(log);
 
@@ -57,6 +60,19 @@ function App() {
   const [authState, setAuthState] = useState(
     authProvider.getInitialAuthState()
   );
+  const [user, setUser] = useState<UserRecord>();
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (authState?.uid) {
+        const user = await getUser(database)(authState.uid);
+        if (user != null) {
+          logger.debug(`setting user ${user.displayName}`);
+          setUser(user);
+        }
+      }
+    };
+    fetchUser();
+  }, [authState?.uid, logger]);
 
   authProvider.onAuthStateChanged = makeOnAuthStateChanged(
     authState,
@@ -73,7 +89,13 @@ function App() {
 
   return (
     <AuthContext.Provider value={authState}>
-      <Router authProvider={authProvider} />
+      <Router
+        authProvider={authProvider}
+        getUserPosts={getUserPosts(database)}
+        getStackPosts={getStackPosts(database)}
+        getUser={getUser(database)}
+        user={user}
+      />
     </AuthContext.Provider>
   );
 }

@@ -1,12 +1,16 @@
-import React, { FunctionComponent } from "react";
+import React from "react";
 import { Switch, Route, BrowserRouter, useLocation } from "react-router-dom";
 import { AuthProvider } from "../services/auth/Auth";
 import AppContainer from "../components/AppContainer";
 import { LoginView } from "../views/LoginView";
 import PrivateRoute from "./PrivateRoute";
-import MainView from "../views/MainView";
+import MainView from "../components/MainView";
+import { ProfileViewController } from "../components/ProfileView";
+import { StackViewController } from "../components/StackView";
+import { GetStackPostsFn, GetUserPostsFn } from "../services/store/Posts";
+import { UserRecord, GetUserFn } from "../services/store/Users";
 
-function Sad404() {
+const Sad404 = () => {
   let location = useLocation();
 
   return (
@@ -16,30 +20,64 @@ function Sad404() {
       </h3>
     </div>
   );
-}
-
-export type RouterProps = {
-  authProvider: AuthProvider;
 };
 
-export const Router: FunctionComponent<RouterProps> = ({ authProvider }) => {
-  return (
-    <BrowserRouter>
-      <Switch>
-        <Route path="/login">
-          <AppContainer>
-            <LoginView authProvider={authProvider} />
-          </AppContainer>
-        </Route>
-        <PrivateRoute exact path="/">
-          <AppContainer>
-            <MainView />
-          </AppContainer>
-        </PrivateRoute>
-        <Route path="*">
-          <Sad404 />
-        </Route>
-      </Switch>
-    </BrowserRouter>
-  );
+export const Router = (props: {
+  authProvider: AuthProvider;
+  getUserPosts: GetUserPostsFn;
+  getStackPosts: GetStackPostsFn;
+  getUser: GetUserFn;
+  user?: UserRecord;
+}) => {
+  const { authProvider, getUserPosts, getStackPosts, getUser, user } = props;
+  if (!user) {
+    return (
+      <BrowserRouter>
+        <Switch>
+          <Route path="/login">
+            <AppContainer>
+              <LoginView authProvider={authProvider} />
+            </AppContainer>
+          </Route>
+          <Route path="*">
+            <Sad404 />
+          </Route>
+        </Switch>
+      </BrowserRouter>
+    );
+  } else {
+    return (
+      <BrowserRouter>
+        <Switch>
+          <Route path="/login">
+            <AppContainer>
+              <LoginView authProvider={authProvider} />
+            </AppContainer>
+          </Route>
+          <PrivateRoute exact path="/">
+            <AppContainer>
+              <MainView />
+            </AppContainer>
+          </PrivateRoute>
+          <PrivateRoute exact path="/profile/:userId?">
+            <AppContainer>
+              <ProfileViewController
+                getUserPosts={getUserPosts}
+                getUser={getUser}
+                user={user}
+              />
+            </AppContainer>
+          </PrivateRoute>
+          <PrivateRoute exact path="/stack/:stackId">
+            <AppContainer>
+              <StackViewController getStackPosts={getStackPosts} />
+            </AppContainer>
+          </PrivateRoute>
+          <Route path="*">
+            <Sad404 />
+          </Route>
+        </Switch>
+      </BrowserRouter>
+    );
+  }
 };

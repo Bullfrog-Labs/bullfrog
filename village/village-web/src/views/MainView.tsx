@@ -12,7 +12,7 @@ export default function MainView(props: any) {
   const authState = useContext(AuthContext);
 
   return (
-    <Container maxWidth={false}>
+    <Container maxWidth="md">
       <EmptyUserStatePlaceholder />
     </Container>
   );
