@@ -17,6 +17,7 @@ import {
 } from "../services/store/Posts";
 import { UserId, UserRecord } from "../services/store/Users";
 import { Redirect, useParams } from "react-router-dom";
+import { stringToSlateNode } from "../components/richtext/Utils";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -244,11 +245,18 @@ export const PostViewController = (props: PostViewControllerProps) => {
   );
   const [postRecordLoaded, setPostRecordLoaded] = useState(false);
 
+  // TODO: Remove the stringtoSlateNode. It is just a hack to get things to work
+  // for now, since the post is just a plain text string in the mock data.
+
   // Attempt to load post
   // TODO: Encapsulate this in a use*-style hook
   useEffect(() => {
     const loadPostRecord = async () => {
-      setPostRecord(await props.getPost(authorId, postId));
+      const foo = await props.getPost(authorId, postId);
+      if (!!foo) {
+        foo.body = stringToSlateNode((foo.body as unknown) as string);
+      }
+      setPostRecord(foo);
       setPostRecordLoaded(true);
     };
     loadPostRecord();
