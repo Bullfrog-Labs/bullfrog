@@ -31,8 +31,7 @@ const USER_RECORD_CONVERTER = {
 
 export const USERS_COLLECTION = "users";
 
-export const getUser = async (
-  database: Database,
+export const getUser = (database: Database) => async (
   uid: UserId
 ): Promise<UserRecord | null> => {
   const logger = log.getLogger("getUser");
@@ -48,13 +47,17 @@ export const getUser = async (
   return userDoc.exists ? userDoc.data()! : null;
 };
 
+export type GetUserFn = ReturnType<typeof getUser>;
+
 export const getUsersForIds = async (
   database: Database,
   userIds: UserId[]
 ): Promise<UserRecord[]> => {
+  const logger = log.getLogger("getUsersForIds");
+  logger.debug(`Fetching posts for ids ${userIds}`);
   const userDoc = await database
     .getHandle()
-    .collectionGroup(USERS_COLLECTION)
+    .collection(USERS_COLLECTION)
     .where("uid", "in", userIds)
     .withConverter(USER_RECORD_CONVERTER)
     .get();
@@ -71,7 +74,7 @@ export const checkIfUserExists = async (
   const logger = log.getLogger("checkIfUserExists");
 
   logger.debug(`checking whether user ${uid} exists`);
-  const user = await getUser(database, uid);
+  const user = await getUser(database)(uid);
   if (!!user) {
     logger.debug(`${uid} is an existing user`);
   } else {
