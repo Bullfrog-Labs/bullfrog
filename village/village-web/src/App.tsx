@@ -1,8 +1,5 @@
-import theme from "./styles/theme";
 import * as log from "loglevel";
 import { Dispatch, SetStateAction, useState } from "react";
-import { ThemeProvider } from "@material-ui/core/styles";
-import CssBaseline from "@material-ui/core/CssBaseline";
 import { Logging } from "kmgmt-common";
 import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
 import { initializeFirebaseApp } from "./services/Firebase";
@@ -91,16 +88,13 @@ function App() {
 
   return (
     <AuthContext.Provider value={authState}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Router
-          authProvider={authProvider}
-          getUserPosts={getUserPosts(database)}
-          getStackPosts={getStackPosts(database)}
-          getUser={getUser(database)}
-          user={user}
-        />
-      </ThemeProvider>
+      <Router
+        authProvider={authProvider}
+        getUserPosts={getUserPosts(database)}
+        getStackPosts={getStackPosts(database)}
+        getUser={getUser(database)}
+        user={user}
+      />
     </AuthContext.Provider>
   );
 }

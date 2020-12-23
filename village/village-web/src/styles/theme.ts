@@ -3,14 +3,38 @@ const theme = createMuiTheme({
   typography: {
     h4: {
       fontFamily: "Libre Caslon Text",
-    },
-    h6: {
-      fontFamily: "Domine",
       fontWeight: 700,
     },
-    body1: {
+    h6: {
       fontFamily: "Libre Caslon Text",
-      fontSize: "1.1rem",
+      fontWeight: 400,
+    },
+    body1: {
+      fontFamily: "Source Sans Pro",
+      //fontFamily: "Libre Caslon Text",
+      fontWeight: 400,
+    },
+    body2: {
+      fontFamily: "Source Sans Pro",
+    },
+  },
+  direction: "ltr",
+  palette: {
+    type: "light",
+    primary: {
+      main: "#011627",
+    },
+    secondary: {
+      main: "#FF9F1C",
+    },
+    error: {
+      main: "#F71735",
+    },
+    info: {
+      main: "#41EAD4",
+    },
+    success: {
+      main: "#008148",
     },
   },
 });

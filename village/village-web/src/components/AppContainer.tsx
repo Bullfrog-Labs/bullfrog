@@ -5,36 +5,10 @@ import {
   CssBaseline,
   Divider,
   Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
 } from "@material-ui/core";
-import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import { createMuiTheme, makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
+import theme from "../styles/theme";
 import { useHistory } from "react-router-dom";
-
-const theme = createMuiTheme({
-  direction: "ltr",
-  palette: {
-    type: "light",
-    primary: {
-      main: "#011627",
-    },
-    secondary: {
-      main: "#FF9F1C",
-    },
-    error: {
-      main: "#F71735",
-    },
-    info: {
-      main: "#41EAD4",
-    },
-    success: {
-      main: "#008148",
-    },
-  },
-});
 
 const useStyles = makeStyles((theme) => ({
   root: {
