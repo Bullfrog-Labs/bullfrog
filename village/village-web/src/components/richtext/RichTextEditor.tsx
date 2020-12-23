@@ -87,7 +87,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
                 handleEscape={(event) => {
                   ReactEditor.focus(editor);
                 }}
-                initialValue={title}
+                value={title}
                 onChange={onChange.title}
               />
             </Grid>

@@ -17,7 +17,7 @@ const Template: Story<EditableTypographyProps> = (args) => (
 export const EditableFilledInH1 = Template.bind({});
 EditableFilledInH1.args = {
   readOnly: false,
-  initialValue: "Sample title",
+  value: "Sample title",
   variant: "h1",
 };
 
@@ -30,6 +30,6 @@ EditableBlankH2.args = {
 export const ReadOnlyFilledInH3 = Template.bind({});
 ReadOnlyFilledInH3.args = {
   readOnly: true,
-  initialValue: "Sample title (read-only)",
+  value: "Sample title (read-only)",
   variant: "h3",
 };

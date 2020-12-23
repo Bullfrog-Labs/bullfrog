@@ -1,9 +1,4 @@
-import React, {
-  FunctionComponent,
-  useState,
-  useMemo,
-  useCallback,
-} from "react";
+import React, { FunctionComponent, useMemo, useCallback } from "react";
 import { Node as SlateNode, createEditor } from "slate";
 import { KBEventHandler, RichText } from "./Types";
 import { withEditableTypographyLayout } from "./EditorBehaviors";
@@ -14,7 +9,7 @@ import { Typography } from "@material-ui/core";
 
 export type EditableTypographyProps = {
   readOnly?: boolean;
-  initialValue?: string;
+  value: string;
   variant?: string;
   handleEscape?: KBEventHandler;
   onChange?: (newValue: string) => void;
@@ -31,30 +26,36 @@ const handleExitEditable = (handleEscape?: KBEventHandler) => (
   }
 };
 
-const slateNodeToString = (title: RichText): string =>
-  SlateNode.leaf(title[0], [0]).text;
+const stringToSlateNode = (s: string): RichText => [
+  {
+    type: "paragraph",
+    children: [{ text: s }],
+  },
+];
+
+const slateNodeToString = (text: RichText): string =>
+  SlateNode.leaf(text[0], [0]).text;
 
 export const EditableTypography: FunctionComponent<EditableTypographyProps> = (
   props
 ) => {
-  const [value, setValue] = useState<RichText>([
-    {
-      type: "paragraph",
-      children: [{ text: props.initialValue ?? "" }],
-    },
-  ]);
-
   const editor = useMemo(
     () => withReact(withEditableTypographyLayout(withHistory(createEditor()))),
     []
   );
 
   const onChange = (newValue: RichText) => {
-    setValue(newValue);
     if (!!props.onChange) {
       props.onChange(slateNodeToString(newValue));
     }
   };
+
+  // TOOD: I need to be able to create a reset function here. I also need to
+  // make it callable from the parent component. This can be done using ref
+  // forwarding, see https://reactjs.org/docs/forwarding-refs.html.
+  // See
+  // https://www.notion.so/Crash-due-to-Slate-cursor-being-in-invalid-position-when-post-rename-fails-due-to-post-name-taken-an-9904289b317d4fc68f6b918ef62ae780
+  // for why this is needed.
 
   const renderLeaf = useCallback(
     ({ children, attributes }) => (
@@ -66,7 +67,11 @@ export const EditableTypography: FunctionComponent<EditableTypographyProps> = (
   );
 
   return (
-    <Slate editor={editor} value={value} onChange={onChange}>
+    <Slate
+      editor={editor}
+      value={stringToSlateNode(props.value)}
+      onChange={onChange}
+    >
       <Editable
         readOnly={props.readOnly ?? false}
         placeholder="Enter a title"
