@@ -9,9 +9,9 @@ export type PostTitle = string;
 export type PostBody = RichText;
 
 export interface PostRecord {
-  updatedAt: Date;
+  id?: PostId; // should only be undefined for unsaved new posts
+  updatedAt?: Date; // should only be undefined for unsaved new posts
   authorId: UserId;
-  id: PostId;
   body: PostBody;
   title: PostTitle;
 }
@@ -46,7 +46,21 @@ const POST_RECORD_CONVERTER = {
 
 export const POSTS_COLLECTION = "posts";
 
-export type CreatePostResult = ["success" | "post-name-taken", PostId];
+export type CreatePostResultSuccess = {
+  state: "success";
+  postId: PostId;
+  postUrl: string;
+};
+
+export type CreatePostResultPostNameTaken = {
+  state: "post-name-taken";
+  postId: PostId;
+};
+
+export type CreatePostResult =
+  | CreatePostResultSuccess
+  | CreatePostResultPostNameTaken;
+
 export type CreatePostFn = (
   newTitle: PostTitle,
   newBody: PostBody

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import RichTextEditor, {
-  Body,
-  Title,
+  EMPTY_RICH_TEXT_STATE,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
 import { Container, CircularProgress, makeStyles } from "@material-ui/core";
@@ -14,10 +13,13 @@ import {
   SyncBodyFn,
   SyncBodyResult,
   CreatePostFn,
+  PostBody,
+  PostTitle,
 } from "../services/store/Posts";
 import { UserId, UserRecord } from "../services/store/Users";
-import { Redirect, useParams } from "react-router-dom";
+import { Redirect, useHistory, useParams } from "react-router-dom";
 import { stringToSlateNode } from "../components/richtext/Utils";
+import { assertNever } from "../utils";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -34,12 +36,13 @@ const DEFAULT_IDLE_TIME = 1 * 1000;
 
 export type BasePostViewProps = {
   idleTime?: number;
-  readOnly?: boolean;
+  readOnly: boolean;
 
-  postRecord: PostRecord;
+  title: PostTitle;
+  body: PostBody;
 
-  onTitleChange: (newTitle: Title) => void;
-  onBodyChange: (newBody: Body) => void;
+  onTitleChange: (newTitle: PostTitle) => void;
+  onBodyChange: (newBody: PostBody) => void;
   onIdle: (event: Event) => void;
 };
 
@@ -47,23 +50,17 @@ export const BasePostView = (props: BasePostViewProps) => {
   const logger = log.getLogger("BasePostView");
   const classes = useStyles();
 
-  if (props.readOnly === undefined) {
-    props.readOnly = true;
-  }
-
   if (props.readOnly) {
-    logger.info(
-      `rendering read-only view for ${props.postRecord.authorId}/${props.postRecord.title}`
-    );
+    logger.info(`rendering read-only view for ${props.title}`);
 
     return (
       <Container className={classes.postView} maxWidth="md">
         <RichTextEditor
           readOnly={true}
-          title={props.postRecord.title}
-          onTitleChange={(_: Title) => {}}
-          body={props.postRecord.body}
-          onBodyChange={(_: Body) => {}}
+          title={props.title}
+          onTitleChange={props.onTitleChange}
+          body={props.body}
+          onBodyChange={props.onBodyChange}
           enableToolbar={false}
         />
       </Container>
@@ -78,9 +75,9 @@ export const BasePostView = (props: BasePostViewProps) => {
       >
         <RichTextEditor
           readOnly={props.readOnly ?? false}
-          title={props.postRecord.title}
+          title={props.title}
           onTitleChange={props.onTitleChange}
-          body={props.postRecord.body}
+          body={props.body}
           onBodyChange={props.onBodyChange}
           enableToolbar={false}
         />
@@ -90,34 +87,86 @@ export const BasePostView = (props: BasePostViewProps) => {
 };
 
 interface CreateNewPostViewProps extends BasePostViewProps {
-  prepopulatedTitle?: Title;
+  prepopulatedTitle?: PostTitle;
   createPost: CreatePostFn;
 }
 
 const CreateNewPostView = (props: CreateNewPostViewProps) => {
   // Need to be able to pre-populate title, or have empty title.
-  // Changing title triggers a rename. Save note on idle if the title or body is
-  // changed. No saving on blank title.
+  // Note is not saved until it has a title and a body. Once the note is saved,
+  // it is redirected to the post view.
+  // Changing title of an unsaved note does nothing on the backend.
+  // Save note on idle if the title or body is changed. No saving on blank
+  // title.
   const logger = log.getLogger("CreateNewPostView");
-  const [postHasTitle, setPostHasTitle] = useState(
-    !!props.prepopulatedTitle || false
+
+  const [nonEmptyTitle, setNonEmptyTitle] = useState(!!props.prepopulatedTitle);
+  const [title, setTitle] = useState<string>(
+    !!props.prepopulatedTitle
+      ? props.prepopulatedTitle
+      : EMPTY_RICH_TEXT_STATE.title
   );
-  const [postHasBody, setPostHasBody] = useState(false);
 
-  // TODO: Construct PostRecord
+  const [nonEmptyBody, setNonEmptyBody] = useState(false);
+  const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT_STATE.body);
 
-  const onIdle = async (event: Event) => {};
+  const history = useHistory();
 
-  /*
-  return <BasePostView onIdle={onIdle} />;
-  */
+  const onIdle = async (event: Event) => {
+    if (!nonEmptyTitle || !nonEmptyBody) {
+      logger.debug("Title or body empty, not creating new post");
+      return;
+    }
+
+    const createPostResult = await props.createPost(title, body);
+    const { postId } = createPostResult;
+
+    switch (createPostResult.state) {
+      case "success":
+        const { postUrl } = createPostResult;
+        logger.info(
+          `new post created with title ${title} and post id ${postId}, redirecting to ${postUrl}`
+        );
+
+        // do redirect to permanent note url
+        history.replace(postUrl);
+        return;
+      case "post-name-taken":
+        logger.info(
+          `new post creation with title ${title} failed because that post name is already taken by post with id ${postId}`
+        );
+        // TODO: Display something to show the user that the rename failed due
+        // to the new name already being taken.
+        return;
+      default:
+        assertNever(createPostResult);
+    }
+  };
+
+  const onTitleChange = (newTitle: PostTitle) => {
+    setNonEmptyTitle(newTitle !== EMPTY_RICH_TEXT_STATE.title);
+  };
+  const onBodyChange = (newBody: PostBody) => {
+    setNonEmptyBody(newBody !== EMPTY_RICH_TEXT_STATE.body);
+  };
+
+  return (
+    <BasePostView
+      readOnly={false}
+      title={title}
+      body={body}
+      onIdle={onIdle}
+      onTitleChange={onTitleChange}
+      onBodyChange={onBodyChange}
+    />
+  );
 };
 
 export type PostViewProps = {
-  readOnly?: boolean;
+  readOnly: boolean;
   postRecord: PostRecord;
 
-  getTitle: () => Promise<Title | undefined>;
+  getTitle: () => Promise<PostTitle | undefined>;
 
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
@@ -131,7 +180,11 @@ export const PostView = (props: PostViewProps) => {
   const [titleChanged, setTitleChanged] = useState(false);
   const [bodyChanged, setBodyChanged] = useState(false);
 
-  const { renamePost, syncBody, ...restProps } = props;
+  const { renamePost, syncBody, postRecord, ...restProps } = props;
+
+  if (!postRecord.id) {
+    throw new Error("PostRecord id should not be undefined in PostView");
+  }
 
   const onIdle = async (event: Event) => {
     // TODO: Post should only be renamed if the user is idle and focus is not on
@@ -144,8 +197,8 @@ export const PostView = (props: PostViewProps) => {
     if (bodyChanged) {
       logger.debug("Body changed, syncing body");
       const syncBodyResult: SyncBodyResult = await syncBody(
-        props.postRecord.id,
-        props.postRecord.body
+        postRecord.id!,
+        postRecord.body
       );
 
       if (syncBodyResult === "success") {
@@ -162,12 +215,12 @@ export const PostView = (props: PostViewProps) => {
     if (needsPostRename) {
       logger.debug("Title changed, renaming post");
       const renamePostResult: RenamePostResult = await renamePost(
-        props.postRecord.id,
-        props.postRecord.title
+        postRecord.id!,
+        postRecord.title
       );
 
       if (renamePostResult === "success") {
-        logger.info(`Post renamed to ${props.postRecord.title}`);
+        logger.info(`Post renamed to ${postRecord.title}`);
         setTitleChanged(false);
         // TODO: Display something to show the user that the rename succeeded
       } else if (renamePostResult === "post-name-taken") {
@@ -186,10 +239,10 @@ export const PostView = (props: PostViewProps) => {
         }
 
         logger.info(
-          `Post rename failed, ${props.postRecord.title} already taken. Reverting to saved title ${savedTitle}`
+          `Post rename failed, ${postRecord.title} already taken. Reverting to saved title ${savedTitle}`
         );
 
-        props.postRecord.title = savedTitle;
+        postRecord.title = savedTitle;
         setTitleChanged(false);
         // TODO: Display something to show the user that the rename failed due
         // to the new name already being taken.
@@ -199,13 +252,13 @@ export const PostView = (props: PostViewProps) => {
     }
   };
 
-  const onTitleChange = (newTitle: Title) => {
-    if (newTitle !== props.postRecord.title) {
+  const onTitleChange = (newTitle: PostTitle) => {
+    if (newTitle !== postRecord.title) {
       setTitleChanged(true);
     }
   };
 
-  const onBodyChange = (newBody: Body) => {
+  const onBodyChange = (newBody: PostBody) => {
     // TODO: Only mark body as changed if it is actually different
     setBodyChanged(true);
   };
@@ -213,6 +266,8 @@ export const PostView = (props: PostViewProps) => {
   return (
     <BasePostView
       onIdle={onIdle}
+      title={postRecord.title}
+      body={postRecord.body}
       onTitleChange={onTitleChange}
       onBodyChange={onBodyChange}
       {...restProps}
@@ -229,7 +284,7 @@ type PostViewControllerProps = {
   */
 };
 
-type PostViewParams = {
+type PostViewControllerParams = {
   authorId: UserId;
   postId: PostId;
 };
@@ -238,7 +293,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
   // Determine whether read-only
   const styles = useStyles();
 
-  const { authorId, postId } = useParams<PostViewParams>();
+  const { authorId, postId } = useParams<PostViewControllerParams>();
   const readOnly = props.user.uid !== authorId;
   const [postRecord, setPostRecord] = useState<PostRecord | undefined>(
     undefined
@@ -270,7 +325,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
   }
 
   // Define helpers
-  const getTitle: () => Promise<Title | undefined> = async () => {
+  const getTitle: () => Promise<PostTitle | undefined> = async () => {
     const postRecord = await props.getPost(authorId, postId);
     return postRecord ? postRecord.title : undefined;
   };
