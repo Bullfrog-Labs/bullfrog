@@ -8,9 +8,23 @@ export const EMPTY_RICH_TEXT: RichText = [
   },
 ];
 
+export const EMPTY_RICH_TEXT_V2: RichText = [
+  {
+    type: "p",
+    children: [{ text: "" }],
+  },
+];
+
 export const stringToSlateNode = (s: string): RichText => [
   {
     type: "paragraph",
+    children: [{ text: s }],
+  },
+];
+
+export const stringToSlateNodeV2 = (s: string): RichText => [
+  {
+    type: "p",
     children: [{ text: s }],
   },
 ];

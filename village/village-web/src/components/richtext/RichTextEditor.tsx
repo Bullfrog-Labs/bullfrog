@@ -1,15 +1,12 @@
-import React, { useCallback, useMemo } from "react";
-import { ReactEditor, withReact, Slate, Editable } from "slate-react";
+import React, { useMemo } from "react";
+import { ReactEditor, withReact, Slate } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
 import { Grid, Container, Paper } from "@material-ui/core";
-import { hotkeyHandler, toReactKBEventHandler } from "./EventHandling";
-import { Element, Leaf } from "./Rendering";
-import { withResetBlockOnInsertBreak } from "./EditorBehaviors";
 import DocumentTitle from "./DocumentTitle";
 import RichTextEditorToolbar from "./RichTextEditorToolbar";
 import { RichText } from "./Types";
-import { EMPTY_RICH_TEXT } from "./Utils";
+import { EMPTY_RICH_TEXT_V2 } from "./Utils";
 import {
   EditablePlugins,
   MentionPlugin,
@@ -44,7 +41,7 @@ const MENTIONABLES = [
 
 export const EMPTY_RICH_TEXT_STATE = {
   title: "",
-  body: EMPTY_RICH_TEXT,
+  body: EMPTY_RICH_TEXT_V2,
 };
 
 export type RichTextEditorProps = {
@@ -60,16 +57,16 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
   return ops.some((op) => !Operation.isSelectionOperation(op));
 };
 
+const plugins = [ParagraphPlugin(), HeadingPlugin(), MentionPlugin()];
+
+const withPlugins = [
+  withReact,
+  withHistory,
+  withInlineVoid({ plugins }),
+] as const;
+
 const RichTextEditor = (props: RichTextEditorProps) => {
   const { title, body, onTitleChange, onBodyChange, enableToolbar } = props;
-
-  const plugins = [ParagraphPlugin(), HeadingPlugin()];
-
-  const withPlugins = [
-    withReact,
-    withHistory,
-    withInlineVoid({ plugins }),
-  ] as const;
 
   const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
 
