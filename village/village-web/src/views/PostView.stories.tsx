@@ -18,8 +18,8 @@ const getTitleHardcoded: () => Promise<Title> = async () => {
   return "Original title";
 };
 
-const renamePostAlwaysSuccessful: RenamePostFn = async () => {
-  return "success";
+const renamePostAlwaysSuccessful: RenamePostFn = async (postId, newTitle) => {
+  return { state: "success" };
 };
 
 const syncBodyAlwaysSuccessful: SyncBodyFn = async () => {

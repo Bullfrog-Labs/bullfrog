@@ -12,6 +12,8 @@ import {
   GetPostFn,
   GetStackPostsFn,
   GetUserPostsFn,
+  RenamePostFn,
+  SyncBodyFn,
 } from "../services/store/Posts";
 import { UserRecord, GetUserFn } from "../services/store/Users";
 import {
@@ -38,6 +40,8 @@ export const Router = (props: {
   getUser: GetUserFn;
   getPost: GetPostFn;
   createPost: (user: UserRecord) => CreatePostFn;
+  renamePost: (user: UserRecord) => RenamePostFn;
+  syncBody: (user: UserRecord) => SyncBodyFn;
   user?: UserRecord;
 }) => {
   const {
@@ -47,6 +51,8 @@ export const Router = (props: {
     getUser,
     getPost,
     createPost,
+    renamePost,
+    syncBody,
     user,
   } = props;
   if (!user) {
@@ -94,7 +100,12 @@ export const Router = (props: {
           </PrivateRoute>
           <PrivateRoute exact path="/post/:authorId/:postId">
             <AppContainer>
-              <PostViewController user={user} getPost={getPost} />
+              <PostViewController
+                user={user}
+                getPost={getPost}
+                renamePost={renamePost(user)}
+                syncBody={syncBody(user)}
+              />
             </AppContainer>
           </PrivateRoute>
           <PrivateRoute exact path="/create-new-post">

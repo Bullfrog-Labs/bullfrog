@@ -22,6 +22,8 @@ import {
   getStackPosts,
   getPost,
   createPost,
+  renamePost,
+  syncBody,
 } from "./services/store/Posts";
 import { useEffect } from "react";
 
@@ -100,6 +102,8 @@ function App() {
         getUser={getUser(database)}
         getPost={getPost(database)}
         createPost={createPost(database)}
+        renamePost={renamePost(database)}
+        syncBody={syncBody(database)}
         user={user}
       />
     </AuthContext.Provider>

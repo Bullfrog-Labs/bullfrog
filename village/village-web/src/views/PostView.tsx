@@ -249,35 +249,36 @@ export const PostView = (props: PostViewProps) => {
         title
       );
 
-      if (renamePostResult === "success") {
-        logger.info(`Post renamed to ${title}`);
-        setTitleChanged(false);
-        // TODO: Display something to show the user that the rename succeeded
-      } else if (renamePostResult === "post-name-taken") {
-        const savedTitle = await props.getTitle(); // this should be pulled from DB
-
-        if (!savedTitle) {
-          // No post was found, even though it was just being edited.
-          // TODO: This should be handled properly at some point, e.g. attempt to
-          // create the post again, or show an error message saying that the
-          // note has been deleted.
-          // For now it will just be logged, since this is a corner case.
+      switch (renamePostResult.state) {
+        case "success":
+          // TODO: Display something to show the user that the rename succeeded
+          logger.info(`Post renamed to ${title}`);
+          setTitleChanged(false);
+          setTitle(title);
+          break;
+        case "post-name-taken":
+          const savedTitle = await props.getTitle();
+          if (!savedTitle) {
+            // No post was found, even though it was just being edited.
+            // TODO: This should be handled properly at some point, e.g. attempt to
+            // create the post again, or show an error message saying that the
+            // note has been deleted.
+            // For now it will just be logged, since this is a corner case.
+            logger.info(
+              "Post rename failed, post deleted while being renamed to already-taken post name"
+            );
+            return;
+          }
           logger.info(
-            "Post rename failed, post deleted while being renamed to already-taken post name"
+            `Post rename failed, ${title} already taken. Reverting to saved title ${savedTitle}`
           );
-          return;
-        }
 
-        logger.info(
-          `Post rename failed, ${title} already taken. Reverting to saved title ${savedTitle}`
-        );
+          setTitle(savedTitle);
+          setTitleChanged(false);
 
-        setTitle(savedTitle);
-        setTitleChanged(false);
-        // TODO: Display something to show the user that the rename failed due
-        // to the new name already being taken.
-      } else {
-        throw Error("Unknown return value from renamePost");
+          break;
+        default:
+          assertNever(renamePostResult);
       }
     }
   };
@@ -295,11 +296,9 @@ export const PostView = (props: PostViewProps) => {
     setBodyChanged(true);
   };
 
-  const onIdleNoop = (event: Event) => {};
-
   return (
     <BasePostView
-      onIdle={onIdleNoop}
+      onIdle={onIdle}
       title={title}
       body={body}
       onTitleChange={onTitleChange}
@@ -312,10 +311,8 @@ export const PostView = (props: PostViewProps) => {
 type PostViewControllerProps = {
   user: UserRecord;
   getPost: (uid: UserId, postId: PostId) => Promise<PostRecord | undefined>;
-  /*
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
-  */
 };
 
 type PostViewControllerParams = {
@@ -333,9 +330,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
     undefined
   );
   const [postRecordLoaded, setPostRecordLoaded] = useState(false);
-
-  // TODO: Remove the stringtoSlateNode. It is just a hack to get things to work
-  // for now, since the post is just a plain text string in the mock data.
 
   // Attempt to load post
   // TODO: Encapsulate this in a use*-style hook
@@ -360,21 +354,13 @@ export const PostViewController = (props: PostViewControllerProps) => {
     return postRecord ? postRecord.title : undefined;
   };
 
-  const renamePost: RenamePostFn = async () => {
-    return "success";
-  };
-
-  const syncBody: SyncBodyFn = async () => {
-    return "success";
-  };
-
   return (
     <PostView
       readOnly={readOnly}
       postRecord={postRecord}
       getTitle={getTitle}
-      renamePost={renamePost}
-      syncBody={syncBody}
+      renamePost={props.renamePost}
+      syncBody={props.syncBody}
     />
   );
 };
