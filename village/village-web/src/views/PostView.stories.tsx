@@ -28,6 +28,7 @@ const syncBodyAlwaysSuccessful: SyncBodyFn = async () => {
 
 export const BasicPostView = Template.bind({});
 BasicPostView.args = {
+  readOnly: false,
   postRecord: {
     id: "456",
     authorId: "123",

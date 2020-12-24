@@ -173,18 +173,23 @@ export type PostViewProps = {
 };
 
 // TODO: Implement code to load the post data into the PostView
+// Changing title triggers a rename. Renames are not allowed if the title is
+// already being used.
 export const PostView = (props: PostViewProps) => {
-  // Changing title triggers a rename. Renames are not allowed if the title is
-  // already being used.
   const logger = log.getLogger("PostView");
-  const [titleChanged, setTitleChanged] = useState(false);
-  const [bodyChanged, setBodyChanged] = useState(false);
-
   const { renamePost, syncBody, postRecord, ...restProps } = props;
 
   if (!postRecord.id) {
     throw new Error("PostRecord id should not be undefined in PostView");
   }
+
+  const postId = postRecord.id;
+
+  const [title, setTitle] = useState(postRecord.title);
+  const [titleChanged, setTitleChanged] = useState(false);
+
+  const [body, setBody] = useState(postRecord.body);
+  const [bodyChanged, setBodyChanged] = useState(false);
 
   const onIdle = async (event: Event) => {
     // TODO: Post should only be renamed if the user is idle and focus is not on
@@ -196,10 +201,7 @@ export const PostView = (props: PostViewProps) => {
     // sync body first
     if (bodyChanged) {
       logger.debug("Body changed, syncing body");
-      const syncBodyResult: SyncBodyResult = await syncBody(
-        postRecord.id!,
-        postRecord.body
-      );
+      const syncBodyResult: SyncBodyResult = await syncBody(postId, body);
 
       if (syncBodyResult === "success") {
         setBodyChanged(false);
@@ -215,12 +217,12 @@ export const PostView = (props: PostViewProps) => {
     if (needsPostRename) {
       logger.debug("Title changed, renaming post");
       const renamePostResult: RenamePostResult = await renamePost(
-        postRecord.id!,
-        postRecord.title
+        postId,
+        title
       );
 
       if (renamePostResult === "success") {
-        logger.info(`Post renamed to ${postRecord.title}`);
+        logger.info(`Post renamed to ${title}`);
         setTitleChanged(false);
         // TODO: Display something to show the user that the rename succeeded
       } else if (renamePostResult === "post-name-taken") {
@@ -239,10 +241,10 @@ export const PostView = (props: PostViewProps) => {
         }
 
         logger.info(
-          `Post rename failed, ${postRecord.title} already taken. Reverting to saved title ${savedTitle}`
+          `Post rename failed, ${title} already taken. Reverting to saved title ${savedTitle}`
         );
 
-        postRecord.title = savedTitle;
+        setTitle(savedTitle);
         setTitleChanged(false);
         // TODO: Display something to show the user that the rename failed due
         // to the new name already being taken.
@@ -254,20 +256,24 @@ export const PostView = (props: PostViewProps) => {
 
   const onTitleChange = (newTitle: PostTitle) => {
     if (newTitle !== postRecord.title) {
+      setTitle(newTitle);
       setTitleChanged(true);
     }
   };
 
   const onBodyChange = (newBody: PostBody) => {
     // TODO: Only mark body as changed if it is actually different
+    setBody(newBody);
     setBodyChanged(true);
   };
 
+  const onIdleNoop = (event: Event) => {};
+
   return (
     <BasePostView
-      onIdle={onIdle}
-      title={postRecord.title}
-      body={postRecord.body}
+      onIdle={onIdleNoop}
+      title={title}
+      body={body}
       onTitleChange={onTitleChange}
       onBodyChange={onBodyChange}
       {...restProps}
@@ -308,9 +314,11 @@ export const PostViewController = (props: PostViewControllerProps) => {
   useEffect(() => {
     const loadPostRecord = async () => {
       const foo = await props.getPost(authorId, postId);
+      /*
       if (!!foo) {
         foo.body = stringToSlateNode((foo.body as unknown) as string);
       }
+      */
       setPostRecord(foo);
       setPostRecordLoaded(true);
     };
