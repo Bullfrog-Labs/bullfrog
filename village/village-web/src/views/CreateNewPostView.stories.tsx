@@ -22,3 +22,16 @@ Untitled.args = {
     console.log(`Redirecting to post url ${postUrl}`);
   },
 };
+
+export const PrepopulatedTitle = Template.bind({});
+PrepopulatedTitle.args = {
+  prepopulatedTitle: "foo",
+  createPost: async (newTitle, newBody) => ({
+    state: "success",
+    postId: "123",
+    postUrl: `/posts/456/${newTitle}`,
+  }),
+  redirectAfterCreate: (postUrl) => {
+    console.log(`Redirecting to post url ${postUrl}`);
+  },
+};

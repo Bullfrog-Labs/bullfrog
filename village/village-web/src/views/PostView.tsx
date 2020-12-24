@@ -17,8 +17,7 @@ import {
   PostTitle,
 } from "../services/store/Posts";
 import { UserId, UserRecord } from "../services/store/Users";
-import { Redirect, useParams } from "react-router-dom";
-import { stringToSlateNode } from "../components/richtext/Utils";
+import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 
 const useStyles = makeStyles((theme) => ({
@@ -86,7 +85,7 @@ export const BasePostView = (props: BasePostViewProps) => {
   );
 };
 
-export interface CreateNewPostViewProps extends BasePostViewProps {
+export interface CreateNewPostViewProps {
   prepopulatedTitle?: PostTitle;
   createPost: CreatePostFn;
   redirectAfterCreate: (postUrl: string) => void;
@@ -160,6 +159,33 @@ export const CreateNewPostView = (props: CreateNewPostViewProps) => {
       onIdle={onIdle}
       onTitleChange={onTitleChange}
       onBodyChange={onBodyChange}
+    />
+  );
+};
+
+export type CreateNewPostViewControllerProps = {
+  createPost: CreatePostFn;
+};
+
+export type CreateNewPostViewControllerParams = {
+  prepopulatedTitle?: PostTitle;
+};
+
+export const CreateNewPostViewController = (
+  props: CreateNewPostViewControllerProps
+) => {
+  const { prepopulatedTitle } = useParams<CreateNewPostViewControllerParams>();
+
+  const history = useHistory();
+  const redirectAfterCreate = (postUrl: string) => {
+    history.replace(postUrl);
+  };
+
+  return (
+    <CreateNewPostView
+      prepopulatedTitle={prepopulatedTitle}
+      createPost={props.createPost}
+      redirectAfterCreate={redirectAfterCreate}
     />
   );
 };
@@ -315,13 +341,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
   // TODO: Encapsulate this in a use*-style hook
   useEffect(() => {
     const loadPostRecord = async () => {
-      const foo = await props.getPost(authorId, postId);
-      /*
-      if (!!foo) {
-        foo.body = stringToSlateNode((foo.body as unknown) as string);
-      }
-      */
-      setPostRecord(foo);
+      setPostRecord(await props.getPost(authorId, postId));
       setPostRecordLoaded(true);
     };
     loadPostRecord();

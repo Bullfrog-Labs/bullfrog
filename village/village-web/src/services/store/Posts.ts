@@ -66,6 +66,54 @@ export type CreatePostFn = (
   newBody: PostBody
 ) => Promise<CreatePostResult>;
 
+export const createPost: (
+  database: Database
+) => (user: UserRecord) => CreatePostFn = (database) => (user) => async (
+  newTitle,
+  newBody
+) => {
+  const logger = log.getLogger("createPost");
+  // Check whether a post with the title exists, and create a new post only if
+  // there is not already an existing one.
+
+  const getPostCollectionRef = () =>
+    database
+      .getHandle()
+      .collection(USERS_COLLECTION)
+      .doc(user.uid)
+      .collection(POSTS_COLLECTION);
+
+  const postDoc = await getPostCollectionRef()
+    .where("title", "==", newTitle)
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  if (!postDoc.empty) {
+    if (postDoc.size > 1) {
+      logger.warn("More than one post found with the same title");
+    }
+    const postRecord = postDoc.docs[0].data();
+    return {
+      state: "post-name-taken",
+      postId: postRecord.id!,
+    };
+  } else {
+    const newPostRecord: PostRecord = {
+      authorId: user.uid,
+      title: newTitle,
+      body: newBody,
+      updatedAt: new Date(),
+    };
+    const newPostDoc = await getPostCollectionRef().add(newPostRecord);
+
+    return {
+      state: "success",
+      postId: newPostDoc.id,
+      postUrl: `/post/${user.uid}/${newPostDoc.id}`,
+    };
+  }
+};
+
 export type RenamePostResult = "success" | "post-name-taken";
 export type RenamePostFn = (
   postId: PostId,
@@ -99,7 +147,13 @@ export const getPost: (database: Database) => GetPostFn = (database) => async (
     .withConverter(POST_RECORD_CONVERTER)
     .get();
 
-  return postDoc.data();
+  const postRecord = postDoc.data();
+  if (!postRecord) {
+    return undefined;
+  }
+
+  postRecord.id = postDoc.id;
+  return postRecord;
 };
 
 export const getUserPosts = (database: Database) => async (

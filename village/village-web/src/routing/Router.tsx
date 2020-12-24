@@ -8,12 +8,16 @@ import MainView from "../views/MainView";
 import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
 import {
+  CreatePostFn,
   GetPostFn,
   GetStackPostsFn,
   GetUserPostsFn,
 } from "../services/store/Posts";
 import { UserRecord, GetUserFn } from "../services/store/Users";
-import { PostViewController } from "../views/PostView";
+import {
+  CreateNewPostViewController,
+  PostViewController,
+} from "../views/PostView";
 
 const Sad404 = () => {
   let location = useLocation();
@@ -33,6 +37,7 @@ export const Router = (props: {
   getStackPosts: GetStackPostsFn;
   getUser: GetUserFn;
   getPost: GetPostFn;
+  createPost: (user: UserRecord) => CreatePostFn;
   user?: UserRecord;
 }) => {
   const {
@@ -41,6 +46,7 @@ export const Router = (props: {
     getStackPosts,
     getUser,
     getPost,
+    createPost,
     user,
   } = props;
   if (!user) {
@@ -89,6 +95,11 @@ export const Router = (props: {
           <PrivateRoute exact path="/post/:authorId/:postId">
             <AppContainer>
               <PostViewController user={user} getPost={getPost} />
+            </AppContainer>
+          </PrivateRoute>
+          <PrivateRoute exact path="/create-new-post">
+            <AppContainer>
+              <CreateNewPostViewController createPost={createPost(user)} />
             </AppContainer>
           </PrivateRoute>
           <Route path="*">
