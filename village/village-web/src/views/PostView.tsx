@@ -232,6 +232,7 @@ export const PostView = (props: PostViewProps) => {
       const syncBodyResult: SyncBodyResult = await syncBody(postId, body);
 
       if (syncBodyResult === "success") {
+        logger.debug("Body synced");
         setBodyChanged(false);
       } else {
         logger.error("sync body failed, will try in next onIdle");

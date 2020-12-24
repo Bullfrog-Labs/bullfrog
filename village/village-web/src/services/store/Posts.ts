@@ -159,9 +159,10 @@ export const renamePost: (
     };
   }
 
+  // TODO: Figure out how to check for failures
   await getPostCollectionForUserRef(database, user.uid)
     .doc(postId)
-    .update({ title: newTitle });
+    .update({ title: newTitle, updatedAt: new Date() });
 
   return {
     state: "success",
@@ -180,6 +181,10 @@ export const syncBody: (
   postId,
   newBody
 ) => {
+  // TODO: Figure out how to check for failures
+  await getPostCollectionForUserRef(database, user.uid)
+    .doc(postId)
+    .update({ body: newBody, updatedAt: new Date() });
   return "success";
 };
 
