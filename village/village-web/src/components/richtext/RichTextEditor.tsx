@@ -2,20 +2,26 @@ import React, { useMemo } from "react";
 import { ReactEditor, withReact, Slate } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
-import { Grid, Container, Paper } from "@material-ui/core";
+import { Grid, Container, Paper, Typography } from "@material-ui/core";
 import DocumentTitle from "./DocumentTitle";
-import RichTextEditorToolbar from "./RichTextEditorToolbar";
 import { RichText } from "./Types";
 import { EMPTY_RICH_TEXT_V2 } from "./Utils";
+import { LooksOne, LooksTwo } from "@styled-icons/material";
 import {
   EditablePlugins,
   MentionPlugin,
   ParagraphPlugin,
+  ParagraphPluginOptions,
   HeadingPlugin,
+  HeadingPluginOptions,
   MentionSelect,
+  HeadingToolbar,
+  ToolbarElement,
   useMention,
   withInlineVoid,
   pipe,
+  ELEMENT_H5,
+  ELEMENT_H6,
 } from "@udecode/slate-plugins";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
@@ -57,7 +63,40 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
   return ops.some((op) => !Operation.isSelectionOperation(op));
 };
 
-const plugins = [ParagraphPlugin(), HeadingPlugin(), MentionPlugin()];
+const ParagraphElement = (props: any) => {
+  return (
+    <p>
+      <Typography variant="body1">{props.children}</Typography>
+    </p>
+  );
+};
+const H5Element = (props: any) => {
+  return <Typography variant="h5">{props.children}</Typography>;
+};
+const H6Element = (props: any) => {
+  return <Typography variant="h6">{props.children}</Typography>;
+};
+
+const paragraphOptions: ParagraphPluginOptions = {
+  p: {
+    component: ParagraphElement,
+  },
+};
+
+const headingOptions: HeadingPluginOptions = {
+  h5: {
+    component: H5Element,
+  },
+  h6: {
+    component: H6Element,
+  },
+};
+
+const plugins = [
+  ParagraphPlugin(paragraphOptions),
+  HeadingPlugin(headingOptions),
+  MentionPlugin(),
+];
 
 const withPlugins = [
   withReact,
@@ -97,6 +136,15 @@ const RichTextEditor = (props: RichTextEditorProps) => {
     },
   };
 
+  const toolbar = (
+    <React.Fragment>
+      <HeadingToolbar>
+        <ToolbarElement type={ELEMENT_H5} icon={<LooksOne />} />
+        <ToolbarElement type={ELEMENT_H6} icon={<LooksTwo />} />
+      </HeadingToolbar>
+    </React.Fragment>
+  );
+
   return (
     <Paper elevation={1}>
       <div className="RichTextEditor">
@@ -127,7 +175,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
                   onChangeMention(editor);
                 }}
               >
-                {!!enableToolbar && <RichTextEditorToolbar />}
+                {!!enableToolbar && toolbar}
                 <EditablePlugins
                   plugins={plugins}
                   readOnly={props.readOnly ?? false}
