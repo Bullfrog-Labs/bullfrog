@@ -93,10 +93,10 @@ export const createPost: (
     if (postDoc.size > 1) {
       logger.warn("More than one post found with the same title");
     }
-    const postRecord = postDoc.docs[0].data();
+    const postId = postDoc.docs[0].id;
     return {
       state: "post-name-taken",
-      postId: postRecord.id!,
+      postId: postId,
     };
   }
 
