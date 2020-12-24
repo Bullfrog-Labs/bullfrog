@@ -2,9 +2,7 @@ import React, { useCallback, useMemo } from "react";
 import { ReactEditor, withReact, Slate, Editable } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
-
 import { Grid, Container, Paper } from "@material-ui/core";
-
 import { hotkeyHandler, toReactKBEventHandler } from "./EventHandling";
 import { Element, Leaf } from "./Rendering";
 import { withResetBlockOnInsertBreak } from "./EditorBehaviors";
@@ -12,13 +10,15 @@ import DocumentTitle from "./DocumentTitle";
 import RichTextEditorToolbar from "./RichTextEditorToolbar";
 import { RichText } from "./Types";
 import { EMPTY_RICH_TEXT } from "./Utils";
-
 import {
   EditablePlugins,
   MentionPlugin,
+  ParagraphPlugin,
+  HeadingPlugin,
   MentionSelect,
   useMention,
   withInlineVoid,
+  pipe,
 } from "@udecode/slate-plugins";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
@@ -63,19 +63,15 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
 const RichTextEditor = (props: RichTextEditorProps) => {
   const { title, body, onTitleChange, onBodyChange, enableToolbar } = props;
 
-  const plugins = [MentionPlugin()];
-  const withMentions = withInlineVoid({ plugins });
+  const plugins = [ParagraphPlugin(), HeadingPlugin()];
 
-  const renderElement = useCallback((props) => <Element {...props} />, []);
-  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+  const withPlugins = [
+    withReact,
+    withHistory,
+    withInlineVoid({ plugins }),
+  ] as const;
 
-  const editor = useMemo(
-    () =>
-      withReact(
-        withResetBlockOnInsertBreak(withHistory(withMentions(createEditor())))
-      ),
-    [withMentions]
-  );
+  const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
 
   const {
     onAddMention,
@@ -138,15 +134,10 @@ const RichTextEditor = (props: RichTextEditorProps) => {
                 <EditablePlugins
                   plugins={plugins}
                   readOnly={props.readOnly ?? false}
-                  renderElement={[renderElement]}
-                  renderLeaf={[renderLeaf]}
                   placeholder="Enter some text"
                   spellCheck
                   autoFocus
-                  onKeyDown={[
-                    toReactKBEventHandler(hotkeyHandler(editor)),
-                    onKeyDownMention,
-                  ]}
+                  onKeyDown={[onKeyDownMention]}
                   onKeyDownDeps={[index, search, target]}
                 />
 
