@@ -17,7 +17,7 @@ import {
   PostTitle,
 } from "../services/store/Posts";
 import { UserId, UserRecord } from "../services/store/Users";
-import { Redirect, useHistory, useParams } from "react-router-dom";
+import { Redirect, useParams } from "react-router-dom";
 import { stringToSlateNode } from "../components/richtext/Utils";
 import { assertNever } from "../utils";
 
@@ -86,12 +86,13 @@ export const BasePostView = (props: BasePostViewProps) => {
   );
 };
 
-interface CreateNewPostViewProps extends BasePostViewProps {
+export interface CreateNewPostViewProps extends BasePostViewProps {
   prepopulatedTitle?: PostTitle;
   createPost: CreatePostFn;
+  redirectAfterCreate: (postUrl: string) => void;
 }
 
-const CreateNewPostView = (props: CreateNewPostViewProps) => {
+export const CreateNewPostView = (props: CreateNewPostViewProps) => {
   // Need to be able to pre-populate title, or have empty title.
   // Note is not saved until it has a title and a body. Once the note is saved,
   // it is redirected to the post view.
@@ -110,8 +111,6 @@ const CreateNewPostView = (props: CreateNewPostViewProps) => {
   const [nonEmptyBody, setNonEmptyBody] = useState(false);
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT_STATE.body);
 
-  const history = useHistory();
-
   const onIdle = async (event: Event) => {
     if (!nonEmptyTitle || !nonEmptyBody) {
       logger.debug("Title or body empty, not creating new post");
@@ -129,7 +128,8 @@ const CreateNewPostView = (props: CreateNewPostViewProps) => {
         );
 
         // do redirect to permanent note url
-        history.replace(postUrl);
+        props.redirectAfterCreate(postUrl);
+
         return;
       case "post-name-taken":
         logger.info(
@@ -144,9 +144,11 @@ const CreateNewPostView = (props: CreateNewPostViewProps) => {
   };
 
   const onTitleChange = (newTitle: PostTitle) => {
+    setTitle(newTitle);
     setNonEmptyTitle(newTitle !== EMPTY_RICH_TEXT_STATE.title);
   };
   const onBodyChange = (newBody: PostBody) => {
+    setBody(newBody);
     setNonEmptyBody(newBody !== EMPTY_RICH_TEXT_STATE.body);
   };
 
