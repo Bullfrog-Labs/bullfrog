@@ -1,72 +1,34 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
-import React, { useState } from "react";
+import React from "react";
 import {
-  Body,
   EMPTY_RICH_TEXT_STATE,
   Title,
 } from "../components/richtext/RichTextEditor";
-import { PostId } from "../services/store/Posts";
-import {
-  PostView,
-  PostViewProps,
-  RenamePostResult,
-  SyncBodyResult,
-} from "./PostView";
+import { RenamePostFn, SyncBodyFn } from "../services/store/Posts";
+import { PostView, PostViewProps } from "./PostView";
 
 export default {
   title: "PostView/PostView",
   component: PostView,
 } as Meta;
 
-const PostViewStateWrapper = (props: PostViewProps) => {
-  const [title, setTitle] = useState(props.postRecord.title);
-  const [body, setBody] = useState(props.postRecord.body);
+const Template: Story<PostViewProps> = (args) => <PostView {...args} />;
 
-  const postRecord = {
-    id: props.postRecord.id,
-    authorId: props.postRecord.authorId,
-    title: title,
-    body: body,
-    updatedAt: new Date(),
-  };
-
-  return (
-    <PostView
-      readOnly={props.readOnly}
-      postRecord={postRecord}
-      getTitle={props.getTitle}
-      onTitleChange={setTitle}
-      onBodyChange={setBody}
-      renamePost={props.renamePost}
-      syncBody={props.syncBody}
-    />
-  );
-};
-
-const Template: Story<PostViewProps> = (args) => (
-  <PostViewStateWrapper {...args} />
-);
-
-const getTitleHardcoded: (postId: PostId) => Promise<Title> = async (
-  postId
-) => {
+const getTitleHardcoded: () => Promise<Title> = async () => {
   return "Original title";
 };
 
-const renamePostAlwaysSuccessful: (
-  newTitle: Title
-) => Promise<RenamePostResult> = async (newTitle) => {
-  return "success";
+const renamePostAlwaysSuccessful: RenamePostFn = async (postId, newTitle) => {
+  return { state: "success" };
 };
 
-const syncBodyAlwaysSuccessful: (
-  newBody: Body
-) => Promise<SyncBodyResult> = async (newBody) => {
+const syncBodyAlwaysSuccessful: SyncBodyFn = async () => {
   return "success";
 };
 
 export const BasicPostView = Template.bind({});
 BasicPostView.args = {
+  readOnly: false,
   postRecord: {
     id: "456",
     authorId: "123",
@@ -74,8 +36,6 @@ BasicPostView.args = {
     body: EMPTY_RICH_TEXT_STATE.body,
     updatedAt: new Date(),
   },
-  onTitleChange: (newTitle: Title) => {},
-  onBodyChange: (newBody: Body) => {},
   getTitle: getTitleHardcoded,
   renamePost: renamePostAlwaysSuccessful,
   syncBody: syncBodyAlwaysSuccessful,

@@ -1,4 +1,4 @@
-import { Story } from "@storybook/react/types-6-0";
+import { Meta, Story } from "@storybook/react/types-6-0";
 import React, { FunctionComponent, useState } from "react";
 import RichTextEditor, {
   RichTextEditorProps,
@@ -10,7 +10,7 @@ import RichTextEditor, {
 export default {
   title: "Editing/RichTextEditor",
   component: RichTextEditor,
-};
+} as Meta;
 
 const RichTextEditorStateWrapper: FunctionComponent<RichTextEditorProps> = (
   props
@@ -38,8 +38,8 @@ export const BasicRTEReadOnly = Template.bind({});
 BasicRTEReadOnly.args = {
   title: EMPTY_RICH_TEXT_STATE.title,
   body: EMPTY_RICH_TEXT_STATE.body,
-  onTitleChange: (newTitle: Title) => {},
-  onBodyChange: (newBody: Body) => {},
+  onTitleChange: (newTitle: Title) => {}, // this does not get used
+  onBodyChange: (newBody: Body) => {}, // this does not get used
   enableToolbar: false,
   readOnly: true,
 };
