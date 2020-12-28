@@ -22,7 +22,7 @@ import {
   pipe,
   ELEMENT_H5,
   ELEMENT_H6,
-} from "@udecode/slate-plugins";
+} from "@blfrg.xyz/slate-plugins";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
