@@ -49,7 +49,7 @@ export const BasePostView = (props: BasePostViewProps) => {
   const logger = log.getLogger("BasePostView");
   const classes = useStyles();
 
-  if (props.readOnly) {
+  if (props.readOnly || props.readOnly === undefined) {
     logger.info(`rendering read-only view for ${props.title}`);
 
     return (
@@ -73,7 +73,7 @@ export const BasePostView = (props: BasePostViewProps) => {
         onIdle={props.onIdle}
       >
         <RichTextEditor
-          readOnly={props.readOnly ?? false}
+          readOnly={props.readOnly}
           title={props.title}
           onTitleChange={props.onTitleChange}
           body={props.body}
