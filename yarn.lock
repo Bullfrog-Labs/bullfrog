@@ -1288,14 +1288,19 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@blfrg.xyz/slate-plugins@^0.71.11":
-  version "0.71.11"
-  resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins/-/slate-plugins-0.71.11.tgz#76d2c31699436e7b7eb876685757cd449e570f04"
-  integrity sha512-DElRjTwIeupj8Du7m2vynMwPUWg0RcYGIrF93AWdTBtnnZuBx1a+QmClFWNBWWjMUYXM94OZp44051ASxMg09Q==
+"@blfrg.xyz/slate-plugins-core@^0.71.9":
+  version "0.71.9"
+  resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins-core/-/slate-plugins-core-0.71.9.tgz#0e2381639e2a0edbba2e5bf7002a628d7bda8d48"
+  integrity sha512-BNjv6nYV0fD9gqptiZbe5nIed6ffRuGvJ+G2mkqYsAVoWqMJlpU4cc8nh9y6HyFEFLM95sR3Q7nHCwfJ3/mp9w==
+
+"@blfrg.xyz/slate-plugins@^0.71.13":
+  version "0.71.13"
+  resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins/-/slate-plugins-0.71.13.tgz#258fb9d112042da6b534c94c867b0c134c3feeda"
+  integrity sha512-ZHihryNMIPhxBxFOYnvUJPHAG+MEEUymMbGUSeDIu+uuD7exB3lyiGLJ8SX0BzHbwtMoqE0k7Uj+d4FF5LGX9Q==
   dependencies:
+    "@blfrg.xyz/slate-plugins-core" "^0.71.9"
     "@react-hook/merged-ref" "^1.3.0"
     "@tippyjs/react" "^4.0.2"
-    "@udecode/slate-plugins-core" "^0.71.9"
     "@uifabric/styling" "^7.12.11"
     "@uifabric/utilities" "^7.19.0"
     image-extensions "^1.1.0"
@@ -4037,11 +4042,6 @@
   dependencies:
     "@typescript-eslint/types" "4.10.0"
     eslint-visitor-keys "^2.0.0"
-
-"@udecode/slate-plugins-core@^0.71.9":
-  version "0.71.9"
-  resolved "https://registry.yarnpkg.com/@udecode/slate-plugins-core/-/slate-plugins-core-0.71.9.tgz#279f7edd20c172f16fc250dec8c9353a2944db22"
-  integrity sha512-ZX03hwawJP/qKKrLDBnGJwjNlFshy5oQuQGCDV9CXBJCt7z8xkjgfBvn2sQEEFINTBUEBU9jbz4qagQfGUdU9Q==
 
 "@uifabric/merge-styles@^7.19.1":
   version "7.19.1"

@@ -1,5 +1,6 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
 import React, { FunctionComponent, useState } from "react";
+import { MemoryRouter } from "react-router-dom";
 import RichTextEditor, {
   RichTextEditorProps,
   Title,
@@ -19,14 +20,16 @@ const RichTextEditorStateWrapper: FunctionComponent<RichTextEditorProps> = (
   const [body, setBody] = useState<Body>(props.body);
 
   return (
-    <RichTextEditor
-      title={title}
-      body={body}
-      onTitleChange={setTitle}
-      onBodyChange={setBody}
-      enableToolbar={props.enableToolbar}
-      readOnly={props.readOnly}
-    />
+    <MemoryRouter>
+      <RichTextEditor
+        title={title}
+        body={body}
+        onTitleChange={setTitle}
+        onBodyChange={setBody}
+        enableToolbar={props.enableToolbar}
+        readOnly={props.readOnly}
+      />
+    </MemoryRouter>
   );
 };
 

@@ -10,6 +10,7 @@ import { LooksOne, LooksTwo } from "@styled-icons/material";
 import {
   EditablePlugins,
   MentionPlugin,
+  MentionPluginOptions,
   ParagraphPlugin,
   ParagraphPluginOptions,
   HeadingPlugin,
@@ -23,6 +24,7 @@ import {
   ELEMENT_H5,
   ELEMENT_H6,
 } from "@blfrg.xyz/slate-plugins";
+import { Link } from "react-router-dom";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -63,18 +65,40 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
   return ops.some((op) => !Operation.isSelectionOperation(op));
 };
 
-const ParagraphElement = (props: any) => {
+const MentionElement = ({
+  attributes,
+  children,
+  element,
+  htmlAttributes,
+}: any) => {
+  const postId = "dummy";
   return (
-    <p>
-      <Typography variant="body1">{props.children}</Typography>
-    </p>
+    <Link
+      {...attributes}
+      data-slate-value={element.value}
+      to={`/post/${postId}`}
+      contentEditable={false}
+      {...htmlAttributes}
+    >
+      {element.value}
+      {children}
+    </Link>
   );
+};
+const ParagraphElement = (props: any) => {
+  return <Typography variant="body1">{props.children}</Typography>;
 };
 const H5Element = (props: any) => {
   return <Typography variant="h5">{props.children}</Typography>;
 };
 const H6Element = (props: any) => {
   return <Typography variant="h6">{props.children}</Typography>;
+};
+
+const mentionOptions: MentionPluginOptions = {
+  mention: {
+    component: MentionElement,
+  },
 };
 
 const paragraphOptions: ParagraphPluginOptions = {
@@ -95,7 +119,7 @@ const headingOptions: HeadingPluginOptions = {
 const plugins = [
   ParagraphPlugin(paragraphOptions),
   HeadingPlugin(headingOptions),
-  MentionPlugin(),
+  MentionPlugin(mentionOptions),
 ];
 
 const withPlugins = [
