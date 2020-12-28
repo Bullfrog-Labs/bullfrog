@@ -5,14 +5,15 @@ import { UserRecord, UserId, USERS_COLLECTION, getUsersForIds } from "./Users";
 import { RichText } from "../../components/richtext/Types";
 
 export type PostId = string;
+export type PostTitle = string;
 export type PostBody = RichText;
 
 export interface PostRecord {
-  updatedAt: Date;
+  id?: PostId; // should only be undefined for unsaved new posts
+  updatedAt?: Date; // should only be undefined for unsaved new posts
   authorId: UserId;
-  id: PostId;
   body: PostBody;
-  title: string;
+  title: PostTitle;
 }
 
 /**
@@ -44,6 +45,178 @@ const POST_RECORD_CONVERTER = {
 };
 
 export const POSTS_COLLECTION = "posts";
+
+const getPostCollectionForUserRef = (database: Database, uid: UserId) =>
+  database
+    .getHandle()
+    .collection(USERS_COLLECTION)
+    .doc(uid)
+    .collection(POSTS_COLLECTION);
+
+export type CreatePostResultSuccess = {
+  state: "success";
+  postId: PostId;
+  postUrl: string;
+};
+
+export type CreatePostResultPostNameTaken = {
+  state: "post-name-taken";
+  postId: PostId;
+};
+
+export type CreatePostResult =
+  | CreatePostResultSuccess
+  | CreatePostResultPostNameTaken;
+
+export type CreatePostFn = (
+  newTitle: PostTitle,
+  newBody: PostBody
+) => Promise<CreatePostResult>;
+
+export const createPost: (
+  database: Database
+) => (user: UserRecord) => CreatePostFn = (database) => (user) => async (
+  newTitle,
+  newBody
+) => {
+  const logger = log.getLogger("createPost");
+
+  // Check whether a post with the title exists, and create a new post only if
+  // there is not already an existing one.
+
+  const postDoc = await getPostCollectionForUserRef(database, user.uid)
+    .where("title", "==", newTitle)
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  if (!postDoc.empty) {
+    if (postDoc.size > 1) {
+      logger.warn("More than one post found with the same title");
+    }
+    const postId = postDoc.docs[0].id;
+    return {
+      state: "post-name-taken",
+      postId: postId,
+    };
+  }
+
+  const newPostRecord: PostRecord = {
+    authorId: user.uid,
+    title: newTitle,
+    body: newBody,
+    updatedAt: new Date(),
+  };
+  const newPostDoc = await getPostCollectionForUserRef(database, user.uid).add(
+    newPostRecord
+  );
+
+  return {
+    state: "success",
+    postId: newPostDoc.id,
+    postUrl: `/post/${user.uid}/${newPostDoc.id}`,
+  };
+};
+
+export type RenamePostResultSuccess = {
+  state: "success";
+};
+
+export type RenamePostResultPostNameTaken = {
+  state: "post-name-taken";
+  postId: PostId;
+};
+
+export type RenamePostResult =
+  | RenamePostResultSuccess
+  | RenamePostResultPostNameTaken;
+
+export type RenamePostFn = (
+  postId: PostId,
+  newTitle: PostTitle
+) => Promise<RenamePostResult>;
+
+export const renamePost: (
+  database: Database
+) => (user: UserRecord) => RenamePostFn = (database) => (user) => async (
+  postId,
+  newTitle
+) => {
+  const logger = log.getLogger("renamePost");
+
+  const postDoc = await getPostCollectionForUserRef(database, user.uid)
+    .where("title", "==", newTitle)
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  if (!postDoc.empty) {
+    if (postDoc.size > 1) {
+      logger.warn("More than one post found with the same title");
+    }
+    const postRecord = postDoc.docs[0].data();
+    return {
+      state: "post-name-taken",
+      postId: postRecord.id!,
+    };
+  }
+
+  // TODO: Figure out how to check for failures
+  await getPostCollectionForUserRef(database, user.uid)
+    .doc(postId)
+    .update({ title: newTitle, updatedAt: new Date() });
+
+  return {
+    state: "success",
+  };
+};
+
+export type SyncBodyResult = "success" | "failure";
+export type SyncBodyFn = (
+  postId: PostId,
+  newBody: PostBody
+) => Promise<SyncBodyResult>;
+
+export const syncBody: (
+  database: Database
+) => (user: UserRecord) => SyncBodyFn = (database) => (user) => async (
+  postId,
+  newBody
+) => {
+  // TODO: Figure out how to check for failures
+  await getPostCollectionForUserRef(database, user.uid)
+    .doc(postId)
+    .update({ body: newBody, updatedAt: new Date() });
+  return "success";
+};
+
+export type GetPostFn = (
+  uid: UserId,
+  postId: PostId
+) => Promise<PostRecord | undefined>;
+
+export const getPost: (database: Database) => GetPostFn = (database) => async (
+  uid,
+  postId
+) => {
+  const logger = log.getLogger("getPost");
+
+  logger.debug(`Fetching post ${postId} for user ${uid}`);
+  const postDoc = await database
+    .getHandle()
+    .collection(USERS_COLLECTION)
+    .doc(uid)
+    .collection(POSTS_COLLECTION)
+    .doc(postId)
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  const postRecord = postDoc.data();
+  if (!postRecord) {
+    return undefined;
+  }
+
+  postRecord.id = postDoc.id;
+  return postRecord;
+};
 
 export const getUserPosts = (database: Database) => async (
   uid: UserId

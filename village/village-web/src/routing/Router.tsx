@@ -7,8 +7,19 @@ import PrivateRoute from "./PrivateRoute";
 import MainView from "../views/MainView";
 import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
-import { GetStackPostsFn, GetUserPostsFn } from "../services/store/Posts";
+import {
+  CreatePostFn,
+  GetPostFn,
+  GetStackPostsFn,
+  GetUserPostsFn,
+  RenamePostFn,
+  SyncBodyFn,
+} from "../services/store/Posts";
 import { UserRecord, GetUserFn } from "../services/store/Users";
+import {
+  CreateNewPostViewController,
+  PostViewController,
+} from "../views/PostView";
 
 const Sad404 = () => {
   let location = useLocation();
@@ -27,9 +38,23 @@ export const Router = (props: {
   getUserPosts: GetUserPostsFn;
   getStackPosts: GetStackPostsFn;
   getUser: GetUserFn;
+  getPost: GetPostFn;
+  createPost: (user: UserRecord) => CreatePostFn;
+  renamePost: (user: UserRecord) => RenamePostFn;
+  syncBody: (user: UserRecord) => SyncBodyFn;
   user?: UserRecord;
 }) => {
-  const { authProvider, getUserPosts, getStackPosts, getUser, user } = props;
+  const {
+    authProvider,
+    getUserPosts,
+    getStackPosts,
+    getUser,
+    getPost,
+    createPost,
+    renamePost,
+    syncBody,
+    user,
+  } = props;
   if (!user) {
     return (
       <BrowserRouter>
@@ -71,6 +96,21 @@ export const Router = (props: {
           <PrivateRoute exact path="/stack/:stackId">
             <AppContainer>
               <StackViewController getStackPosts={getStackPosts} />
+            </AppContainer>
+          </PrivateRoute>
+          <PrivateRoute exact path="/post/:authorId/:postId">
+            <AppContainer>
+              <PostViewController
+                user={user}
+                getPost={getPost}
+                renamePost={renamePost(user)}
+                syncBody={syncBody(user)}
+              />
+            </AppContainer>
+          </PrivateRoute>
+          <PrivateRoute exact path="/create-new-post">
+            <AppContainer>
+              <CreateNewPostViewController createPost={createPost(user)} />
             </AppContainer>
           </PrivateRoute>
           <Route path="*">
