@@ -200,7 +200,6 @@ export type PostViewProps = {
   syncBody: SyncBodyFn;
 };
 
-// TODO: Implement code to load the post data into the PostView
 // Changing title triggers a rename. Renames are not allowed if the title is
 // already being used.
 export const PostView = (props: PostViewProps) => {
@@ -222,8 +221,10 @@ export const PostView = (props: PostViewProps) => {
   const onIdle = async (event: Event) => {
     // TODO: Post should only be renamed if the user is idle and focus is not on
     // the title itself.
-    // TODO: If the title is set to empty or blank, reset it back to the
-    // original title
+    // TODO: If the title is set to empty or blank, the title is reset back to the
+    // original title. If the original title is shorter than the title, a crash
+    // occurs because of the cursor position. Need to set the cursor to the
+    // beginning of the title.
     const needsPostRename = titleChanged;
 
     // sync body first
@@ -322,7 +323,6 @@ type PostViewControllerParams = {
 };
 
 export const PostViewController = (props: PostViewControllerProps) => {
-  // Determine whether read-only
   const styles = useStyles();
 
   const { authorId, postId } = useParams<PostViewControllerParams>();
