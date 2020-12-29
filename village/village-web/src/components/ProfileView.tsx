@@ -8,7 +8,7 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import { PostRecord, GetUserPostsFn } from "../services/store/Posts";
 import { UserRecord, UserId, GetUserFn } from "../services/store/Users";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
 import ListItemText from "@material-ui/core/ListItemText";
 
@@ -96,18 +96,22 @@ export const ProfileView = (props: ProfileViewProps) => {
 
   const listItems = posts.map((post) => {
     return (
-      <ListItem
-        alignItems="flex-start"
-        key={user.uid}
-        className={classes.postListItem}
-      >
-        <ListItemText
-          primary={post.title}
-          secondary={
-            <React.Fragment>{richTextStringPreview(post.body)}</React.Fragment>
-          }
-        />
-      </ListItem>
+      <Link to={`/post/${post.authorId}/${post.id}`}>
+        <ListItem
+          alignItems="flex-start"
+          key={user.uid}
+          className={classes.postListItem}
+        >
+          <ListItemText
+            primary={post.title}
+            secondary={
+              <React.Fragment>
+                {richTextStringPreview(post.body)}
+              </React.Fragment>
+            }
+          />
+        </ListItem>
+      </Link>
     );
   });
 

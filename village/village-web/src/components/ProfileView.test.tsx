@@ -5,13 +5,16 @@ import { Logging } from "kmgmt-common";
 import { AuthContext } from "../services/auth/Auth";
 import { u0, posts0, authProvider } from "../testing/Fixtures";
 import { richTextStringPreview } from "./richtext/Utils";
+import { MemoryRouter } from "react-router-dom";
 
 Logging.configure(log);
 
 test("displays a few posts", () => {
   const { getByText } = render(
     <AuthContext.Provider value={authProvider.getInitialAuthState()}>
-      <ProfileView user={u0} posts={posts0} />
+      <MemoryRouter initialEntries={["/"]} initialIndex={0}>
+        <ProfileView user={u0} posts={posts0} />
+      </MemoryRouter>
     </AuthContext.Provider>
   );
 

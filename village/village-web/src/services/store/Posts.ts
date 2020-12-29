@@ -36,8 +36,8 @@ const POST_RECORD_CONVERTER = {
     const data = snapshot.data(options)!;
     return {
       updatedAt: data.updatedAt,
-      authorId: data.userId,
-      id: data.id,
+      authorId: data.authorId,
+      id: snapshot.id,
       body: data.body,
       title: data.title,
     };
@@ -214,7 +214,6 @@ export const getPost: (database: Database) => GetPostFn = (database) => async (
     return undefined;
   }
 
-  postRecord.id = postDoc.id;
   return postRecord;
 };
 
