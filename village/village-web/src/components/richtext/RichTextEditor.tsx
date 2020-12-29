@@ -86,7 +86,11 @@ const MentionElement = ({
   );
 };
 const ParagraphElement = (props: any) => {
-  return <Typography variant="body1">{props.children}</Typography>;
+  return (
+    <Typography paragraph={true} variant="body1">
+      {props.children}
+    </Typography>
+  );
 };
 const H5Element = (props: any) => {
   return <Typography variant="h5">{props.children}</Typography>;
