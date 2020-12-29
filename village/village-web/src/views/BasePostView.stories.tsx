@@ -1,6 +1,9 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
 import React, { useState } from "react";
-import { EMPTY_RICH_TEXT_STATE } from "../components/richtext/RichTextEditor";
+import {
+  EMPTY_RICH_TEXT_STATE,
+  useMentions,
+} from "../components/richtext/RichTextEditor";
 import { BasePostView, BasePostViewProps } from "./PostView";
 
 export default {
@@ -12,6 +15,8 @@ const BasePostViewStateWrapper = (props: BasePostViewProps) => {
   const [title, setTitle] = useState(props.title);
   const [body, setBody] = useState(props.body);
 
+  const [mentionables, onMentionSearchChanged] = useMentions();
+
   return (
     <BasePostView
       readOnly={props.readOnly}
@@ -20,6 +25,8 @@ const BasePostViewStateWrapper = (props: BasePostViewProps) => {
       onTitleChange={setTitle}
       onBodyChange={setBody}
       onIdle={() => {}}
+      onMentionSearchChanged={onMentionSearchChanged}
+      mentionables={mentionables}
     />
   );
 };

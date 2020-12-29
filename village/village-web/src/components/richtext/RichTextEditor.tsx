@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ReactEditor, withReact, Slate } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
@@ -26,6 +26,7 @@ import {
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Link } from "react-router-dom";
+import { PostRecord, GetGlobalMentionsFn } from "../../services/store/Posts";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -55,6 +56,50 @@ export type RichTextEditorProps = {
   readOnly?: boolean;
   onMentionSearchChanged?: (search: string) => void;
   mentionables?: MentionNodeData[];
+};
+
+export const useMentions = (
+  getGlobalMentions?: GetGlobalMentionsFn
+): [MentionNodeData[], (newSearch: string) => void] => {
+  const getMentionables = async (
+    prefixTitle: string
+  ): Promise<MentionNodeData[]> => {
+    if (!getGlobalMentions) {
+      return [
+        { value: "Aayla Secura" },
+        { value: "Adi Gallia" },
+        { value: "Admiral Dodd Rancit" },
+        { value: "Admiral Firmus Piett" },
+      ];
+    } else {
+      const posts = await getGlobalMentions(prefixTitle);
+      return posts.map((post: PostRecord) => {
+        return {
+          value: post.title,
+        };
+      });
+    }
+  };
+
+  const [mentionables, setMentionables] = useState<MentionNodeData[]>([]);
+  const [search, setSearch] = useState<string>();
+
+  const onMentionSearchChanged = (newSearch: string) => {
+    const updateMentionables = async () => {
+      if (search !== newSearch) {
+        const newMentionables = await getMentionables(newSearch);
+        const newMention: MentionNodeData = { value: newSearch, exists: false };
+        if (newSearch) {
+          newMentionables.splice(0, 0, newMention);
+        }
+        setMentionables(newMentionables);
+        setSearch(newSearch);
+      }
+    };
+    updateMentionables();
+  };
+
+  return [mentionables, onMentionSearchChanged];
 };
 
 const didOpsAffectContent = (ops: Operation[]): boolean => {

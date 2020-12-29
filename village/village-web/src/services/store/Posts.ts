@@ -284,7 +284,7 @@ export const getStackPosts = (database: Database) => async (
 
 export type GetStackPostsFn = ReturnType<typeof getStackPosts>;
 
-const getGlobalMentions = (database: Database) => async (
+export const getGlobalMentions = (database: Database) => async (
   titlePrefix: string
 ): Promise<PostRecord[]> => {
   const logger = log.getLogger("getGlobalMentions");

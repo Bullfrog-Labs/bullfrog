@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import RichTextEditor, {
+  useMentions,
   EMPTY_RICH_TEXT_STATE,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
@@ -15,10 +16,12 @@ import {
   CreatePostFn,
   PostBody,
   PostTitle,
+  GetGlobalMentionsFn,
 } from "../services/store/Posts";
 import { UserId, UserRecord } from "../services/store/Users";
 import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
+import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -43,6 +46,8 @@ export type BasePostViewProps = {
   onTitleChange: (newTitle: PostTitle) => void;
   onBodyChange: (newBody: PostBody) => void;
   onIdle: (event: Event) => void;
+  onMentionSearchChanged: (newSearch: string) => void;
+  mentionables: MentionNodeData[];
 };
 
 export const BasePostView = (props: BasePostViewProps) => {
@@ -79,6 +84,8 @@ export const BasePostView = (props: BasePostViewProps) => {
           body={props.body}
           onBodyChange={props.onBodyChange}
           enableToolbar={false}
+          mentionables={props.mentionables}
+          onMentionSearchChanged={props.onMentionSearchChanged}
         />
       </IdleTimer>
     </Container>
@@ -89,6 +96,8 @@ export interface CreateNewPostViewProps {
   prepopulatedTitle?: PostTitle;
   createPost: CreatePostFn;
   redirectAfterCreate: (postUrl: string) => void;
+  onMentionSearchChanged: (newSearch: string) => void;
+  mentionables: MentionNodeData[];
 }
 
 export const CreateNewPostView = (props: CreateNewPostViewProps) => {
@@ -159,6 +168,8 @@ export const CreateNewPostView = (props: CreateNewPostViewProps) => {
       onIdle={onIdle}
       onTitleChange={onTitleChange}
       onBodyChange={onBodyChange}
+      onMentionSearchChanged={props.onMentionSearchChanged}
+      mentionables={props.mentionables}
     />
   );
 };
@@ -181,11 +192,15 @@ export const CreateNewPostViewController = (
     history.replace(postUrl);
   };
 
+  const [mentionables, onMentionSearchChanged] = useMentions();
+
   return (
     <CreateNewPostView
       prepopulatedTitle={prepopulatedTitle}
       createPost={props.createPost}
       redirectAfterCreate={redirectAfterCreate}
+      onMentionSearchChanged={onMentionSearchChanged}
+      mentionables={mentionables}
     />
   );
 };
@@ -198,6 +213,8 @@ export type PostViewProps = {
 
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
+  onMentionSearchChanged: (newSearch: string) => void;
+  mentionables: MentionNodeData[];
 };
 
 // Changing title triggers a rename. Renames are not allowed if the title is
@@ -313,6 +330,7 @@ export const PostView = (props: PostViewProps) => {
 type PostViewControllerProps = {
   user: UserRecord;
   getPost: (uid: UserId, postId: PostId) => Promise<PostRecord | undefined>;
+  getGlobalMentions: GetGlobalMentionsFn;
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
 };
@@ -331,6 +349,9 @@ export const PostViewController = (props: PostViewControllerProps) => {
     undefined
   );
   const [postRecordLoaded, setPostRecordLoaded] = useState(false);
+  const [mentionables, onMentionSearchChanged] = useMentions(
+    props.getGlobalMentions
+  );
 
   // Attempt to load post
   // TODO: Encapsulate this in a use*-style hook
@@ -362,6 +383,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
       getTitle={getTitle}
       renamePost={props.renamePost}
       syncBody={props.syncBody}
+      mentionables={mentionables}
+      onMentionSearchChanged={onMentionSearchChanged}
     />
   );
 };
