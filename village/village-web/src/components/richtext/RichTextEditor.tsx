@@ -7,6 +7,7 @@ import DocumentTitle from "./DocumentTitle";
 import { RichText } from "./Types";
 import { EMPTY_RICH_TEXT_V2 } from "./Utils";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
+import * as log from "loglevel";
 import {
   MentionPlugin,
   MentionPluginOptions,
@@ -26,7 +27,11 @@ import {
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Link } from "react-router-dom";
-import { PostRecord, GetGlobalMentionsFn } from "../../services/store/Posts";
+import {
+  PostRecord,
+  GetGlobalMentionsFn,
+  CreatePostFn,
+} from "../../services/store/Posts";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -56,11 +61,18 @@ export type RichTextEditorProps = {
   readOnly?: boolean;
   onMentionSearchChanged?: (search: string) => void;
   mentionables?: MentionNodeData[];
+  onMentionAdded?: (option: MentionNodeData) => void;
 };
 
 export const useMentions = (
-  getGlobalMentions?: GetGlobalMentionsFn
-): [MentionNodeData[], (newSearch: string) => void] => {
+  getGlobalMentions?: GetGlobalMentionsFn,
+  createPost?: CreatePostFn
+): [
+  MentionNodeData[],
+  (newSearch: string) => void,
+  (option: MentionNodeData) => void
+] => {
+  const logger = log.getLogger("useMentions");
   const getMentionables = async (
     prefixTitle: string
   ): Promise<MentionNodeData[]> => {
@@ -88,10 +100,17 @@ export const useMentions = (
     const updateMentionables = async () => {
       if (search !== newSearch) {
         const newMentionables = await getMentionables(newSearch);
-        const newMention: MentionNodeData = { value: newSearch, exists: false };
-        if (newSearch) {
-          newMentionables.splice(0, 0, newMention);
+        // Only insert the search query if it doesnt exist exactly in the results.
+        if (newMentionables.find((m) => m.value === newSearch) === undefined) {
+          const newMention: MentionNodeData = {
+            value: newSearch,
+            exists: false,
+          };
+          if (newSearch) {
+            newMentionables.splice(0, 0, newMention);
+          }
         }
+
         setMentionables(newMentionables);
         setSearch(newSearch);
       }
@@ -99,7 +118,19 @@ export const useMentions = (
     updateMentionables();
   };
 
-  return [mentionables, onMentionSearchChanged];
+  const onMentionAdded = (mention: MentionNodeData) => {
+    const addMentionToDatabase = async () => {
+      if ("exists" in mention && mention["exists"] === false && !!createPost) {
+        logger.debug(`adding mention ${mention.value}`);
+        await createPost(mention.value, EMPTY_RICH_TEXT_V2);
+      } else {
+        logger.debug(`not adding mention ${mention.value}; already exists`);
+      }
+    };
+    addMentionToDatabase();
+  };
+
+  return [mentionables, onMentionSearchChanged, onMentionAdded];
 };
 
 const didOpsAffectContent = (ops: Operation[]): boolean => {
@@ -180,9 +211,12 @@ const RichTextEditor = (props: RichTextEditorProps) => {
     onTitleChange,
     onBodyChange,
     enableToolbar,
-    onMentionSearchChanged = (search) => {},
+    onMentionSearchChanged = (search: string) => {},
     mentionables = [],
+    onMentionAdded = (mention: MentionNodeData) => {},
   } = props;
+
+  const logger = log.getLogger("RichTextEditor");
 
   const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
 
@@ -201,6 +235,11 @@ const RichTextEditor = (props: RichTextEditorProps) => {
   useEffect(() => {
     onMentionSearchChanged(search);
   }, [search, onMentionSearchChanged]);
+
+  const onClickMention = (editor: ReactEditor, option: MentionNodeData) => {
+    onAddMention(editor, option);
+    onMentionAdded(option);
+  };
 
   const onChange = {
     title: (newTitle: Title) => {
@@ -270,7 +309,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
                   at={target}
                   valueIndex={index}
                   options={values}
-                  onClickMention={onAddMention}
+                  onClickMention={onClickMention}
                 />
               </Slate>
             </Grid>

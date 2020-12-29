@@ -48,6 +48,7 @@ export type BasePostViewProps = {
   onIdle: (event: Event) => void;
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
+  onMentionAdded: (option: MentionNodeData) => void;
 };
 
 export const BasePostView = (props: BasePostViewProps) => {
@@ -86,6 +87,7 @@ export const BasePostView = (props: BasePostViewProps) => {
           enableToolbar={false}
           mentionables={props.mentionables}
           onMentionSearchChanged={props.onMentionSearchChanged}
+          onMentionAdded={props.onMentionAdded}
         />
       </IdleTimer>
     </Container>
@@ -98,6 +100,7 @@ export interface CreateNewPostViewProps {
   redirectAfterCreate: (postUrl: string) => void;
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
+  onMentionAdded: (option: MentionNodeData) => void;
 }
 
 export const CreateNewPostView = (props: CreateNewPostViewProps) => {
@@ -170,12 +173,14 @@ export const CreateNewPostView = (props: CreateNewPostViewProps) => {
       onBodyChange={onBodyChange}
       onMentionSearchChanged={props.onMentionSearchChanged}
       mentionables={props.mentionables}
+      onMentionAdded={props.onMentionAdded}
     />
   );
 };
 
 export type CreateNewPostViewControllerProps = {
   createPost: CreatePostFn;
+  getGlobalMentions: GetGlobalMentionsFn;
 };
 
 export type CreateNewPostViewControllerParams = {
@@ -192,7 +197,10 @@ export const CreateNewPostViewController = (
     history.replace(postUrl);
   };
 
-  const [mentionables, onMentionSearchChanged] = useMentions();
+  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
+    props.getGlobalMentions,
+    props.createPost
+  );
 
   return (
     <CreateNewPostView
@@ -201,6 +209,7 @@ export const CreateNewPostViewController = (
       redirectAfterCreate={redirectAfterCreate}
       onMentionSearchChanged={onMentionSearchChanged}
       mentionables={mentionables}
+      onMentionAdded={onMentionAdded}
     />
   );
 };
@@ -215,6 +224,7 @@ export type PostViewProps = {
   syncBody: SyncBodyFn;
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
+  onMentionAdded: (option: MentionNodeData) => void;
 };
 
 // Changing title triggers a rename. Renames are not allowed if the title is
@@ -333,6 +343,7 @@ type PostViewControllerProps = {
   getGlobalMentions: GetGlobalMentionsFn;
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
+  createPost: CreatePostFn;
 };
 
 type PostViewControllerParams = {
@@ -349,8 +360,9 @@ export const PostViewController = (props: PostViewControllerProps) => {
     undefined
   );
   const [postRecordLoaded, setPostRecordLoaded] = useState(false);
-  const [mentionables, onMentionSearchChanged] = useMentions(
-    props.getGlobalMentions
+  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
+    props.getGlobalMentions,
+    props.createPost
   );
 
   // Attempt to load post
@@ -385,6 +397,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
       syncBody={props.syncBody}
       mentionables={mentionables}
       onMentionSearchChanged={onMentionSearchChanged}
+      onMentionAdded={onMentionAdded}
     />
   );
 };

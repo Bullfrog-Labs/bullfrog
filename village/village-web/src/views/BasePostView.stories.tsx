@@ -15,7 +15,7 @@ const BasePostViewStateWrapper = (props: BasePostViewProps) => {
   const [title, setTitle] = useState(props.title);
   const [body, setBody] = useState(props.body);
 
-  const [mentionables, onMentionSearchChanged] = useMentions();
+  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions();
 
   return (
     <BasePostView
@@ -27,6 +27,7 @@ const BasePostViewStateWrapper = (props: BasePostViewProps) => {
       onIdle={() => {}}
       onMentionSearchChanged={onMentionSearchChanged}
       mentionables={mentionables}
+      onMentionAdded={onMentionAdded}
     />
   );
 };

@@ -109,12 +109,16 @@ export const Router = (props: {
                 renamePost={renamePost(user)}
                 syncBody={syncBody(user)}
                 getGlobalMentions={getGlobalMentions}
+                createPost={createPost(user)}
               />
             </AppContainer>
           </PrivateRoute>
           <PrivateRoute exact path="/create-new-post">
             <AppContainer>
-              <CreateNewPostViewController createPost={createPost(user)} />
+              <CreateNewPostViewController
+                createPost={createPost(user)}
+                getGlobalMentions={getGlobalMentions}
+              />
             </AppContainer>
           </PrivateRoute>
           <Route path="*">
