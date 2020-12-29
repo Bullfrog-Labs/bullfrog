@@ -8,7 +8,6 @@ import { RichText } from "./Types";
 import { EMPTY_RICH_TEXT_V2 } from "./Utils";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
 import {
-  EditablePlugins,
   MentionPlugin,
   MentionPluginOptions,
   ParagraphPlugin,
@@ -25,6 +24,7 @@ import {
   ELEMENT_H5,
   ELEMENT_H6,
 } from "@blfrg.xyz/slate-plugins";
+import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Link } from "react-router-dom";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
