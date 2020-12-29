@@ -284,3 +284,25 @@ export const getStackPosts = (database: Database) => async (
 };
 
 export type GetStackPostsFn = ReturnType<typeof getStackPosts>;
+
+const getGlobalMentions = (database: Database) => async (
+  titlePrefix: string
+): Promise<PostRecord[]> => {
+  const logger = log.getLogger("getGlobalMentions");
+
+  logger.debug(`Fetching posts for title ${titlePrefix}`);
+  const postsDoc = await database
+    .getHandle()
+    .collectionGroup(POSTS_COLLECTION)
+    .where("title", ">=", titlePrefix)
+    .where("title", "<", `${titlePrefix}\uf8ff`)
+    .limit(10)
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  return postsDoc.docs.map((doc) => {
+    return doc.data();
+  });
+};
+
+export type GetGlobalMentionsFn = ReturnType<typeof getGlobalMentions>;

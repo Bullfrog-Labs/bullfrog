@@ -1288,17 +1288,17 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@blfrg.xyz/slate-plugins-core@^0.71.9":
-  version "0.71.9"
-  resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins-core/-/slate-plugins-core-0.71.9.tgz#0e2381639e2a0edbba2e5bf7002a628d7bda8d48"
-  integrity sha512-BNjv6nYV0fD9gqptiZbe5nIed6ffRuGvJ+G2mkqYsAVoWqMJlpU4cc8nh9y6HyFEFLM95sR3Q7nHCwfJ3/mp9w==
+"@blfrg.xyz/slate-plugins-core@^0.71.10":
+  version "0.71.10"
+  resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins-core/-/slate-plugins-core-0.71.10.tgz#2fcbbf434dacc0a2e3c129e6df794be236c09723"
+  integrity sha512-jKlLbKKI4jzS6bVJEqK9NdAFKyaOGyiwlDuNyHjqNtQJlBuy4e4FdenhFRjO7I95gRlRlYZ1yCpiocl0GflegA==
 
-"@blfrg.xyz/slate-plugins@^0.71.13":
-  version "0.71.13"
-  resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins/-/slate-plugins-0.71.13.tgz#258fb9d112042da6b534c94c867b0c134c3feeda"
-  integrity sha512-ZHihryNMIPhxBxFOYnvUJPHAG+MEEUymMbGUSeDIu+uuD7exB3lyiGLJ8SX0BzHbwtMoqE0k7Uj+d4FF5LGX9Q==
+"@blfrg.xyz/slate-plugins@^0.71.15":
+  version "0.71.15"
+  resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins/-/slate-plugins-0.71.15.tgz#8fbe8b8937434f42f8b9b7598842d8e4456826f3"
+  integrity sha512-7/pEu+2INiz36MXJJ9BwGh+esw6NtCFpxznTThufq/o3KkEvx3KHc9tle29XOwEquVPibS6pEKtLPEJZ+RbtmQ==
   dependencies:
-    "@blfrg.xyz/slate-plugins-core" "^0.71.9"
+    "@blfrg.xyz/slate-plugins-core" "^0.71.10"
     "@react-hook/merged-ref" "^1.3.0"
     "@tippyjs/react" "^4.0.2"
     "@uifabric/styling" "^7.12.11"
@@ -7258,6 +7258,11 @@ del@^4.1.1:
     p-map "^2.0.0"
     pify "^4.0.1"
     rimraf "^2.6.3"
+
+delay@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/delay/-/delay-4.4.0.tgz#71abc745f3ce043fe7f450491236541edec4ad0c"
+  integrity sha512-txgOrJu3OdtOfTiEOT2e76dJVfG/1dz2NZ4F0Pyt4UGZJryssMRp5vdM5wQoLwSOBNdrJv3F9PAhp/heqd7vrA==
 
 delayed-stream@~1.0.0:
   version "1.0.0"

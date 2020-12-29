@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ReactEditor, withReact, Slate } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
@@ -16,6 +16,7 @@ import {
   HeadingPlugin,
   HeadingPluginOptions,
   MentionSelect,
+  MentionNodeData,
   HeadingToolbar,
   ToolbarElement,
   useMention,
@@ -40,13 +41,6 @@ export type RichTextState = {
   body: Body;
 };
 
-const MENTIONABLES = [
-  { value: "Aayla Secura" },
-  { value: "Adi Gallia" },
-  { value: "Admiral Dodd Rancit" },
-  { value: "Admiral Firmus Piett" },
-];
-
 export const EMPTY_RICH_TEXT_STATE = {
   title: "",
   body: EMPTY_RICH_TEXT_V2,
@@ -59,6 +53,8 @@ export type RichTextEditorProps = {
   onBodyChange: (newBody: Body) => void;
   enableToolbar?: boolean;
   readOnly?: boolean;
+  onMentionSearchChanged?: (search: string) => void;
+  mentionables?: MentionNodeData[];
 };
 
 const didOpsAffectContent = (ops: Operation[]): boolean => {
@@ -133,7 +129,15 @@ const withPlugins = [
 ] as const;
 
 const RichTextEditor = (props: RichTextEditorProps) => {
-  const { title, body, onTitleChange, onBodyChange, enableToolbar } = props;
+  const {
+    title,
+    body,
+    onTitleChange,
+    onBodyChange,
+    enableToolbar,
+    onMentionSearchChanged = (search) => {},
+    mentionables = [],
+  } = props;
 
   const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
 
@@ -145,10 +149,13 @@ const RichTextEditor = (props: RichTextEditorProps) => {
     index,
     target,
     values,
-  } = useMention(MENTIONABLES, {
+  } = useMention(mentionables, {
     maxSuggestions: 10,
-    trigger: "@",
   });
+
+  useEffect(() => {
+    onMentionSearchChanged(search);
+  }, [search, onMentionSearchChanged]);
 
   const onChange = {
     title: (newTitle: Title) => {
