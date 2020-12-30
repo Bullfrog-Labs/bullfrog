@@ -66,6 +66,10 @@ class RichTextEditor extends React.Component {
     );
   }
 
+  focusEditor() {
+    ReactEditor.focus(this.editor);
+  }
+
   render() {
     const renderElement = (props: RenderElementProps) => <Element {...props} />;
     const renderLeaf = (props: RenderLeafProps) => <Leaf {...props} />;
@@ -99,7 +103,7 @@ class RichTextEditor extends React.Component {
                 <DocumentTitle
                   readOnly={this.props.readOnly}
                   handleEscape={() => {
-                    ReactEditor.focus(this.editor);
+                    this.focusEditor();
                   }}
                   value={this.props.title}
                   onChange={onChange.title}
