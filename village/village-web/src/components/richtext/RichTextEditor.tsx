@@ -45,6 +45,9 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
   return ops.some((op) => !Operation.isSelectionOperation(op));
 };
 
+// TODO: Need to turn RichTextEditor into a class component so that a simple
+// method can be provided to focus the editor.
+// TODO: Need to pull out DocumentTitle.
 const RichTextEditor = (props: RichTextEditorProps) => {
   const { title, body, onTitleChange, onBodyChange, enableToolbar } = props;
 

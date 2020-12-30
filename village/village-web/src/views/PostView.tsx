@@ -45,6 +45,9 @@ export type BasePostViewProps = {
   onIdle: (event: Event) => void;
 };
 
+// TODO: BasePostView needs to manage both DocumentTitle and RichTextEditor. It
+// has to take a ref on RichTextEditor and construct the DocumentTitle
+// handleEscape callback to call the focus method on that RichTextEditor ref.
 export const BasePostView = (props: BasePostViewProps) => {
   const logger = log.getLogger("BasePostView");
   const classes = useStyles();
