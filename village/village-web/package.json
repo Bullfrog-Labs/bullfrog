@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@blfrg.xyz/slate-plugins": "^0.71.19",
+    "@blfrg.xyz/slate-plugins": "^0.71.20",
     "@material-ui/core": "^4.11.2",
     "@styled-icons/material": "^10.18.0",
     "@testing-library/jest-dom": "^5.11.4",
@@ -13,6 +13,7 @@
     "@types/node": "^14.14.14",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "@types/uuid": "^8.3.0",
     "delay": "^4.4.0",
     "firebase": "^8.2.1",
     "react": "^17.0.1",
@@ -26,6 +27,7 @@
     "slate-react": "^0.59.0",
     "styled-components": "^5.2.1",
     "typescript": "^4.0.3",
+    "uuid": "^8.3.2",
     "web-vitals": "^1.0.1"
   },
   "scripts": {

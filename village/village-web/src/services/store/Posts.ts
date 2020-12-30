@@ -70,14 +70,16 @@ export type CreatePostResult =
 
 export type CreatePostFn = (
   newTitle: PostTitle,
-  newBody: PostBody
+  newBody: PostBody,
+  postId?: string
 ) => Promise<CreatePostResult>;
 
 export const createPost: (
   database: Database
 ) => (user: UserRecord) => CreatePostFn = (database) => (user) => async (
   newTitle,
-  newBody
+  newBody,
+  postId?: string
 ) => {
   const logger = log.getLogger("createPost");
 
@@ -106,9 +108,16 @@ export const createPost: (
     body: newBody,
     updatedAt: new Date(),
   };
-  const newPostDoc = await getPostCollectionForUserRef(database, user.uid).add(
-    newPostRecord
-  );
+  let newPostDoc = null;
+  if (postId) {
+    newPostDoc = await getPostCollectionForUserRef(database, user.uid)
+      .doc(postId)
+      .set(newPostRecord);
+  } else {
+    newPostDoc = await getPostCollectionForUserRef(database, user.uid).add(
+      newPostRecord
+    );
+  }
 
   return {
     state: "success",

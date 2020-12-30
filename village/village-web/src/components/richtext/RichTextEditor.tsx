@@ -7,6 +7,8 @@ import DocumentTitle from "./DocumentTitle";
 import { RichText } from "./Types";
 import { EMPTY_RICH_TEXT_V2 } from "./Utils";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
+import { v4 as uuid } from "uuid";
+import { UserId } from "../../services/store/Users";
 import * as log from "loglevel";
 import {
   MentionPlugin,
@@ -66,7 +68,8 @@ export type RichTextEditorProps = {
 
 export const useMentions = (
   getGlobalMentions?: GetGlobalMentionsFn,
-  createPost?: CreatePostFn
+  createPost?: CreatePostFn,
+  authorId?: UserId
 ): [
   MentionNodeData[],
   (newSearch: string) => void,
@@ -107,6 +110,8 @@ export const useMentions = (
         if (newMentionables.find((m) => m.value === newSearch) === undefined) {
           const newMention: MentionNodeData = {
             value: newSearch,
+            authorId: authorId,
+            postId: uuid(),
             exists: false,
           };
           if (newSearch) {
@@ -125,7 +130,7 @@ export const useMentions = (
     const addMentionToDatabase = async () => {
       if ("exists" in mention && mention["exists"] === false && !!createPost) {
         logger.debug(`adding mention ${mention.value}`);
-        await createPost(mention.value, EMPTY_RICH_TEXT_V2);
+        await createPost(mention.value, EMPTY_RICH_TEXT_V2, mention.postId);
       } else {
         logger.debug(`not adding mention ${mention.value}; already exists`);
       }
@@ -239,7 +244,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
     index,
     target,
     values,
-  } = useMention(mentionables, {
+  } = useMention(mentionables, onMentionAdded, {
     maxSuggestions: 10,
   });
 

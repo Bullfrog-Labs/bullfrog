@@ -181,6 +181,7 @@ export const CreateNewPostView = (props: CreateNewPostViewProps) => {
 export type CreateNewPostViewControllerProps = {
   createPost: CreatePostFn;
   getGlobalMentions: GetGlobalMentionsFn;
+  user: UserRecord;
 };
 
 export type CreateNewPostViewControllerParams = {
@@ -199,7 +200,8 @@ export const CreateNewPostViewController = (
 
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     props.getGlobalMentions,
-    props.createPost
+    props.createPost,
+    props.user.uid
   );
 
   return (
@@ -362,7 +364,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const [postRecordLoaded, setPostRecordLoaded] = useState(false);
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     props.getGlobalMentions,
-    props.createPost
+    props.createPost,
+    authorId
   );
 
   // Attempt to load post

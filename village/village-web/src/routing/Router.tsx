@@ -118,6 +118,7 @@ export const Router = (props: {
               <CreateNewPostViewController
                 createPost={createPost(user)}
                 getGlobalMentions={getGlobalMentions}
+                user={user}
               />
             </AppContainer>
           </PrivateRoute>
