@@ -67,9 +67,9 @@ export type RichTextEditorProps = {
 };
 
 export const useMentions = (
-  getGlobalMentions?: GetGlobalMentionsFn,
-  createPost?: CreatePostFn,
-  authorId?: UserId
+  getGlobalMentions: GetGlobalMentionsFn,
+  createPost: CreatePostFn,
+  authorId: UserId
 ): [
   MentionNodeData[],
   (newSearch: string) => void,
