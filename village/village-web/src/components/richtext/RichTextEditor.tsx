@@ -1,5 +1,12 @@
-import React, { useCallback, useMemo } from "react";
-import { ReactEditor, withReact, Slate, Editable } from "slate-react";
+import React from "react";
+import {
+  ReactEditor,
+  withReact,
+  Slate,
+  Editable,
+  RenderElementProps,
+  RenderLeafProps,
+} from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
 
@@ -45,74 +52,85 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
   return ops.some((op) => !Operation.isSelectionOperation(op));
 };
 
-// TODO: Need to turn RichTextEditor into a class component so that a simple
-// method can be provided to focus the editor.
 // TODO: Need to pull out DocumentTitle.
-const RichTextEditor = (props: RichTextEditorProps) => {
-  const { title, body, onTitleChange, onBodyChange, enableToolbar } = props;
+class RichTextEditor extends React.Component {
+  props: RichTextEditorProps;
+  editor: ReactEditor;
 
-  const renderElement = useCallback((props) => <Element {...props} />, []);
-  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+  constructor(props: RichTextEditorProps) {
+    super(props);
+    this.props = props;
 
-  const editor = useMemo(
-    () => withReact(withResetBlockOnInsertBreak(withHistory(createEditor()))),
-    []
-  );
+    this.editor = withReact(
+      withResetBlockOnInsertBreak(withHistory(createEditor()))
+    );
+  }
 
-  const onChange = {
-    title: (newTitle: Title) => {
-      if (title === newTitle) {
-        return;
-      }
-      onTitleChange(newTitle);
-    },
-    body: (newBody: Body) => {
-      if (didOpsAffectContent(editor.operations)) {
-        onBodyChange(newBody);
-      }
-    },
-  };
+  render() {
+    const renderElement = (props: RenderElementProps) => <Element {...props} />;
+    const renderLeaf = (props: RenderLeafProps) => <Leaf {...props} />;
 
-  return (
-    <Paper elevation={1}>
-      <div className="RichTextEditor">
-        <Container>
-          <Grid
-            container
-            direction="column"
-            justify="flex-start"
-            alignItems="stretch"
-            spacing={3}
-          >
-            <Grid item>
-              <DocumentTitle
-                readOnly={props.readOnly}
-                handleEscape={(event) => {
-                  ReactEditor.focus(editor);
-                }}
-                value={title}
-                onChange={onChange.title}
-              />
-            </Grid>
-            <Grid item>
-              <Slate editor={editor} value={body} onChange={onChange.body}>
-                {!!enableToolbar && <RichTextEditorToolbar />}
-                <Editable
-                  readOnly={props.readOnly ?? false}
-                  renderElement={renderElement}
-                  renderLeaf={renderLeaf}
-                  placeholder="Enter some text"
-                  spellCheck
-                  autoFocus
-                  onKeyDown={toReactKBEventHandler(hotkeyHandler(editor))}
+    const onChange = {
+      title: (newTitle: Title) => {
+        if (this.props.title === newTitle) {
+          return;
+        }
+        this.props.onTitleChange(newTitle);
+      },
+      body: (newBody: Body) => {
+        if (didOpsAffectContent(this.editor.operations)) {
+          this.props.onBodyChange(newBody);
+        }
+      },
+    };
+
+    return (
+      <Paper elevation={1}>
+        <div className="RichTextEditor">
+          <Container>
+            <Grid
+              container
+              direction="column"
+              justify="flex-start"
+              alignItems="stretch"
+              spacing={3}
+            >
+              <Grid item>
+                <DocumentTitle
+                  readOnly={this.props.readOnly}
+                  handleEscape={() => {
+                    ReactEditor.focus(this.editor);
+                  }}
+                  value={this.props.title}
+                  onChange={onChange.title}
                 />
-              </Slate>
+              </Grid>
+              <Grid item>
+                <Slate
+                  editor={this.editor}
+                  value={this.props.body}
+                  onChange={onChange.body}
+                >
+                  {!!this.props.enableToolbar && <RichTextEditorToolbar />}
+                  <Editable
+                    readOnly={this.props.readOnly ?? false}
+                    renderElement={renderElement}
+                    renderLeaf={renderLeaf}
+                    placeholder="Enter some text"
+                    spellCheck
+                    autoFocus
+                    onKeyDown={toReactKBEventHandler(
+                      hotkeyHandler(this.editor)
+                    )}
+                  />
+                </Slate>
+              </Grid>
             </Grid>
-          </Grid>
-        </Container>
-      </div>
-    </Paper>
-  );
-};
+          </Container>
+        </div>
+      </Paper>
+    );
+  }
+}
 
 export default RichTextEditor;
