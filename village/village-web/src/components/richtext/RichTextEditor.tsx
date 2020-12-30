@@ -88,6 +88,9 @@ export const useMentions = (
       return posts.map((post: PostRecord) => {
         return {
           value: post.title,
+          postId: post.id,
+          authorId: post.authorId,
+          exists: true,
         };
       });
     }
@@ -143,12 +146,20 @@ const MentionElement = ({
   element,
   htmlAttributes,
 }: any) => {
-  const postId = "dummy";
+  const logger = log.getLogger("MentionElement");
+  const postId = element["postId"];
+  const authorId = element["authorId"];
+  const title = element.value;
+  if (!postId || !authorId || !element.value) {
+    logger.error(
+      `Invalid MentionNodeData; postId=${postId}, authorId=${authorId}, title=${title}`
+    );
+  }
   return (
     <Link
       {...attributes}
-      data-slate-value={element.value}
-      to={`/post/${postId}`}
+      data-slate-value={title}
+      to={`/post/${authorId}/${postId}`}
       contentEditable={false}
       {...htmlAttributes}
     >
@@ -237,6 +248,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
   }, [search, onMentionSearchChanged]);
 
   const onClickMention = (editor: ReactEditor, option: MentionNodeData) => {
+    logger.debug(`on click mention ${JSON.stringify(option)}`);
     onAddMention(editor, option);
     onMentionAdded(option);
   };
@@ -302,7 +314,7 @@ const RichTextEditor = (props: RichTextEditorProps) => {
                   spellCheck
                   autoFocus
                   onKeyDown={[onKeyDownMention]}
-                  onKeyDownDeps={[index, search, target]}
+                  onKeyDownDeps={[index, search, target, values]}
                 />
 
                 <MentionSelect

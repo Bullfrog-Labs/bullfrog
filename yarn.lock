@@ -1293,10 +1293,10 @@
   resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins-core/-/slate-plugins-core-0.71.10.tgz#2fcbbf434dacc0a2e3c129e6df794be236c09723"
   integrity sha512-jKlLbKKI4jzS6bVJEqK9NdAFKyaOGyiwlDuNyHjqNtQJlBuy4e4FdenhFRjO7I95gRlRlYZ1yCpiocl0GflegA==
 
-"@blfrg.xyz/slate-plugins@^0.71.15":
-  version "0.71.15"
-  resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins/-/slate-plugins-0.71.15.tgz#8fbe8b8937434f42f8b9b7598842d8e4456826f3"
-  integrity sha512-7/pEu+2INiz36MXJJ9BwGh+esw6NtCFpxznTThufq/o3KkEvx3KHc9tle29XOwEquVPibS6pEKtLPEJZ+RbtmQ==
+"@blfrg.xyz/slate-plugins@^0.71.19":
+  version "0.71.19"
+  resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins/-/slate-plugins-0.71.19.tgz#532dab5f0533b7d590077f526c2d563000dfeea3"
+  integrity sha512-ZgNWdq6+X4wavRvOxE1FFOOeuL7LBvjWaeJ/vTvPBVINyrLiu90oNoSp9eDPhlenViQYoAR0qnsd0fUVvOTwdA==
   dependencies:
     "@blfrg.xyz/slate-plugins-core" "^0.71.10"
     "@react-hook/merged-ref" "^1.3.0"
