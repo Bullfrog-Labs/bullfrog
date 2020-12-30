@@ -1,6 +1,6 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
 import React, { useState } from "react";
-import { EMPTY_RICH_TEXT_STATE } from "../components/richtext/RichTextEditor";
+import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 import { BasePostView, BasePostViewProps } from "./PostView";
 
 export default {
@@ -31,8 +31,8 @@ const Template: Story<BasePostViewProps> = (args) => (
 export const BPV = Template.bind({});
 BPV.args = {
   readOnly: false,
-  title: EMPTY_RICH_TEXT_STATE.title,
-  body: EMPTY_RICH_TEXT_STATE.body,
+  title: "",
+  body: EMPTY_RICH_TEXT,
   onTitleChange: () => {},
   onBodyChange: () => {},
   onIdle: () => {},

@@ -1,11 +1,7 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
 import React, { FunctionComponent, useState } from "react";
-import RichTextEditor, {
-  RichTextEditorProps,
-  Title,
-  Body,
-  EMPTY_RICH_TEXT_STATE,
-} from "./RichTextEditor";
+import RichTextEditor, { RichTextEditorProps, Body } from "./RichTextEditor";
+import { EMPTY_RICH_TEXT } from "./Utils";
 
 export default {
   title: "Editing/RichTextEditor",
@@ -15,15 +11,12 @@ export default {
 const RichTextEditorStateWrapper: FunctionComponent<RichTextEditorProps> = (
   props
 ) => {
-  const [title, setTitle] = useState(props.title);
   const [body, setBody] = useState<Body>(props.body);
 
   return (
     <RichTextEditor
-      title={title}
       body={body}
-      onTitleChange={setTitle}
-      onBodyChange={setBody}
+      onChange={setBody}
       enableToolbar={props.enableToolbar}
       readOnly={props.readOnly}
     />
@@ -36,29 +29,23 @@ const Template: Story<RichTextEditorProps> = (args) => (
 
 export const BasicRTEReadOnly = Template.bind({});
 BasicRTEReadOnly.args = {
-  title: EMPTY_RICH_TEXT_STATE.title,
-  body: EMPTY_RICH_TEXT_STATE.body,
-  onTitleChange: (newTitle: Title) => {}, // this does not get used
-  onBodyChange: (newBody: Body) => {}, // this does not get used
+  body: EMPTY_RICH_TEXT,
+  onChange: (newBody: Body) => {}, // this does not get used
   enableToolbar: false,
   readOnly: true,
 };
 
 export const BasicRTE = Template.bind({});
 BasicRTE.args = {
-  title: EMPTY_RICH_TEXT_STATE.title,
-  body: EMPTY_RICH_TEXT_STATE.body,
-  onTitleChange: (newTitle: Title) => {},
-  onBodyChange: (newBody: Body) => {},
+  body: EMPTY_RICH_TEXT,
+  onChange: (newBody: Body) => {},
   enableToolbar: false,
   readOnly: false,
 };
 export const RTEWithToolbar = Template.bind({});
 RTEWithToolbar.args = {
-  title: EMPTY_RICH_TEXT_STATE.title,
-  body: EMPTY_RICH_TEXT_STATE.body,
-  onTitleChange: (newTitle: Title) => {},
-  onBodyChange: (newBody: Body) => {},
+  body: EMPTY_RICH_TEXT,
+  onChange: (newBody: Body) => {},
   enableToolbar: true,
   readOnly: false,
 };
@@ -118,10 +105,8 @@ const TEST_STATE = {
 
 export const RTEWithContent = Template.bind({});
 RTEWithContent.args = {
-  title: TEST_STATE.title,
   body: TEST_STATE.body,
-  onTitleChange: (newTitle: Title) => {},
-  onBodyChange: (newBody: Body) => {},
+  onChange: (newBody: Body) => {},
   enableToolbar: true,
   readOnly: false,
 };

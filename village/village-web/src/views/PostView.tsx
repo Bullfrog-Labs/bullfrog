@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from "react";
-import RichTextEditor, {
-  EMPTY_RICH_TEXT_STATE,
-} from "../components/richtext/RichTextEditor";
+import React, { useEffect, useRef, useState } from "react";
+import RichTextEditor from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
-import { Container, CircularProgress, makeStyles } from "@material-ui/core";
+import {
+  Container,
+  CircularProgress,
+  makeStyles,
+  Paper,
+  Grid,
+} from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
 import {
   PostRecord,
@@ -19,7 +23,8 @@ import {
 import { UserId, UserRecord } from "../services/store/Users";
 import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
-import { ConditionalWrapper } from "../jsxUtils";
+import DocumentTitle from "../components/richtext/DocumentTitle";
+import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -31,6 +36,8 @@ const useStyles = makeStyles((theme) => ({
     left: "50%",
   },
 }));
+
+const EMPTY_TITLE = "";
 
 const DEFAULT_IDLE_TIME = 1 * 1000;
 
@@ -46,9 +53,6 @@ export type BasePostViewProps = {
   onIdle: (event: Event) => void;
 };
 
-// TODO: BasePostView needs to manage both DocumentTitle and RichTextEditor. It
-// has to take a ref on RichTextEditor and construct the DocumentTitle
-// handleEscape callback to call the focus method on that RichTextEditor ref.
 export const BasePostView = (props: BasePostViewProps) => {
   const logger = log.getLogger("BasePostView");
   const classes = useStyles();
@@ -59,32 +63,55 @@ export const BasePostView = (props: BasePostViewProps) => {
     logger.info(`rendering read-only view for ${props.title}`);
   }
 
-  const richTextEditor = (
-    <ConditionalWrapper
-      condition={!readOnly}
-      wrapper={(children) => (
-        <IdleTimer
-          timeout={props.idleTime ?? DEFAULT_IDLE_TIME}
-          onIdle={props.onIdle}
-        >
-          {children}
-        </IdleTimer>
-      )}
-    >
-      <RichTextEditor
-        readOnly={props.readOnly}
-        title={props.title}
-        onTitleChange={props.onTitleChange}
-        body={props.body}
-        onBodyChange={props.onBodyChange}
-        enableToolbar={false}
-      />
-    </ConditionalWrapper>
+  const richTextEditorRef = useRef<RichTextEditor>(null);
+
+  const idleTimer = (
+    <IdleTimer
+      timeout={props.idleTime ?? DEFAULT_IDLE_TIME}
+      onIdle={props.onIdle}
+    />
   );
+
+  const documentTitle = (
+    <DocumentTitle
+      readOnly={readOnly}
+      handleEscape={() => {
+        richTextEditorRef.current?.focusEditor();
+      }}
+      value={props.title}
+      onChange={props.onTitleChange}
+    />
+  );
+
+  const richTextEditor = (
+    <RichTextEditor
+      ref={richTextEditorRef}
+      readOnly={readOnly}
+      body={props.body}
+      onChange={props.onBodyChange}
+      enableToolbar={false}
+    />
+  );
+
+  const paperElevation = readOnly ? 0 : 1;
 
   return (
     <Container className={classes.postView} maxWidth="md">
-      {richTextEditor}
+      <Paper elevation={paperElevation}>
+        <Container>
+          {idleTimer}
+          <Grid
+            container
+            direction="column"
+            justify="flex-start"
+            alignItems="stretch"
+            spacing={3}
+          >
+            <Grid item>{documentTitle}</Grid>
+            <Grid item>{richTextEditor}</Grid>
+          </Grid>
+        </Container>
+      </Paper>
     </Container>
   );
 };
@@ -106,15 +133,13 @@ export const CreateNewPostView = (props: CreateNewPostViewProps) => {
 
   const [nonEmptyTitle, setNonEmptyTitle] = useState(!!props.prepopulatedTitle);
   const [title, setTitle] = useState<string>(
-    !!props.prepopulatedTitle
-      ? props.prepopulatedTitle
-      : EMPTY_RICH_TEXT_STATE.title
+    !!props.prepopulatedTitle ? props.prepopulatedTitle : EMPTY_TITLE
   );
 
   const [nonEmptyBody, setNonEmptyBody] = useState(false);
-  const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT_STATE.body);
+  const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
 
-  const onIdle = async (event: Event) => {
+  const onIdle = async () => {
     if (!nonEmptyTitle || !nonEmptyBody) {
       logger.debug("Title or body empty, not creating new post");
       return;
@@ -148,11 +173,11 @@ export const CreateNewPostView = (props: CreateNewPostViewProps) => {
 
   const onTitleChange = (newTitle: PostTitle) => {
     setTitle(newTitle);
-    setNonEmptyTitle(newTitle !== EMPTY_RICH_TEXT_STATE.title);
+    setNonEmptyTitle(newTitle !== EMPTY_TITLE);
   };
   const onBodyChange = (newBody: PostBody) => {
     setBody(newBody);
-    setNonEmptyBody(newBody !== EMPTY_RICH_TEXT_STATE.body);
+    setNonEmptyBody(newBody !== EMPTY_RICH_TEXT);
   };
 
   return (
@@ -222,7 +247,7 @@ export const PostView = (props: PostViewProps) => {
   const [body, setBody] = useState(postRecord.body);
   const [bodyChanged, setBodyChanged] = useState(false);
 
-  const onIdle = async (event: Event) => {
+  const onIdle = async () => {
     // TODO: Post should only be renamed if the user is idle and focus is not on
     // the title itself.
     // TODO: If the title is set to empty or blank, the title is reset back to the
