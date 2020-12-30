@@ -5,7 +5,7 @@ import { withHistory } from "slate-history";
 import { Grid, Container, Paper, Typography } from "@material-ui/core";
 import DocumentTitle from "./DocumentTitle";
 import { RichText } from "./Types";
-import { EMPTY_RICH_TEXT_V2 } from "./Utils";
+import { EMPTY_RICH_TEXT } from "./Utils";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
 import { v4 as uuid } from "uuid";
 import { UserId } from "../../services/store/Users";
@@ -51,7 +51,7 @@ export type RichTextState = {
 
 export const EMPTY_RICH_TEXT_STATE = {
   title: "",
-  body: EMPTY_RICH_TEXT_V2,
+  body: EMPTY_RICH_TEXT,
 };
 
 export type RichTextEditorProps = {
@@ -130,7 +130,7 @@ export const useMentions = (
     const addMentionToDatabase = async () => {
       if ("exists" in mention && mention["exists"] === false && !!createPost) {
         logger.debug(`adding mention ${mention.value}`);
-        await createPost(mention.value, EMPTY_RICH_TEXT_V2, mention.postId);
+        await createPost(mention.value, EMPTY_RICH_TEXT, mention.postId);
       } else {
         logger.debug(`not adding mention ${mention.value}; already exists`);
       }
