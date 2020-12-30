@@ -109,20 +109,26 @@ export const createPost: (
     updatedAt: new Date(),
   };
   let newPostDoc = null;
+  let newPostId = postId;
   if (postId) {
-    newPostDoc = await getPostCollectionForUserRef(database, user.uid)
+    await getPostCollectionForUserRef(database, user.uid)
       .doc(postId)
       .set(newPostRecord);
   } else {
     newPostDoc = await getPostCollectionForUserRef(database, user.uid).add(
       newPostRecord
     );
+    newPostId = newPostDoc.id;
+  }
+
+  if (!newPostId) {
+    throw new Error("Missing post id!");
   }
 
   return {
     state: "success",
-    postId: newPostDoc.id,
-    postUrl: `/post/${user.uid}/${newPostDoc.id}`,
+    postId: newPostId,
+    postUrl: `/post/${user.uid}/${newPostId}`,
   };
 };
 
