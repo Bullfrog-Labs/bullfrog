@@ -19,6 +19,7 @@ import {
 import { UserId, UserRecord } from "../services/store/Users";
 import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
+import { ConditionalWrapper } from "../jsxUtils";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -52,38 +53,38 @@ export const BasePostView = (props: BasePostViewProps) => {
   const logger = log.getLogger("BasePostView");
   const classes = useStyles();
 
-  if (props.readOnly || props.readOnly === undefined) {
-    logger.info(`rendering read-only view for ${props.title}`);
+  const readOnly = props.readOnly || props.readOnly === undefined; // default to read-only
 
-    return (
-      <Container className={classes.postView} maxWidth="md">
-        <RichTextEditor
-          readOnly={true}
-          title={props.title}
-          onTitleChange={props.onTitleChange}
-          body={props.body}
-          onBodyChange={props.onBodyChange}
-          enableToolbar={false}
-        />
-      </Container>
-    );
+  if (readOnly) {
+    logger.info(`rendering read-only view for ${props.title}`);
   }
+
+  const richTextEditor = (
+    <ConditionalWrapper
+      condition={!readOnly}
+      wrapper={(children) => (
+        <IdleTimer
+          timeout={props.idleTime ?? DEFAULT_IDLE_TIME}
+          onIdle={props.onIdle}
+        >
+          {children}
+        </IdleTimer>
+      )}
+    >
+      <RichTextEditor
+        readOnly={props.readOnly}
+        title={props.title}
+        onTitleChange={props.onTitleChange}
+        body={props.body}
+        onBodyChange={props.onBodyChange}
+        enableToolbar={false}
+      />
+    </ConditionalWrapper>
+  );
 
   return (
     <Container className={classes.postView} maxWidth="md">
-      <IdleTimer
-        timeout={props.idleTime ?? DEFAULT_IDLE_TIME}
-        onIdle={props.onIdle}
-      >
-        <RichTextEditor
-          readOnly={props.readOnly}
-          title={props.title}
-          onTitleChange={props.onTitleChange}
-          body={props.body}
-          onBodyChange={props.onBodyChange}
-          enableToolbar={false}
-        />
-      </IdleTimer>
+      {richTextEditor}
     </Container>
   );
 };
