@@ -79,24 +79,15 @@ export const useMentions = (
   const getMentionables = async (
     prefixTitle: string
   ): Promise<MentionNodeData[]> => {
-    if (!getGlobalMentions) {
-      return [
-        { value: "Aayla Secura" },
-        { value: "Adi Gallia" },
-        { value: "Admiral Dodd Rancit" },
-        { value: "Admiral Firmus Piett" },
-      ];
-    } else {
-      const posts = await getGlobalMentions(prefixTitle);
-      return posts.map((post: PostRecord) => {
-        return {
-          value: post.title,
-          postId: post.id,
-          authorId: post.authorId,
-          exists: true,
-        };
-      });
-    }
+    const posts = await getGlobalMentions(prefixTitle);
+    return posts.map((post: PostRecord) => {
+      return {
+        value: post.title,
+        postId: post.id,
+        authorId: post.authorId,
+        exists: true,
+      };
+    });
   };
 
   const [mentionables, setMentionables] = useState<MentionNodeData[]>([]);
