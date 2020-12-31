@@ -1,4 +1,9 @@
-import React, { useEffect, useMemo } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { ReactEditor, withReact, Slate } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
@@ -99,76 +104,78 @@ const withPlugins = [
   withInlineVoid({ plugins }),
 ] as const;
 
-class RichTextEditor extends React.Component {
-  props: RichTextEditorProps;
-  editor: ReactEditor;
+export type RichTextEditorImperativeHandle = {
+  focusEditor: () => void;
+};
 
-  constructor(props: RichTextEditorProps) {
-    super(props);
-    this.props = props;
-    this.editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
+const RichTextEditor = forwardRef<
+  RichTextEditorImperativeHandle,
+  RichTextEditorProps
+>((props, ref) => {
+  const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
+
+  let onMentionAdded = props.onMentionAdded;
+  if (!onMentionAdded) {
+    onMentionAdded = (option: MentionNodeData) => {};
   }
 
-  focusEditor() {
-    ReactEditor.focus(this.editor);
-  }
+  useImperativeHandle(ref, () => ({
+    focusEditor: () => ReactEditor.focus(editor),
+  }));
 
-  render() {
-    const {
-      onAddMention,
-      onChangeMention,
-      onKeyDownMention,
-      search,
-      index,
-      target,
-      values,
-    } = useMention(MENTIONABLES, {
-      maxSuggestions: 10,
-      trigger: "@",
-    });
+  const {
+    onAddMention,
+    onChangeMention,
+    onKeyDownMention,
+    search,
+    index,
+    target,
+    values,
+  } = useMention(MENTIONABLES, onMentionAdded, {
+    maxSuggestions: 10,
+    trigger: "@",
+  });
+  const onChange = (newBody: Body) => {
+    if (didOpsAffectContent(editor.operations)) {
+      props.onChange(newBody);
+    }
+  };
 
-    const onChange = (newBody: Body) => {
-      if (didOpsAffectContent(this.editor.operations)) {
-        this.props.onChange(newBody);
-      }
-    };
-
-    const toolbar = (
-      <React.Fragment>
-        <HeadingToolbar>
-          <ToolbarElement type={ELEMENT_H5} icon={<LooksOne />} />
-          <ToolbarElement type={ELEMENT_H6} icon={<LooksTwo />} />
-        </HeadingToolbar>
-      </React.Fragment>
-    );
-    return (
-      <Slate
-        editor={this.editor}
-        value={this.props.body}
-        onChange={(newValue) => {
-          onChange(newValue);
-          onChangeMention(this.editor);
-        }}
-      >
-        {!!this.props.enableToolbar && toolbar}
-        <EditablePlugins
-          plugins={plugins}
-          readOnly={this.props.readOnly ?? false}
-          placeholder="Enter some text"
-          spellCheck
-          autoFocus
-          onKeyDown={[onKeyDownMention]}
-          onKeyDownDeps={[index, search, target]}
-        />
-        <MentionSelect
-          at={target}
-          valueIndex={index}
-          options={values}
-          onClickMention={onAddMention}
-        />
-      </Slate>
-    );
-  }
-}
+  const toolbar = (
+    <React.Fragment>
+      <HeadingToolbar>
+        <ToolbarElement type={ELEMENT_H5} icon={<LooksOne />} />
+        <ToolbarElement type={ELEMENT_H6} icon={<LooksTwo />} />
+      </HeadingToolbar>
+    </React.Fragment>
+  );
+  return (
+    <Slate
+      editor={editor}
+      value={props.body}
+      onChange={(newValue) => {
+        onChange(newValue);
+        onChangeMention(editor);
+      }}
+    >
+      {!!props.enableToolbar && toolbar}
+      <EditablePlugins
+        plugins={plugins}
+        readOnly={props.readOnly ?? false}
+        placeholder="Enter some text"
+        spellCheck
+        autoFocus
+        onKeyDown={[onKeyDownMention]}
+        onKeyDownDeps={[index, search, target]}
+      />
+      <MentionSelect
+        at={target}
+        valueIndex={index}
+        options={values}
+        onClickMention={onAddMention}
+      />
+    </Slate>
+  );
+});
 
 export default RichTextEditor;
