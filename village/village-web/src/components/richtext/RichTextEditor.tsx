@@ -7,6 +7,12 @@ import DocumentTitle from "./DocumentTitle";
 import { RichText } from "./Types";
 import { EMPTY_RICH_TEXT } from "./Utils";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
+import {
+  MentionElement,
+  H5Element,
+  H6Element,
+  ParagraphElement,
+} from "./Rendering";
 import * as log from "loglevel";
 import {
   MentionPlugin,
