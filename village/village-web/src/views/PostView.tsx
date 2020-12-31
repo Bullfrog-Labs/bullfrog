@@ -25,6 +25,7 @@ import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import DocumentTitle from "../components/richtext/DocumentTitle";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
+import { PostAuthorLink } from "../components/identity/PostAuthorLink";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -93,6 +94,8 @@ export const BasePostView = (props: BasePostViewProps) => {
     />
   );
 
+  const authorLink = <PostAuthorLink />;
+
   const paperElevation = readOnly ? 0 : 1;
 
   return (
@@ -108,6 +111,7 @@ export const BasePostView = (props: BasePostViewProps) => {
             spacing={3}
           >
             <Grid item>{documentTitle}</Grid>
+            <Grid item>{authorLink}</Grid>
             <Grid item>{richTextEditor}</Grid>
           </Grid>
         </Container>
