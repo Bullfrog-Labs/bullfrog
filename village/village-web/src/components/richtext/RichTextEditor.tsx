@@ -1,4 +1,5 @@
-import React from "react";
+import { forwardRef, useImperativeHandle, useMemo } from "react";
+import { withResetBlockOnInsertBreak } from "./EditorBehaviors";
 import {
   ReactEditor,
   withReact,
@@ -7,14 +8,15 @@ import {
   RenderElementProps,
   RenderLeafProps,
 } from "slate-react";
-import { createEditor, Operation } from "slate";
+
 import { withHistory } from "slate-history";
+import { createEditor, Operation } from "slate";
+
+import { RichText } from "./Types";
+import { Element, Leaf } from "./Rendering";
+import RichTextEditorToolbar from "./RichTextEditorToolbar";
 
 import { hotkeyHandler, toReactKBEventHandler } from "./EventHandling";
-import { Element, Leaf } from "./Rendering";
-import { withResetBlockOnInsertBreak } from "./EditorBehaviors";
-import RichTextEditorToolbar from "./RichTextEditorToolbar";
-import { RichText } from "./Types";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -35,48 +37,46 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
   return ops.some((op) => !Operation.isSelectionOperation(op));
 };
 
-class RichTextEditor extends React.Component {
-  props: RichTextEditorProps;
-  editor: ReactEditor;
+export type RichTextEditorImperativeHandle = {
+  focusEditor: () => void;
+};
 
-  constructor(props: RichTextEditorProps) {
-    super(props);
-    this.props = props;
+const RichTextEditor = forwardRef<
+  RichTextEditorImperativeHandle,
+  RichTextEditorProps
+>((props, ref) => {
+  const editor = useMemo(
+    () => withReact(withResetBlockOnInsertBreak(withHistory(createEditor()))),
+    []
+  );
 
-    this.editor = withReact(
-      withResetBlockOnInsertBreak(withHistory(createEditor()))
-    );
-  }
+  useImperativeHandle(ref, () => ({
+    focusEditor: () => ReactEditor.focus(editor),
+  }));
 
-  focusEditor() {
-    ReactEditor.focus(this.editor);
-  }
+  const renderElement = (props: RenderElementProps) => <Element {...props} />;
+  const renderLeaf = (props: RenderLeafProps) => <Leaf {...props} />;
 
-  render() {
-    const renderElement = (props: RenderElementProps) => <Element {...props} />;
-    const renderLeaf = (props: RenderLeafProps) => <Leaf {...props} />;
+  const onChange = (newBody: Body) => {
+    if (didOpsAffectContent(editor.operations)) {
+      props.onChange(newBody);
+    }
+  };
 
-    const onChange = (newBody: Body) => {
-      if (didOpsAffectContent(this.editor.operations)) {
-        this.props.onChange(newBody);
-      }
-    };
-
-    return (
-      <Slate editor={this.editor} value={this.props.body} onChange={onChange}>
-        {!!this.props.enableToolbar && <RichTextEditorToolbar />}
-        <Editable
-          readOnly={this.props.readOnly ?? false}
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
-          placeholder="Enter some text"
-          spellCheck
-          autoFocus
-          onKeyDown={toReactKBEventHandler(hotkeyHandler(this.editor))}
-        />
-      </Slate>
-    );
-  }
-}
+  return (
+    <Slate editor={editor} value={props.body} onChange={onChange}>
+      {!!props.enableToolbar && <RichTextEditorToolbar />}
+      <Editable
+        readOnly={props.readOnly ?? true}
+        renderElement={renderElement}
+        renderLeaf={renderLeaf}
+        placeholder="Enter some text"
+        spellCheck
+        autoFocus
+        onKeyDown={toReactKBEventHandler(hotkeyHandler(editor))}
+      />
+    </Slate>
+  );
+});
 
 export default RichTextEditor;
