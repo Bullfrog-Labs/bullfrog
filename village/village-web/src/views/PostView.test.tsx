@@ -1,21 +1,18 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import { BasePostView } from "./PostView";
-import {
-  EMPTY_RICH_TEXT_STATE,
-  Title,
-  Body,
-} from "../components/richtext/RichTextEditor";
+import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
+import { PostTitle, PostBody } from "../services/store/Posts";
 
 test("Renders BasePostView", async () => {
-  let title = EMPTY_RICH_TEXT_STATE.title;
-  let body = EMPTY_RICH_TEXT_STATE.body;
+  let title = "";
+  let body = EMPTY_RICH_TEXT;
 
-  const setTitle = jest.fn((newTitle: Title) => {
+  const setTitle = jest.fn((newTitle: PostTitle) => {
     title = newTitle;
   });
 
-  const setBody = (newBody: Body) => {
+  const setBody = (newBody: PostBody) => {
     body = newBody;
   };
 

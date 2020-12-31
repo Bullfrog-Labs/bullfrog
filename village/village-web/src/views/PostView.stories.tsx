@@ -1,10 +1,7 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
 import React from "react";
-import {
-  EMPTY_RICH_TEXT_STATE,
-  Title,
-} from "../components/richtext/RichTextEditor";
-import { RenamePostFn, SyncBodyFn } from "../services/store/Posts";
+import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
+import { PostTitle, RenamePostFn, SyncBodyFn } from "../services/store/Posts";
 import { PostView, PostViewProps } from "./PostView";
 
 export default {
@@ -14,7 +11,7 @@ export default {
 
 const Template: Story<PostViewProps> = (args) => <PostView {...args} />;
 
-const getTitleHardcoded: () => Promise<Title> = async () => {
+const getTitleHardcoded: () => Promise<PostTitle> = async () => {
   return "Original title";
 };
 
@@ -32,8 +29,8 @@ BasicPostView.args = {
   postRecord: {
     id: "456",
     authorId: "123",
-    title: EMPTY_RICH_TEXT_STATE.title,
-    body: EMPTY_RICH_TEXT_STATE.body,
+    title: "",
+    body: EMPTY_RICH_TEXT,
     updatedAt: new Date(),
   },
   getTitle: getTitleHardcoded,
