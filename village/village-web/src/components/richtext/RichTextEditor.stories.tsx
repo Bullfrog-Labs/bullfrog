@@ -50,7 +50,7 @@ const RichTextEditorStateWrapper: FunctionComponent<RichTextEditorProps> = (
         readOnly={props.readOnly}
         onMentionSearchChanged={onMentionSearchChanged}
         mentionables={mentionables}
-        createPost={createPost}
+        onMentionAdded={(mention: MentionNodeData) => {}}
       />
     </MemoryRouter>
   );

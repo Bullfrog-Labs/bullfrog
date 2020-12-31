@@ -111,6 +111,10 @@ const RichTextEditor = forwardRef<
   if (!onMentionAdded) {
     onMentionAdded = (option: MentionNodeData) => {};
   }
+  let onMentionSearchChanged = props.onMentionSearchChanged;
+  if (!onMentionSearchChanged) {
+    onMentionSearchChanged = (search: string) => {};
+  }
 
   useImperativeHandle(ref, () => ({
     focusEditor: () => ReactEditor.focus(editor),
@@ -127,8 +131,6 @@ const RichTextEditor = forwardRef<
   } = useMention(props.mentionables, onMentionAdded, {
     maxSuggestions: 10,
   });
-
-  const { onMentionSearchChanged } = props;
 
   useEffect(() => {
     onMentionSearchChanged(search);
