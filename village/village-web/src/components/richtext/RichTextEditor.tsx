@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ReactEditor, withReact, Slate } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
@@ -7,8 +7,6 @@ import DocumentTitle from "./DocumentTitle";
 import { RichText } from "./Types";
 import { EMPTY_RICH_TEXT } from "./Utils";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
-import { v4 as uuid } from "uuid";
-import { UserId } from "../../services/store/Users";
 import * as log from "loglevel";
 import {
   MentionPlugin,
@@ -29,11 +27,6 @@ import {
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Link } from "react-router-dom";
-import {
-  PostRecord,
-  GetGlobalMentionsFn,
-  CreatePostFn,
-} from "../../services/store/Posts";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -64,72 +57,6 @@ export type RichTextEditorProps = {
   onMentionSearchChanged?: (search: string) => void;
   mentionables?: MentionNodeData[];
   onMentionAdded?: (option: MentionNodeData) => void;
-};
-
-export const useMentions = (
-  getGlobalMentions: GetGlobalMentionsFn,
-  createPost: CreatePostFn,
-  authorId: UserId
-): [
-  MentionNodeData[],
-  (newSearch: string) => void,
-  (option: MentionNodeData) => void
-] => {
-  const logger = log.getLogger("useMentions");
-  const getMentionables = async (
-    prefixTitle: string
-  ): Promise<MentionNodeData[]> => {
-    const posts = await getGlobalMentions(prefixTitle);
-    return posts.map((post: PostRecord) => {
-      return {
-        value: post.title,
-        postId: post.id,
-        authorId: post.authorId,
-        exists: true,
-      };
-    });
-  };
-
-  const [mentionables, setMentionables] = useState<MentionNodeData[]>([]);
-  const [search, setSearch] = useState<string>();
-
-  const onMentionSearchChanged = (newSearch: string) => {
-    const updateMentionables = async () => {
-      if (search !== newSearch) {
-        const newMentionables = await getMentionables(newSearch);
-        // Only insert the search query if it doesnt exist exactly in the results.
-        if (newMentionables.find((m) => m.value === newSearch) === undefined) {
-          const newMention: MentionNodeData = {
-            value: newSearch,
-            authorId: authorId,
-            postId: uuid(),
-            exists: false,
-          };
-          if (newSearch) {
-            newMentionables.splice(0, 0, newMention);
-          }
-        }
-
-        setMentionables(newMentionables);
-        setSearch(newSearch);
-      }
-    };
-    updateMentionables();
-  };
-
-  const onMentionAdded = (mention: MentionNodeData) => {
-    const addMentionToDatabase = async () => {
-      if ("exists" in mention && mention["exists"] === false && !!createPost) {
-        logger.debug(`adding mention ${mention.value}`);
-        await createPost(mention.value, EMPTY_RICH_TEXT, mention.postId);
-      } else {
-        logger.debug(`not adding mention ${mention.value}; already exists`);
-      }
-    };
-    addMentionToDatabase();
-  };
-
-  return [mentionables, onMentionSearchChanged, onMentionAdded];
 };
 
 const didOpsAffectContent = (ops: Operation[]): boolean => {

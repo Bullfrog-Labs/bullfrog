@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import RichTextEditor, {
-  useMentions,
   EMPTY_RICH_TEXT_STATE,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
@@ -18,6 +17,7 @@ import {
   PostTitle,
   GetGlobalMentionsFn,
 } from "../services/store/Posts";
+import { useMentions } from "../hooks/useMentions";
 import { UserId, UserRecord } from "../services/store/Users";
 import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";

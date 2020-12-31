@@ -2,9 +2,9 @@ import { Meta, Story } from "@storybook/react/types-6-0";
 import React, { useState } from "react";
 import {
   EMPTY_RICH_TEXT_STATE,
-  useMentions,
   Body,
 } from "../components/richtext/RichTextEditor";
+import { useMentions } from "../hooks/useMentions";
 import { BasePostView, BasePostViewProps } from "./PostView";
 import { PostRecord, CreatePostResult } from "../services/store/Posts";
 
