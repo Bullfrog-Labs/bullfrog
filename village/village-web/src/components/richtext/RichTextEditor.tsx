@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { ReactEditor, withReact, Slate } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
-import { Grid, Container, Paper, Typography } from "@material-ui/core";
+import { Grid, Container, Paper } from "@material-ui/core";
 import DocumentTitle from "./DocumentTitle";
 import { RichText } from "./Types";
 import { EMPTY_RICH_TEXT } from "./Utils";
@@ -26,7 +26,6 @@ import {
   ELEMENT_H6,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
-import { Link } from "react-router-dom";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -61,48 +60,6 @@ export type RichTextEditorProps = {
 
 const didOpsAffectContent = (ops: Operation[]): boolean => {
   return ops.some((op) => !Operation.isSelectionOperation(op));
-};
-
-const MentionElement = ({
-  attributes,
-  children,
-  element,
-  htmlAttributes,
-}: any) => {
-  const logger = log.getLogger("MentionElement");
-  const postId = element["postId"];
-  const authorId = element["authorId"];
-  const title = element.value;
-  if (!postId || !authorId || !element.value) {
-    logger.error(
-      `Invalid MentionNodeData; postId=${postId}, authorId=${authorId}, title=${title}`
-    );
-  }
-  return (
-    <Link
-      {...attributes}
-      data-slate-value={title}
-      to={`/post/${authorId}/${postId}`}
-      contentEditable={false}
-      {...htmlAttributes}
-    >
-      {element.value}
-      {children}
-    </Link>
-  );
-};
-const ParagraphElement = (props: any) => {
-  return (
-    <Typography paragraph={true} variant="body1">
-      {props.children}
-    </Typography>
-  );
-};
-const H5Element = (props: any) => {
-  return <Typography variant="h5">{props.children}</Typography>;
-};
-const H6Element = (props: any) => {
-  return <Typography variant="h6">{props.children}</Typography>;
 };
 
 const mentionOptions: MentionPluginOptions = {
