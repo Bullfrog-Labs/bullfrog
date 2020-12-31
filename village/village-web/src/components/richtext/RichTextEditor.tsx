@@ -2,8 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { ReactEditor, withReact, Slate } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
-import { Grid, Container, Paper } from "@material-ui/core";
-import DocumentTitle from "./DocumentTitle";
+import { Typography } from "@material-ui/core";
 import { RichText } from "./Types";
 import { EMPTY_RICH_TEXT } from "./Utils";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
@@ -39,13 +38,14 @@ import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 // The implementation below is based off of
 // https://github.com/ianstormtaylor/slate/blob/master/site/examples/richtext.js.
 
-export type Title = string;
 export type Body = RichText;
 
-export type RichTextState = {
-  title: Title;
-  body: Body;
-};
+const MENTIONABLES = [
+  { value: "Aayla Secura" },
+  { value: "Adi Gallia" },
+  { value: "Admiral Dodd Rancit" },
+  { value: "Admiral Firmus Piett" },
+];
 
 export const EMPTY_RICH_TEXT_STATE = {
   title: "",
@@ -53,10 +53,8 @@ export const EMPTY_RICH_TEXT_STATE = {
 };
 
 export type RichTextEditorProps = {
-  title: Title;
   body: Body;
-  onTitleChange: (newTitle: Title) => void;
-  onBodyChange: (newBody: Body) => void;
+  onChange: (newBody: Body) => void;
   enableToolbar?: boolean;
   readOnly?: boolean;
   onMentionSearchChanged?: (search: string) => void;
@@ -101,121 +99,76 @@ const withPlugins = [
   withInlineVoid({ plugins }),
 ] as const;
 
-const RichTextEditor = (props: RichTextEditorProps) => {
-  const {
-    title,
-    body,
-    onTitleChange,
-    onBodyChange,
-    enableToolbar,
-    onMentionSearchChanged = (search: string) => {},
-    mentionables = [],
-    onMentionAdded = (mention: MentionNodeData) => {},
-  } = props;
+class RichTextEditor extends React.Component {
+  props: RichTextEditorProps;
+  editor: ReactEditor;
 
-  const logger = log.getLogger("RichTextEditor");
+  constructor(props: RichTextEditorProps) {
+    super(props);
+    this.props = props;
+    this.editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
+  }
 
-  const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
+  focusEditor() {
+    ReactEditor.focus(this.editor);
+  }
 
-  const {
-    onAddMention,
-    onChangeMention,
-    onKeyDownMention,
-    search,
-    index,
-    target,
-    values,
-  } = useMention(mentionables, onMentionAdded, {
-    maxSuggestions: 10,
-  });
+  render() {
+    const {
+      onAddMention,
+      onChangeMention,
+      onKeyDownMention,
+      search,
+      index,
+      target,
+      values,
+    } = useMention(MENTIONABLES, {
+      maxSuggestions: 10,
+      trigger: "@",
+    });
 
-  useEffect(() => {
-    onMentionSearchChanged(search);
-  }, [search, onMentionSearchChanged]);
-
-  const onClickMention = (editor: ReactEditor, option: MentionNodeData) => {
-    logger.debug(`on click mention ${JSON.stringify(option)}`);
-    onAddMention(editor, option);
-    onMentionAdded(option);
-  };
-
-  const onChange = {
-    title: (newTitle: Title) => {
-      if (title === newTitle) {
-        return;
+    const onChange = (newBody: Body) => {
+      if (didOpsAffectContent(this.editor.operations)) {
+        this.props.onChange(newBody);
       }
-      onTitleChange(newTitle);
-    },
-    body: (newBody: Body) => {
-      if (didOpsAffectContent(editor.operations)) {
-        onBodyChange(newBody);
-      }
-    },
-  };
+    };
 
-  const toolbar = (
-    <React.Fragment>
-      <HeadingToolbar>
-        <ToolbarElement type={ELEMENT_H5} icon={<LooksOne />} />
-        <ToolbarElement type={ELEMENT_H6} icon={<LooksTwo />} />
-      </HeadingToolbar>
-    </React.Fragment>
-  );
-
-  return (
-    <Paper elevation={1}>
-      <div className="RichTextEditor">
-        <Container>
-          <Grid
-            container
-            direction="column"
-            justify="flex-start"
-            alignItems="stretch"
-            spacing={3}
-          >
-            <Grid item>
-              <DocumentTitle
-                readOnly={props.readOnly}
-                handleEscape={(event) => {
-                  ReactEditor.focus(editor);
-                }}
-                value={title}
-                onChange={onChange.title}
-              />
-            </Grid>
-            <Grid item>
-              <Slate
-                editor={editor}
-                value={body}
-                onChange={(newValue) => {
-                  onChange.body(newValue);
-                  onChangeMention(editor);
-                }}
-              >
-                {!!enableToolbar && toolbar}
-                <EditablePlugins
-                  plugins={plugins}
-                  readOnly={props.readOnly ?? false}
-                  placeholder="Enter some text"
-                  spellCheck
-                  autoFocus
-                  onKeyDown={[onKeyDownMention]}
-                  onKeyDownDeps={[index, search, target, values]}
-                />
-
-                <MentionSelect
-                  at={target}
-                  valueIndex={index}
-                  options={values}
-                  onClickMention={onClickMention}
-                />
-              </Slate>
-            </Grid>
-          </Grid>
-        </Container>
-      </div>
-    </Paper>
-  );
-};
+    const toolbar = (
+      <React.Fragment>
+        <HeadingToolbar>
+          <ToolbarElement type={ELEMENT_H5} icon={<LooksOne />} />
+          <ToolbarElement type={ELEMENT_H6} icon={<LooksTwo />} />
+        </HeadingToolbar>
+      </React.Fragment>
+    );
+    return (
+      <Slate
+        editor={this.editor}
+        value={this.props.body}
+        onChange={(newValue) => {
+          onChange(newValue);
+          onChangeMention(this.editor);
+        }}
+      >
+        {!!this.props.enableToolbar && toolbar}
+        <EditablePlugins
+          plugins={plugins}
+          readOnly={this.props.readOnly ?? false}
+          placeholder="Enter some text"
+          spellCheck
+          autoFocus
+          onKeyDown={[onKeyDownMention]}
+          onKeyDownDeps={[index, search, target]}
+        />
+        <MentionSelect
+          at={target}
+          valueIndex={index}
+          options={values}
+          onClickMention={onAddMention}
+        />
+      </Slate>
+    );
+  }
+}
 
 export default RichTextEditor;

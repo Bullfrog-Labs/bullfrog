@@ -86,25 +86,27 @@ export const StackView = (props: StackViewProps) => {
       </Typography>
     );
     return (
-      <ListItem
-        alignItems="flex-start"
-        key={post.post.id}
-        className={classes.postListItem}
-      >
-        <ListItemAvatar>
-          <Avatar alt={post.user.displayName}>
-            <ImageIcon />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText
-          primary={listItemPrimaryText}
-          secondary={
-            <React.Fragment>
-              {richTextStringPreview(post.post.body)}
-            </React.Fragment>
-          }
-        />
-      </ListItem>
+      <Link to={`/post/${post.user.uid}/${post.post.id}`}>
+        <ListItem
+          alignItems="flex-start"
+          key={post.post.id}
+          className={classes.postListItem}
+        >
+          <ListItemAvatar>
+            <Avatar alt={post.user.displayName}>
+              <ImageIcon />
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText
+            primary={listItemPrimaryText}
+            secondary={
+              <React.Fragment>
+                {richTextStringPreview(post.post.body)}
+              </React.Fragment>
+            }
+          />
+        </ListItem>
+      </Link>
     );
   });
 
