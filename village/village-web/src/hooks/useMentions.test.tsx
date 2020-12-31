@@ -9,22 +9,8 @@ import { u0, posts0, authProvider } from "../testing/Fixtures";
 Logging.configure(log);
 
 test("fetches empty mentions", async () => {
-  const getGlobalMentions = async (
-    titlePrefix: string
-  ): Promise<PostRecord[]> => {
-    return [];
-  };
-  const createPost = async (
-    title: string,
-    body: Body,
-    postId?: string
-  ): Promise<CreatePostResult> => {
-    return { state: "success", postId: "hjkhj", postUrl: "" };
-  };
-  const authorId = "79832475341985234";
-
   const { waitForNextUpdate, result } = renderHook(() =>
-    useMentions(getGlobalMentions, createPost, authorId)
+    useMentions(getGlobalMentions0, createPost0, authorId)
   );
 
   var [mentionables, onMentionSearchChanged] = result.current;
@@ -32,55 +18,27 @@ test("fetches empty mentions", async () => {
   expect(mentionables).toEqual([]);
 });
 
-test("fetches suggested mention only", async () => {
-  const getGlobalMentions = async (
-    titlePrefix: string
-  ): Promise<PostRecord[]> => {
-    return [];
-  };
-  const createPost = async (
-    title: string,
-    body: Body,
-    postId?: string
-  ): Promise<CreatePostResult> => {
-    return { state: "success", postId: "hjkhj", postUrl: "" };
-  };
-  const authorId = "79832475341985234";
-
+test("fetches suggested mention only when no match exists", async () => {
   const { waitForNextUpdate, result } = renderHook(() =>
-    useMentions(getGlobalMentions, createPost, authorId)
+    useMentions(getGlobalMentions0, createPost0, authorId)
   );
 
   var [mentionables, onMentionSearchChanged] = result.current;
 
   await act(async () => {
-    onMentionSearchChanged("Title");
+    onMentionSearchChanged("wabisabi");
     await waitForNextUpdate();
   });
 
   var [mentionables] = result.current;
 
-  expect(mentionables[0].value).toEqual("Title");
+  expect(mentionables[0].value).toEqual("wabisabi");
   expect(mentionables[0].exists).toEqual(false);
 });
 
 test("fetches non empty mentions", async () => {
-  const getGlobalMentions = async (
-    titlePrefix: string
-  ): Promise<PostRecord[]> => {
-    return posts0;
-  };
-  const createPost = async (
-    title: string,
-    body: Body,
-    postId?: string
-  ): Promise<CreatePostResult> => {
-    return { state: "success", postId: "hjkhj", postUrl: "" };
-  };
-  const authorId = "79832475341985234";
-
   const { waitForNextUpdate, result } = renderHook(() =>
-    useMentions(getGlobalMentions, createPost, authorId)
+    useMentions(getGlobalMentions0, createPost0, authorId)
   );
 
   var [mentionables, onMentionSearchChanged] = result.current;
@@ -99,3 +57,17 @@ test("fetches non empty mentions", async () => {
     value: "Title mane",
   });
 });
+
+const getGlobalMentions0 = async (
+  titlePrefix: string
+): Promise<PostRecord[]> => {
+  return posts0;
+};
+const createPost0 = async (
+  title: string,
+  body: Body,
+  postId?: string
+): Promise<CreatePostResult> => {
+  return { state: "success", postId: "hjkhj", postUrl: "" };
+};
+const authorId = "79832475341985234";
