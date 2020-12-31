@@ -1,13 +1,7 @@
-import React, {
-  useEffect,
-  useMemo,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import React, { useMemo, forwardRef, useImperativeHandle } from "react";
 import { ReactEditor, withReact, Slate } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
-import { Typography } from "@material-ui/core";
 import { RichText } from "./Types";
 import { EMPTY_RICH_TEXT } from "./Utils";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
@@ -44,13 +38,6 @@ import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 // https://github.com/ianstormtaylor/slate/blob/master/site/examples/richtext.js.
 
 export type Body = RichText;
-
-const MENTIONABLES = [
-  { value: "Aayla Secura" },
-  { value: "Adi Gallia" },
-  { value: "Admiral Dodd Rancit" },
-  { value: "Admiral Firmus Piett" },
-];
 
 export const EMPTY_RICH_TEXT_STATE = {
   title: "",
@@ -131,7 +118,7 @@ const RichTextEditor = forwardRef<
     index,
     target,
     values,
-  } = useMention(MENTIONABLES, onMentionAdded, {
+  } = useMention(props.mentionables, onMentionAdded, {
     maxSuggestions: 10,
     trigger: "@",
   });
