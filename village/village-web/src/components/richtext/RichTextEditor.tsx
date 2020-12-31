@@ -1,4 +1,9 @@
-import React, { useMemo, forwardRef, useImperativeHandle } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { ReactEditor, withReact, Slate } from "slate-react";
 import { createEditor, Operation } from "slate";
 import { withHistory } from "slate-history";
@@ -49,9 +54,9 @@ export type RichTextEditorProps = {
   onChange: (newBody: Body) => void;
   enableToolbar?: boolean;
   readOnly?: boolean;
-  onMentionSearchChanged?: (search: string) => void;
-  mentionables?: MentionNodeData[];
-  onMentionAdded?: (option: MentionNodeData) => void;
+  onMentionSearchChanged: (search: string) => void;
+  mentionables: MentionNodeData[];
+  onMentionAdded: (option: MentionNodeData) => void;
 };
 
 const didOpsAffectContent = (ops: Operation[]): boolean => {
@@ -99,9 +104,8 @@ const RichTextEditor = forwardRef<
   RichTextEditorImperativeHandle,
   RichTextEditorProps
 >((props, ref) => {
+  const logger = log.getLogger("RichTextEditor");
   const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
-
-  console.log("fuuuuuu");
 
   let onMentionAdded = props.onMentionAdded;
   if (!onMentionAdded) {
@@ -123,10 +127,23 @@ const RichTextEditor = forwardRef<
   } = useMention(props.mentionables, onMentionAdded, {
     maxSuggestions: 10,
   });
+
+  const { onMentionSearchChanged } = props;
+
+  useEffect(() => {
+    onMentionSearchChanged(search);
+  }, [search, onMentionSearchChanged]);
+
   const onChange = (newBody: Body) => {
     if (didOpsAffectContent(editor.operations)) {
       props.onChange(newBody);
     }
+  };
+
+  const onClickMention = (editor: ReactEditor, option: MentionNodeData) => {
+    logger.debug(`on click mention ${JSON.stringify(option)}`);
+    onAddMention(editor, option);
+    onMentionAdded(option);
   };
 
   const toolbar = (
@@ -154,13 +171,13 @@ const RichTextEditor = forwardRef<
         spellCheck
         autoFocus
         onKeyDown={[onKeyDownMention]}
-        onKeyDownDeps={[index, search, target]}
+        onKeyDownDeps={[index, search, target, values]}
       />
       <MentionSelect
         at={target}
         valueIndex={index}
         options={values}
-        onClickMention={onAddMention}
+        onClickMention={onClickMention}
       />
     </Slate>
   );

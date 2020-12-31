@@ -48,6 +48,9 @@ const RichTextEditorStateWrapper: FunctionComponent<RichTextEditorProps> = (
         onChange={setBody}
         enableToolbar={props.enableToolbar}
         readOnly={props.readOnly}
+        onMentionSearchChanged={onMentionSearchChanged}
+        mentionables={mentionables}
+        createPost={createPost}
       />
     </MemoryRouter>
   );
