@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import RichTextEditor from "../components/richtext/RichTextEditor";
+import RichTextEditor, {
+  RichTextEditorImperativeHandle,
+} from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
 import {
   Container,
@@ -64,7 +66,7 @@ export const BasePostView = (props: BasePostViewProps) => {
     logger.info(`rendering read-only view for ${props.title}`);
   }
 
-  const richTextEditorRef = useRef<RichTextEditor>(null);
+  const richTextEditorRef = useRef<RichTextEditorImperativeHandle>(null);
 
   const idleTimer = (
     <IdleTimer
