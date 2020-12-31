@@ -101,6 +101,8 @@ const RichTextEditor = forwardRef<
 >((props, ref) => {
   const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
 
+  console.log("fuuuuuu");
+
   let onMentionAdded = props.onMentionAdded;
   if (!onMentionAdded) {
     onMentionAdded = (option: MentionNodeData) => {};
@@ -120,7 +122,6 @@ const RichTextEditor = forwardRef<
     values,
   } = useMention(props.mentionables, onMentionAdded, {
     maxSuggestions: 10,
-    trigger: "@",
   });
   const onChange = (newBody: Body) => {
     if (didOpsAffectContent(editor.operations)) {
