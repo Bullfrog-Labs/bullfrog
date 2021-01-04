@@ -278,6 +278,16 @@ export const PostView = (props: PostViewProps) => {
   const [body, setBody] = useState(postRecord.body);
   const [bodyChanged, setBodyChanged] = useState(false);
 
+  useEffect(() => {
+    setTitle(postRecord.title);
+    setTitleChanged(false);
+  }, [postRecord.title]);
+
+  useEffect(() => {
+    setBody(postRecord.body);
+    setBodyChanged(false);
+  }, [postRecord.body]);
+
   const onIdle = async () => {
     // TODO: Post should only be renamed if the user is idle and focus is not on
     // the title itself.
@@ -403,7 +413,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
   // TODO: Encapsulate this in a use*-style hook
   useEffect(() => {
     const loadPostRecord = async () => {
-      setPostRecord(await props.getPost(authorId, postId));
+      const post = await props.getPost(authorId, postId);
+      setPostRecord(post);
       setPostRecordLoaded(true);
     };
     loadPostRecord();
