@@ -96,22 +96,22 @@ export const ProfileView = (props: ProfileViewProps) => {
 
   const listItems = posts.map((post) => {
     return (
-      <Link to={`/post/${post.authorId}/${post.id}`}>
-        <ListItem
-          alignItems="flex-start"
-          key={user.uid}
-          className={classes.postListItem}
-        >
-          <ListItemText
-            primary={post.title}
-            secondary={
-              <React.Fragment>
-                {richTextStringPreview(post.body)}
-              </React.Fragment>
-            }
-          />
-        </ListItem>
-      </Link>
+      <ListItem
+        alignItems="flex-start"
+        key={user.uid}
+        className={classes.postListItem}
+      >
+        <ListItemText
+          primary={
+            <Link key={user.uid} to={`/post/${post.authorId}/${post.id}`}>
+              {post.title}
+            </Link>
+          }
+          secondary={
+            <React.Fragment>{richTextStringPreview(post.body)}</React.Fragment>
+          }
+        />
+      </ListItem>
     );
   });
 
