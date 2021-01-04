@@ -70,14 +70,16 @@ export type CreatePostResult =
 
 export type CreatePostFn = (
   newTitle: PostTitle,
-  newBody: PostBody
+  newBody: PostBody,
+  postId?: string
 ) => Promise<CreatePostResult>;
 
 export const createPost: (
   database: Database
 ) => (user: UserRecord) => CreatePostFn = (database) => (user) => async (
   newTitle,
-  newBody
+  newBody,
+  postId?: string
 ) => {
   const logger = log.getLogger("createPost");
 
@@ -106,14 +108,27 @@ export const createPost: (
     body: newBody,
     updatedAt: new Date(),
   };
-  const newPostDoc = await getPostCollectionForUserRef(database, user.uid).add(
-    newPostRecord
-  );
+  let newPostDoc = null;
+  let newPostId = postId;
+  if (postId) {
+    await getPostCollectionForUserRef(database, user.uid)
+      .doc(postId)
+      .set(newPostRecord);
+  } else {
+    newPostDoc = await getPostCollectionForUserRef(database, user.uid).add(
+      newPostRecord
+    );
+    newPostId = newPostDoc.id;
+  }
+
+  if (!newPostId) {
+    throw new Error("Missing post id!");
+  }
 
   return {
     state: "success",
-    postId: newPostDoc.id,
-    postUrl: `/post/${user.uid}/${newPostDoc.id}`,
+    postId: newPostId,
+    postUrl: `/post/${user.uid}/${newPostId}`,
   };
 };
 
@@ -283,3 +298,25 @@ export const getStackPosts = (database: Database) => async (
 };
 
 export type GetStackPostsFn = ReturnType<typeof getStackPosts>;
+
+export const getGlobalMentions = (database: Database) => async (
+  titlePrefix: string
+): Promise<PostRecord[]> => {
+  const logger = log.getLogger("getGlobalMentions");
+
+  logger.debug(`Fetching posts for title ${titlePrefix}`);
+  const postsDoc = await database
+    .getHandle()
+    .collectionGroup(POSTS_COLLECTION)
+    .where("title", ">=", titlePrefix)
+    .where("title", "<", `${titlePrefix}\uf8ff`)
+    .limit(10)
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  return postsDoc.docs.map((doc) => {
+    return doc.data();
+  });
+};
+
+export type GetGlobalMentionsFn = ReturnType<typeof getGlobalMentions>;

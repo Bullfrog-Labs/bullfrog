@@ -55,6 +55,9 @@ export const getUsersForIds = async (
 ): Promise<UserRecord[]> => {
   const logger = log.getLogger("getUsersForIds");
   logger.debug(`Fetching posts for ids ${userIds}`);
+  if (!userIds || userIds.length == 0) {
+    return [];
+  }
   const userDoc = await database
     .getHandle()
     .collection(USERS_COLLECTION)

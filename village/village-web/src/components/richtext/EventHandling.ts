@@ -39,7 +39,7 @@ export const hotkeyHandler = (editor: Editor) => {
 };
 
 export const toReactKBEventHandler = (kbEventHandler: KBEventHandler) => (
-  reactEvent: React.KeyboardEvent
+  reactEvent: React.KeyboardEvent<HTMLDivElement>
 ) => kbEventHandler(reactEvent.nativeEvent);
 
 export const toReactMouseEventHandler = (

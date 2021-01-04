@@ -79,34 +79,35 @@ export const StackView = (props: StackViewProps) => {
     const linkTo = `/profile/${post.user.uid}`;
     const listItemPrimaryText = (
       <Typography variant="body2">
-        {post.post.title} -{" "}
+        <Link to={`/post/${post.user.uid}/${post.post.id}`}>
+          {post.post.title}
+        </Link>{" "}
+        -{" "}
         <em>
-          <Link to={linkTo}>{post.user.username}</Link>
+          <Link to={linkTo}>{post.user.displayName}</Link>
         </em>
       </Typography>
     );
     return (
-      <Link to={`/post/${post.user.uid}/${post.post.id}`}>
-        <ListItem
-          alignItems="flex-start"
-          key={post.post.id}
-          className={classes.postListItem}
-        >
-          <ListItemAvatar>
-            <Avatar alt={post.user.displayName}>
-              <ImageIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary={listItemPrimaryText}
-            secondary={
-              <React.Fragment>
-                {richTextStringPreview(post.post.body)}
-              </React.Fragment>
-            }
-          />
-        </ListItem>
-      </Link>
+      <ListItem
+        alignItems="flex-start"
+        key={post.post.id}
+        className={classes.postListItem}
+      >
+        <ListItemAvatar>
+          <Avatar alt={post.user.displayName}>
+            <ImageIcon />
+          </Avatar>
+        </ListItemAvatar>
+        <ListItemText
+          primary={listItemPrimaryText}
+          secondary={
+            <React.Fragment>
+              {richTextStringPreview(post.post.body)}
+            </React.Fragment>
+          }
+        />
+      </ListItem>
     );
   });
 

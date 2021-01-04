@@ -17,7 +17,7 @@ export type EditableTypographyProps = {
 };
 
 const handleExitEditable = (handleEscape?: KBEventHandler) => (
-  event: React.KeyboardEvent
+  event: React.KeyboardEvent<HTMLDivElement>
 ) => {
   if (event.key === "Enter" || event.key === "Escape") {
     event.preventDefault();
