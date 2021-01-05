@@ -6,7 +6,7 @@ import * as log from "loglevel";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 
 import {
-  PostRecord,
+  UserPost,
   GetGlobalMentionsFn,
   CreatePostFn,
 } from "../services/store/Posts";
@@ -25,11 +25,12 @@ export const useMentions = (
     prefixTitle: string
   ): Promise<MentionNodeData[]> => {
     const posts = await getGlobalMentions(prefixTitle);
-    return posts.map((post: PostRecord) => {
+    return posts.map((post: UserPost) => {
       return {
-        value: post.title,
-        postId: post.id,
-        authorId: post.authorId,
+        value: post.post.title,
+        postId: post.post.id,
+        authorId: post.post.authorId,
+        authorUsername: post.user.username,
         exists: true,
       };
     });

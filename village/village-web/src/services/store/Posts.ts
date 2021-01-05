@@ -272,13 +272,10 @@ const getPostsForTitle = async (
   });
 };
 
-export const getStackPosts = (database: Database) => async (
-  title: string
+export const getUserPostsForPosts = async (
+  database: Database,
+  posts: PostRecord[]
 ): Promise<UserPost[]> => {
-  const logger = log.getLogger("getStackPosts");
-
-  logger.debug(`Fetching posts for title ${title}`);
-  const posts = await getPostsForTitle(database, title);
   const postUserIds: UserId[] = [];
   posts.forEach((post) => {
     postUserIds.push(post.authorId);
@@ -297,11 +294,21 @@ export const getStackPosts = (database: Database) => async (
   });
 };
 
+export const getStackPosts = (database: Database) => async (
+  title: string
+): Promise<UserPost[]> => {
+  const logger = log.getLogger("getStackPosts");
+
+  logger.debug(`Fetching posts for title ${title}`);
+  const posts = await getPostsForTitle(database, title);
+  return getUserPostsForPosts(database, posts);
+};
+
 export type GetStackPostsFn = ReturnType<typeof getStackPosts>;
 
 export const getGlobalMentions = (database: Database) => async (
   titlePrefix: string
-): Promise<PostRecord[]> => {
+): Promise<UserPost[]> => {
   const logger = log.getLogger("getGlobalMentions");
 
   logger.debug(`Fetching posts for title ${titlePrefix}`);
@@ -314,9 +321,11 @@ export const getGlobalMentions = (database: Database) => async (
     .withConverter(POST_RECORD_CONVERTER)
     .get();
 
-  return postsDoc.docs.map((doc) => {
+  const posts = postsDoc.docs.map((doc) => {
     return doc.data();
   });
+
+  return getUserPostsForPosts(database, posts);
 };
 
 export type GetGlobalMentionsFn = ReturnType<typeof getGlobalMentions>;

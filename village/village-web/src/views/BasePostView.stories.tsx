@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 import { Body } from "../components/richtext/RichTextEditor";
 import { BasePostView, BasePostViewProps } from "./PostView";
-import { PostRecord, CreatePostResult } from "../services/store/Posts";
+import { UserPost, CreatePostResult } from "../services/store/Posts";
 import { useMentions } from "../hooks/useMentions";
 
 export default {
@@ -17,7 +17,7 @@ const BasePostViewStateWrapper = (props: BasePostViewProps) => {
 
   const getGlobalMentions = async (
     titlePrefix: string
-  ): Promise<PostRecord[]> => {
+  ): Promise<UserPost[]> => {
     return [];
   };
   const createPost = async (

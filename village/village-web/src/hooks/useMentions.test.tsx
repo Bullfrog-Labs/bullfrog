@@ -2,9 +2,9 @@ import * as log from "loglevel";
 import { useMentions } from "./useMentions";
 import { act, renderHook } from "@testing-library/react-hooks";
 import { Logging } from "kmgmt-common";
-import { CreatePostResult, PostRecord } from "../services/store/Posts";
+import { CreatePostResult, UserPost } from "../services/store/Posts";
 import { Body } from "../components/richtext/RichTextEditor";
-import { u0, posts0, authProvider } from "../testing/Fixtures";
+import { u0, posts0, authProvider, userPosts0 } from "../testing/Fixtures";
 
 Logging.configure(log);
 
@@ -52,16 +52,15 @@ test("fetches non empty mentions", async () => {
 
   expect(mentionables[1]).toEqual({
     authorId: "123",
+    authorUsername: "l4stewar",
     exists: true,
     postId: "123",
     value: "Title mane",
   });
 });
 
-const getGlobalMentions0 = async (
-  titlePrefix: string
-): Promise<PostRecord[]> => {
-  return posts0;
+const getGlobalMentions0 = async (titlePrefix: string): Promise<UserPost[]> => {
+  return userPosts0;
 };
 const createPost0 = async (
   title: string,
