@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { Typography } from "@material-ui/core";
+import { Typography, Tooltip } from "@material-ui/core";
 import { RenderLeafProps, RenderElementProps } from "slate-react";
 import { Link } from "react-router-dom";
 import * as log from "loglevel";
@@ -72,23 +72,26 @@ export const MentionElement = ({
   const logger = log.getLogger("MentionElement");
   const postId = element["postId"];
   const authorId = element["authorId"];
+  const authorUsername = element["authorUsername"];
   const title = element.value;
-  if (!postId || !authorId || !element.value) {
-    logger.error(
-      `Invalid MentionNodeData; postId=${postId}, authorId=${authorId}, title=${title}`
-    );
+  if (!postId || !element.value) {
+    logger.error(`Invalid MentionNodeData; postId=${postId}, title=${title}`);
   }
   return (
-    <Link
-      {...attributes}
-      data-slate-value={title}
-      to={`/post/${authorId}/${postId}`}
-      contentEditable={false}
-      {...htmlAttributes}
-    >
-      {element.value}
-      {children}
-    </Link>
+    <React.Fragment>
+      <Tooltip title={"Author: " + authorUsername}>
+        <Link
+          {...attributes}
+          data-slate-value={title}
+          to={`/post/${authorId}/${postId}`}
+          contentEditable={false}
+          {...htmlAttributes}
+        >
+          {element.value}
+          {children}
+        </Link>
+      </Tooltip>
+    </React.Fragment>
   );
 };
 
