@@ -82,7 +82,7 @@ export const MentionElement = ({
   }
   return (
     <React.Fragment>
-      <Tooltip title={"Author: " + authorUsername}>
+      <Tooltip title={authorUsername}>
         <Link
           {...attributes}
           data-slate-value={title}
