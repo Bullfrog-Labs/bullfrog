@@ -74,8 +74,11 @@ export const MentionElement = ({
   const authorId = element["authorId"];
   const authorUsername = element["authorUsername"];
   const title = element.value;
-  if (!postId || !element.value) {
-    logger.error(`Invalid MentionNodeData; postId=${postId}, title=${title}`);
+  if (!postId || !authorId || !authorUsername || !element.value) {
+    logger.error(
+      `Invalid MentionNodeData; postId=${postId}, authorId=${authorId}, ` +
+        `authorUsername=${authorUsername}, title=${title}`
+    );
   }
   return (
     <React.Fragment>
