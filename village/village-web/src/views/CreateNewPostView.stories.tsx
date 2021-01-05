@@ -16,7 +16,7 @@ export default {
   component: CreateNewPostView,
 } as Meta;
 
-const CreateNewPostViewStateWrapper = (props: CreateNewPostViewProps) => {
+const Template: Story<CreateNewPostViewProps> = (args) => {
   const getGlobalMentions = async (
     titlePrefix: string
   ): Promise<PostRecord[]> => {
@@ -39,7 +39,7 @@ const CreateNewPostViewStateWrapper = (props: CreateNewPostViewProps) => {
   return (
     <MemoryRouter>
       <CreateNewPostView
-        {...props}
+        {...args}
         onMentionSearchChanged={onMentionSearchChanged}
         mentionables={mentionables}
         onMentionAdded={onMentionAdded}
@@ -47,10 +47,6 @@ const CreateNewPostViewStateWrapper = (props: CreateNewPostViewProps) => {
     </MemoryRouter>
   );
 };
-
-const Template: Story<CreateNewPostViewProps> = (args) => (
-  <CreateNewPostViewStateWrapper {...args} />
-);
 
 export const Untitled = Template.bind({});
 Untitled.args = {
