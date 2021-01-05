@@ -18,8 +18,30 @@ const Template: Story<PostAuthorLinkProps> = (args) => (
   <PostAuthorLink {...args} />
 );
 
-export const Basic = Template.bind({});
-Basic.args = {
-  uid: "123",
-  username: "user123",
+export const UserIsAuthor = Template.bind({});
+UserIsAuthor.args = {
+  user: {
+    uid: "123",
+    displayName: "foo",
+    username: "foo",
+  },
+  author: {
+    uid: "123",
+    displayName: "foo",
+    username: "foo",
+  },
+};
+
+export const UserIsNotAuthor = Template.bind({});
+UserIsNotAuthor.args = {
+  user: {
+    uid: "123",
+    displayName: "foo",
+    username: "foo",
+  },
+  author: {
+    uid: "456",
+    displayName: "bar",
+    username: "bar",
+  },
 };
