@@ -45,6 +45,9 @@ const BasePostViewStateWrapper = (props: BasePostViewProps) => {
       onMentionSearchChanged={onMentionSearchChanged}
       mentionables={mentionables}
       onMentionAdded={onMentionAdded}
+      mentionableElementFn={(option) => (
+        <React.Fragment>option.value</React.Fragment>
+      )}
     />
   );
 };

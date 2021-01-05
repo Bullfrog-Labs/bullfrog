@@ -9,6 +9,7 @@ import {
   makeStyles,
   Paper,
   Grid,
+  Typography,
 } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
 import {
@@ -27,7 +28,7 @@ import { useMentions } from "../hooks/useMentions";
 import { UserId, UserRecord } from "../services/store/Users";
 import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
-import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
+import { MentionNode, MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import DocumentTitle from "../components/richtext/DocumentTitle";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 
@@ -59,6 +60,7 @@ export type BasePostViewProps = {
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
+  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
 };
 
 export const BasePostView = (props: BasePostViewProps) => {
@@ -101,6 +103,7 @@ export const BasePostView = (props: BasePostViewProps) => {
       mentionables={props.mentionables}
       onMentionSearchChanged={props.onMentionSearchChanged}
       onMentionAdded={props.onMentionAdded}
+      mentionableElementFn={props.mentionableElementFn}
     />
   );
 
@@ -134,6 +137,7 @@ export interface CreateNewPostViewProps {
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
+  user: UserRecord;
 }
 
 export const CreateNewPostView = (props: CreateNewPostViewProps) => {
@@ -185,6 +189,18 @@ export const CreateNewPostView = (props: CreateNewPostViewProps) => {
     }
   };
 
+  const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
+    if (option.authorId === props.user.uid) {
+      return <Typography>{option.value}</Typography>;
+    } else {
+      return (
+        <Typography>
+          {option.value} - <em>{option.authorUsername}</em>
+        </Typography>
+      );
+    }
+  };
+
   const onTitleChange = (newTitle: PostTitle) => {
     setTitle(newTitle);
     setNonEmptyTitle(newTitle !== EMPTY_TITLE);
@@ -205,6 +221,7 @@ export const CreateNewPostView = (props: CreateNewPostViewProps) => {
       onMentionSearchChanged={props.onMentionSearchChanged}
       mentionables={props.mentionables}
       onMentionAdded={props.onMentionAdded}
+      mentionableElementFn={mentionableElementFn}
     />
   );
 };
@@ -243,6 +260,7 @@ export const CreateNewPostViewController = (
       onMentionSearchChanged={onMentionSearchChanged}
       mentionables={mentionables}
       onMentionAdded={onMentionAdded}
+      user={props.user}
     />
   );
 };
@@ -258,6 +276,7 @@ export type PostViewProps = {
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
+  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
 };
 
 // Changing title triggers a rename. Renames are not allowed if the title is
@@ -409,6 +428,18 @@ export const PostViewController = (props: PostViewControllerProps) => {
     authorId
   );
 
+  const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
+    if (option.authorId === props.user.uid) {
+      return <Typography>{option.value}</Typography>;
+    } else {
+      return (
+        <Typography>
+          {option.value} - <em>{option.authorUsername}</em>
+        </Typography>
+      );
+    }
+  };
+
   // Attempt to load post
   // TODO: Encapsulate this in a use*-style hook
   useEffect(() => {
@@ -443,6 +474,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
       mentionables={mentionables}
       onMentionSearchChanged={onMentionSearchChanged}
       onMentionAdded={onMentionAdded}
+      mentionableElementFn={mentionableElementFn}
     />
   );
 };

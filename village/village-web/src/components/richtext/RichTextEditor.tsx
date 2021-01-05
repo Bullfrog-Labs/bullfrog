@@ -58,6 +58,7 @@ export type RichTextEditorProps = {
   onMentionSearchChanged: (search: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
+  mentionableElementFn?: (option: MentionNodeData) => JSX.Element;
 };
 
 const didOpsAffectContent = (ops: Operation[]): boolean => {
@@ -115,6 +116,10 @@ const RichTextEditor = forwardRef<
   let onMentionSearchChanged = props.onMentionSearchChanged;
   if (!onMentionSearchChanged) {
     onMentionSearchChanged = (search: string) => {};
+  }
+  let mentionableElementFn = props.mentionableElementFn;
+  if (!mentionableElementFn) {
+    mentionableElementFn = (option) => <Typography>{option.value}</Typography>;
   }
 
   useImperativeHandle(ref, () => ({
@@ -181,11 +186,7 @@ const RichTextEditor = forwardRef<
         valueIndex={index}
         options={values}
         onClickMention={onClickMention}
-        rowElementFn={(option) => (
-          <Typography>
-            {option.value} - <em>{option.authorUsername}</em>
-          </Typography>
-        )}
+        rowElementFn={mentionableElementFn}
       />
     </Slate>
   );
