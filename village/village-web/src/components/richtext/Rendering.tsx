@@ -1,6 +1,8 @@
 import React, { FunctionComponent } from "react";
 import { Typography } from "@material-ui/core";
 import { RenderLeafProps, RenderElementProps } from "slate-react";
+import { Link } from "react-router-dom";
+import * as log from "loglevel";
 
 export const Element: FunctionComponent<RenderElementProps> = ({
   attributes,
@@ -59,4 +61,49 @@ export const Leaf: FunctionComponent<RenderLeafProps> = ({
     children = <u>{children}</u>;
   }
   return <span {...attributes}>{children}</span>;
+};
+
+export const MentionElement = ({
+  attributes,
+  children,
+  element,
+  htmlAttributes,
+}: any) => {
+  const logger = log.getLogger("MentionElement");
+  const postId = element["postId"];
+  const authorId = element["authorId"];
+  const title = element.value;
+  if (!postId || !authorId || !element.value) {
+    logger.error(
+      `Invalid MentionNodeData; postId=${postId}, authorId=${authorId}, title=${title}`
+    );
+  }
+  return (
+    <Link
+      {...attributes}
+      data-slate-value={title}
+      to={`/post/${authorId}/${postId}`}
+      contentEditable={false}
+      {...htmlAttributes}
+    >
+      {element.value}
+      {children}
+    </Link>
+  );
+};
+
+export const ParagraphElement = (props: any) => {
+  return (
+    <Typography paragraph={true} variant="body1">
+      {props.children}
+    </Typography>
+  );
+};
+
+export const H5Element = (props: any) => {
+  return <Typography variant="h5">{props.children}</Typography>;
+};
+
+export const H6Element = (props: any) => {
+  return <Typography variant="h6">{props.children}</Typography>;
 };

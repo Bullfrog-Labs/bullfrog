@@ -3,14 +3,14 @@ import { Node as SlateNode } from "slate";
 
 export const EMPTY_RICH_TEXT: RichText = [
   {
-    type: "paragraph",
+    type: "p",
     children: [{ text: "" }],
   },
 ];
 
 export const stringToSlateNode = (s: string): RichText => [
   {
-    type: "paragraph",
+    type: "p",
     children: [{ text: s }],
   },
 ];
@@ -22,8 +22,12 @@ export const slateNodeToString = (text: RichText): string =>
 // preview is a React component. Code from Rendering.tsx can probably be used to
 // generate the preview.
 export const richTextStringPreview = (
-  richText: RichText
+  richText: RichText | string // '| string' is temporary - working around data form transition
 ): string | undefined => {
+  if (typeof richText === "string") {
+    return richText;
+  }
+
   if (!richText || richText.length === 0) {
     return undefined;
   }

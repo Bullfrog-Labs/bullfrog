@@ -9,6 +9,7 @@ import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
 import {
   CreatePostFn,
+  GetGlobalMentionsFn,
   GetPostFn,
   GetStackPostsFn,
   GetUserPostsFn,
@@ -42,6 +43,7 @@ export const Router = (props: {
   createPost: (user: UserRecord) => CreatePostFn;
   renamePost: (user: UserRecord) => RenamePostFn;
   syncBody: (user: UserRecord) => SyncBodyFn;
+  getGlobalMentions: GetGlobalMentionsFn;
   user?: UserRecord;
 }) => {
   const {
@@ -53,6 +55,7 @@ export const Router = (props: {
     createPost,
     renamePost,
     syncBody,
+    getGlobalMentions,
     user,
   } = props;
   if (!user) {
@@ -106,12 +109,18 @@ export const Router = (props: {
                 getPost={getPost}
                 renamePost={renamePost(user)}
                 syncBody={syncBody(user)}
+                getGlobalMentions={getGlobalMentions}
+                createPost={createPost(user)}
               />
             </AppContainer>
           </PrivateRoute>
           <PrivateRoute exact path="/create-new-post">
             <AppContainer>
-              <CreateNewPostViewController createPost={createPost(user)} />
+              <CreateNewPostViewController
+                createPost={createPost(user)}
+                getGlobalMentions={getGlobalMentions}
+                user={user}
+              />
             </AppContainer>
           </PrivateRoute>
           <Route path="*">

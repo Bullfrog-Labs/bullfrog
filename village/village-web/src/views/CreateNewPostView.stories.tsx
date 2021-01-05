@@ -1,5 +1,14 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
 import React from "react";
+import { MemoryRouter } from "react-router-dom";
+import { useMentions } from "../hooks/useMentions";
+import {
+  PostRecord,
+  CreatePostResult,
+  PostTitle,
+  PostBody,
+  PostId,
+} from "../services/store/Posts";
 import { CreateNewPostView, CreateNewPostViewProps } from "./PostView";
 
 export default {
@@ -7,8 +16,40 @@ export default {
   component: CreateNewPostView,
 } as Meta;
 
+const CreateNewPostViewStateWrapper = (props: CreateNewPostViewProps) => {
+  const getGlobalMentions = async (
+    titlePrefix: string
+  ): Promise<PostRecord[]> => {
+    return [];
+  };
+  const createPost = async (
+    title: PostTitle,
+    body: PostBody,
+    postId?: PostId
+  ): Promise<CreatePostResult> => {
+    return { state: "success", postId: "hjkhj", postUrl: "" };
+  };
+  const authorId = "79832475341985234";
+  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
+    getGlobalMentions,
+    createPost,
+    authorId
+  );
+
+  return (
+    <MemoryRouter>
+      <CreateNewPostView
+        {...props}
+        onMentionSearchChanged={onMentionSearchChanged}
+        mentionables={mentionables}
+        onMentionAdded={onMentionAdded}
+      />
+    </MemoryRouter>
+  );
+};
+
 const Template: Story<CreateNewPostViewProps> = (args) => (
-  <CreateNewPostView {...args} />
+  <CreateNewPostViewStateWrapper {...args} />
 );
 
 export const Untitled = Template.bind({});
