@@ -5,7 +5,7 @@ import React, {
   useImperativeHandle,
 } from "react";
 import { ReactEditor, withReact, Slate } from "slate-react";
-import { createEditor, Operation } from "slate";
+import { createEditor, Operation, Editor } from "slate";
 import { withHistory } from "slate-history";
 import { RichText } from "./Types";
 import { EMPTY_RICH_TEXT } from "./Utils";
@@ -30,9 +30,12 @@ import {
   ToolbarElement,
   useMention,
   withInlineVoid,
+  withAutoformat,
+  AutoformatRule,
   pipe,
   ELEMENT_H5,
   ELEMENT_H6,
+  unwrapList,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Typography } from "@material-ui/core";
@@ -65,6 +68,21 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
   return ops.some((op) => !Operation.isSelectionOperation(op));
 };
 
+const preFormat = (editor: Editor) => unwrapList(editor);
+
+export const autoformatRules: AutoformatRule[] = [
+  {
+    type: ELEMENT_H5,
+    markup: "#",
+    preFormat,
+  },
+  {
+    type: ELEMENT_H6,
+    markup: "##",
+    preFormat,
+  },
+];
+
 const mentionOptions: MentionPluginOptions = {
   mention: {
     component: MentionElement,
@@ -95,6 +113,9 @@ const plugins = [
 const withPlugins = [
   withReact,
   withHistory,
+  withAutoformat({
+    rules: autoformatRules,
+  }),
   withInlineVoid({ plugins }),
 ] as const;
 
