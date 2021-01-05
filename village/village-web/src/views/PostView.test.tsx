@@ -3,15 +3,23 @@ import { render } from "@testing-library/react";
 import { CreateNewPostView, PostView } from "./PostView";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 import { MemoryRouter } from "react-router-dom";
+import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 
-test("Renders CreatePostView", () => {
+test("Renders CreateNewPostView", () => {
   const createPost = jest.fn();
   const redirectAfterCreate = jest.fn();
+
+  const onMentionSearchChanged = jest.fn();
+  const mentionables: MentionNodeData[] = [];
+  const onMentionAdded = jest.fn();
 
   const { getByText } = render(
     <CreateNewPostView
       createPost={createPost}
       redirectAfterCreate={redirectAfterCreate}
+      onMentionSearchChanged={onMentionSearchChanged}
+      mentionables={mentionables}
+      onMentionAdded={onMentionAdded}
     />
   );
 
@@ -42,6 +50,10 @@ test("Renders PostView", () => {
     getTitle: jest.fn(),
     renamePost: jest.fn(),
     syncBody: jest.fn(),
+
+    onMentionSearchChanged: jest.fn(),
+    mentionables: [],
+    onMentionAdded: jest.fn(),
   };
 
   const { getByText } = render(
