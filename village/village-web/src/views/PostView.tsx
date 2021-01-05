@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import RichTextEditor, {
   RichTextEditorImperativeHandle,
 } from "../components/richtext/RichTextEditor";
@@ -249,7 +255,14 @@ export const CreateNewPostViewController = (
 
 export type PostViewProps = {
   readOnly: boolean;
-  postRecord: PostRecord;
+
+  postId: PostId;
+
+  title: PostTitle;
+  setTitle: Dispatch<SetStateAction<PostTitle>>;
+
+  body: PostBody;
+  setBody: Dispatch<SetStateAction<PostBody>>;
 
   getTitle: () => Promise<PostTitle | undefined>;
 
@@ -264,18 +277,18 @@ export type PostViewProps = {
 // already being used.
 export const PostView = (props: PostViewProps) => {
   const logger = log.getLogger("PostView");
-  const { renamePost, syncBody, postRecord, ...restProps } = props;
+  const {
+    renamePost,
+    syncBody,
+    postId,
+    title,
+    setTitle,
+    body,
+    setBody,
+    ...restProps
+  } = props;
 
-  if (!postRecord.id) {
-    throw new Error("PostRecord id should not be undefined in PostView");
-  }
-
-  const postId = postRecord.id;
-
-  const [title, setTitle] = useState(postRecord.title);
   const [titleChanged, setTitleChanged] = useState(false);
-
-  const [body, setBody] = useState(postRecord.body);
   const [bodyChanged, setBodyChanged] = useState(false);
 
   const onIdle = async () => {
@@ -346,7 +359,7 @@ export const PostView = (props: PostViewProps) => {
   };
 
   const onTitleChange = (newTitle: PostTitle) => {
-    if (newTitle !== postRecord.title) {
+    if (newTitle !== title) {
       setTitle(newTitle);
       setTitleChanged(true);
     }
@@ -385,14 +398,18 @@ type PostViewControllerParams = {
 };
 
 export const PostViewController = (props: PostViewControllerProps) => {
+  const logger = log.getLogger("PostViewController");
   const styles = useStyles();
 
   const { authorId, postId } = useParams<PostViewControllerParams>();
   const readOnly = props.user.uid !== authorId;
-  const [postRecord, setPostRecord] = useState<PostRecord | undefined>(
-    undefined
-  );
+
+  const [title, setTitle] = useState<PostTitle>("");
+  const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
+
   const [postRecordLoaded, setPostRecordLoaded] = useState(false);
+  const [postRecordNotFound, setPostRecordNotFound] = useState(false);
+
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     props.getGlobalMentions,
     props.createPost,
@@ -403,15 +420,24 @@ export const PostViewController = (props: PostViewControllerProps) => {
   // TODO: Encapsulate this in a use*-style hook
   useEffect(() => {
     const loadPostRecord = async () => {
-      setPostRecord(await props.getPost(authorId, postId));
+      const postRecord = await props.getPost(authorId, postId);
+      setPostRecordNotFound(!postRecord);
+
+      if (postRecordNotFound) {
+        logger.info(`Post ${postId} for author ${authorId} not found.`);
+        return;
+      }
+
+      setTitle(postRecord!.title);
+      setBody(postRecord!.body);
       setPostRecordLoaded(true);
     };
     loadPostRecord();
-  }, [authorId, postId, props]);
+  }, [authorId, postId, logger, postRecordNotFound, props]);
 
   if (!postRecordLoaded) {
     return <CircularProgress className={styles.loadingIndicator} />;
-  } else if (!postRecord) {
+  } else if (postRecordNotFound) {
     // TODO: Is this the right place to redirect?
     return <Redirect to={"/404"} />;
   }
@@ -425,7 +451,11 @@ export const PostViewController = (props: PostViewControllerProps) => {
   return (
     <PostView
       readOnly={readOnly}
-      postRecord={postRecord}
+      postId={postId}
+      title={title!}
+      setTitle={setTitle}
+      body={body!}
+      setBody={setBody}
       getTitle={getTitle}
       renamePost={props.renamePost}
       syncBody={props.syncBody}
