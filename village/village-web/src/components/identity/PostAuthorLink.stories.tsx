@@ -20,7 +20,7 @@ const Template: Story<PostAuthorLinkProps> = (args) => (
 
 export const UserIsAuthor = Template.bind({});
 UserIsAuthor.args = {
-  user: {
+  viewer: {
     uid: "123",
     displayName: "foo",
     username: "foo",
@@ -34,7 +34,7 @@ UserIsAuthor.args = {
 
 export const UserIsNotAuthor = Template.bind({});
 UserIsNotAuthor.args = {
-  user: {
+  viewer: {
     uid: "123",
     displayName: "foo",
     username: "foo",

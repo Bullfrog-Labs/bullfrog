@@ -101,7 +101,8 @@ export const Router = (props: {
           <PrivateRoute exact path="/post/:authorId/:postId">
             <AppContainer>
               <PostViewController
-                user={user}
+                viewer={user}
+                getUser={getUser}
                 getPost={getPost}
                 renamePost={renamePost(user)}
                 syncBody={syncBody(user)}
