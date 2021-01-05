@@ -43,6 +43,7 @@ export const useMentions = (
     const updateMentionables = async () => {
       if (search !== newSearch) {
         const newMentionables = await getMentionables(newSearch);
+        console.dir(newMentionables);
         // Only insert the search query if it doesnt exist exactly in the results.
         if (newMentionables.find((m) => m.value === newSearch) === undefined) {
           const newMention: MentionNodeData = {

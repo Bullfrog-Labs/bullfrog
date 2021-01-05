@@ -35,6 +35,7 @@ import {
   ELEMENT_H6,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
+import { Typography } from "@material-ui/core";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -180,6 +181,11 @@ const RichTextEditor = forwardRef<
         valueIndex={index}
         options={values}
         onClickMention={onClickMention}
+        rowElementFn={(option) => (
+          <Typography>
+            {option.value} - <em>{option.authorUsername}</em>
+          </Typography>
+        )}
       />
     </Slate>
   );
