@@ -1,7 +1,10 @@
 import React, {
   Dispatch,
+  forwardRef,
+  RefObject,
   SetStateAction,
   useEffect,
+  useImperativeHandle,
   useRef,
   useState,
 } from "react";
@@ -74,6 +77,7 @@ type EditablePostComponents = {
   idleTimer: React.ReactChild;
   documentTitle: React.ReactChild;
   richTextEditor: React.ReactChild;
+  richTextEditorRef: RefObject<RichTextEditorImperativeHandle>;
 };
 
 const useEditablePostComponents: (
@@ -124,6 +128,7 @@ const useEditablePostComponents: (
     idleTimer: idleTimer,
     documentTitle: documentTitle,
     richTextEditor: richTextEditor,
+    richTextEditorRef: richTextEditorRef,
   };
 
   return result;
@@ -313,143 +318,154 @@ export type PostViewProps = {
   onMentionAdded: (option: MentionNodeData) => void;
 };
 
+type PostViewImperativeHandle = {
+  blurEditor: () => void;
+};
+
 // Changing title triggers a rename. Renames are not allowed if the title is
 // already being used.
-export const PostView = (props: PostViewProps) => {
-  const logger = log.getLogger("PostView");
+export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
+  (props, ref) => {
+    const logger = log.getLogger("PostView");
 
-  if (props.readOnly) {
-    logger.info(`rendering read-only view for ${props.title}`);
-  }
-
-  const [bodyChanged, setBodyChanged] = useState(false);
-  const [titleChanged, setTitleChanged] = useState(false);
-
-  const onIdle = async () => {
-    // TODO: Post should only be renamed if the user is idle and focus is not on
-    // the title itself.
-    // TODO: If the title is set to empty or blank, the title is reset back to the
-    // original title. If the original title is shorter than the title, a crash
-    // occurs because of the cursor position. Need to set the cursor to the
-    // beginning of the title.
-    const needsPostRename = titleChanged;
-
-    // sync body first
-    if (bodyChanged) {
-      logger.debug("Body changed, syncing body");
-      const syncBodyResult: SyncBodyResult = await props.syncBody(
-        props.postId,
-        props.body
-      );
-
-      if (syncBodyResult === "success") {
-        logger.debug("Body synced");
-        setBodyChanged(false);
-      } else {
-        logger.error("sync body failed, will try in next onIdle");
-        needsPostRename &&
-          logger.error("skipping post rename due to sync body failure");
-        return;
-      }
+    if (props.readOnly) {
+      logger.info(`rendering read-only view for ${props.title}`);
     }
 
-    // rename post, if needed
-    if (needsPostRename) {
-      logger.debug("Title changed, renaming post");
-      const renamePostResult: RenamePostResult = await props.renamePost(
-        props.postId,
-        props.title
-      );
+    const [bodyChanged, setBodyChanged] = useState(false);
+    const [titleChanged, setTitleChanged] = useState(false);
 
-      switch (renamePostResult.state) {
-        case "success":
-          // TODO: Display something to show the user that the rename succeeded
-          logger.info(`Post renamed to ${props.title}`);
-          setTitleChanged(false);
-          props.setTitle(props.title);
-          break;
-        case "post-name-taken":
-          const savedTitle = await props.getTitle();
-          if (!savedTitle) {
-            // No post was found, even though it was just being edited.
-            // TODO: This should be handled properly at some point, e.g. attempt to
-            // create the post again, or show an error message saying that the
-            // note has been deleted.
-            // For now it will just be logged, since this is a corner case.
+    const onIdle = async () => {
+      // TODO: Post should only be renamed if the user is idle and focus is not on
+      // the title itself.
+      // TODO: If the title is set to empty or blank, the title is reset back to the
+      // original title. If the original title is shorter than the title, a crash
+      // occurs because of the cursor position. Need to set the cursor to the
+      // beginning of the title.
+      const needsPostRename = titleChanged;
+
+      // sync body first
+      if (bodyChanged) {
+        logger.debug("Body changed, syncing body");
+        const syncBodyResult: SyncBodyResult = await props.syncBody(
+          props.postId,
+          props.body
+        );
+
+        if (syncBodyResult === "success") {
+          logger.debug("Body synced");
+          setBodyChanged(false);
+        } else {
+          logger.error("sync body failed, will try in next onIdle");
+          needsPostRename &&
+            logger.error("skipping post rename due to sync body failure");
+          return;
+        }
+      }
+
+      // rename post, if needed
+      if (needsPostRename) {
+        logger.debug("Title changed, renaming post");
+        const renamePostResult: RenamePostResult = await props.renamePost(
+          props.postId,
+          props.title
+        );
+
+        switch (renamePostResult.state) {
+          case "success":
+            // TODO: Display something to show the user that the rename succeeded
+            logger.info(`Post renamed to ${props.title}`);
+            setTitleChanged(false);
+            props.setTitle(props.title);
+            break;
+          case "post-name-taken":
+            const savedTitle = await props.getTitle();
+            if (!savedTitle) {
+              // No post was found, even though it was just being edited.
+              // TODO: This should be handled properly at some point, e.g. attempt to
+              // create the post again, or show an error message saying that the
+              // note has been deleted.
+              // For now it will just be logged, since this is a corner case.
+              logger.info(
+                "Post rename failed, post deleted while being renamed to already-taken post name"
+              );
+              return;
+            }
             logger.info(
-              "Post rename failed, post deleted while being renamed to already-taken post name"
+              `Post rename failed, ${props.title} already taken. Reverting to saved title ${savedTitle}`
             );
-            return;
-          }
-          logger.info(
-            `Post rename failed, ${props.title} already taken. Reverting to saved title ${savedTitle}`
-          );
 
-          props.setTitle(savedTitle);
-          setTitleChanged(false);
+            props.setTitle(savedTitle);
+            setTitleChanged(false);
 
-          break;
-        default:
-          assertNever(renamePostResult);
+            break;
+          default:
+            assertNever(renamePostResult);
+        }
       }
-    }
-  };
+    };
 
-  const onTitleChange = (newTitle: PostTitle) => {
-    if (newTitle !== props.title) {
-      props.setTitle(newTitle);
-      setTitleChanged(true);
-    }
-  };
+    const onTitleChange = (newTitle: PostTitle) => {
+      if (newTitle !== props.title) {
+        props.setTitle(newTitle);
+        setTitleChanged(true);
+      }
+    };
 
-  const onBodyChange = (newBody: PostBody) => {
-    // TODO: Only mark body as changed if it is actually different
-    props.setBody(newBody);
-    setBodyChanged(true);
-  };
+    const onBodyChange = (newBody: PostBody) => {
+      // TODO: Only mark body as changed if it is actually different
+      props.setBody(newBody);
+      setBodyChanged(true);
+    };
 
-  const {
-    idleTimer,
-    documentTitle,
-    richTextEditor,
-  } = useEditablePostComponents({
-    onIdle: onIdle,
-    readOnly: props.readOnly,
+    const {
+      idleTimer,
+      documentTitle,
+      richTextEditor,
+      richTextEditorRef,
+    } = useEditablePostComponents({
+      onIdle: onIdle,
+      readOnly: props.readOnly,
 
-    title: props.title,
-    body: props.body,
+      title: props.title,
+      body: props.body,
 
-    onTitleChange: onTitleChange,
-    onBodyChange: onBodyChange,
+      onTitleChange: onTitleChange,
+      onBodyChange: onBodyChange,
 
-    onMentionSearchChanged: props.onMentionSearchChanged,
-    mentionables: props.mentionables,
-    onMentionAdded: props.onMentionAdded,
-  });
+      onMentionSearchChanged: props.onMentionSearchChanged,
+      mentionables: props.mentionables,
+      onMentionAdded: props.onMentionAdded,
+    });
 
-  const authorLink = (
-    <PostAuthorLink viewer={props.viewer} author={props.author} />
-  );
+    const authorLink = (
+      <PostAuthorLink viewer={props.viewer} author={props.author} />
+    );
 
-  const postView = (
-    <Container>
-      {idleTimer}
-      <Grid
-        container
-        direction="column"
-        justify="flex-start"
-        alignItems="stretch"
-        spacing={3}
-      >
-        <Grid item>{documentTitle}</Grid>
-        <Grid item>{authorLink}</Grid>
-        <Grid item>{richTextEditor}</Grid>
-      </Grid>
-    </Container>
-  );
+    const postView = (
+      <Container>
+        {idleTimer}
+        <Grid
+          container
+          direction="column"
+          justify="flex-start"
+          alignItems="stretch"
+          spacing={3}
+        >
+          <Grid item>{documentTitle}</Grid>
+          <Grid item>{authorLink}</Grid>
+          <Grid item>{richTextEditor}</Grid>
+        </Grid>
+      </Container>
+    );
 
-  return <BasePostView readOnly={props.readOnly} postView={postView} />;
-};
+    useImperativeHandle(ref, () => ({
+      blurEditor: () => richTextEditorRef.current?.blurEditor(),
+    }));
+
+    return <BasePostView readOnly={props.readOnly} postView={postView} />;
+  }
+);
 
 type PostViewControllerProps = {
   viewer: UserRecord;
