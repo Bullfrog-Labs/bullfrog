@@ -28,7 +28,7 @@ import { useMentions } from "../hooks/useMentions";
 import { UserId, UserRecord } from "../services/store/Users";
 import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
-import { MentionNode, MentionNodeData } from "@blfrg.xyz/slate-plugins";
+import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import DocumentTitle from "../components/richtext/DocumentTitle";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 
@@ -249,7 +249,8 @@ export const CreateNewPostViewController = (
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     props.getGlobalMentions,
     props.createPost,
-    props.user.uid
+    props.user.uid,
+    props.user.username
   );
 
   return (
@@ -425,7 +426,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     props.getGlobalMentions,
     props.createPost,
-    authorId
+    authorId,
+    props.user.username
   );
 
   const mentionableElementFn = (option: MentionNodeData): JSX.Element => {

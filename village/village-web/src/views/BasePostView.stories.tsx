@@ -28,10 +28,12 @@ const BasePostViewStateWrapper = (props: BasePostViewProps) => {
     return { state: "success", postId: "hjkhj", postUrl: "" };
   };
   const authorId = "79832475341985234";
+  const authorUsername = "donkeyKing";
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     getGlobalMentions,
     createPost,
-    authorId
+    authorId,
+    authorUsername
   );
 
   return (

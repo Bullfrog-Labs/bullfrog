@@ -52,6 +52,12 @@ import {
   MARK_STRIKETHROUGH,
   BlockquotePlugin,
   ELEMENT_BLOCKQUOTE,
+  ListPlugin,
+  withList,
+  ELEMENT_LI,
+  toggleList,
+  ELEMENT_UL,
+  KbdPlugin,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Typography } from "@material-ui/core";
@@ -121,6 +127,14 @@ export const autoformatRules: AutoformatRule[] = [
     markup: [">"],
     preFormat,
   },
+  {
+    type: ELEMENT_LI,
+    markup: ["*", "-"],
+    preFormat,
+    format: (editor) => {
+      toggleList(editor, { typeList: ELEMENT_UL });
+    },
+  },
 ];
 
 const mentionOptions: MentionPluginOptions = {
@@ -147,7 +161,7 @@ const headingOptions: HeadingPluginOptions = {
 export const headingTypes = [ELEMENT_H5, ELEMENT_H6];
 
 const resetBlockTypesCommonRule = {
-  types: [],
+  types: [MARK_BOLD],
   defaultType: ELEMENT_PARAGRAPH,
 };
 
@@ -175,8 +189,8 @@ const plugins = [
   CodePlugin(),
   StrikethroughPlugin(),
   BlockquotePlugin(),
-  //ListPlugin(options),
-  /*
+  ListPlugin(),
+  KbdPlugin(),
   ResetBlockTypePlugin(optionsResetBlockTypes),
   SoftBreakPlugin({
     rules: [
@@ -184,12 +198,11 @@ const plugins = [
       {
         hotkey: "enter",
         query: {
-          allow: [],
+          allow: [ELEMENT_BLOCKQUOTE],
         },
       },
     ],
   }),
-  */
   ExitBreakPlugin({
     rules: [
       {
@@ -214,6 +227,7 @@ const plugins = [
 const withPlugins = [
   withReact,
   withHistory,
+  withList(),
   withAutoformat({
     rules: autoformatRules,
   }),

@@ -7,7 +7,7 @@ export type UserId = string;
 export interface UserRecord {
   uid: UserId;
   displayName: string;
-  username?: string;
+  username: string;
   description?: string;
 }
 
@@ -94,6 +94,7 @@ const authedUserToNewUserRecord = (authedUser: firebase.User): UserRecord => {
   return {
     uid: authedUser.uid,
     displayName: authedUser.displayName,
+    username: "",
   };
 };
 
