@@ -18,6 +18,7 @@ import {
   makeStyles,
   Paper,
   Grid,
+  Typography,
 } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
 import {
@@ -71,6 +72,7 @@ type EditablePostInputs = {
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
+  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
 };
 
 type EditablePostComponents = {
@@ -93,6 +95,7 @@ const useEditablePostComponents: (
   onMentionSearchChanged,
   mentionables,
   onMentionAdded,
+  mentionableElementFn,
 }) => {
   const richTextEditorRef = useRef<RichTextEditorImperativeHandle>(null);
 
@@ -121,6 +124,7 @@ const useEditablePostComponents: (
       mentionables={mentionables}
       onMentionSearchChanged={onMentionSearchChanged}
       onMentionAdded={onMentionAdded}
+      mentionableElementFn={mentionableElementFn}
     />
   );
 
@@ -144,7 +148,7 @@ export const BasePostView = (props: BasePostViewProps) => {
   const paperElevation = props.readOnly ? 0 : 1;
 
   return (
-    <Container className={classes.postView} maxWidth="md">
+    <Container className={classes.postView} maxWidth="sm">
       <Paper elevation={paperElevation}>{props.postView}</Paper>
     </Container>
   );
@@ -157,6 +161,8 @@ export interface CreateNewPostViewProps {
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
+  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
+  user: UserRecord;
 }
 
 export const CreateNewPostView = (props: CreateNewPostViewProps) => {
@@ -236,6 +242,7 @@ export const CreateNewPostView = (props: CreateNewPostViewProps) => {
     onMentionSearchChanged: props.onMentionSearchChanged,
     mentionables: props.mentionables,
     onMentionAdded: props.onMentionAdded,
+    mentionableElementFn: props.mentionableElementFn,
   });
 
   const postView = (
@@ -280,8 +287,21 @@ export const CreateNewPostViewController = (
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     props.getGlobalMentions,
     props.createPost,
-    props.user.uid
+    props.user.uid,
+    props.user.username
   );
+
+  const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
+    if (option.authorId === props.user.uid) {
+      return <Typography>{option.value}</Typography>;
+    } else {
+      return (
+        <Typography>
+          {option.value} - <em>{option.authorUsername}</em>
+        </Typography>
+      );
+    }
+  };
 
   return (
     <CreateNewPostView
@@ -291,6 +311,8 @@ export const CreateNewPostViewController = (
       onMentionSearchChanged={onMentionSearchChanged}
       mentionables={mentionables}
       onMentionAdded={onMentionAdded}
+      mentionableElementFn={mentionableElementFn}
+      user={props.user}
     />
   );
 };
@@ -316,6 +338,7 @@ export type PostViewProps = {
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
+  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
 };
 
 type PostViewImperativeHandle = {
@@ -436,6 +459,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
       onMentionSearchChanged: props.onMentionSearchChanged,
       mentionables: props.mentionables,
       onMentionAdded: props.onMentionAdded,
+      mentionableElementFn: props.mentionableElementFn,
     });
 
     const authorLink = (
@@ -495,17 +519,30 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const [postRecordLoaded, setPostRecordLoaded] = useState(false);
   const [postRecordNotFound, setPostRecordNotFound] = useState(false);
 
-  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
-    props.getGlobalMentions,
-    props.createPost,
-    authorId
-  );
-
   const [authorUserRecord, setAuthorUserRecord] = useState<
     UserRecord | undefined
   >(undefined);
 
   const [authorUserRecordLoaded, setAuthorUserRecordLoaded] = useState(false);
+
+  const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
+    if (authorUserRecord && option.authorId === authorUserRecord.uid) {
+      return <Typography>{option.value}</Typography>;
+    } else {
+      return (
+        <Typography>
+          {option.value} - <em>{option.authorUsername}</em>
+        </Typography>
+      );
+    }
+  };
+
+  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
+    props.getGlobalMentions,
+    props.createPost,
+    authorId,
+    authorUserRecord?.username || ""
+  );
 
   // Attempt to load post
   // TODO: Encapsulate this in a use*-style hook
@@ -584,6 +621,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
       mentionables={mentionables}
       onMentionSearchChanged={onMentionSearchChanged}
       onMentionAdded={onMentionAdded}
+      mentionableElementFn={mentionableElementFn}
     />
   );
 };
