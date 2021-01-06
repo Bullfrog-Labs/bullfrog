@@ -4,7 +4,7 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import { Logging } from "kmgmt-common";
 import { CreatePostResult, UserPost } from "../services/store/Posts";
 import { Body } from "../components/richtext/RichTextEditor";
-import { userPosts0 } from "../testing/Fixtures";
+import { u0, posts0, authProvider, userPosts0 } from "../testing/Fixtures";
 
 Logging.configure(log);
 
@@ -30,6 +30,8 @@ test("fetches suggested mention only when no match exists", async () => {
     await waitForNextUpdate();
   });
 
+  var [mentionables] = result.current;
+
   expect(mentionables[0].value).toEqual("wabisabi");
   expect(mentionables[0].exists).toEqual(false);
 });
@@ -45,6 +47,8 @@ test("fetches non empty mentions", async () => {
     onMentionSearchChanged("Title");
     await waitForNextUpdate();
   });
+
+  var [mentionables] = result.current;
 
   expect(mentionables[1]).toEqual({
     authorId: "123",
