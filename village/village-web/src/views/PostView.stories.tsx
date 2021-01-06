@@ -1,5 +1,5 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
-import React from "react";
+import React, { useState } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 import { useMentions } from "../hooks/useMentions";
@@ -20,6 +20,14 @@ export default {
 } as Meta;
 
 const Template: Story<PostViewProps> = (args) => {
+  const [title, setTitle] = useState(args.title);
+  args.title = title;
+  args.setTitle = setTitle;
+
+  const [body, setBody] = useState(args.body);
+  args.body = body;
+  args.setBody = setBody;
+
   const getGlobalMentions = async (
     titlePrefix: string
   ): Promise<UserPost[]> => {
@@ -67,13 +75,9 @@ const syncBodyAlwaysSuccessful: SyncBodyFn = async () => {
 export const BasicPostView = Template.bind({});
 BasicPostView.args = {
   readOnly: false,
-  postRecord: {
-    id: "456",
-    authorId: "123",
-    title: "",
-    body: EMPTY_RICH_TEXT,
-    updatedAt: new Date(),
-  },
+  postId: "456",
+  title: "",
+  body: EMPTY_RICH_TEXT,
   viewer: {
     uid: "456",
     displayName: "baz",

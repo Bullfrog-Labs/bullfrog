@@ -4,16 +4,16 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import { Logging } from "kmgmt-common";
 import { CreatePostResult, UserPost } from "../services/store/Posts";
 import { Body } from "../components/richtext/RichTextEditor";
-import { u0, posts0, authProvider, userPosts0 } from "../testing/Fixtures";
+import { userPosts0 } from "../testing/Fixtures";
 
 Logging.configure(log);
 
 test("fetches empty mentions", async () => {
-  const { waitForNextUpdate, result } = renderHook(() =>
+  const { result } = renderHook(() =>
     useMentions(getGlobalMentions0, createPost0, authorId, authorUsername)
   );
 
-  var [mentionables, onMentionSearchChanged] = result.current;
+  var [mentionables] = result.current;
 
   expect(mentionables).toEqual([]);
 });
