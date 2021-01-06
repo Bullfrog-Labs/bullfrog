@@ -7,7 +7,7 @@ import {
   CreatePostResult,
   PostBody,
   PostId,
-  PostRecord,
+  UserPost,
   PostTitle,
   RenamePostFn,
   SyncBodyFn,
@@ -30,7 +30,7 @@ const Template: Story<PostViewProps> = (args) => {
 
   const getGlobalMentions = async (
     titlePrefix: string
-  ): Promise<PostRecord[]> => {
+  ): Promise<UserPost[]> => {
     return [];
   };
   const createPost = async (

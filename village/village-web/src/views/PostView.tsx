@@ -18,6 +18,7 @@ import {
   makeStyles,
   Paper,
   Grid,
+  Typography,
 } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
 import {
@@ -71,6 +72,7 @@ type EditablePostInputs = {
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
+  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
 };
 
 type EditablePostComponents = {
@@ -93,6 +95,7 @@ const useEditablePostComponents: (
   onMentionSearchChanged,
   mentionables,
   onMentionAdded,
+  mentionableElementFn,
 }) => {
   const richTextEditorRef = useRef<RichTextEditorImperativeHandle>(null);
 
@@ -121,6 +124,7 @@ const useEditablePostComponents: (
       mentionables={mentionables}
       onMentionSearchChanged={onMentionSearchChanged}
       onMentionAdded={onMentionAdded}
+      mentionableElementFn={mentionableElementFn}
     />
   );
 
@@ -157,6 +161,8 @@ export interface CreateNewPostViewProps {
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
+  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
+  user: UserRecord;
 }
 
 export const CreateNewPostView = (props: CreateNewPostViewProps) => {
@@ -236,6 +242,7 @@ export const CreateNewPostView = (props: CreateNewPostViewProps) => {
     onMentionSearchChanged: props.onMentionSearchChanged,
     mentionables: props.mentionables,
     onMentionAdded: props.onMentionAdded,
+    mentionableElementFn: props.mentionableElementFn,
   });
 
   const postView = (
@@ -283,6 +290,18 @@ export const CreateNewPostViewController = (
     props.user.uid
   );
 
+  const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
+    if (option.authorId === props.user.uid) {
+      return <Typography>{option.value}</Typography>;
+    } else {
+      return (
+        <Typography>
+          {option.value} - <em>{option.authorUsername}</em>
+        </Typography>
+      );
+    }
+  };
+
   return (
     <CreateNewPostView
       prepopulatedTitle={prepopulatedTitle}
@@ -291,6 +310,8 @@ export const CreateNewPostViewController = (
       onMentionSearchChanged={onMentionSearchChanged}
       mentionables={mentionables}
       onMentionAdded={onMentionAdded}
+      mentionableElementFn={mentionableElementFn}
+      user={props.user}
     />
   );
 };
@@ -316,6 +337,7 @@ export type PostViewProps = {
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
+  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
 };
 
 type PostViewImperativeHandle = {
@@ -436,6 +458,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
       onMentionSearchChanged: props.onMentionSearchChanged,
       mentionables: props.mentionables,
       onMentionAdded: props.onMentionAdded,
+      mentionableElementFn: props.mentionableElementFn,
     });
 
     const authorLink = (
@@ -506,6 +529,18 @@ export const PostViewController = (props: PostViewControllerProps) => {
   >(undefined);
 
   const [authorUserRecordLoaded, setAuthorUserRecordLoaded] = useState(false);
+
+  const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
+    if (authorUserRecord && option.authorId === authorUserRecord.uid) {
+      return <Typography>{option.value}</Typography>;
+    } else {
+      return (
+        <Typography>
+          {option.value} - <em>{option.authorUsername}</em>
+        </Typography>
+      );
+    }
+  };
 
   // Attempt to load post
   // TODO: Encapsulate this in a use*-style hook
@@ -584,6 +619,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
       mentionables={mentionables}
       onMentionSearchChanged={onMentionSearchChanged}
       onMentionAdded={onMentionAdded}
+      mentionableElementFn={mentionableElementFn}
     />
   );
 };

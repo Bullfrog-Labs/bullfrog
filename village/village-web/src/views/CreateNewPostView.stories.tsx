@@ -3,7 +3,7 @@ import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { useMentions } from "../hooks/useMentions";
 import {
-  PostRecord,
+  UserPost,
   CreatePostResult,
   PostTitle,
   PostBody,
@@ -19,7 +19,7 @@ export default {
 const Template: Story<CreateNewPostViewProps> = (args) => {
   const getGlobalMentions = async (
     titlePrefix: string
-  ): Promise<PostRecord[]> => {
+  ): Promise<UserPost[]> => {
     return [];
   };
   const createPost = async (

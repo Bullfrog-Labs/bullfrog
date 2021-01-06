@@ -35,6 +35,7 @@ import {
   ELEMENT_H6,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
+import { Typography } from "@material-ui/core";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -57,6 +58,7 @@ export type RichTextEditorProps = {
   onMentionSearchChanged: (search: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
+  mentionableElementFn?: (option: MentionNodeData) => JSX.Element;
 };
 
 const didOpsAffectContent = (ops: Operation[]): boolean => {
@@ -115,6 +117,10 @@ const RichTextEditor = forwardRef<
   let onMentionSearchChanged = props.onMentionSearchChanged;
   if (!onMentionSearchChanged) {
     onMentionSearchChanged = (search: string) => {};
+  }
+  let mentionableElementFn = props.mentionableElementFn;
+  if (!mentionableElementFn) {
+    mentionableElementFn = (option) => <Typography>{option.value}</Typography>;
   }
 
   useImperativeHandle(ref, () => ({
@@ -182,6 +188,7 @@ const RichTextEditor = forwardRef<
         valueIndex={index}
         options={values}
         onClickMention={onClickMention}
+        rowElementFn={mentionableElementFn}
       />
     </Slate>
   );
