@@ -55,11 +55,6 @@ import { Typography } from "@material-ui/core";
 
 export type Body = RichText;
 
-export const EMPTY_RICH_TEXT_STATE = {
-  title: "",
-  body: EMPTY_RICH_TEXT,
-};
-
 export type RichTextEditorProps = {
   body: Body;
   onChange: (newBody: Body) => void;
