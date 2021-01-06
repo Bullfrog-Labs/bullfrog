@@ -137,7 +137,7 @@ export const BasePostView = (props: BasePostViewProps) => {
   const paperElevation = props.readOnly ? 0 : 1;
 
   return (
-    <Container className={classes.postView} maxWidth="md">
+    <Container className={classes.postView} maxWidth="sm">
       <Paper elevation={paperElevation}>{props.postView}</Paper>
     </Container>
   );
