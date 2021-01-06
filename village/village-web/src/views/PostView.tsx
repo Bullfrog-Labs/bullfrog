@@ -494,28 +494,44 @@ export const PostViewController = (props: PostViewControllerProps) => {
   // Attempt to load post
   // TODO: Encapsulate this in a use*-style hook
   useEffect(() => {
+    let isSubscribed = true; // used to prevent state updates on unmounted components
     const loadPostRecord = async () => {
       const postRecord = await props.getPost(authorId, postId);
-      setPostRecordNotFound(!postRecord);
+      const postRecordNotFound = !postRecord;
 
-      if (postRecordNotFound) {
-        logger.info(`Post ${postId} for author ${authorId} not found.`);
+      if (!isSubscribed) {
         return;
       }
 
-      setTitle(postRecord!.title);
-      setBody(postRecord!.body);
       setPostRecordLoaded(true);
+      setPostRecordNotFound(postRecordNotFound);
+
+      if (postRecordNotFound) {
+        logger.info(`Post ${postId} for author ${authorId} not found.`);
+      } else {
+        setTitle(postRecord!.title);
+        setBody(postRecord!.body);
+      }
     };
     loadPostRecord();
+    return () => {
+      isSubscribed = false;
+    };
   }, [authorId, postId, logger, postRecordNotFound, props]);
 
   useEffect(() => {
+    let isSubscribed = true; // used to prevent state updates on unmounted components
     const loadAuthorUserRecord = async () => {
-      setAuthorUserRecord(await props.getUser(authorId));
-      setAuthorUserRecordLoaded(true);
+      const authorUserRecord = await props.getUser(authorId);
+      if (isSubscribed) {
+        setAuthorUserRecord(authorUserRecord);
+        setAuthorUserRecordLoaded(true);
+      }
     };
     loadAuthorUserRecord();
+    return () => {
+      isSubscribed = false;
+    };
   }, [authorId, props]);
 
   if (!postRecordLoaded || !authorUserRecordLoaded) {
@@ -523,6 +539,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
   } else if (postRecordNotFound) {
     // TODO: Is this the right place to redirect?
     return <Redirect to={"/404"} />;
+    // return <CircularProgress className={styles.loadingIndicator} />;
   } else if (!authorUserRecord) {
     const errMessage = `Loaded post ${postId} for author ${authorId}, but author user record was not found`;
     logger.error(errMessage);
