@@ -18,6 +18,9 @@ import {
 } from "./Rendering";
 import * as log from "loglevel";
 import {
+  ResetBlockTypePlugin,
+  SoftBreakPlugin,
+  ExitBreakPlugin,
   MentionPlugin,
   MentionPluginOptions,
   ParagraphPlugin,
@@ -33,9 +36,13 @@ import {
   withAutoformat,
   AutoformatRule,
   pipe,
+  isBlockAboveEmpty,
+  isSelectionAtBlockStart,
   ELEMENT_H5,
   ELEMENT_H6,
   unwrapList,
+  ELEMENT_PARAGRAPH,
+  ResetBlockTypePluginOptions,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Typography } from "@material-ui/core";
@@ -104,10 +111,65 @@ const headingOptions: HeadingPluginOptions = {
   },
 };
 
+export const headingTypes = [ELEMENT_H5, ELEMENT_H6];
+
+const resetBlockTypesCommonRule = {
+  types: [],
+  defaultType: ELEMENT_PARAGRAPH,
+};
+
+export const optionsResetBlockTypes: ResetBlockTypePluginOptions = {
+  rules: [
+    {
+      ...resetBlockTypesCommonRule,
+      hotkey: "Enter",
+      predicate: isBlockAboveEmpty,
+    },
+    {
+      ...resetBlockTypesCommonRule,
+      hotkey: "Backspace",
+      predicate: isSelectionAtBlockStart,
+    },
+  ],
+};
+
 const plugins = [
   ParagraphPlugin(paragraphOptions),
   HeadingPlugin(headingOptions),
   MentionPlugin(mentionOptions),
+  /*
+  ResetBlockTypePlugin(optionsResetBlockTypes),
+  SoftBreakPlugin({
+    rules: [
+      { hotkey: "shift+enter" },
+      {
+        hotkey: "enter",
+        query: {
+          allow: [],
+        },
+      },
+    ],
+  }),
+  */
+  ExitBreakPlugin({
+    rules: [
+      {
+        hotkey: "mod+enter",
+      },
+      {
+        hotkey: "mod+shift+enter",
+        before: true,
+      },
+      {
+        hotkey: "enter",
+        query: {
+          start: true,
+          end: true,
+          allow: headingTypes,
+        },
+      },
+    ],
+  }),
 ];
 
 const withPlugins = [
