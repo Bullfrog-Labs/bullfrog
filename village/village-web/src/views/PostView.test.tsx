@@ -49,12 +49,11 @@ const author: UserRecord = {
 test("Renders PostView", () => {
   const props = {
     readOnly: false,
-    postRecord: {
-      id: "foo",
-      authorId: "123",
-      title: "bar",
-      body: EMPTY_RICH_TEXT,
-    },
+    postId: "foo",
+    title: "bar",
+    setTitle: jest.fn(),
+    body: EMPTY_RICH_TEXT,
+    setBody: jest.fn(),
     viewer: viewer,
     author: author,
 
@@ -86,14 +85,14 @@ test("PostView to PostView navigation works", async () => {
     {
       id: "abc",
       authorId: author.uid,
-      body: EMPTY_RICH_TEXT,
       title: "Foo",
+      body: EMPTY_RICH_TEXT,
     },
     {
       id: "def",
       authorId: author.uid,
-      body: stringToSlateNode("Non-empty"),
       title: "Bar",
+      body: stringToSlateNode("Non-empty"),
     },
   ];
 
@@ -109,7 +108,10 @@ test("PostView to PostView navigation works", async () => {
   });
 
   const props = {
+    author: author,
     viewer: viewer,
+    setTitle: jest.fn(),
+    setBody: jest.fn(),
     getUser: getUser,
     getPost: getPost,
     getGlobalMentions: getGlobalMentions,

@@ -317,24 +317,13 @@ export type PostViewProps = {
 // already being used.
 export const PostView = (props: PostViewProps) => {
   const logger = log.getLogger("PostView");
-  const {
-    renamePost,
-    syncBody,
-    postId,
-    title,
-    setTitle,
-    body,
-    setBody,
-    ...restProps
-  } = props;
-
-  const [titleChanged, setTitleChanged] = useState(false);
 
   if (props.readOnly) {
-    logger.info(`rendering read-only view for ${title}`);
+    logger.info(`rendering read-only view for ${props.title}`);
   }
 
   const [bodyChanged, setBodyChanged] = useState(false);
+  const [titleChanged, setTitleChanged] = useState(false);
 
   const onIdle = async () => {
     // TODO: Post should only be renamed if the user is idle and focus is not on
@@ -348,7 +337,10 @@ export const PostView = (props: PostViewProps) => {
     // sync body first
     if (bodyChanged) {
       logger.debug("Body changed, syncing body");
-      const syncBodyResult: SyncBodyResult = await props.syncBody(postId, body);
+      const syncBodyResult: SyncBodyResult = await props.syncBody(
+        props.postId,
+        props.body
+      );
 
       if (syncBodyResult === "success") {
         logger.debug("Body synced");
@@ -365,16 +357,16 @@ export const PostView = (props: PostViewProps) => {
     if (needsPostRename) {
       logger.debug("Title changed, renaming post");
       const renamePostResult: RenamePostResult = await props.renamePost(
-        postId,
-        title
+        props.postId,
+        props.title
       );
 
       switch (renamePostResult.state) {
         case "success":
           // TODO: Display something to show the user that the rename succeeded
-          logger.info(`Post renamed to ${title}`);
+          logger.info(`Post renamed to ${props.title}`);
           setTitleChanged(false);
-          setTitle(title);
+          props.setTitle(props.title);
           break;
         case "post-name-taken":
           const savedTitle = await props.getTitle();
@@ -390,10 +382,10 @@ export const PostView = (props: PostViewProps) => {
             return;
           }
           logger.info(
-            `Post rename failed, ${title} already taken. Reverting to saved title ${savedTitle}`
+            `Post rename failed, ${props.title} already taken. Reverting to saved title ${savedTitle}`
           );
 
-          setTitle(savedTitle);
+          props.setTitle(savedTitle);
           setTitleChanged(false);
 
           break;
@@ -404,15 +396,15 @@ export const PostView = (props: PostViewProps) => {
   };
 
   const onTitleChange = (newTitle: PostTitle) => {
-    if (newTitle !== title) {
-      setTitle(newTitle);
+    if (newTitle !== props.title) {
+      props.setTitle(newTitle);
       setTitleChanged(true);
     }
   };
 
   const onBodyChange = (newBody: PostBody) => {
     // TODO: Only mark body as changed if it is actually different
-    setBody(newBody);
+    props.setBody(newBody);
     setBodyChanged(true);
   };
 
@@ -422,10 +414,10 @@ export const PostView = (props: PostViewProps) => {
     richTextEditor,
   } = useEditablePostComponents({
     onIdle: onIdle,
-    readOnly: readOnly,
+    readOnly: props.readOnly,
 
-    title: title,
-    body: body,
+    title: props.title,
+    body: props.body,
 
     onTitleChange: onTitleChange,
     onBodyChange: onBodyChange,
@@ -456,7 +448,7 @@ export const PostView = (props: PostViewProps) => {
     </Container>
   );
 
-  return <BasePostView readOnly={readOnly} postView={postView} />;
+  return <BasePostView readOnly={props.readOnly} postView={postView} />;
 };
 
 type PostViewControllerProps = {
