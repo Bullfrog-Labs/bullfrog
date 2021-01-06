@@ -5,10 +5,9 @@ import React, {
   useImperativeHandle,
 } from "react";
 import { ReactEditor, withReact, Slate } from "slate-react";
-import { createEditor, Operation } from "slate";
+import { createEditor, Operation, Editor } from "slate";
 import { withHistory } from "slate-history";
 import { RichText } from "./Types";
-import { EMPTY_RICH_TEXT } from "./Utils";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
 import {
   MentionElement,
@@ -18,6 +17,9 @@ import {
 } from "./Rendering";
 import * as log from "loglevel";
 import {
+  ResetBlockTypePlugin,
+  SoftBreakPlugin,
+  ExitBreakPlugin,
   MentionPlugin,
   MentionPluginOptions,
   ParagraphPlugin,
@@ -30,9 +32,32 @@ import {
   ToolbarElement,
   useMention,
   withInlineVoid,
+  withAutoformat,
+  AutoformatRule,
   pipe,
+  isBlockAboveEmpty,
+  isSelectionAtBlockStart,
   ELEMENT_H5,
   ELEMENT_H6,
+  unwrapList,
+  ELEMENT_PARAGRAPH,
+  ResetBlockTypePluginOptions,
+  BoldPlugin,
+  CodePlugin,
+  ItalicPlugin,
+  StrikethroughPlugin,
+  MARK_BOLD,
+  MARK_CODE,
+  MARK_ITALIC,
+  MARK_STRIKETHROUGH,
+  BlockquotePlugin,
+  ELEMENT_BLOCKQUOTE,
+  ListPlugin,
+  withList,
+  ELEMENT_LI,
+  toggleList,
+  ELEMENT_UL,
+  KbdPlugin,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Typography } from "@material-ui/core";
@@ -44,11 +69,6 @@ import { Typography } from "@material-ui/core";
 // https://github.com/ianstormtaylor/slate/blob/master/site/examples/richtext.js.
 
 export type Body = RichText;
-
-export const EMPTY_RICH_TEXT_STATE = {
-  title: "",
-  body: EMPTY_RICH_TEXT,
-};
 
 export type RichTextEditorProps = {
   body: Body;
@@ -64,6 +84,58 @@ export type RichTextEditorProps = {
 const didOpsAffectContent = (ops: Operation[]): boolean => {
   return ops.some((op) => !Operation.isSelectionOperation(op));
 };
+
+const preFormat = (editor: Editor) => unwrapList(editor);
+
+export const autoformatRules: AutoformatRule[] = [
+  {
+    type: ELEMENT_H5,
+    markup: "#",
+    preFormat,
+  },
+  {
+    type: ELEMENT_H6,
+    markup: "##",
+    preFormat,
+  },
+  {
+    type: MARK_BOLD,
+    between: ["**", "**"],
+    mode: "inline",
+    insertTrigger: true,
+  },
+  {
+    type: MARK_ITALIC,
+    between: ["*", "*"],
+    mode: "inline",
+    insertTrigger: true,
+  },
+  {
+    type: MARK_CODE,
+    between: ["`", "`"],
+    mode: "inline",
+    insertTrigger: true,
+  },
+  {
+    type: MARK_STRIKETHROUGH,
+    between: ["~~", "~~"],
+    mode: "inline",
+    insertTrigger: true,
+  },
+  {
+    type: ELEMENT_BLOCKQUOTE,
+    markup: [">"],
+    preFormat,
+  },
+  {
+    type: ELEMENT_LI,
+    markup: ["*", "-"],
+    preFormat,
+    format: (editor) => {
+      toggleList(editor, { typeList: ELEMENT_UL });
+    },
+  },
+];
 
 const mentionOptions: MentionPluginOptions = {
   mention: {
@@ -86,15 +158,79 @@ const headingOptions: HeadingPluginOptions = {
   },
 };
 
+export const headingTypes = [ELEMENT_H5, ELEMENT_H6];
+
+const resetBlockTypesCommonRule = {
+  types: [MARK_BOLD],
+  defaultType: ELEMENT_PARAGRAPH,
+};
+
+export const optionsResetBlockTypes: ResetBlockTypePluginOptions = {
+  rules: [
+    {
+      ...resetBlockTypesCommonRule,
+      hotkey: "Enter",
+      predicate: isBlockAboveEmpty,
+    },
+    {
+      ...resetBlockTypesCommonRule,
+      hotkey: "Backspace",
+      predicate: isSelectionAtBlockStart,
+    },
+  ],
+};
+
 const plugins = [
   ParagraphPlugin(paragraphOptions),
   HeadingPlugin(headingOptions),
   MentionPlugin(mentionOptions),
+  BoldPlugin(),
+  ItalicPlugin(),
+  CodePlugin(),
+  StrikethroughPlugin(),
+  BlockquotePlugin(),
+  ListPlugin(),
+  KbdPlugin(),
+  ResetBlockTypePlugin(optionsResetBlockTypes),
+  SoftBreakPlugin({
+    rules: [
+      { hotkey: "shift+enter" },
+      {
+        hotkey: "enter",
+        query: {
+          allow: [ELEMENT_BLOCKQUOTE],
+        },
+      },
+    ],
+  }),
+  ExitBreakPlugin({
+    rules: [
+      {
+        hotkey: "mod+enter",
+      },
+      {
+        hotkey: "mod+shift+enter",
+        before: true,
+      },
+      {
+        hotkey: "enter",
+        query: {
+          start: true,
+          end: true,
+          allow: headingTypes,
+        },
+      },
+    ],
+  }),
 ];
 
 const withPlugins = [
   withReact,
   withHistory,
+  withList(),
+  withAutoformat({
+    rules: autoformatRules,
+  }),
   withInlineVoid({ plugins }),
 ] as const;
 

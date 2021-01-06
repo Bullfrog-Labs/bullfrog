@@ -33,7 +33,8 @@ const Template: Story<CreateNewPostViewProps> = (args) => {
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     getGlobalMentions,
     createPost,
-    authorId
+    authorId,
+    "l4stewar"
   );
 
   return (

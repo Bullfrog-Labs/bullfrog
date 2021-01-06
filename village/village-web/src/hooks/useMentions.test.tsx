@@ -4,13 +4,13 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import { Logging } from "kmgmt-common";
 import { CreatePostResult, UserPost } from "../services/store/Posts";
 import { Body } from "../components/richtext/RichTextEditor";
-import { u0, posts0, authProvider, userPosts0 } from "../testing/Fixtures";
+import { userPosts0 } from "../testing/Fixtures";
 
 Logging.configure(log);
 
 test("fetches empty mentions", async () => {
   const { result } = renderHook(() =>
-    useMentions(getGlobalMentions0, createPost0, authorId)
+    useMentions(getGlobalMentions0, createPost0, authorId, authorUsername)
   );
 
   var [mentionables] = result.current;
@@ -20,7 +20,7 @@ test("fetches empty mentions", async () => {
 
 test("fetches suggested mention only when no match exists", async () => {
   const { waitForNextUpdate, result } = renderHook(() =>
-    useMentions(getGlobalMentions0, createPost0, authorId)
+    useMentions(getGlobalMentions0, createPost0, authorId, authorUsername)
   );
 
   var [mentionables, onMentionSearchChanged] = result.current;
@@ -38,7 +38,7 @@ test("fetches suggested mention only when no match exists", async () => {
 
 test("fetches non empty mentions", async () => {
   const { waitForNextUpdate, result } = renderHook(() =>
-    useMentions(getGlobalMentions0, createPost0, authorId)
+    useMentions(getGlobalMentions0, createPost0, authorId, authorUsername)
   );
 
   var [mentionables, onMentionSearchChanged] = result.current;
@@ -70,3 +70,4 @@ const createPost0 = async (
   return { state: "success", postId: "hjkhj", postUrl: "" };
 };
 const authorId = "79832475341985234";
+const authorUsername = "donkeyKong";

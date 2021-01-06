@@ -3,8 +3,12 @@ import { Node as SlateNode } from "slate";
 
 export const EMPTY_RICH_TEXT: RichText = [
   {
-    type: "p",
-    children: [{ text: "" }],
+    children: [
+      {
+        type: "p",
+        children: [{ text: "" }],
+      },
+    ],
   },
 ];
 

@@ -287,7 +287,8 @@ export const CreateNewPostViewController = (
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     props.getGlobalMentions,
     props.createPost,
-    props.user.uid
+    props.user.uid,
+    props.user.username
   );
 
   const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
@@ -518,12 +519,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const [postRecordLoaded, setPostRecordLoaded] = useState(false);
   const [postRecordNotFound, setPostRecordNotFound] = useState(false);
 
-  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
-    props.getGlobalMentions,
-    props.createPost,
-    authorId
-  );
-
   const [authorUserRecord, setAuthorUserRecord] = useState<
     UserRecord | undefined
   >(undefined);
@@ -541,6 +536,13 @@ export const PostViewController = (props: PostViewControllerProps) => {
       );
     }
   };
+
+  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
+    props.getGlobalMentions,
+    props.createPost,
+    authorId,
+    authorUserRecord?.username || ""
+  );
 
   // Attempt to load post
   // TODO: Encapsulate this in a use*-style hook

@@ -14,7 +14,8 @@ import {
 export const useMentions = (
   getGlobalMentions: GetGlobalMentionsFn,
   createPost: CreatePostFn,
-  authorId: UserId
+  authorId: UserId,
+  authorUsername: string
 ): [
   MentionNodeData[],
   (newSearch: string) => void,
@@ -48,6 +49,7 @@ export const useMentions = (
           const newMention: MentionNodeData = {
             value: newSearch,
             authorId: authorId,
+            authorUsername: authorUsername,
             postId: uuid(),
             exists: false,
           };
