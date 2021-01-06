@@ -132,8 +132,8 @@ test("PostView to PostView navigation works", async () => {
 
   await waitFor(() => screen.getByText("Foo"));
 
-  // TODO: disabled: enable after merging fixes in
-  // https://github.com/Bullfrog-Labs/bullfrog/pull/61 await waitFor(() =>
-  // history.push(`/post/${author.uid}/def`);
-  // screen.getByText("Bar"));
+  // Check that navigating to another post results in that post's data replacing
+  // the current post's
+  history.push(`/post/${author.uid}/def`);
+  await waitFor(() => screen.getByText("Bar"));
 });
