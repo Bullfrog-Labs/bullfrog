@@ -8,7 +8,6 @@ import { ReactEditor, withReact, Slate } from "slate-react";
 import { createEditor, Operation, Editor } from "slate";
 import { withHistory } from "slate-history";
 import { RichText } from "./Types";
-import { EMPTY_RICH_TEXT } from "./Utils";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
 import {
   MentionElement,
@@ -43,6 +42,14 @@ import {
   unwrapList,
   ELEMENT_PARAGRAPH,
   ResetBlockTypePluginOptions,
+  BoldPlugin,
+  CodePlugin,
+  ItalicPlugin,
+  StrikethroughPlugin,
+  MARK_BOLD,
+  MARK_CODE,
+  MARK_ITALIC,
+  MARK_STRIKETHROUGH,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Typography } from "@material-ui/core";
@@ -82,6 +89,30 @@ export const autoformatRules: AutoformatRule[] = [
     type: ELEMENT_H6,
     markup: "##",
     preFormat,
+  },
+  {
+    type: MARK_BOLD,
+    between: ["**", "**"],
+    mode: "inline",
+    insertTrigger: true,
+  },
+  {
+    type: MARK_ITALIC,
+    between: ["*", "*"],
+    mode: "inline",
+    insertTrigger: true,
+  },
+  {
+    type: MARK_CODE,
+    between: ["`", "`"],
+    mode: "inline",
+    insertTrigger: true,
+  },
+  {
+    type: MARK_STRIKETHROUGH,
+    between: ["~~", "~~"],
+    mode: "inline",
+    insertTrigger: true,
   },
 ];
 
@@ -132,6 +163,12 @@ const plugins = [
   ParagraphPlugin(paragraphOptions),
   HeadingPlugin(headingOptions),
   MentionPlugin(mentionOptions),
+  BoldPlugin(),
+  ItalicPlugin(),
+  CodePlugin(),
+  StrikethroughPlugin(),
+  //BlockquotePlugin(options),
+  //ListPlugin(options),
   /*
   ResetBlockTypePlugin(optionsResetBlockTypes),
   SoftBreakPlugin({
