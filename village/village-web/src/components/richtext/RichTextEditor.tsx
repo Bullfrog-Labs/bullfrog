@@ -50,6 +50,8 @@ import {
   MARK_CODE,
   MARK_ITALIC,
   MARK_STRIKETHROUGH,
+  BlockquotePlugin,
+  ELEMENT_BLOCKQUOTE,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Typography } from "@material-ui/core";
@@ -114,6 +116,11 @@ export const autoformatRules: AutoformatRule[] = [
     mode: "inline",
     insertTrigger: true,
   },
+  {
+    type: ELEMENT_BLOCKQUOTE,
+    markup: [">"],
+    preFormat,
+  },
 ];
 
 const mentionOptions: MentionPluginOptions = {
@@ -167,7 +174,7 @@ const plugins = [
   ItalicPlugin(),
   CodePlugin(),
   StrikethroughPlugin(),
-  //BlockquotePlugin(options),
+  BlockquotePlugin(),
   //ListPlugin(options),
   /*
   ResetBlockTypePlugin(optionsResetBlockTypes),
