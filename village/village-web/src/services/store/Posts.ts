@@ -226,6 +226,7 @@ export const getPost: (database: Database) => GetPostFn = (database) => async (
 
   const postRecord = postDoc.data();
   if (!postRecord) {
+    logger.debug(`Post ${postId} not found for user ${uid}`);
     return undefined;
   }
 
