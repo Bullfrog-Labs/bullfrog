@@ -12,6 +12,22 @@ import { createMemoryHistory } from "history";
 import { PostId } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
 
+const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
+  return <React.Fragment>option.value</React.Fragment>;
+};
+
+const viewer: UserRecord = {
+  uid: "456",
+  displayName: "baz",
+  username: "baz",
+};
+
+const author: UserRecord = {
+  uid: "123",
+  displayName: "qux",
+  username: "qux",
+};
+
 test("Renders CreateNewPostView", () => {
   const createPost = jest.fn();
   const redirectAfterCreate = jest.fn();
@@ -27,24 +43,14 @@ test("Renders CreateNewPostView", () => {
       onMentionSearchChanged={onMentionSearchChanged}
       mentionables={mentionables}
       onMentionAdded={onMentionAdded}
+      mentionableElementFn={mentionableElementFn}
+      user={author}
     />
   );
 
   const titleEl = getByText("Enter a title");
   expect(titleEl).toBeInTheDocument();
 });
-
-const viewer: UserRecord = {
-  uid: "456",
-  displayName: "baz",
-  username: "baz",
-};
-
-const author: UserRecord = {
-  uid: "123",
-  displayName: "qux",
-  username: "qux",
-};
 
 test("Renders PostView", () => {
   const props = {
@@ -65,6 +71,7 @@ test("Renders PostView", () => {
     onMentionSearchChanged: jest.fn(),
     mentionables: [],
     onMentionAdded: jest.fn(),
+    mentionableElementFn: mentionableElementFn,
   };
 
   const { getByText } = render(
@@ -105,7 +112,7 @@ test("PostView to PostView navigation works", async () => {
   });
 
   const getGlobalMentions = jest.fn(async (titlePrefix: string) => {
-    return posts;
+    return [];
   });
 
   const props = {
