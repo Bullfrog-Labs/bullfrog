@@ -1,5 +1,5 @@
 import { Story, Meta } from "@storybook/react/types-6-0";
-import React, { FunctionComponent, useState } from "react";
+import React from "react";
 import {
   EditableTypography,
   EditableTypographyProps,

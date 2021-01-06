@@ -33,7 +33,7 @@ export const USERS_COLLECTION = "users";
 
 export const getUser = (database: Database) => async (
   uid: UserId
-): Promise<UserRecord | null> => {
+): Promise<UserRecord | undefined> => {
   const logger = log.getLogger("getUser");
 
   logger.debug(`Fetching user ${uid}`);
@@ -44,7 +44,7 @@ export const getUser = (database: Database) => async (
     .doc(uid)
     .get();
 
-  return userDoc.exists ? userDoc.data()! : null;
+  return userDoc.exists ? userDoc.data()! : undefined;
 };
 
 export type GetUserFn = ReturnType<typeof getUser>;
