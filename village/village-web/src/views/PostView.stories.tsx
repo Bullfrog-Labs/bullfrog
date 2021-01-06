@@ -7,7 +7,7 @@ import {
   CreatePostResult,
   PostBody,
   PostId,
-  PostRecord,
+  UserPost,
   PostTitle,
   RenamePostFn,
   SyncBodyFn,
@@ -22,7 +22,7 @@ export default {
 const Template: Story<PostViewProps> = (args) => {
   const getGlobalMentions = async (
     titlePrefix: string
-  ): Promise<PostRecord[]> => {
+  ): Promise<UserPost[]> => {
     return [];
   };
   const createPost = async (
@@ -36,7 +36,8 @@ const Template: Story<PostViewProps> = (args) => {
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     getGlobalMentions,
     createPost,
-    authorId
+    authorId,
+    "l4stewar"
   );
 
   return (
