@@ -37,7 +37,7 @@ import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
 import { useMentions } from "../hooks/useMentions";
 import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
-import { MentionNode, MentionNodeData } from "@blfrg.xyz/slate-plugins";
+import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import DocumentTitle from "../components/richtext/DocumentTitle";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 import { PostAuthorLink } from "../components/identity/PostAuthorLink";
