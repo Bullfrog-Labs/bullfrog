@@ -29,13 +29,14 @@ import {
   PostTitle,
   GetGlobalMentionsFn,
 } from "../services/store/Posts";
+import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
 import { useMentions } from "../hooks/useMentions";
-import { UserId, UserRecord } from "../services/store/Users";
 import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import DocumentTitle from "../components/richtext/DocumentTitle";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
+import { PostAuthorLink } from "../components/identity/PostAuthorLink";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -52,8 +53,10 @@ const EMPTY_TITLE = "";
 
 const DEFAULT_IDLE_TIME = 1 * 1000;
 
-export type BasePostViewProps = {
+type EditablePostInputs = {
   idleTime?: number;
+  onIdle: (event: Event) => void;
+
   readOnly: boolean;
 
   title: PostTitle;
@@ -61,29 +64,36 @@ export type BasePostViewProps = {
 
   onTitleChange: (newTitle: PostTitle) => void;
   onBodyChange: (newBody: PostBody) => void;
-  onIdle: (event: Event) => void;
+
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
 };
 
-export const BasePostView = (props: BasePostViewProps) => {
-  const logger = log.getLogger("BasePostView");
-  const classes = useStyles();
+type EditablePostComponents = {
+  idleTimer: React.ReactChild;
+  documentTitle: React.ReactChild;
+  richTextEditor: React.ReactChild;
+};
 
-  const readOnly = props.readOnly || props.readOnly === undefined; // default to read-only
-
-  if (readOnly) {
-    logger.info(`rendering read-only view for ${props.title}`);
-  }
-
+const useEditablePostComponents: (
+  inputs: EditablePostInputs
+) => EditablePostComponents = ({
+  idleTime,
+  onIdle,
+  readOnly,
+  title,
+  body,
+  onTitleChange,
+  onBodyChange,
+  onMentionSearchChanged,
+  mentionables,
+  onMentionAdded,
+}) => {
   const richTextEditorRef = useRef<RichTextEditorImperativeHandle>(null);
 
   const idleTimer = (
-    <IdleTimer
-      timeout={props.idleTime ?? DEFAULT_IDLE_TIME}
-      onIdle={props.onIdle}
-    />
+    <IdleTimer timeout={idleTime ?? DEFAULT_IDLE_TIME} onIdle={onIdle} />
   );
 
   const documentTitle = (
@@ -92,8 +102,8 @@ export const BasePostView = (props: BasePostViewProps) => {
       handleEscape={() => {
         richTextEditorRef.current?.focusEditor();
       }}
-      value={props.title}
-      onChange={props.onTitleChange}
+      value={title}
+      onChange={onTitleChange}
     />
   );
 
@@ -101,34 +111,36 @@ export const BasePostView = (props: BasePostViewProps) => {
     <RichTextEditor
       ref={richTextEditorRef}
       readOnly={readOnly}
-      body={props.body}
-      onChange={props.onBodyChange}
+      body={body}
+      onChange={onBodyChange}
       enableToolbar={false}
-      mentionables={props.mentionables}
-      onMentionSearchChanged={props.onMentionSearchChanged}
-      onMentionAdded={props.onMentionAdded}
+      mentionables={mentionables}
+      onMentionSearchChanged={onMentionSearchChanged}
+      onMentionAdded={onMentionAdded}
     />
   );
 
-  const paperElevation = readOnly ? 0 : 1;
+  const result: EditablePostComponents = {
+    idleTimer: idleTimer,
+    documentTitle: documentTitle,
+    richTextEditor: richTextEditor,
+  };
+
+  return result;
+};
+
+export type BasePostViewProps = {
+  readOnly: boolean;
+  postView: React.ReactChild;
+};
+
+export const BasePostView = (props: BasePostViewProps) => {
+  const classes = useStyles();
+  const paperElevation = props.readOnly ? 0 : 1;
 
   return (
     <Container className={classes.postView} maxWidth="md">
-      <Paper elevation={paperElevation}>
-        <Container>
-          {idleTimer}
-          <Grid
-            container
-            direction="column"
-            justify="flex-start"
-            alignItems="stretch"
-            spacing={3}
-          >
-            <Grid item>{documentTitle}</Grid>
-            <Grid item>{richTextEditor}</Grid>
-          </Grid>
-        </Container>
-      </Paper>
+      <Paper elevation={paperElevation}>{props.postView}</Paper>
     </Container>
   );
 };
@@ -200,19 +212,44 @@ export const CreateNewPostView = (props: CreateNewPostViewProps) => {
     setNonEmptyBody(newBody !== EMPTY_RICH_TEXT);
   };
 
-  return (
-    <BasePostView
-      readOnly={false}
-      title={title}
-      body={body}
-      onIdle={onIdle}
-      onTitleChange={onTitleChange}
-      onBodyChange={onBodyChange}
-      onMentionSearchChanged={props.onMentionSearchChanged}
-      mentionables={props.mentionables}
-      onMentionAdded={props.onMentionAdded}
-    />
+  const readOnly = false;
+
+  const {
+    idleTimer,
+    documentTitle,
+    richTextEditor,
+  } = useEditablePostComponents({
+    onIdle: onIdle,
+    readOnly: readOnly,
+
+    title: title,
+    body: body,
+
+    onTitleChange: onTitleChange,
+    onBodyChange: onBodyChange,
+
+    onMentionSearchChanged: props.onMentionSearchChanged,
+    mentionables: props.mentionables,
+    onMentionAdded: props.onMentionAdded,
+  });
+
+  const postView = (
+    <Container>
+      {idleTimer}
+      <Grid
+        container
+        direction="column"
+        justify="flex-start"
+        alignItems="stretch"
+        spacing={3}
+      >
+        <Grid item>{documentTitle}</Grid>
+        <Grid item>{richTextEditor}</Grid>
+      </Grid>
+    </Container>
   );
+
+  return <BasePostView readOnly={readOnly} postView={postView} />;
 };
 
 export type CreateNewPostViewControllerProps = {
@@ -264,6 +301,9 @@ export type PostViewProps = {
   body: PostBody;
   setBody: Dispatch<SetStateAction<PostBody>>;
 
+  viewer: UserRecord;
+  author: UserRecord;
+
   getTitle: () => Promise<PostTitle | undefined>;
 
   renamePost: RenamePostFn;
@@ -289,6 +329,11 @@ export const PostView = (props: PostViewProps) => {
   } = props;
 
   const [titleChanged, setTitleChanged] = useState(false);
+
+  if (props.readOnly) {
+    logger.info(`rendering read-only view for ${title}`);
+  }
+
   const [bodyChanged, setBodyChanged] = useState(false);
 
   const onIdle = async () => {
@@ -303,7 +348,7 @@ export const PostView = (props: PostViewProps) => {
     // sync body first
     if (bodyChanged) {
       logger.debug("Body changed, syncing body");
-      const syncBodyResult: SyncBodyResult = await syncBody(postId, body);
+      const syncBodyResult: SyncBodyResult = await props.syncBody(postId, body);
 
       if (syncBodyResult === "success") {
         logger.debug("Body synced");
@@ -319,7 +364,7 @@ export const PostView = (props: PostViewProps) => {
     // rename post, if needed
     if (needsPostRename) {
       logger.debug("Title changed, renaming post");
-      const renamePostResult: RenamePostResult = await renamePost(
+      const renamePostResult: RenamePostResult = await props.renamePost(
         postId,
         title
       );
@@ -371,20 +416,52 @@ export const PostView = (props: PostViewProps) => {
     setBodyChanged(true);
   };
 
-  return (
-    <BasePostView
-      onIdle={onIdle}
-      title={title}
-      body={body}
-      onTitleChange={onTitleChange}
-      onBodyChange={onBodyChange}
-      {...restProps}
-    />
+  const {
+    idleTimer,
+    documentTitle,
+    richTextEditor,
+  } = useEditablePostComponents({
+    onIdle: onIdle,
+    readOnly: readOnly,
+
+    title: title,
+    body: body,
+
+    onTitleChange: onTitleChange,
+    onBodyChange: onBodyChange,
+
+    onMentionSearchChanged: props.onMentionSearchChanged,
+    mentionables: props.mentionables,
+    onMentionAdded: props.onMentionAdded,
+  });
+
+  const authorLink = (
+    <PostAuthorLink viewer={props.viewer} author={props.author} />
   );
+
+  const postView = (
+    <Container>
+      {idleTimer}
+      <Grid
+        container
+        direction="column"
+        justify="flex-start"
+        alignItems="stretch"
+        spacing={3}
+      >
+        <Grid item>{documentTitle}</Grid>
+        <Grid item>{authorLink}</Grid>
+        <Grid item>{richTextEditor}</Grid>
+      </Grid>
+    </Container>
+  );
+
+  return <BasePostView readOnly={readOnly} postView={postView} />;
 };
 
 type PostViewControllerProps = {
-  user: UserRecord;
+  viewer: UserRecord;
+  getUser: GetUserFn;
   getPost: (uid: UserId, postId: PostId) => Promise<PostRecord | undefined>;
   getGlobalMentions: GetGlobalMentionsFn;
   renamePost: RenamePostFn;
@@ -402,7 +479,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const styles = useStyles();
 
   const { authorId, postId } = useParams<PostViewControllerParams>();
-  const readOnly = props.user.uid !== authorId;
+  const readOnly = props.viewer.uid !== authorId;
 
   const [title, setTitle] = useState<PostTitle>("");
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
@@ -415,6 +492,12 @@ export const PostViewController = (props: PostViewControllerProps) => {
     props.createPost,
     authorId
   );
+
+  const [authorUserRecord, setAuthorUserRecord] = useState<
+    UserRecord | undefined
+  >(undefined);
+
+  const [authorUserRecordLoaded, setAuthorUserRecordLoaded] = useState(false);
 
   // Attempt to load post
   // TODO: Encapsulate this in a use*-style hook
@@ -435,11 +518,23 @@ export const PostViewController = (props: PostViewControllerProps) => {
     loadPostRecord();
   }, [authorId, postId, logger, postRecordNotFound, props]);
 
-  if (!postRecordLoaded) {
+  useEffect(() => {
+    const loadAuthorUserRecord = async () => {
+      setAuthorUserRecord(await props.getUser(authorId));
+      setAuthorUserRecordLoaded(true);
+    };
+    loadAuthorUserRecord();
+  }, [authorId, props]);
+
+  if (!postRecordLoaded || !authorUserRecordLoaded) {
     return <CircularProgress className={styles.loadingIndicator} />;
   } else if (postRecordNotFound) {
     // TODO: Is this the right place to redirect?
     return <Redirect to={"/404"} />;
+  } else if (!authorUserRecord) {
+    const errMessage = `Loaded post ${postId} for author ${authorId}, but author user record was not found`;
+    logger.error(errMessage);
+    throw new Error(errMessage);
   }
 
   // Define helpers
@@ -450,6 +545,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   return (
     <PostView
+      viewer={props.viewer}
+      author={authorUserRecord}
       readOnly={readOnly}
       postId={postId}
       title={title!}

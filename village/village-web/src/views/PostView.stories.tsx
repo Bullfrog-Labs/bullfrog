@@ -1,7 +1,17 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
 import React, { useState } from "react";
+import { MemoryRouter } from "react-router-dom";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
-import { PostTitle, RenamePostFn, SyncBodyFn } from "../services/store/Posts";
+import { useMentions } from "../hooks/useMentions";
+import {
+  CreatePostResult,
+  PostBody,
+  PostId,
+  PostRecord,
+  PostTitle,
+  RenamePostFn,
+  SyncBodyFn,
+} from "../services/store/Posts";
 import { PostView, PostViewProps } from "./PostView";
 
 export default {
@@ -18,7 +28,35 @@ const Template: Story<PostViewProps> = (args) => {
   args.body = body;
   args.setBody = setBody;
 
-  return <PostView {...args} />;
+  const getGlobalMentions = async (
+    titlePrefix: string
+  ): Promise<PostRecord[]> => {
+    return [];
+  };
+  const createPost = async (
+    title: PostTitle,
+    body: PostBody,
+    postId?: PostId
+  ): Promise<CreatePostResult> => {
+    return { state: "success", postId: "hjkhj", postUrl: "" };
+  };
+  const authorId = "79832475341985234";
+  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
+    getGlobalMentions,
+    createPost,
+    authorId
+  );
+
+  return (
+    <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
+      <PostView
+        {...args}
+        mentionables={mentionables}
+        onMentionSearchChanged={onMentionSearchChanged}
+        onMentionAdded={onMentionAdded}
+      />
+    </MemoryRouter>
+  );
 };
 
 const getTitleHardcoded: () => Promise<PostTitle> = async () => {
@@ -39,6 +77,16 @@ BasicPostView.args = {
   postId: "456",
   title: "",
   body: EMPTY_RICH_TEXT,
+  viewer: {
+    uid: "456",
+    displayName: "baz",
+    username: "baz",
+  },
+  author: {
+    uid: "123",
+    displayName: "qux",
+    username: "qux",
+  },
   getTitle: getTitleHardcoded,
   renamePost: renamePostAlwaysSuccessful,
   syncBody: syncBodyAlwaysSuccessful,
