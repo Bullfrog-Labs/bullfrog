@@ -98,6 +98,7 @@ const withPlugins = [
 
 export type RichTextEditorImperativeHandle = {
   focusEditor: () => void;
+  blurEditor: () => void;
 };
 
 const RichTextEditor = forwardRef<
@@ -118,6 +119,7 @@ const RichTextEditor = forwardRef<
 
   useImperativeHandle(ref, () => ({
     focusEditor: () => ReactEditor.focus(editor),
+    blurEditor: () => ReactEditor.blur(editor),
   }));
 
   const {
