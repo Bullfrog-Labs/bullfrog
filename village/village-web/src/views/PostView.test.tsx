@@ -55,12 +55,11 @@ test("Renders CreateNewPostView", () => {
 test("Renders PostView", () => {
   const props = {
     readOnly: false,
-    postRecord: {
-      id: "foo",
-      authorId: "123",
-      title: "bar",
-      body: EMPTY_RICH_TEXT,
-    },
+    postId: "foo",
+    title: "bar",
+    setTitle: jest.fn(),
+    body: EMPTY_RICH_TEXT,
+    setBody: jest.fn(),
     viewer: viewer,
     author: author,
 
