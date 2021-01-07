@@ -41,10 +41,19 @@ import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import DocumentTitle from "../components/richtext/DocumentTitle";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 import { PostAuthorLink } from "../components/identity/PostAuthorLink";
+import { PostStackLink } from "../components/stacks/PostStackLink";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
-    "margin-top": theme.spacing(5),
+    marginTop: theme.spacing(5),
+  },
+  leftGutter: {
+    paddingLeft: theme.spacing(1),
+    paddingTop: theme.spacing(1),
+  },
+  postDetails: {
+    paddingTop: theme.spacing(1),
+    paddingRight: theme.spacing(2),
   },
   loadingIndicator: {
     position: "fixed",
@@ -148,7 +157,7 @@ export const BasePostView = (props: BasePostViewProps) => {
   const paperElevation = props.readOnly ? 0 : 1;
 
   return (
-    <Container className={classes.postView} maxWidth="sm">
+    <Container className={classes.postView} maxWidth="md">
       <Paper elevation={paperElevation}>{props.postView}</Paper>
     </Container>
   );
@@ -349,6 +358,7 @@ type PostViewImperativeHandle = {
 // already being used.
 export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
   (props, ref) => {
+    const classes = useStyles();
     const logger = log.getLogger("PostView");
 
     if (props.readOnly) {
@@ -466,21 +476,70 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
       <PostAuthorLink viewer={props.viewer} author={props.author} />
     );
 
-    const postView = (
-      <Container>
-        {idleTimer}
+    const header = (
+      <Grid item>
         <Grid
           container
           direction="column"
           justify="flex-start"
           alignItems="stretch"
-          spacing={3}
+          spacing={1}
         >
           <Grid item>{documentTitle}</Grid>
           <Grid item>{authorLink}</Grid>
+        </Grid>
+      </Grid>
+    );
+
+    const leftGutter = (
+      <div className={classes.leftGutter}>
+        <Grid
+          container
+          direction="row"
+          justify="center"
+          alignItems="flex-start"
+          spacing={1}
+        >
+          <Grid item>
+            <PostStackLink postTitle={props.title} />
+          </Grid>
+        </Grid>
+      </div>
+    );
+
+    const postDetails = (
+      <div className={classes.postDetails}>
+        <Grid
+          container
+          direction="column"
+          justify="flex-start"
+          alignItems="stretch"
+          spacing={4}
+        >
+          <Grid item>{header}</Grid>
           <Grid item>{richTextEditor}</Grid>
         </Grid>
-      </Container>
+      </div>
+    );
+
+    const postView = (
+      <>
+        {idleTimer}
+        <Grid
+          container
+          direction="row"
+          justify="center"
+          alignItems="flex-start"
+          spacing={1}
+        >
+          <Grid item sm={1}>
+            {leftGutter}
+          </Grid>
+          <Grid item sm={11}>
+            {postDetails}
+          </Grid>
+        </Grid>
+      </>
     );
 
     useImperativeHandle(ref, () => ({
@@ -508,7 +567,7 @@ type PostViewControllerParams = {
 
 export const PostViewController = (props: PostViewControllerProps) => {
   const logger = log.getLogger("PostViewController");
-  const styles = useStyles();
+  const classes = useStyles();
 
   const { authorId, postId } = useParams<PostViewControllerParams>();
   const readOnly = props.viewer.uid !== authorId;
@@ -588,11 +647,10 @@ export const PostViewController = (props: PostViewControllerProps) => {
   }, [authorId, props]);
 
   if (!postRecordLoaded || !authorUserRecordLoaded) {
-    return <CircularProgress className={styles.loadingIndicator} />;
+    return <CircularProgress className={classes.loadingIndicator} />;
   } else if (postRecordNotFound) {
     // TODO: Is this the right place to redirect?
     return <Redirect to={"/404"} />;
-    // return <CircularProgress className={styles.loadingIndicator} />;
   } else if (!authorUserRecord) {
     const errMessage = `Loaded post ${postId} for author ${authorId}, but author user record was not found`;
     logger.error(errMessage);
