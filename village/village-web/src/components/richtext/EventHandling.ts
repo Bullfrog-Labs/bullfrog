@@ -37,12 +37,3 @@ export const hotkeyHandler = (editor: Editor) => {
   // Note that PLATFORM will only work in a browser environemnt, not in headless test environments.
   return platformAwareKeymapToHotkeyHandler(PLATFORM_AWARE_KEYMAP, PLATFORM);
 };
-
-export const toReactKBEventHandler = (kbEventHandler: KBEventHandler) => (
-  reactEvent: React.KeyboardEvent<HTMLDivElement>
-) => kbEventHandler(reactEvent.nativeEvent);
-
-export const toReactMouseEventHandler = (
-  mouseEventHandler: MouseEventHandler
-) => (reactEvent: React.MouseEvent, value: any) =>
-  mouseEventHandler(reactEvent.nativeEvent, value);
