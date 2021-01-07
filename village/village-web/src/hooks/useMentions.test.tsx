@@ -4,7 +4,7 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import { Logging } from "kmgmt-common";
 import { CreatePostResult, UserPost } from "../services/store/Posts";
 import { Body } from "../components/richtext/RichTextEditor";
-import { userPosts0 } from "../testing/Fixtures";
+import { userPosts0, userPosts1, u0 } from "../testing/Fixtures";
 
 Logging.configure(log);
 
@@ -18,7 +18,7 @@ test("fetches empty mentions", async () => {
   expect(mentionables).toEqual([]);
 });
 
-test("fetches suggested mention only when no match exists", async () => {
+test("creates suggested mention when no own user match exists", async () => {
   const { waitForNextUpdate, result } = renderHook(() =>
     useMentions(getGlobalMentions0, createPost0, authorId, authorUsername)
   );
@@ -33,6 +33,24 @@ test("fetches suggested mention only when no match exists", async () => {
   var [mentionables] = result.current;
 
   expect(mentionables[0].value).toEqual("wabisabi");
+  expect(mentionables[0].exists).toEqual(false);
+});
+
+test("creates suggested mention when only other user match exists", async () => {
+  const { waitForNextUpdate, result } = renderHook(() =>
+    useMentions(getGlobalMentions1, createPost0, u0.uid, u0.username)
+  );
+
+  var [mentionables, onMentionSearchChanged] = result.current;
+
+  await act(async () => {
+    onMentionSearchChanged("Artifice");
+    await waitForNextUpdate();
+  });
+
+  var [mentionables] = result.current;
+
+  expect(mentionables[0].value).toEqual("Artifice");
   expect(mentionables[0].exists).toEqual(false);
 });
 
@@ -61,6 +79,9 @@ test("fetches non empty mentions", async () => {
 
 const getGlobalMentions0 = async (titlePrefix: string): Promise<UserPost[]> => {
   return userPosts0;
+};
+const getGlobalMentions1 = async (titlePrefix: string): Promise<UserPost[]> => {
+  return userPosts1;
 };
 const createPost0 = async (
   title: string,
