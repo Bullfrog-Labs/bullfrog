@@ -274,6 +274,26 @@ export type CreateNewPostViewControllerParams = {
   prepopulatedTitle?: PostTitle;
 };
 
+const mentionableElementFn = (uid: UserId) => (
+  option: MentionNodeData
+): JSX.Element => {
+  if (!option.exists) {
+    return (
+      <Typography>
+        <em>Create "{option.value}"</em>
+      </Typography>
+    );
+  } else if (option.authorId === uid) {
+    return <Typography>{option.value}</Typography>;
+  } else {
+    return (
+      <Typography>
+        {option.value} - <em>{option.authorUsername}</em>
+      </Typography>
+    );
+  }
+};
+
 export const CreateNewPostViewController = (
   props: CreateNewPostViewControllerProps
 ) => {
@@ -291,18 +311,6 @@ export const CreateNewPostViewController = (
     props.user.username
   );
 
-  const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
-    if (option.authorId === props.user.uid) {
-      return <Typography>{option.value}</Typography>;
-    } else {
-      return (
-        <Typography>
-          {option.value} - <em>{option.authorUsername}</em>
-        </Typography>
-      );
-    }
-  };
-
   return (
     <CreateNewPostView
       prepopulatedTitle={prepopulatedTitle}
@@ -311,7 +319,7 @@ export const CreateNewPostViewController = (
       onMentionSearchChanged={onMentionSearchChanged}
       mentionables={mentionables}
       onMentionAdded={onMentionAdded}
-      mentionableElementFn={mentionableElementFn}
+      mentionableElementFn={mentionableElementFn(props.user.uid)}
       user={props.user}
     />
   );
@@ -525,18 +533,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const [authorUserRecordLoaded, setAuthorUserRecordLoaded] = useState(false);
 
-  const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
-    if (authorUserRecord && option.authorId === authorUserRecord.uid) {
-      return <Typography>{option.value}</Typography>;
-    } else {
-      return (
-        <Typography>
-          {option.value} - <em>{option.authorUsername}</em>
-        </Typography>
-      );
-    }
-  };
-
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     props.getGlobalMentions,
     props.createPost,
@@ -621,7 +617,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
       mentionables={mentionables}
       onMentionSearchChanged={onMentionSearchChanged}
       onMentionAdded={onMentionAdded}
-      mentionableElementFn={mentionableElementFn}
+      mentionableElementFn={mentionableElementFn(authorUserRecord.uid)}
     />
   );
 };

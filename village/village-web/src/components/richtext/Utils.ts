@@ -14,8 +14,12 @@ export const EMPTY_RICH_TEXT: RichText = [
 
 export const stringToSlateNode = (s: string): RichText => [
   {
-    type: "p",
-    children: [{ text: s }],
+    children: [
+      {
+        type: "p",
+        children: [{ text: s }],
+      },
+    ],
   },
 ];
 

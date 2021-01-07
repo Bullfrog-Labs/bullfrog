@@ -45,7 +45,11 @@ export const useMentions = (
       if (search !== newSearch) {
         const newMentionables = await getMentionables(newSearch);
         // Only insert the search query if it doesnt exist exactly in the results.
-        if (newMentionables.find((m) => m.value === newSearch) === undefined) {
+        const ownPostExists =
+          newMentionables.find((m) => {
+            return m.value === newSearch && m.authorId === authorId;
+          }) === undefined;
+        if (ownPostExists) {
           const newMention: MentionNodeData = {
             value: newSearch,
             authorId: authorId,
