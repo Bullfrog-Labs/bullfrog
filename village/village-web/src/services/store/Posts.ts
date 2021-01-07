@@ -3,6 +3,8 @@ import { Database } from "./Database";
 import firebase from "firebase";
 import { UserRecord, UserId, USERS_COLLECTION, getUsersForIds } from "./Users";
 import { RichText } from "../../components/richtext/Types";
+import { Node } from "slate";
+import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
 
 export type PostId = string;
 export type PostTitle = string;
@@ -14,6 +16,7 @@ export interface PostRecord {
   authorId: UserId;
   body: PostBody;
   title: PostTitle;
+  mentions: string[];
 }
 
 /**
@@ -40,6 +43,7 @@ const POST_RECORD_CONVERTER = {
       id: snapshot.id,
       body: data.body,
       title: data.title,
+      mentions: data.mentions || [],
     };
   },
 };
@@ -106,6 +110,7 @@ export const createPost: (
     authorId: user.uid,
     title: newTitle,
     body: newBody,
+    mentions: [],
     updatedAt: new Date(),
   };
   let newPostDoc = null;
@@ -196,10 +201,27 @@ export const syncBody: (
   postId,
   newBody
 ) => {
+  const logger = log.getLogger("syncBody");
+
+  const mentionIds = Array.from(Node.elements(newBody[0]))
+    .filter((n) => n[0]["type"] === ELEMENT_MENTION)
+    .map((n) => {
+      if (!n[0]["postId"]) {
+        logger.warn(`Invalid mention node ${JSON.stringify(n[0])}`);
+      }
+      return n[0]["postId"];
+    });
+
+  logger.debug(`Saving ${mentionIds.length} mentions`);
+
   // TODO: Figure out how to check for failures
   await getPostCollectionForUserRef(database, user.uid)
     .doc(postId)
-    .update({ body: newBody, updatedAt: new Date() });
+    .update({
+      body: newBody,
+      updatedAt: new Date(),
+      mentions: mentionIds as string[],
+    });
   return "success";
 };
 

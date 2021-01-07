@@ -20,6 +20,7 @@ export const p0: PostRecord = {
   authorId: "123",
   updatedAt: new Date(),
   id: "123",
+  mentions: [],
 };
 export const p1: PostRecord = Object.assign({}, p0, { id: "124" });
 export const p2: PostRecord = {
@@ -28,6 +29,7 @@ export const p2: PostRecord = {
   authorId: u1.uid,
   updatedAt: new Date(),
   id: "123",
+  mentions: [],
 };
 
 export const posts0: PostRecord[] = [p0];
