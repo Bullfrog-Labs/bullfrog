@@ -41,11 +41,13 @@ const useStyles = makeStyles((theme) => ({
     transform: `translate(-${MODAL_TOP} -${MODAL_LEFT}%)`,
     width: 400,
     height: 400,
-    backgroundColor: theme.palette.background.default,
     border: "2px solid #000",
     borderRadius: theme.spacing(1),
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
+  },
+  autocompleteSearchBoxModalBackdrop: {
+    backgroundColor: theme.palette.background.default,
   },
 }));
 
@@ -129,6 +131,9 @@ export const useAutocompleteSearchBoxModal = () => {
       onClose={() => setModalOpen(false)}
       aria-labelledby="search-box-modal-title"
       aria-describedby="search-box-modal-description"
+      BackdropProps={{
+        className: classes.autocompleteSearchBoxModalBackdrop,
+      }}
     >
       <div>
         <AutocompleteSearchBox getSuggestions={getSuggestions} />
