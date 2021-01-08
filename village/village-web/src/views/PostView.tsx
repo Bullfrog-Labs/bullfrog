@@ -359,7 +359,7 @@ export type PostViewProps = {
 };
 
 type PostViewImperativeHandle = {
-  blurEditor: () => void;
+  blurBody: () => void;
 };
 
 // Changing title triggers a rename. Renames are not allowed if the title is
@@ -551,7 +551,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
     );
 
     useImperativeHandle(ref, () => ({
-      blurEditor: () => richTextEditorRef.current?.blurEditor(),
+      blurBody: () => richTextEditorRef.current?.blurEditor(),
     }));
 
     return <BasePostView readOnly={props.readOnly} postView={postView} />;
@@ -599,6 +599,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
     authorUserRecord?.username || ""
   );
 
+  const postViewRef = useRef<PostViewImperativeHandle>(null);
+
   // Attempt to load post
   // TODO: Encapsulate this in a use*-style hook
   useEffect(() => {
@@ -618,6 +620,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
         logger.info(`Post ${postId} for author ${authorId} not found.`);
       } else {
         setTitle(postRecord!.title);
+
+        postViewRef.current?.blurBody();
         setBody(postRecord!.body);
       }
     };
@@ -661,6 +665,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   return (
     <PostView
+      ref={postViewRef}
       viewer={props.viewer}
       author={authorUserRecord}
       readOnly={readOnly}
