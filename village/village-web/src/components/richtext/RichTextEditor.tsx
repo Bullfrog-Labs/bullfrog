@@ -1,6 +1,7 @@
 import React, {
   useEffect,
   useMemo,
+  useState,
   forwardRef,
   useImperativeHandle,
 } from "react";
@@ -308,6 +309,7 @@ const RichTextEditor = forwardRef<
       </HeadingToolbar>
     </React.Fragment>
   );
+
   return (
     <Slate
       editor={editor}
@@ -322,8 +324,8 @@ const RichTextEditor = forwardRef<
         plugins={plugins}
         readOnly={props.readOnly ?? false}
         placeholder="Enter some text"
-        spellCheck
         autoFocus
+        spellCheck={false}
         onKeyDown={[onKeyDownMention]}
         onKeyDownDeps={[index, search, target, values]}
       />
