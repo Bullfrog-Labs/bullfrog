@@ -10,6 +10,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import theme from "../styles/theme";
 import { useHistory } from "react-router-dom";
 
+import { useHotkeys } from "react-hotkeys-hook";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -42,11 +44,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-// function AppBar
-
 export default function AppContainer(props: { children: React.ReactNode }) {
   const classes = useStyles();
   const history = useHistory();
+
+  useHotkeys("command+u", () => {
+    console.log("Display search box");
+  });
 
   return (
     <MuiThemeProvider theme={theme}>
