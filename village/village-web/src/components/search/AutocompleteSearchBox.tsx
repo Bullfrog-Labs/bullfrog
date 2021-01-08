@@ -53,10 +53,7 @@ export type AutocompleteSearchBoxProps = {
   getSuggestions: SuggestionFetchFn;
 };
 
-export const AutocompleteSearchBox = React.forwardRef<
-  HTMLDivElement,
-  AutocompleteSearchBoxProps
->((props, ref) => {
+export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   const [value, setValue] = useState<string>("");
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
 
@@ -88,18 +85,16 @@ export const AutocompleteSearchBox = React.forwardRef<
   };
 
   return (
-    <div ref={ref}>
-      <Autosuggest
-        suggestions={suggestions}
-        onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-        onSuggestionsClearRequested={onSuggestionsClearRequested}
-        getSuggestionValue={getSuggestionValue}
-        renderSuggestion={renderSuggestion}
-        inputProps={inputProps}
-      />
-    </div>
+    <Autosuggest
+      suggestions={suggestions}
+      onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+      onSuggestionsClearRequested={onSuggestionsClearRequested}
+      getSuggestionValue={getSuggestionValue}
+      renderSuggestion={renderSuggestion}
+      inputProps={inputProps}
+    />
   );
-});
+};
 
 const allSuggestions: SearchSuggestion[] = [
   { action: "navigateToPost", value: "foo" },
@@ -135,7 +130,9 @@ export const useAutocompleteSearchBoxModal = () => {
       aria-labelledby="search-box-modal-title"
       aria-describedby="search-box-modal-description"
     >
-      <AutocompleteSearchBox getSuggestions={getSuggestions} />
+      <div>
+        <AutocompleteSearchBox getSuggestions={getSuggestions} />
+      </div>
     </Modal>
   );
 
