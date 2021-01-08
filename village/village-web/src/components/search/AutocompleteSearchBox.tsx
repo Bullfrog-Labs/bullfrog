@@ -26,9 +26,10 @@ type AutocompleteSearchBoxOnChangeFn = (
   newValue: ChangeEvent
 ) => void;
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   input: {
     width: "100%",
+    ...theme.typography.h5,
   },
   suggestionsContainer: {
     width: 400,
