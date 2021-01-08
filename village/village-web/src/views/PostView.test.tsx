@@ -9,14 +9,14 @@ import { MemoryRouter, Route, Router } from "react-router-dom";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 
 import { createMemoryHistory } from "history";
-import { PostId } from "../services/store/Posts";
+import { PostId, UserPost, PostRecord } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
 
 const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
   return <React.Fragment>option.value</React.Fragment>;
 };
 
-const getMentionUserPosts0 = async (postId: PostId) => {
+const getMentionUserPosts0 = async (postId: PostId): Promise<UserPost[]> => {
   return [];
 };
 
@@ -66,6 +66,7 @@ test("Renders PostView", () => {
     setBody: jest.fn(),
     viewer: viewer,
     author: author,
+    mentions: [],
 
     getTitle: jest.fn(),
     renamePost: jest.fn(),
@@ -75,7 +76,6 @@ test("Renders PostView", () => {
     mentionables: [],
     onMentionAdded: jest.fn(),
     mentionableElementFn: mentionableElementFn,
-    getMentionUserPosts: getMentionUserPosts0,
   };
 
   const { getByText } = render(
@@ -93,18 +93,20 @@ test("Renders PostView", () => {
 
 test("PostView to PostView navigation works", async () => {
   const history = createMemoryHistory();
-  const posts = [
+  const posts: PostRecord[] = [
     {
       id: "abc",
       authorId: author.uid,
       body: EMPTY_RICH_TEXT,
       title: "Foo",
+      mentions: [],
     },
     {
       id: "def",
       authorId: author.uid,
       body: stringToSlateNode("Non-empty"),
       title: "Bar",
+      mentions: [],
     },
   ];
 
@@ -127,6 +129,7 @@ test("PostView to PostView navigation works", async () => {
     renamePost: jest.fn(),
     syncBody: jest.fn(),
     createPost: jest.fn(),
+    getMentionUserPosts: getMentionUserPosts0,
   };
 
   history.push(`/post/${author.uid}/abc`);
