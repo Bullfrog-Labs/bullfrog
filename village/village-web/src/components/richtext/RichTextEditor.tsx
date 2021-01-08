@@ -11,8 +11,8 @@ import { RichText } from "./Types";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
 import {
   MentionElement,
-  H5Element,
-  H6Element,
+  H2Element,
+  H3Element,
   ParagraphElement,
 } from "./Rendering";
 import * as log from "loglevel";
@@ -37,8 +37,8 @@ import {
   pipe,
   isBlockAboveEmpty,
   isSelectionAtBlockStart,
-  ELEMENT_H5,
-  ELEMENT_H6,
+  ELEMENT_H2,
+  ELEMENT_H3,
   unwrapList,
   ELEMENT_PARAGRAPH,
   ResetBlockTypePluginOptions,
@@ -89,12 +89,12 @@ const preFormat = (editor: Editor) => unwrapList(editor);
 
 export const autoformatRules: AutoformatRule[] = [
   {
-    type: ELEMENT_H5,
+    type: ELEMENT_H2,
     markup: "#",
     preFormat,
   },
   {
-    type: ELEMENT_H6,
+    type: ELEMENT_H3,
     markup: "##",
     preFormat,
   },
@@ -150,15 +150,15 @@ const paragraphOptions: ParagraphPluginOptions = {
 };
 
 const headingOptions: HeadingPluginOptions = {
-  h5: {
-    component: H5Element,
+  h2: {
+    component: H2Element,
   },
-  h6: {
-    component: H6Element,
+  h3: {
+    component: H3Element,
   },
 };
 
-export const headingTypes = [ELEMENT_H5, ELEMENT_H6];
+export const headingTypes = [ELEMENT_H2, ELEMENT_H3];
 
 const resetBlockTypesCommonRule = {
   types: [MARK_BOLD],
@@ -295,8 +295,8 @@ const RichTextEditor = forwardRef<
   const toolbar = (
     <React.Fragment>
       <HeadingToolbar>
-        <ToolbarElement type={ELEMENT_H5} icon={<LooksOne />} />
-        <ToolbarElement type={ELEMENT_H6} icon={<LooksTwo />} />
+        <ToolbarElement type={ELEMENT_H2} icon={<LooksOne />} />
+        <ToolbarElement type={ELEMENT_H3} icon={<LooksTwo />} />
       </HeadingToolbar>
     </React.Fragment>
   );

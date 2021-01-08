@@ -46,10 +46,10 @@ export const ParagraphElement = (props: any) => {
   );
 };
 
-export const H5Element = (props: any) => {
-  return <Typography variant="h5">{props.children}</Typography>;
+export const H2Element = (props: any) => {
+  return <Typography variant="h2">{props.children}</Typography>;
 };
 
-export const H6Element = (props: any) => {
-  return <Typography variant="h6">{props.children}</Typography>;
+export const H3Element = (props: any) => {
+  return <Typography variant="h3">{props.children}</Typography>;
 };

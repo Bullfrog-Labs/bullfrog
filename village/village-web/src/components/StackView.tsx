@@ -113,7 +113,7 @@ export const StackView = (props: StackViewProps) => {
 
   return (
     <Container maxWidth="sm">
-      <Typography variant="h4">{source.name}</Typography>
+      <Typography variant="h1">{source.name}</Typography>
       <Divider className={classes.profileDivider} />
       <List className={classes.root}>{listItems}</List>
     </Container>

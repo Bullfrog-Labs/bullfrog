@@ -32,6 +32,10 @@ export const TypographyView = ({}: TypographyViewProps) => {
         <Typography variant="h4" gutterBottom>
           h4. Heading
         </Typography>
+        <br />
+        <Typography variant="h5" gutterBottom>
+          h5. Heading
+        </Typography>
         <Typography variant="subtitle1" gutterBottom>
           subtitle1. Lorem ipsum dolor sit amet, consectetur adipisicing elit.
           Quos blanditiis tenetur
