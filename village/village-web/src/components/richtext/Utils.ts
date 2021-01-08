@@ -24,7 +24,7 @@ export const stringToSlateNode = (s: string): RichText => [
 ];
 
 export const slateNodeToString = (text: RichText): string =>
-  SlateNode.leaf(text[0], [0]).text;
+  SlateNode.string(text[0]);
 
 // TODO: This should probably be converted to a TSX function, so that the
 // preview is a React component. Code from Rendering.tsx can probably be used to
