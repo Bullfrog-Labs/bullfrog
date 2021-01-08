@@ -14,6 +14,7 @@ import {
   H2Element,
   H3Element,
   ParagraphElement,
+  BlockquoteElement,
 } from "./Rendering";
 import * as log from "loglevel";
 import {
@@ -58,6 +59,7 @@ import {
   toggleList,
   ELEMENT_UL,
   KbdPlugin,
+  BlockquotePluginOptions,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Typography } from "@material-ui/core";
@@ -158,6 +160,12 @@ const headingOptions: HeadingPluginOptions = {
   },
 };
 
+const blockquoteOptions: BlockquotePluginOptions = {
+  blockquote: {
+    component: BlockquoteElement,
+  },
+};
+
 export const headingTypes = [ELEMENT_H2, ELEMENT_H3];
 
 const resetBlockTypesCommonRule = {
@@ -188,7 +196,7 @@ const plugins = [
   ItalicPlugin(),
   CodePlugin(),
   StrikethroughPlugin(),
-  BlockquotePlugin(),
+  BlockquotePlugin(blockquoteOptions),
   ListPlugin(),
   KbdPlugin(),
   ResetBlockTypePlugin(optionsResetBlockTypes),

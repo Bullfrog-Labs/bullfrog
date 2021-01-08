@@ -2,6 +2,7 @@ import React from "react";
 import { Typography, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import * as log from "loglevel";
+import { Blockquote } from "../Blockquote";
 
 export const MentionElement = ({
   attributes,
@@ -35,6 +36,19 @@ export const MentionElement = ({
         </Link>
       </Tooltip>
     </React.Fragment>
+  );
+};
+
+export const BlockquoteElement = ({
+  attributes,
+  children,
+  htmlAttributes,
+}: any) => {
+  const logger = log.getLogger("BlockquoteElement");
+  return (
+    <Blockquote {...attributes} {...htmlAttributes}>
+      {children}
+    </Blockquote>
   );
 };
 

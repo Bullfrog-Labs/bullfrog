@@ -1,11 +1,17 @@
 import React from "react";
 import { Typography, Container } from "@material-ui/core";
+import { Blockquote } from "../components/Blockquote";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles({
   root: {
     width: "100%",
     maxWidth: 500,
+  },
+  blockquote: {
+    borderLeft: "4px solid",
+    margin: "1em 0",
+    paddingLeft: "1em",
   },
 });
 
@@ -64,6 +70,14 @@ export const TypographyView = ({}: TypographyViewProps) => {
         </Typography>
         <Typography variant="overline" display="block" gutterBottom>
           overline text
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          <Blockquote>
+            blockquote. Lorem ipsum dolor sit amet, consectetur adipisicing
+            elit. Quos blanditiis tenetur unde suscipit, quam beatae rerum
+            inventore consectetur, neque doloribus, cupiditate numquam
+            dignissimos laborum fugiat deleniti? Eum quasi quidem quibusdam.
+          </Blockquote>
         </Typography>
       </div>
     </Container>
