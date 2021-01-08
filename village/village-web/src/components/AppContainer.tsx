@@ -64,8 +64,10 @@ export default function AppContainer(props: { children: React.ReactNode }) {
           <Divider />
         </Drawer>
         <main className={classes.content}>
-          <div />
-          {props.children}
+          <Container maxWidth="sm">
+            <div />
+            {props.children}
+          </Container>
         </main>
       </div>
     </MuiThemeProvider>

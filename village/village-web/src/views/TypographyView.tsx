@@ -2,7 +2,12 @@ import React from "react";
 import { Typography, Container } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles((theme) => {});
+const useStyles = makeStyles({
+  root: {
+    width: "100%",
+    maxWidth: 500,
+  },
+});
 
 export type TypographyViewProps = {};
 
@@ -11,24 +16,21 @@ export const TypographyView = ({}: TypographyViewProps) => {
 
   return (
     <Container maxWidth="sm">
-      <div>
-        <Typography variant="h1" component="h2" gutterBottom>
+      <div className={classes.root}>
+        <Typography variant="h1" gutterBottom>
           h1. Heading
         </Typography>
+        <br />
         <Typography variant="h2" gutterBottom>
           h2. Heading
         </Typography>
+        <br />
         <Typography variant="h3" gutterBottom>
           h3. Heading
         </Typography>
+        <br />
         <Typography variant="h4" gutterBottom>
           h4. Heading
-        </Typography>
-        <Typography variant="h5" gutterBottom>
-          h5. Heading
-        </Typography>
-        <Typography variant="h6" gutterBottom>
-          h6. Heading
         </Typography>
         <Typography variant="subtitle1" gutterBottom>
           subtitle1. Lorem ipsum dolor sit amet, consectetur adipisicing elit.

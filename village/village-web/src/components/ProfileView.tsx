@@ -116,11 +116,11 @@ export const ProfileView = (props: ProfileViewProps) => {
   });
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4">{user.displayName}</Typography>
-      <Typography variant="h6">{user.description}</Typography>
+    <>
+      <Typography variant="h1">{user.displayName}</Typography>
+      <Typography variant="h4">{user.description}</Typography>
       <Divider className={classes.profileDivider} />
       <List className={classes.root}>{listItems}</List>
-    </Container>
+    </>
   );
 };
