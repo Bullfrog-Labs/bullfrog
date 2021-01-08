@@ -1,5 +1,5 @@
-import { Dialog, makeStyles, Modal } from "@material-ui/core";
-import React, { useState } from "react";
+import { Dialog, makeStyles } from "@material-ui/core";
+import React, { useEffect, useRef, useState } from "react";
 import Autosuggest, {
   ChangeEvent,
   SuggestionsFetchRequested,
@@ -26,7 +26,7 @@ type AutocompleteSearchBoxOnChangeFn = (
   newValue: ChangeEvent
 ) => void;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   input: {
     width: "100%",
   },
@@ -44,6 +44,8 @@ export type AutocompleteSearchBoxProps = {
 };
 
 export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
+  const classes = useStyles();
+
   const [value, setValue] = useState<string>("");
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
 
@@ -69,12 +71,16 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
     }
   };
 
+  const inputRef = useRef<HTMLInputElement>(null);
   const inputProps = {
     value: value,
     onChange: onChange,
+    ref: inputRef,
   };
 
-  const classes = useStyles();
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   return (
     <Autosuggest
