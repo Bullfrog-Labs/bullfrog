@@ -34,6 +34,9 @@ const useStyles = makeStyles((theme) => ({
     width: 400,
     height: 400,
   },
+  suggestionsList: {
+    listStyleType: "none",
+  },
 }));
 
 export type AutocompleteSearchBoxProps = {
@@ -84,6 +87,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
       theme={{
         input: classes.input,
         suggestionsContainer: classes.suggestionsContainer,
+        suggestionsList: classes.suggestionsList,
       }}
     />
   );
