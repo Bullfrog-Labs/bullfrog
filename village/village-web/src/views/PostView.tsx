@@ -682,7 +682,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
       } else {
         setTitle(postRecord!.title);
         setBody(postRecord!.body);
-        console.dir(postRecord);
       }
     };
     loadPostRecord();
