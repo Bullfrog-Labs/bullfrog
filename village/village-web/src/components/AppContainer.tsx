@@ -8,9 +8,9 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import theme from "../styles/theme";
-import { useHistory } from "react-router-dom";
 
 import { useHotkeys } from "react-hotkeys-hook";
+import { useAutocompleteSearchBoxModal } from "./search/AutocompleteSearchBox";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -46,15 +46,22 @@ const useStyles = makeStyles((theme) => ({
 
 export default function AppContainer(props: { children: React.ReactNode }) {
   const classes = useStyles();
-  const history = useHistory();
+  const autocompleteSearchBox = useAutocompleteSearchBoxModal();
 
-  useHotkeys("command+u", () => {
-    console.log("Display search box");
+  useHotkeys("command+u", (event) => {
+    event.preventDefault();
+    autocompleteSearchBox.setModalOpen((v) => !v);
+    // TODO: Need to somehow get the focus here
+  });
+
+  useHotkeys("escape", () => {
+    autocompleteSearchBox.setModalOpen(false);
   });
 
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
+      {autocompleteSearchBox.modal}
       <div className={classes.root}>
         <Drawer
           className={classes.drawer}

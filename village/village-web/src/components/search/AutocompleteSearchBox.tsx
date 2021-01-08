@@ -1,3 +1,4 @@
+import { makeStyles, Modal } from "@material-ui/core";
 import React, { useState } from "react";
 import Autosuggest, {
   ChangeEvent,
@@ -25,11 +26,37 @@ type AutocompleteSearchBoxOnChangeFn = (
   newValue: ChangeEvent
 ) => void;
 
+const MODAL_TOP = "50%";
+const MODAL_LEFT = "50%";
+
+const MODAL_STYLE = {
+  top: MODAL_TOP,
+  left: MODAL_LEFT,
+  transform: `translate(-${MODAL_TOP}, -${MODAL_LEFT})`,
+};
+
+const useStyles = makeStyles((theme) => ({
+  autocompleteSearchBoxModal: {
+    position: "absolute",
+    transform: `translate(-${MODAL_TOP} -${MODAL_LEFT}%)`,
+    width: 400,
+    height: 400,
+    backgroundColor: theme.palette.background.default,
+    border: "2px solid #000",
+    borderRadius: theme.spacing(1),
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+  },
+}));
+
 export type AutocompleteSearchBoxProps = {
   getSuggestions: SuggestionFetchFn;
 };
 
-export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
+export const AutocompleteSearchBox = React.forwardRef<
+  HTMLDivElement,
+  AutocompleteSearchBoxProps
+>((props, ref) => {
   const [value, setValue] = useState<string>("");
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
 
@@ -61,13 +88,60 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   };
 
   return (
-    <Autosuggest
-      suggestions={suggestions}
-      onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-      onSuggestionsClearRequested={onSuggestionsClearRequested}
-      getSuggestionValue={getSuggestionValue}
-      renderSuggestion={renderSuggestion}
-      inputProps={inputProps}
-    />
+    <div ref={ref}>
+      <Autosuggest
+        suggestions={suggestions}
+        onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+        onSuggestionsClearRequested={onSuggestionsClearRequested}
+        getSuggestionValue={getSuggestionValue}
+        renderSuggestion={renderSuggestion}
+        inputProps={inputProps}
+      />
+    </div>
   );
+});
+
+const allSuggestions: SearchSuggestion[] = [
+  { action: "navigateToPost", value: "foo" },
+  { action: "navigateToPost", value: "bar" },
+  { action: "navigateToPost", value: "baz" },
+];
+
+export const getSuggestions: SuggestionFetchFn = (value) => {
+  const exactMatchExists =
+    allSuggestions.filter((s) => s.value === value).length !== 0;
+
+  const createNewPostSuggestions: SearchSuggestion[] = exactMatchExists
+    ? []
+    : [{ action: "createNewPost", value: value }];
+
+  const matchingSuggestions = allSuggestions.filter((s) =>
+    s.value.startsWith(value)
+  );
+
+  return [...createNewPostSuggestions, ...matchingSuggestions];
+};
+
+export const useAutocompleteSearchBoxModal = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const classes = useStyles();
+
+  const modal = (
+    <Modal
+      style={MODAL_STYLE}
+      className={classes.autocompleteSearchBoxModal}
+      open={modalOpen}
+      onClose={() => setModalOpen(false)}
+      aria-labelledby="search-box-modal-title"
+      aria-describedby="search-box-modal-description"
+    >
+      <AutocompleteSearchBox getSuggestions={getSuggestions} />
+    </Modal>
+  );
+
+  return {
+    modalOpen: modalOpen,
+    setModalOpen: setModalOpen,
+    modal: modal,
+  };
 };
