@@ -1,4 +1,4 @@
-import { makeStyles, Modal } from "@material-ui/core";
+import { Dialog, makeStyles, Modal } from "@material-ui/core";
 import React, { useState } from "react";
 import Autosuggest, {
   ChangeEvent,
@@ -26,36 +26,13 @@ type AutocompleteSearchBoxOnChangeFn = (
   newValue: ChangeEvent
 ) => void;
 
-const MODAL_TOP = "50%";
-const MODAL_LEFT = "50%";
-
-const MODAL_STYLE = {
-  top: MODAL_TOP,
-  left: MODAL_LEFT,
-  transform: `translate(-${MODAL_TOP}, -${MODAL_LEFT})`,
-};
-
 const useStyles = makeStyles((theme) => ({
-  modal: {
-    position: "absolute",
-    transform: `translate(-${MODAL_TOP} -${MODAL_LEFT}%)`,
-    width: 400,
-    height: 400,
-    border: "2px solid #000",
-    borderRadius: theme.spacing(1),
-    // boxShadow: theme.shadows[5],
-    backgroundColor: theme.palette.background.default,
-    padding: theme.spacing(2, 4, 3),
-  },
-  modalBackdrop: {
-    backgroundColor: theme.palette.background.default,
-  },
   input: {
     width: "100%",
   },
   suggestionsContainer: {
-    width: "100%",
-    height: "100%",
+    width: 400,
+    height: 400,
   },
 }));
 
@@ -106,6 +83,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
       inputProps={inputProps}
       theme={{
         input: classes.input,
+        suggestionsContainer: classes.suggestionsContainer,
       }}
     />
   );
@@ -132,31 +110,25 @@ export const getSuggestions: SuggestionFetchFn = (value) => {
   return [...createNewPostSuggestions, ...matchingSuggestions];
 };
 
-export const useAutocompleteSearchBoxModal = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const classes = useStyles();
+export const useAutocompleteSearchBoxDialog = () => {
+  const [open, setOpen] = useState(false);
 
-  const modal = (
-    <Modal
-      style={MODAL_STYLE}
-      className={classes.modal}
-      open={modalOpen}
-      onClose={() => setModalOpen(false)}
-      aria-labelledby="search-box-modal-title"
-      aria-describedby="search-box-modal-description"
-      BackdropProps={{
-        classes: { root: classes.modalBackdrop },
-      }}
+  const dialog = (
+    <Dialog
+      maxWidth={"sm"}
+      fullWidth={true}
+      onClose={() => setOpen(false)}
+      open={open}
+      aria-labelledby="search-box-dialog-title"
+      aria-describedby="search-box-dialog-description"
     >
-      <div>
-        <AutocompleteSearchBox getSuggestions={getSuggestions} />
-      </div>
-    </Modal>
+      <AutocompleteSearchBox getSuggestions={getSuggestions} />
+    </Dialog>
   );
 
   return {
-    modalOpen: modalOpen,
-    setModalOpen: setModalOpen,
-    modal: modal,
+    dialogOpen: open,
+    setDialogOpen: setOpen,
+    dialog: dialog,
   };
 };
