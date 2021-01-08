@@ -3,6 +3,8 @@ import React from "react";
 import {
   AutocompleteSearchBox,
   AutocompleteSearchBoxProps,
+  SearchSuggestion,
+  SuggestionFetchFn,
 } from "./AutocompleteSearchBox";
 
 export default {
@@ -14,5 +16,26 @@ const Template: Story<AutocompleteSearchBoxProps> = (args) => (
   <AutocompleteSearchBox {...args} />
 );
 
+const allSuggestions: SearchSuggestion[] = [
+  { action: "navigateToPost", value: "foo" },
+  { action: "navigateToPost", value: "bar" },
+  { action: "navigateToPost", value: "baz" },
+];
+
+const getSuggestions: SuggestionFetchFn = (value) => {
+  const exactMatchExists =
+    allSuggestions.filter((s) => s.value === value).length !== 0;
+
+  const createNewPostSuggestions: SearchSuggestion[] = exactMatchExists
+    ? []
+    : [{ action: "createNewPost", value: value }];
+
+  const matchingSuggestions = allSuggestions.filter((s) =>
+    s.value.startsWith(value)
+  );
+
+  return [...createNewPostSuggestions, ...matchingSuggestions];
+};
+
 export const InitialState = Template.bind({});
-InitialState.args = {};
+InitialState.args = { getSuggestions: getSuggestions };
