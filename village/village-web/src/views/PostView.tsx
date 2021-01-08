@@ -400,22 +400,26 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
       </ListItem>
     );
   });
-  return (
-    <div className={classes.postDetails}>
-      <Grid
-        container
-        direction="column"
-        justify="flex-start"
-        alignItems="stretch"
-        spacing={4}
-      >
-        <Grid item>
-          <Typography variant="h5">Mentions</Typography>
-          <List>{mentionListItems}</List>
+  if (mentionListItems.length == 0) {
+    return <React.Fragment />;
+  } else {
+    return (
+      <div className={classes.postDetails}>
+        <Grid
+          container
+          direction="column"
+          justify="flex-start"
+          alignItems="stretch"
+          spacing={4}
+        >
+          <Grid item>
+            <Typography variant="h5">Mentions</Typography>
+            <List>{mentionListItems}</List>
+          </Grid>
         </Grid>
-      </Grid>
-    </div>
-  );
+      </div>
+    );
+  }
 };
 
 // Changing title triggers a rename. Renames are not allowed if the title is
