@@ -36,18 +36,26 @@ const MODAL_STYLE = {
 };
 
 const useStyles = makeStyles((theme) => ({
-  autocompleteSearchBoxModal: {
+  modal: {
     position: "absolute",
     transform: `translate(-${MODAL_TOP} -${MODAL_LEFT}%)`,
     width: 400,
     height: 400,
     border: "2px solid #000",
     borderRadius: theme.spacing(1),
-    boxShadow: theme.shadows[5],
+    // boxShadow: theme.shadows[5],
+    backgroundColor: theme.palette.background.default,
     padding: theme.spacing(2, 4, 3),
   },
-  autocompleteSearchBoxModalBackdrop: {
+  modalBackdrop: {
     backgroundColor: theme.palette.background.default,
+  },
+  input: {
+    width: "100%",
+  },
+  suggestionsContainer: {
+    width: "100%",
+    height: "100%",
   },
 }));
 
@@ -86,6 +94,8 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
     onChange: onChange,
   };
 
+  const classes = useStyles();
+
   return (
     <Autosuggest
       suggestions={suggestions}
@@ -94,6 +104,9 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
       getSuggestionValue={getSuggestionValue}
       renderSuggestion={renderSuggestion}
       inputProps={inputProps}
+      theme={{
+        input: classes.input,
+      }}
     />
   );
 };
@@ -126,13 +139,13 @@ export const useAutocompleteSearchBoxModal = () => {
   const modal = (
     <Modal
       style={MODAL_STYLE}
-      className={classes.autocompleteSearchBoxModal}
+      className={classes.modal}
       open={modalOpen}
       onClose={() => setModalOpen(false)}
       aria-labelledby="search-box-modal-title"
       aria-describedby="search-box-modal-description"
       BackdropProps={{
-        className: classes.autocompleteSearchBoxModalBackdrop,
+        classes: { root: classes.modalBackdrop },
       }}
     >
       <div>
