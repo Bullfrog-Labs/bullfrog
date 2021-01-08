@@ -3,6 +3,10 @@ import { UserRecord } from "../services/store/Users";
 import { AuthProvider } from "../services/auth/Auth";
 import { stringToSlateNode } from "../components/richtext/Utils";
 
+/**
+ * Users
+ */
+
 export const u0: UserRecord = {
   displayName: "Leighland",
   uid: "123",
@@ -13,6 +17,10 @@ export const u1: UserRecord = Object.assign({}, u0, {
   uid: "124",
   username: "l5stewar",
 });
+
+/**
+ * Posts
+ */
 
 export const p0: PostRecord = {
   title: "Title mane",
@@ -34,6 +42,10 @@ export const p2: PostRecord = {
 
 export const posts0: PostRecord[] = [p0];
 
+/**
+ * UserPosts
+ */
+
 export const up0 = {
   user: u0,
   post: p0,
@@ -54,6 +66,10 @@ export const userPosts0: UserPost[] = [up0, up1];
 
 // 2 posts, 2 users, diff post titles
 export const userPosts1: UserPost[] = [up0, up2];
+
+/**
+ * Auth
+ */
 
 export const authProvider: AuthProvider = {
   onAuthStateChanged: (authState) => {},
