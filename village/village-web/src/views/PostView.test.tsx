@@ -16,6 +16,10 @@ const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
   return <React.Fragment>option.value</React.Fragment>;
 };
 
+const getMentionUserPosts0 = async (postId: PostId) => {
+  return [];
+};
+
 const viewer: UserRecord = {
   uid: "456",
   displayName: "baz",
@@ -71,6 +75,7 @@ test("Renders PostView", () => {
     mentionables: [],
     onMentionAdded: jest.fn(),
     mentionableElementFn: mentionableElementFn,
+    getMentionUserPosts: getMentionUserPosts0,
   };
 
   const { getByText } = render(

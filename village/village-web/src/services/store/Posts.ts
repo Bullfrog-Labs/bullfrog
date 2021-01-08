@@ -352,3 +352,65 @@ export const getGlobalMentions = (database: Database) => async (
 };
 
 export type GetGlobalMentionsFn = ReturnType<typeof getGlobalMentions>;
+
+export const getPostsForIds = (database: Database) => async (
+  postIds: PostId[]
+): Promise<PostRecord[]> => {
+  if (postIds.length === 0) {
+    return [];
+  }
+
+  const postsDoc = await database
+    .getHandle()
+    .collectionGroup(POSTS_COLLECTION)
+    .where("id", "in", postIds)
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  const posts = postsDoc.docs.map((doc) => {
+    return doc.data();
+  });
+
+  return posts;
+};
+
+export const getUserPostsForIds = (database: Database) => async (
+  postIds: PostId[]
+): Promise<UserPost[]> => {
+  const logger = log.getLogger("getUserPostsForIds");
+
+  logger.debug(`Fetching posts for ids ${postIds.length}`);
+  const posts = await getPostsForIds(database)(postIds);
+  return getUserPostsForPosts(database, posts);
+};
+
+export type GetUserPostsForIdsFn = ReturnType<typeof getUserPostsForIds>;
+
+export const getMentionPosts = (database: Database) => async (
+  postId: PostId
+): Promise<PostRecord[]> => {
+  const postsDoc = await database
+    .getHandle()
+    .collectionGroup(POSTS_COLLECTION)
+    .where("mentions", "array-contains", postId)
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  const posts = postsDoc.docs.map((doc) => {
+    return doc.data();
+  });
+
+  return posts;
+};
+
+export const getMentionUserPosts = (database: Database) => async (
+  postId: PostId
+): Promise<UserPost[]> => {
+  const logger = log.getLogger("getMentions");
+
+  logger.debug(`Fetching mentions for id ${postId}`);
+  const posts = await getMentionPosts(database)(postId);
+  return getUserPostsForPosts(database, posts);
+};
+
+export type GetMentionUserPostsFn = ReturnType<typeof getMentionUserPosts>;

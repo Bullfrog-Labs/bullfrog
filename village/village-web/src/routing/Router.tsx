@@ -13,6 +13,7 @@ import {
   GetPostFn,
   GetStackPostsFn,
   GetUserPostsFn,
+  GetMentionUserPostsFn,
   RenamePostFn,
   SyncBodyFn,
 } from "../services/store/Posts";
@@ -44,6 +45,7 @@ export const Router = (props: {
   renamePost: (user: UserRecord) => RenamePostFn;
   syncBody: (user: UserRecord) => SyncBodyFn;
   getGlobalMentions: GetGlobalMentionsFn;
+  getMentionUserPosts: GetMentionUserPostsFn;
   user?: UserRecord;
 }) => {
   const {
@@ -56,6 +58,7 @@ export const Router = (props: {
     renamePost,
     syncBody,
     getGlobalMentions,
+    getMentionUserPosts,
     user,
   } = props;
   if (!user) {
@@ -111,6 +114,7 @@ export const Router = (props: {
                 syncBody={syncBody(user)}
                 getGlobalMentions={getGlobalMentions}
                 createPost={createPost(user)}
+                getMentionUserPosts={getMentionUserPosts}
               />
             </AppContainer>
           </PrivateRoute>

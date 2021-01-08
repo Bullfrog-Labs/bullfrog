@@ -25,6 +25,7 @@ import {
   renamePost,
   syncBody,
   getGlobalMentions,
+  getMentionUserPosts,
 } from "./services/store/Posts";
 import { useEffect } from "react";
 
@@ -106,6 +107,7 @@ function App() {
         renamePost={renamePost(database)}
         syncBody={syncBody(database)}
         getGlobalMentions={getGlobalMentions(database)}
+        getMentionUserPosts={getMentionUserPosts(database)}
         user={user}
       />
     </AuthContext.Provider>

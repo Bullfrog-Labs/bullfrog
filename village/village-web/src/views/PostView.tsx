@@ -19,6 +19,9 @@ import {
   Paper,
   Grid,
   Typography,
+  List,
+  ListItem,
+  ListItemText,
 } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
 import {
@@ -32,14 +35,19 @@ import {
   PostBody,
   PostTitle,
   GetGlobalMentionsFn,
+  UserPost,
+  GetMentionUserPostsFn,
 } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
 import { useMentions } from "../hooks/useMentions";
-import { Redirect, useHistory, useParams } from "react-router-dom";
+import { Link, Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import DocumentTitle from "../components/richtext/DocumentTitle";
-import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
+import {
+  EMPTY_RICH_TEXT,
+  richTextStringPreview,
+} from "../components/richtext/Utils";
 import { PostAuthorLink } from "../components/identity/PostAuthorLink";
 import { PostStackLink } from "../components/stacks/PostStackLink";
 
@@ -59,6 +67,10 @@ const useStyles = makeStyles((theme) => ({
     position: "fixed",
     top: "30%",
     left: "50%",
+  },
+  postListItem: {
+    paddingLeft: "0px",
+    paddingRight: "0px",
   },
 }));
 
@@ -347,6 +359,7 @@ export type PostViewProps = {
 
   viewer: UserRecord;
   author: UserRecord;
+  mentions: UserPost[];
 
   getTitle: () => Promise<PostTitle | undefined>;
 
@@ -360,6 +373,49 @@ export type PostViewProps = {
 
 type PostViewImperativeHandle = {
   blurEditor: () => void;
+};
+
+const MentionsSection = (props: { mentions: UserPost[] }) => {
+  const classes = useStyles();
+  const { mentions } = props;
+  const mentionListItems = mentions.map((mention) => {
+    return (
+      <ListItem
+        alignItems="flex-start"
+        key={mention.post.id}
+        className={classes.postListItem}
+      >
+        <ListItemText
+          primary={
+            <Link to={`/post/${mention.post.authorId}/${mention.post.id}`}>
+              {mention.post.title}
+            </Link>
+          }
+          secondary={
+            <React.Fragment>
+              {richTextStringPreview(mention.post.body)}
+            </React.Fragment>
+          }
+        />
+      </ListItem>
+    );
+  });
+  return (
+    <div className={classes.postDetails}>
+      <Grid
+        container
+        direction="column"
+        justify="flex-start"
+        alignItems="stretch"
+        spacing={4}
+      >
+        <Grid item>
+          <Typography variant="h5">Mentions</Typography>
+          <List>{mentionListItems}</List>
+        </Grid>
+      </Grid>
+    </div>
+  );
 };
 
 // Changing title triggers a rename. Renames are not allowed if the title is
@@ -545,6 +601,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
           </Grid>
           <Grid item sm={11}>
             {postDetails}
+            <MentionsSection mentions={props.mentions} />
           </Grid>
         </Grid>
       </>
@@ -566,6 +623,7 @@ type PostViewControllerProps = {
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
   createPost: CreatePostFn;
+  getMentionUserPosts: GetMentionUserPostsFn;
 };
 
 type PostViewControllerParams = {
@@ -582,6 +640,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const [title, setTitle] = useState<PostTitle>("");
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
+  const [mentions, setMentions] = useState<UserPost[]>([]);
 
   const [postRecordLoaded, setPostRecordLoaded] = useState(false);
   const [postRecordNotFound, setPostRecordNotFound] = useState(false);
@@ -603,8 +662,10 @@ export const PostViewController = (props: PostViewControllerProps) => {
   // TODO: Encapsulate this in a use*-style hook
   useEffect(() => {
     let isSubscribed = true; // used to prevent state updates on unmounted components
+
     const loadPostRecord = async () => {
       const postRecord = await props.getPost(authorId, postId);
+      const newMentions = await props.getMentionUserPosts(postId);
       const postRecordNotFound = !postRecord;
 
       if (!isSubscribed) {
@@ -614,11 +675,14 @@ export const PostViewController = (props: PostViewControllerProps) => {
       setPostRecordLoaded(true);
       setPostRecordNotFound(postRecordNotFound);
 
+      setMentions(newMentions);
+
       if (postRecordNotFound) {
         logger.info(`Post ${postId} for author ${authorId} not found.`);
       } else {
         setTitle(postRecord!.title);
         setBody(postRecord!.body);
+        console.dir(postRecord);
       }
     };
     loadPostRecord();
@@ -668,6 +732,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
       title={title!}
       setTitle={setTitle}
       body={body!}
+      mentions={mentions!}
       setBody={setBody}
       getTitle={getTitle}
       renamePost={props.renamePost}
