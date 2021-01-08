@@ -8,7 +8,7 @@ const theme = createMuiTheme({
     },
     h6: {
       fontFamily: "Libre Caslon Text",
-      fontWeight: 400,
+      fontWeight: 700,
     },
     body1: {
       fontFamily: "Source Sans Pro",
