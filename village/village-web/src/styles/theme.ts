@@ -25,6 +25,11 @@ const theme = createMuiTheme({
       fontFamily: "Libre Caslon Text",
       fontSize: "20px",
     },
+    h6: {
+      fontFamily: "Libre Caslon Text",
+      fontSize: "20px",
+      fontWeight: 400,
+    },
     subtitle1: {
       fontFamily: "Source Sans Pro",
       fontSize: "1.01rem",

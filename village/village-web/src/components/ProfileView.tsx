@@ -104,7 +104,7 @@ export const ProfileView = (props: ProfileViewProps) => {
         <ListItemText
           primary={
             <Link key={user.uid} to={`/post/${post.authorId}/${post.id}`}>
-              {post.title}
+              <Typography variant="h6">{post.title}</Typography>
             </Link>
           }
           secondary={
