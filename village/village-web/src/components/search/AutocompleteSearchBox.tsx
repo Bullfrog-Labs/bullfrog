@@ -6,6 +6,23 @@ import Autosuggest, {
 } from "react-autosuggest";
 import { assertNever } from "../../utils";
 
+const AUTOCOMPLETE_SEARCH_BOX_KEY = "u";
+const AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER = "command";
+export const AUTOCOMPLETE_SEARCH_BOX_HOTKEY = `${AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER}+${AUTOCOMPLETE_SEARCH_BOX_KEY}`;
+export const AUTOCOMPLETE_SEARCH_BOX_ESCKEY = "escape";
+
+const isAutocompleteSearchBoxHotkey = (event: React.KeyboardEvent) => {
+  if (AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER !== "command") {
+    // needs to match with key-matching logic in this function. This is simpler
+    // than setting up a lookup table.
+    throw new Error(
+      "Search box key modifier should be set to command, or logic needs to be updated"
+    );
+  }
+
+  return event.metaKey && event.key === AUTOCOMPLETE_SEARCH_BOX_KEY;
+};
+
 export type CreateNewPostSuggestion = {
   value: string;
   action: "createNewPost";
@@ -31,9 +48,11 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     ...theme.typography.h5,
   },
-  suggestionsContainer: {
-    width: 400,
-    height: 400,
+  suggestionsContainer: {},
+  container: {
+    width: "100%",
+    height: "100%",
+    padding: theme.spacing(4),
   },
   suggestionsList: {
     listStyleType: "none",
@@ -42,6 +61,7 @@ const useStyles = makeStyles((theme) => ({
 
 export type AutocompleteSearchBoxProps = {
   getSuggestions: SuggestionFetchFn;
+  onClose: () => void;
 };
 
 export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
@@ -74,6 +94,12 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const inputProps = {
+    onKeyDown: (event: React.KeyboardEvent) => {
+      if (isAutocompleteSearchBoxHotkey(event)) {
+        event.preventDefault();
+        props.onClose();
+      }
+    },
     value: value,
     onChange: onChange,
     ref: inputRef,
@@ -93,6 +119,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
       inputProps={inputProps}
       theme={{
         input: classes.input,
+        container: classes.container,
         suggestionsContainer: classes.suggestionsContainer,
         suggestionsList: classes.suggestionsList,
       }}
@@ -123,17 +150,21 @@ export const getSuggestions: SuggestionFetchFn = (value) => {
 
 export const useAutocompleteSearchBoxDialog = () => {
   const [open, setOpen] = useState(false);
+  const onClose = () => setOpen(false);
 
   const dialog = (
     <Dialog
       maxWidth={"sm"}
       fullWidth={true}
-      onClose={() => setOpen(false)}
+      onClose={onClose}
       open={open}
       aria-labelledby="search-box-dialog-title"
       aria-describedby="search-box-dialog-description"
     >
-      <AutocompleteSearchBox getSuggestions={getSuggestions} />
+      <AutocompleteSearchBox
+        getSuggestions={getSuggestions}
+        onClose={onClose}
+      />
     </Dialog>
   );
 

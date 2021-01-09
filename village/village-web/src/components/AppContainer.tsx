@@ -10,7 +10,11 @@ import { makeStyles } from "@material-ui/core/styles";
 import theme from "../styles/theme";
 
 import { useHotkeys } from "react-hotkeys-hook";
-import { useAutocompleteSearchBoxDialog } from "./search/AutocompleteSearchBox";
+import {
+  AUTOCOMPLETE_SEARCH_BOX_ESCKEY,
+  AUTOCOMPLETE_SEARCH_BOX_HOTKEY,
+  useAutocompleteSearchBoxDialog,
+} from "./search/AutocompleteSearchBox";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,13 +52,12 @@ export default function AppContainer(props: { children: React.ReactNode }) {
   const classes = useStyles();
   const autocompleteSearchBox = useAutocompleteSearchBoxDialog();
 
-  useHotkeys("command+u", (event) => {
+  useHotkeys(AUTOCOMPLETE_SEARCH_BOX_HOTKEY, (event) => {
     event.preventDefault();
     autocompleteSearchBox.setDialogOpen((v) => !v);
-    // TODO: Need to somehow get the focus here
   });
 
-  useHotkeys("escape", () => {
+  useHotkeys(AUTOCOMPLETE_SEARCH_BOX_ESCKEY, () => {
     autocompleteSearchBox.setDialogOpen(false);
   });
 
