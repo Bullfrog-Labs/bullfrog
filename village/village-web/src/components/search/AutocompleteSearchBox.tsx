@@ -5,6 +5,10 @@ import Autosuggest, {
   SuggestionsFetchRequested,
 } from "react-autosuggest";
 import { assertNever } from "../../utils";
+import {
+  SearchSuggestion,
+  SearchSuggestionFetchFn,
+} from "../../services/search/Suggestions";
 
 const AUTOCOMPLETE_SEARCH_BOX_KEY = "u";
 const AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER = "command";
@@ -23,48 +27,33 @@ const isAutocompleteSearchBoxHotkey = (event: React.KeyboardEvent) => {
   return event.metaKey && event.key === AUTOCOMPLETE_SEARCH_BOX_KEY;
 };
 
-export type CreateNewPostSuggestion = {
-  value: string;
-  action: "createNewPost";
-};
-
-export type NavigateToPostSuggestion = {
-  value: string;
-  action: "navigateToPost";
-};
-
-export type SearchSuggestion =
-  | CreateNewPostSuggestion
-  | NavigateToPostSuggestion;
-
-export type SuggestionFetchFn = (value: string) => SearchSuggestion[];
 type AutocompleteSearchBoxOnChangeFn = (
   event: React.FormEvent<any>,
   newValue: ChangeEvent
 ) => void;
 
-const useStyles = makeStyles((theme) => ({
-  input: {
-    width: "100%",
-    ...theme.typography.h5,
-  },
-  suggestionsContainer: {},
-  container: {
-    width: "100%",
-    height: "100%",
-    padding: theme.spacing(4),
-  },
-  suggestionsList: {
-    listStyleType: "none",
-  },
-}));
-
 export type AutocompleteSearchBoxProps = {
-  getSuggestions: SuggestionFetchFn;
+  getSuggestions: SearchSuggestionFetchFn;
   onClose: () => void;
 };
 
 export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
+  const useStyles = makeStyles((theme) => ({
+    input: {
+      width: "100%",
+      ...theme.typography.h5,
+    },
+    suggestionsContainer: {},
+    container: {
+      width: "100%",
+      height: "100%",
+      padding: theme.spacing(4),
+    },
+    suggestionsList: {
+      listStyleType: "none",
+    },
+  }));
+
   const classes = useStyles();
 
   const [value, setValue] = useState<string>("");
@@ -133,7 +122,7 @@ const allSuggestions: SearchSuggestion[] = [
   { action: "navigateToPost", value: "baz" },
 ];
 
-export const getSuggestions: SuggestionFetchFn = (value) => {
+export const getSuggestions: SearchSuggestionFetchFn = (value) => {
   const exactMatchExists =
     allSuggestions.filter((s) => s.value === value).length !== 0;
 
@@ -148,7 +137,9 @@ export const getSuggestions: SuggestionFetchFn = (value) => {
   return [...createNewPostSuggestions, ...matchingSuggestions];
 };
 
-export const useAutocompleteSearchBoxDialog = () => {
+export const useAutocompleteSearchBoxDialog = (
+  getSuggestions: SearchSuggestionFetchFn
+) => {
   const [open, setOpen] = useState(false);
   const onClose = () => setOpen(false);
 

@@ -15,6 +15,7 @@ import {
   AUTOCOMPLETE_SEARCH_BOX_HOTKEY,
   useAutocompleteSearchBoxDialog,
 } from "./search/AutocompleteSearchBox";
+import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,9 +49,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function AppContainer(props: { children: React.ReactNode }) {
+export interface AppContainerProps extends React.PropsWithChildren<{}> {
+  getSearchBoxSuggestions: SearchSuggestionFetchFn;
+}
+
+export const AppContainer: React.FC<AppContainerProps> = (props) => {
   const classes = useStyles();
-  const autocompleteSearchBox = useAutocompleteSearchBoxDialog();
+  const autocompleteSearchBox = useAutocompleteSearchBoxDialog(
+    props.getSearchBoxSuggestions
+  );
 
   useHotkeys(AUTOCOMPLETE_SEARCH_BOX_HOTKEY, (event) => {
     event.preventDefault();
@@ -86,4 +93,6 @@ export default function AppContainer(props: { children: React.ReactNode }) {
       </div>
     </MuiThemeProvider>
   );
-}
+};
+
+export default AppContainer;
