@@ -5,7 +5,7 @@ import { userPosts0 } from "../testing/Fixtures";
 import { MemoryRouter } from "react-router-dom";
 
 export default {
-  title: "Village/StackView",
+  title: "Stacks/StackView",
   component: StackView,
 } as Meta;
 

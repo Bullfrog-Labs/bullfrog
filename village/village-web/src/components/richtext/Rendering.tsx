@@ -2,6 +2,7 @@ import React from "react";
 import { Typography, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import * as log from "loglevel";
+import { Blockquote } from "../Blockquote";
 
 export const MentionElement = ({
   attributes,
@@ -38,6 +39,19 @@ export const MentionElement = ({
   );
 };
 
+export const BlockquoteElement = ({
+  attributes,
+  children,
+  htmlAttributes,
+}: any) => {
+  const logger = log.getLogger("BlockquoteElement");
+  return (
+    <Blockquote {...attributes} {...htmlAttributes}>
+      {children}
+    </Blockquote>
+  );
+};
+
 export const ParagraphElement = (props: any) => {
   return (
     <Typography paragraph={true} variant="body1">
@@ -46,10 +60,10 @@ export const ParagraphElement = (props: any) => {
   );
 };
 
-export const H5Element = (props: any) => {
-  return <Typography variant="h5">{props.children}</Typography>;
+export const H2Element = (props: any) => {
+  return <Typography variant="h2">{props.children}</Typography>;
 };
 
-export const H6Element = (props: any) => {
-  return <Typography variant="h6">{props.children}</Typography>;
+export const H3Element = (props: any) => {
+  return <Typography variant="h3">{props.children}</Typography>;
 };
