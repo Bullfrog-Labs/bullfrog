@@ -307,7 +307,7 @@ export const getStackPosts = (database: Database) => async (
 
 export type GetStackPostsFn = ReturnType<typeof getStackPosts>;
 
-export const getGlobalMentions = (database: Database) => async (
+export const getAllPostsByTitlePrefix = (database: Database) => async (
   titlePrefix: string
 ): Promise<UserPost[]> => {
   const logger = log.getLogger("getGlobalMentions");
@@ -329,4 +329,4 @@ export const getGlobalMentions = (database: Database) => async (
   return getUserPostsForPosts(database, posts);
 };
 
-export type GetGlobalMentionsFn = ReturnType<typeof getGlobalMentions>;
+export type GetGlobalMentionsFn = ReturnType<typeof getAllPostsByTitlePrefix>;
