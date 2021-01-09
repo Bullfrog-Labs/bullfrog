@@ -85,7 +85,7 @@ export const AppContainer: React.FC<AppContainerProps> = (props) => {
           <Divider />
         </Drawer>
         <main className={classes.content}>
-          <Container maxWidth="md">
+          <Container maxWidth="sm">
             <div />
             {props.children}
           </Container>
