@@ -11,6 +11,7 @@ import { UserRecord, UserId, GetUserFn } from "../services/store/Users";
 import { Link, useParams } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
 import ListItemText from "@material-ui/core/ListItemText";
+import { useGlobalStyles } from "../styles/styles";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -92,6 +93,7 @@ export const ProfileViewController = (props: {
 export const ProfileView = (props: ProfileViewProps) => {
   const logger = log.getLogger("ProfileView");
   const classes = useStyles();
+  const globalClasses = useGlobalStyles();
   const { posts, user } = props;
 
   const listItems = posts.map((post) => {
@@ -103,12 +105,20 @@ export const ProfileView = (props: ProfileViewProps) => {
       >
         <ListItemText
           primary={
-            <Link key={user.uid} to={`/post/${post.authorId}/${post.id}`}>
+            <Link
+              className={globalClasses.link}
+              key={user.uid}
+              to={`/post/${post.authorId}/${post.id}`}
+            >
               <Typography variant="h6">{post.title}</Typography>
             </Link>
           }
           secondary={
-            <React.Fragment>{richTextStringPreview(post.body)}</React.Fragment>
+            <React.Fragment>
+              <Typography variant="body1">
+                {richTextStringPreview(post.body)}
+              </Typography>
+            </React.Fragment>
           }
         />
       </ListItem>

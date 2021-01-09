@@ -15,6 +15,7 @@ import ImageIcon from "@material-ui/icons/Image";
 import { Link, useParams } from "react-router-dom";
 import { UserPost, GetStackPostsFn } from "../services/store/Posts";
 import { richTextStringPreview } from "./richtext/Utils";
+import { useGlobalStyles } from "../styles/styles";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -27,6 +28,10 @@ const useStyles = makeStyles((theme) => ({
   postListItem: {
     paddingLeft: "0px",
     paddingRight: "0px",
+  },
+  username: {
+    fontWeight: 300,
+    color: "grey",
   },
 }));
 
@@ -74,19 +79,23 @@ export const StackView = (props: StackViewProps) => {
   const logger = log.getLogger("StackView");
   const { posts, source } = props;
   const classes = useStyles();
+  const globalClasses = useGlobalStyles();
 
   const listItems = posts.map((post) => {
-    const linkTo = `/profile/${post.user.uid}`;
     const listItemPrimaryText = (
-      <Typography variant="body2">
-        <Link to={`/post/${post.user.uid}/${post.post.id}`}>
-          {post.post.title}
-        </Link>{" "}
-        -{" "}
-        <em>
-          <Link to={linkTo}>{post.user.displayName}</Link>
-        </em>
-      </Typography>
+      <>
+        <Typography variant="h6">
+          <Link
+            className={globalClasses.link}
+            to={`/post/${post.user.uid}/${post.post.id}`}
+          >
+            {post.post.title}
+          </Link>
+        </Typography>
+        <Typography variant="subtitle2" className={classes.username}>
+          <em>{post.user.displayName}</em>
+        </Typography>
+      </>
     );
     return (
       <ListItem
