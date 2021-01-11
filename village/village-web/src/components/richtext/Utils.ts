@@ -48,9 +48,11 @@ export const richTextStringPreview = (
 export const mentionPreview = (body: RichText, path: Path): any => {
   const editor = createEditor();
   editor.children = body;
-  const aboveBlock = Editor.above(editor, { at: path });
+  const block = Editor.above(editor, { at: path });
+  const node = block && block[0];
+  if (node) node["noGutter"] = true;
   //const afterBlock = Editor.after(editor, path, { unit: "block" });
   //const blockRange = aboveBlock && Editor.range(editor, aboveBlock, afterBlock);
 
-  return aboveBlock && [{ children: [aboveBlock[0]] }];
+  return node && [{ children: [node] }];
 };

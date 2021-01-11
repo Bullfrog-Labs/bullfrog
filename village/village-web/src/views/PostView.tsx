@@ -409,12 +409,14 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
       >
         <ListItemText
           primary={
-            <Link
-              className={globalClasses.link}
-              to={`/post/${mention.post.authorId}/${mention.post.id}`}
-            >
-              {mention.post.title}
-            </Link>
+            <Typography variant="h6">
+              <Link
+                className={globalClasses.link}
+                to={`/post/${mention.post.authorId}/${mention.post.id}`}
+              >
+                {mention.post.title}
+              </Link>
+            </Typography>
           }
           secondary={
             <React.Fragment>
