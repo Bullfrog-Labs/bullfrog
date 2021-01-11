@@ -130,6 +130,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
         props.onClose();
       }
     },
+    placeholder: "Type to search and create",
     value: value,
     onChange: onChange,
     ref: inputRef,
