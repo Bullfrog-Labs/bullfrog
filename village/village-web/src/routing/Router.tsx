@@ -9,7 +9,7 @@ import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
 import {
   CreatePostFn,
-  GetGlobalMentionsFn,
+  GetAllPostsByTitlePrefixFn,
   GetPostFn,
   GetStackPostsFn,
   GetUserPostsFn,
@@ -43,7 +43,7 @@ export const Router = (props: {
   createPost: (user: UserRecord) => CreatePostFn;
   renamePost: (user: UserRecord) => RenamePostFn;
   syncBody: (user: UserRecord) => SyncBodyFn;
-  getGlobalMentions: GetGlobalMentionsFn;
+  getGlobalMentions: GetAllPostsByTitlePrefixFn;
   user?: UserRecord;
 }) => {
   const {

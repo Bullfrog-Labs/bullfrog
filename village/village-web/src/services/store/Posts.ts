@@ -329,4 +329,6 @@ export const getAllPostsByTitlePrefix = (database: Database) => async (
   return getUserPostsForPosts(database, posts);
 };
 
-export type GetGlobalMentionsFn = ReturnType<typeof getAllPostsByTitlePrefix>;
+export type GetAllPostsByTitlePrefixFn = ReturnType<
+  typeof getAllPostsByTitlePrefix
+>;

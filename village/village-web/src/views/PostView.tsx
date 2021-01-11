@@ -31,7 +31,7 @@ import {
   CreatePostFn,
   PostBody,
   PostTitle,
-  GetGlobalMentionsFn,
+  GetAllPostsByTitlePrefixFn,
 } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
 import { useMentions } from "../hooks/useMentions";
@@ -275,7 +275,7 @@ export const CreateNewPostView = (props: CreateNewPostViewProps) => {
 
 export type CreateNewPostViewControllerProps = {
   createPost: CreatePostFn;
-  getGlobalMentions: GetGlobalMentionsFn;
+  getGlobalMentions: GetAllPostsByTitlePrefixFn;
   user: UserRecord;
 };
 
@@ -562,7 +562,7 @@ type PostViewControllerProps = {
   viewer: UserRecord;
   getUser: GetUserFn;
   getPost: (uid: UserId, postId: PostId) => Promise<PostRecord | undefined>;
-  getGlobalMentions: GetGlobalMentionsFn;
+  getGlobalMentions: GetAllPostsByTitlePrefixFn;
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
   createPost: CreatePostFn;
