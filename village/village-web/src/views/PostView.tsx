@@ -50,6 +50,7 @@ import {
 } from "../components/richtext/Utils";
 import { PostAuthorLink } from "../components/identity/PostAuthorLink";
 import { PostStackLink } from "../components/stacks/PostStackLink";
+import { useGlobalStyles } from "../styles/styles";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -378,6 +379,7 @@ type PostViewImperativeHandle = {
 const MentionsSection = (props: { mentions: UserPost[] }) => {
   const classes = useStyles();
   const { mentions } = props;
+  const globalClasses = useGlobalStyles();
   const mentionListItems = mentions.map((mention) => {
     return (
       <ListItem
@@ -387,7 +389,10 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
       >
         <ListItemText
           primary={
-            <Link to={`/post/${mention.post.authorId}/${mention.post.id}`}>
+            <Link
+              className={globalClasses.link}
+              to={`/post/${mention.post.authorId}/${mention.post.id}`}
+            >
               {mention.post.title}
             </Link>
           }
