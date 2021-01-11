@@ -14,38 +14,38 @@ const allSuggestions: SearchSuggestion[] = [
     action: "navigateToPost",
     authorId: "123",
     authorUsername: "user123",
-    value: "foo",
+    title: "foo",
   },
   {
     action: "navigateToPost",
     authorId: "456",
     authorUsername: "user456",
-    value: "foo",
+    title: "foo",
   },
   {
     action: "navigateToPost",
     authorId: "456",
     authorUsername: "user456",
-    value: "bar",
+    title: "bar",
   },
   {
     action: "navigateToPost",
     authorId: "456",
     authorUsername: "user456",
-    value: "baz",
+    title: "baz",
   },
 ];
 
 export const getSuggestions: SearchSuggestionFetchFn = async (value) => {
   const exactMatchExists =
-    allSuggestions.filter((s) => s.value === value).length !== 0;
+    allSuggestions.filter((s) => s.title === value).length !== 0;
 
   const createNewPostSuggestions: SearchSuggestion[] = exactMatchExists
     ? []
-    : [{ action: "createNewPost", value: value }];
+    : [{ action: "createNewPost", title: value }];
 
   const matchingSuggestions = allSuggestions.filter((s) =>
-    s.value.startsWith(value)
+    s.title.startsWith(value)
   );
 
   return [...createNewPostSuggestions, ...matchingSuggestions];

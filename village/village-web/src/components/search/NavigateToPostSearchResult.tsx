@@ -12,11 +12,11 @@ export const NavigateToPostSearchResult = (
 ) => {
   const ownPost = props.user.uid === props.suggestion.authorId;
   if (ownPost) {
-    return <div>{props.suggestion.value}</div>;
+    return <div>{props.suggestion.title}</div>;
   } else {
     return (
       <div>
-        {props.suggestion.value} by {props.suggestion.authorUsername}
+        {props.suggestion.title} by {props.suggestion.authorUsername}
       </div>
     );
   }

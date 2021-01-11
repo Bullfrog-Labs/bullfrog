@@ -13,6 +13,7 @@ import {
 import { UserRecord } from "../../services/store/Users";
 import { NavigateToPostSearchResult } from "./NavigateToPostSearchResult";
 import { useHistory } from "react-router-dom";
+import { postURL } from "../../routing/URLs";
 
 const AUTOCOMPLETE_SEARCH_BOX_KEY = "u";
 const AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER = "command";
@@ -85,11 +86,11 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
     setSuggestions([]);
   };
 
-  const getSuggestionValue = (suggestion: SearchSuggestion) => suggestion.value;
+  const getSuggestionValue = (suggestion: SearchSuggestion) => suggestion.title;
   const renderSuggestion = (suggestion: SearchSuggestion) => {
     switch (suggestion.action) {
       case "createNewPost":
-        return <div>create new post: {suggestion.value}</div>;
+        return <div>create new post: {suggestion.title}</div>;
       case "navigateToPost":
         return (
           <NavigateToPostSearchResult
@@ -113,8 +114,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
         console.log("Creating a new post");
         break;
       case "navigateToPost":
-        console.log("Navigating to post");
-        history.push();
+        history.push(postURL(data.suggestion.authorId, data.suggestion.title));
         break;
       default:
         assertNever(data.suggestion);

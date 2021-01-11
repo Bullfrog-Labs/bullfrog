@@ -31,7 +31,7 @@ export const NavigateToOwnPost = Template.bind({});
 NavigateToOwnPost.args = {
   user: user,
   suggestion: {
-    value: "Bar",
+    title: "Bar",
     authorId: "123",
     authorUsername: "foo",
     action: "navigateToPost",
@@ -42,7 +42,7 @@ export const NavigateToOtherPost = Template.bind({});
 NavigateToOtherPost.args = {
   user: user,
   suggestion: {
-    value: "Bar",
+    title: "Bar",
     authorId: "456“",
     authorUsername: "baz",
     action: "navigateToPost",

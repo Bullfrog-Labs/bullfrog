@@ -4,12 +4,12 @@ import { getAllPostsByTitlePrefix } from "../store/Posts";
 import { UserId } from "../store/Users";
 
 export type CreateNewPostSuggestion = {
-  value: string;
+  title: string;
   action: "createNewPost";
 };
 
 export type NavigateToPostSuggestion = {
-  value: string;
+  title: string;
   authorId: UserId;
   authorUsername: string;
   action: "navigateToPost";
@@ -33,12 +33,11 @@ export const getSearchSuggestionsByTitlePrefix: (
 
   const createNewPostSuggestions: CreateNewPostSuggestion[] = exactMatchExists
     ? []
-    : [{ action: "createNewPost", value: value }];
+    : [{ action: "createNewPost", title: value }];
 
-  // TODO: Need to add author here
   const matchingSuggestions: NavigateToPostSuggestion[] = allMatches.map(
     (s) => ({
-      value: s.post.title,
+      title: s.post.title,
       authorId: s.user.uid,
       authorUsername: s.user.username,
       action: "navigateToPost",
