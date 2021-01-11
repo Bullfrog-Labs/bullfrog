@@ -77,7 +77,11 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
       case "createNewPost":
         return <div>create new post: {suggestion.value}</div>;
       case "navigateToPost":
-        return <div>{suggestion.value}</div>;
+        return (
+          <div>
+            {suggestion.authorUsername}/{suggestion.value}
+          </div>
+        );
       default:
         assertNever(suggestion);
     }
@@ -116,27 +120,6 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
       }}
     />
   );
-};
-
-const allSuggestions: SearchSuggestion[] = [
-  { action: "navigateToPost", value: "foo" },
-  { action: "navigateToPost", value: "bar" },
-  { action: "navigateToPost", value: "baz" },
-];
-
-export const getSuggestions: SearchSuggestionFetchFn = async (value) => {
-  const exactMatchExists =
-    allSuggestions.filter((s) => s.value === value).length !== 0;
-
-  const createNewPostSuggestions: SearchSuggestion[] = exactMatchExists
-    ? []
-    : [{ action: "createNewPost", value: value }];
-
-  const matchingSuggestions = allSuggestions.filter((s) =>
-    s.value.startsWith(value)
-  );
-
-  return [...createNewPostSuggestions, ...matchingSuggestions];
 };
 
 export const useAutocompleteSearchBoxDialog = (
