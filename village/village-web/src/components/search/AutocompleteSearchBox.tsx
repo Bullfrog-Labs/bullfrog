@@ -76,7 +76,9 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
     setSuggestions(suggestions);
   };
 
-  const onSuggestionsClearRequested = undefined;
+  const onSuggestionsClearRequested = () => {
+    setSuggestions([]);
+  };
 
   const getSuggestionValue = (suggestion: SearchSuggestion) => suggestion.value;
   const renderSuggestion = (suggestion: SearchSuggestion) => {
