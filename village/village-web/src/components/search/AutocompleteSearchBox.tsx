@@ -62,8 +62,10 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   const onChange: AutocompleteSearchBoxOnChangeFn = (event, changeEvent) => {
     setValue(changeEvent.newValue);
   };
-  const onSuggestionsFetchRequested: SuggestionsFetchRequested = (request) => {
-    const suggestions = props.getSuggestions(request.value);
+  const onSuggestionsFetchRequested: SuggestionsFetchRequested = async (
+    request
+  ) => {
+    const suggestions = await props.getSuggestions(request.value);
     setSuggestions(suggestions);
   };
 
@@ -122,7 +124,7 @@ const allSuggestions: SearchSuggestion[] = [
   { action: "navigateToPost", value: "baz" },
 ];
 
-export const getSuggestions: SearchSuggestionFetchFn = (value) => {
+export const getSuggestions: SearchSuggestionFetchFn = async (value) => {
   const exactMatchExists =
     allSuggestions.filter((s) => s.value === value).length !== 0;
 

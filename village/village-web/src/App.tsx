@@ -27,6 +27,7 @@ import {
   getAllPostsByTitlePrefix,
 } from "./services/store/Posts";
 import { useEffect } from "react";
+import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
 
 Logging.configure(log);
 
@@ -106,6 +107,9 @@ function App() {
         renamePost={renamePost(database)}
         syncBody={syncBody(database)}
         getGlobalMentions={getAllPostsByTitlePrefix(database)}
+        getSearchSuggestionsByTitlePrefix={getSearchSuggestionsByTitlePrefix(
+          database
+        )}
         user={user}
       />
     </AuthContext.Provider>

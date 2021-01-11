@@ -1,5 +1,4 @@
 import { Database } from "../store/Database";
-import { getAllPostsByTitlePrefix } from "../store/Posts";
 
 export type CreateNewPostSuggestion = {
   value: string;
@@ -15,11 +14,14 @@ export type SearchSuggestion =
   | CreateNewPostSuggestion
   | NavigateToPostSuggestion;
 
-export type SearchSuggestionFetchFn = (value: string) => SearchSuggestion[];
+export type SearchSuggestionFetchFn = (
+  value: string
+) => Promise<SearchSuggestion[]>;
 
 export const getSearchSuggestionsByTitlePrefix: (
   database: Database
-) => SearchSuggestionFetchFn = (database) => async (value: string) => {
-  const allMatches = await getAllPostsByTitlePrefix(database)(value);
-  return [];
+) => SearchSuggestionFetchFn = () => async () => {
+  // const allMatches = await getAllPostsByTitlePrefix(database)(value);
+  const foo: SearchSuggestion[] = [];
+  return new Promise((resolve) => resolve(foo));
 };
