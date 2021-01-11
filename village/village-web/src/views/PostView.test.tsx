@@ -9,11 +9,16 @@ import { MemoryRouter, Route, Router } from "react-router-dom";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 
 import { createMemoryHistory } from "history";
-import { PostId } from "../services/store/Posts";
+import { PostId, UserPost, PostRecord } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
+import { userPosts0 } from "../testing/Fixtures";
 
 const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
   return <React.Fragment>option.value</React.Fragment>;
+};
+
+const getMentionUserPosts0 = async (postId: PostId): Promise<UserPost[]> => {
+  return [];
 };
 
 const viewer: UserRecord = {
@@ -27,6 +32,23 @@ const author: UserRecord = {
   displayName: "qux",
   username: "qux",
 };
+
+const posts: PostRecord[] = [
+  {
+    id: "abc",
+    authorId: author.uid,
+    body: EMPTY_RICH_TEXT,
+    title: "Foo",
+    mentions: [],
+  },
+  {
+    id: "def",
+    authorId: author.uid,
+    body: stringToSlateNode("Non-empty"),
+    title: "Bar",
+    mentions: [],
+  },
+];
 
 test("Renders CreateNewPostView", () => {
   const createPost = jest.fn();
@@ -52,8 +74,8 @@ test("Renders CreateNewPostView", () => {
   expect(titleEl).toBeInTheDocument();
 });
 
-test("Renders PostView", () => {
-  const props = {
+const TestPostView = (props: { mentions?: UserPost[] }) => {
+  const postProps = {
     readOnly: false,
     postId: "foo",
     title: "bar",
@@ -62,6 +84,7 @@ test("Renders PostView", () => {
     setBody: jest.fn(),
     viewer: viewer,
     author: author,
+    mentions: props.mentions || [],
 
     getTitle: jest.fn(),
     renamePost: jest.fn(),
@@ -73,10 +96,30 @@ test("Renders PostView", () => {
     mentionableElementFn: mentionableElementFn,
   };
 
-  const { getByText } = render(
+  return (
     <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
-      <PostView {...props} />
+      <PostView {...postProps} />
     </MemoryRouter>
+  );
+};
+
+test("Renders PostView with no mentions", () => {
+  const { getByText, queryByText } = render(<TestPostView />);
+
+  const titleEl = getByText("bar");
+  expect(titleEl).toBeInTheDocument();
+
+  const authorEl = getByText("qux");
+  expect(authorEl).toBeInTheDocument();
+
+  const mentionsEl = queryByText("Mentions");
+  expect(mentionsEl).toBeNull();
+});
+
+test("Renders PostView with mentions", () => {
+  const mentions = userPosts0;
+  const { getByText, queryAllByText } = render(
+    <TestPostView mentions={mentions} />
   );
 
   const titleEl = getByText("bar");
@@ -84,24 +127,16 @@ test("Renders PostView", () => {
 
   const authorEl = getByText("qux");
   expect(authorEl).toBeInTheDocument();
+
+  const mentionsEl = getByText("Mentions");
+  expect(mentionsEl).toBeInTheDocument();
+
+  const mentionTitleEls = queryAllByText("Title mane");
+  expect(mentionTitleEls.length).toEqual(2);
 });
 
 test("PostView to PostView navigation works", async () => {
   const history = createMemoryHistory();
-  const posts = [
-    {
-      id: "abc",
-      authorId: author.uid,
-      body: EMPTY_RICH_TEXT,
-      title: "Foo",
-    },
-    {
-      id: "def",
-      authorId: author.uid,
-      body: stringToSlateNode("Non-empty"),
-      title: "Bar",
-    },
-  ];
 
   const postsMap = new Map(posts.map((post) => [post.id, post]));
 
@@ -122,6 +157,7 @@ test("PostView to PostView navigation works", async () => {
     renamePost: jest.fn(),
     syncBody: jest.fn(),
     createPost: jest.fn(),
+    getMentionUserPosts: getMentionUserPosts0,
   };
 
   history.push(`/post/${author.uid}/abc`);
