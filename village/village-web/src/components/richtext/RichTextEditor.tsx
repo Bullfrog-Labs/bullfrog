@@ -340,4 +340,18 @@ const RichTextEditor = forwardRef<
   );
 });
 
+export const RichTextViewer = (props: { body: RichText }) => {
+  return (
+    <RichTextEditor
+      readOnly={true}
+      body={props.body}
+      onChange={(newBody: Body) => {}}
+      enableToolbar={false}
+      mentionables={[]}
+      onMentionSearchChanged={(search: string) => {}}
+      onMentionAdded={(option: MentionNodeData) => {}}
+    />
+  );
+};
+
 export default RichTextEditor;

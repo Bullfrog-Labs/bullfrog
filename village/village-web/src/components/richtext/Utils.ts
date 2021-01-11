@@ -1,5 +1,5 @@
 import { RichText } from "./Types";
-import { Node as SlateNode } from "slate";
+import { createEditor, Editor, Node as SlateNode, Path } from "slate";
 
 export const EMPTY_RICH_TEXT: RichText = [
   {
@@ -43,4 +43,14 @@ export const richTextStringPreview = (
   return Array.from(SlateNode.texts(richText[0]), ([text, path]) => text.text)
     .slice(0, 3)
     .join("\n");
+};
+
+export const mentionPreview = (body: RichText, path: Path): any => {
+  const editor = createEditor();
+  editor.children = body;
+  const aboveBlock = Editor.above(editor, { at: path });
+  //const afterBlock = Editor.after(editor, path, { unit: "block" });
+  //const blockRange = aboveBlock && Editor.range(editor, aboveBlock, afterBlock);
+
+  return aboveBlock && [{ children: [aboveBlock[0]] }];
 };

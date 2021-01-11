@@ -1,6 +1,6 @@
 import * as log from "loglevel";
 import React, { useContext, useState, useEffect } from "react";
-import { Container, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import { AuthContext } from "../services/auth/Auth";
 import Divider from "@material-ui/core/Divider";
 import { makeStyles } from "@material-ui/core/styles";

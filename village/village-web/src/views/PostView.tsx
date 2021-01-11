@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import RichTextEditor, {
   RichTextEditorImperativeHandle,
+  RichTextViewer,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
 import {
@@ -47,6 +48,7 @@ import DocumentTitle from "../components/richtext/DocumentTitle";
 import {
   EMPTY_RICH_TEXT,
   richTextStringPreview,
+  mentionPreview,
 } from "../components/richtext/Utils";
 import { PostAuthorLink } from "../components/identity/PostAuthorLink";
 import { PostStackLink } from "../components/stacks/PostStackLink";
@@ -163,6 +165,7 @@ const useEditablePostComponents: (
 export type BasePostViewProps = {
   readOnly: boolean;
   postView: React.ReactChild;
+  mentions?: UserPost[];
 };
 
 export const BasePostView = (props: BasePostViewProps) => {
@@ -171,7 +174,23 @@ export const BasePostView = (props: BasePostViewProps) => {
 
   return (
     <Container className={classes.postView} maxWidth="sm">
-      <Paper elevation={paperElevation}>{props.postView}</Paper>
+      <Grid container spacing={3}>
+        <Grid item sm={12}>
+          <Paper elevation={paperElevation}>{props.postView}</Paper>
+        </Grid>
+        {props.mentions && (
+          <Grid item sm={12}>
+            <Paper elevation={paperElevation}>
+              <Grid container spacing={1}>
+                <Grid item sm={1}></Grid>
+                <Grid item sm={11}>
+                  <MentionsSection mentions={props.mentions} />
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
+        )}
+      </Grid>
     </Container>
   );
 };
@@ -380,6 +399,7 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
   const classes = useStyles();
   const { mentions } = props;
   const globalClasses = useGlobalStyles();
+
   const mentionListItems = mentions.map((mention) => {
     return (
       <ListItem
@@ -398,14 +418,16 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
           }
           secondary={
             <React.Fragment>
-              {richTextStringPreview(mention.post.body)}
+              <RichTextViewer
+                body={mentionPreview(mention.post.body, [0, 0, 1])}
+              />
             </React.Fragment>
           }
         />
       </ListItem>
     );
   });
-  if (mentionListItems.length == 0) {
+  if (mentionListItems.length === 0) {
     return <React.Fragment />;
   } else {
     return (
@@ -418,7 +440,9 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
           spacing={4}
         >
           <Grid item>
-            <Typography variant="h5">Mentions</Typography>
+            <Typography variant="h6">
+              <em>Mentions</em>
+            </Typography>
             <List>{mentionListItems}</List>
           </Grid>
         </Grid>
@@ -610,7 +634,6 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
           </Grid>
           <Grid item sm={11}>
             {postDetails}
-            <MentionsSection mentions={props.mentions} />
           </Grid>
         </Grid>
       </>
@@ -620,7 +643,13 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
       blurBody: () => richTextEditorRef.current?.blurEditor(),
     }));
 
-    return <BasePostView readOnly={props.readOnly} postView={postView} />;
+    return (
+      <BasePostView
+        readOnly={props.readOnly}
+        postView={postView}
+        mentions={props.mentions}
+      />
+    );
   }
 );
 
