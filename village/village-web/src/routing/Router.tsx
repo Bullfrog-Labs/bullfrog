@@ -13,6 +13,7 @@ import {
   GetPostFn,
   GetStackPostsFn,
   GetUserPostsFn,
+  GetMentionUserPostsFn,
   RenamePostFn,
   SyncBodyFn,
 } from "../services/store/Posts";
@@ -46,6 +47,7 @@ export const Router = (props: {
   syncBody: (user: UserRecord) => SyncBodyFn;
   getGlobalMentions: GetAllPostsByTitlePrefixFn;
   getSearchSuggestionsByTitlePrefix: SearchSuggestionFetchFn;
+  getMentionUserPosts: GetMentionUserPostsFn;
   user?: UserRecord;
 }) => {
   const {
@@ -59,6 +61,7 @@ export const Router = (props: {
     syncBody,
     getGlobalMentions,
     getSearchSuggestionsByTitlePrefix,
+    getMentionUserPosts,
     user,
   } = props;
   const AppContainerWithProps: React.FC<{}> = (props) => (
@@ -119,6 +122,7 @@ export const Router = (props: {
                 syncBody={syncBody(user)}
                 getGlobalMentions={getGlobalMentions}
                 createPost={createPost(user)}
+                getMentionUserPosts={getMentionUserPosts}
               />
             </AppContainerWithProps>
           </PrivateRoute>

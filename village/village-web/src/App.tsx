@@ -24,6 +24,7 @@ import {
   createPost,
   renamePost,
   syncBody,
+  getMentionUserPosts,
   getAllPostsByTitlePrefix,
 } from "./services/store/Posts";
 import { useEffect } from "react";
@@ -107,6 +108,7 @@ function App() {
         renamePost={renamePost(database)}
         syncBody={syncBody(database)}
         getGlobalMentions={getAllPostsByTitlePrefix(database)}
+        getMentionUserPosts={getMentionUserPosts(database)}
         getSearchSuggestionsByTitlePrefix={getSearchSuggestionsByTitlePrefix(
           database
         )}
