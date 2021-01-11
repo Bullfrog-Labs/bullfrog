@@ -51,6 +51,13 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
     },
     suggestionsList: {
       listStyleType: "none",
+      paddingLeft: theme.spacing(2),
+    },
+    suggestionHighlighted: {
+      backgroundColor: theme.palette.action.selected,
+    },
+    suggestion: {
+      ...theme.typography.h5,
     },
   }));
 
@@ -117,6 +124,8 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
         container: classes.container,
         suggestionsContainer: classes.suggestionsContainer,
         suggestionsList: classes.suggestionsList,
+        suggestionHighlighted: classes.suggestionHighlighted,
+        suggestion: classes.suggestion,
       }}
     />
   );
