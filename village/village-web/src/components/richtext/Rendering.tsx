@@ -3,6 +3,7 @@ import { Typography, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import * as log from "loglevel";
 import { Blockquote } from "../Blockquote";
+import { useGlobalStyles } from "../../styles/styles";
 
 export const MentionElement = ({
   attributes,
@@ -10,6 +11,7 @@ export const MentionElement = ({
   element,
   htmlAttributes,
 }: any) => {
+  const globalClasses = useGlobalStyles();
   const logger = log.getLogger("MentionElement");
   const postId = element["postId"];
   const authorId = element["authorId"];
@@ -26,6 +28,7 @@ export const MentionElement = ({
       <Tooltip title={authorUsername}>
         <Link
           {...attributes}
+          className={globalClasses.link}
           data-slate-value={title}
           to={`/post/${authorId}/${postId}`}
           contentEditable={false}
