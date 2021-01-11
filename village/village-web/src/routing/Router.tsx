@@ -65,7 +65,10 @@ export const Router = (props: {
     user,
   } = props;
   const AppContainerWithProps: React.FC<{}> = (props) => (
-    <AppContainer getSearchBoxSuggestions={getSearchSuggestionsByTitlePrefix}>
+    <AppContainer
+      user={user}
+      getSearchBoxSuggestions={getSearchSuggestionsByTitlePrefix}
+    >
       {props.children}
     </AppContainer>
   );

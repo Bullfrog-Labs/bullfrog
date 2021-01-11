@@ -16,6 +16,7 @@ import {
   useAutocompleteSearchBoxDialog,
 } from "./search/AutocompleteSearchBox";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
+import { UserRecord } from "../services/store/Users";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -49,29 +50,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export interface AppContainerProps extends React.PropsWithChildren<{}> {
-  getSearchBoxSuggestions: SearchSuggestionFetchFn;
-}
+type BaseAppContainerProps = {
+  autocompleteSearchBoxDialog?: React.ReactChild;
+};
 
-export const AppContainer: React.FC<AppContainerProps> = (props) => {
+const BaseAppContainer: React.FC<BaseAppContainerProps> = (props) => {
   const classes = useStyles();
-  const autocompleteSearchBox = useAutocompleteSearchBoxDialog(
-    props.getSearchBoxSuggestions
-  );
-
-  useHotkeys(AUTOCOMPLETE_SEARCH_BOX_HOTKEY, (event) => {
-    event.preventDefault();
-    autocompleteSearchBox.setDialogOpen((v) => !v);
-  });
-
-  useHotkeys(AUTOCOMPLETE_SEARCH_BOX_ESCKEY, () => {
-    autocompleteSearchBox.setDialogOpen(false);
-  });
 
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
-      {autocompleteSearchBox.dialog}
+      {!!props.autocompleteSearchBoxDialog && props.autocompleteSearchBoxDialog}
       <div className={classes.root}>
         <Drawer
           className={classes.drawer}
@@ -94,5 +83,51 @@ export const AppContainer: React.FC<AppContainerProps> = (props) => {
     </MuiThemeProvider>
   );
 };
+
+export interface AppContainerProps extends React.PropsWithChildren<{}> {
+  user?: UserRecord;
+  getSearchBoxSuggestions: SearchSuggestionFetchFn;
+}
+
+export const AppContainer: React.FC<AppContainerProps> = (props) =>
+  !!props.user ? (
+    <AuthedAppContainer {...props} />
+  ) : (
+    <UnauthedAppContainer {...props} />
+  );
+
+const AuthedAppContainer = (props: AppContainerProps) => {
+  if (!props.user) {
+    throw new Error(
+      "AuthedAppContainer should be called with valid authenticated user."
+    );
+  }
+
+  const autocompleteSearchBox = useAutocompleteSearchBoxDialog(
+    props.user,
+    props.getSearchBoxSuggestions
+  );
+
+  useHotkeys(AUTOCOMPLETE_SEARCH_BOX_HOTKEY, (event) => {
+    event.preventDefault();
+    autocompleteSearchBox.setDialogOpen((v) => !v);
+  });
+
+  useHotkeys(AUTOCOMPLETE_SEARCH_BOX_ESCKEY, () => {
+    autocompleteSearchBox.setDialogOpen(false);
+  });
+
+  return (
+    <BaseAppContainer
+      autocompleteSearchBoxDialog={autocompleteSearchBox.dialog}
+    >
+      {props.children}
+    </BaseAppContainer>
+  );
+};
+
+const UnauthedAppContainer = (props: AppContainerProps) => (
+  <BaseAppContainer>{props.children}</BaseAppContainer>
+);
 
 export default AppContainer;

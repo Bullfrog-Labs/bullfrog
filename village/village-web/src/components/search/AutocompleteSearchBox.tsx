@@ -9,6 +9,7 @@ import {
   SearchSuggestion,
   SearchSuggestionFetchFn,
 } from "../../services/search/Suggestions";
+import { UserRecord } from "../../services/store/Users";
 
 const AUTOCOMPLETE_SEARCH_BOX_KEY = "u";
 const AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER = "command";
@@ -33,6 +34,7 @@ type AutocompleteSearchBoxOnChangeFn = (
 ) => void;
 
 export type AutocompleteSearchBoxProps = {
+  user: UserRecord;
   getSuggestions: SearchSuggestionFetchFn;
   onClose: () => void;
 };
@@ -134,6 +136,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
 };
 
 export const useAutocompleteSearchBoxDialog = (
+  user: UserRecord,
   getSuggestions: SearchSuggestionFetchFn
 ) => {
   const [open, setOpen] = useState(false);
@@ -149,6 +152,7 @@ export const useAutocompleteSearchBoxDialog = (
       aria-describedby="search-box-dialog-description"
     >
       <AutocompleteSearchBox
+        user={user}
         getSuggestions={getSuggestions}
         onClose={onClose}
       />
