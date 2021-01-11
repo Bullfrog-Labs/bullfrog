@@ -114,7 +114,8 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
         console.log("Creating a new post");
         break;
       case "navigateToPost":
-        history.push(postURL(data.suggestion.authorId, data.suggestion.title));
+        history.push(postURL(data.suggestion.authorId, data.suggestion.postId));
+        props.onClose();
         break;
       default:
         assertNever(data.suggestion);

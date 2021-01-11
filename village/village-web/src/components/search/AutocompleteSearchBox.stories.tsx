@@ -15,24 +15,28 @@ const allSuggestions: SearchSuggestion[] = [
     authorId: "123",
     authorUsername: "user123",
     title: "foo",
+    postId: "jkdljksada",
   },
   {
     action: "navigateToPost",
     authorId: "456",
     authorUsername: "user456",
     title: "foo",
+    postId: "jlkoqipewq",
   },
   {
     action: "navigateToPost",
     authorId: "456",
     authorUsername: "user456",
     title: "bar",
+    postId: "qweqpoewqi",
   },
   {
     action: "navigateToPost",
     authorId: "456",
     authorUsername: "user456",
     title: "baz",
+    postId: "zxcxznmmxz",
   },
 ];
 

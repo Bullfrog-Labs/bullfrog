@@ -1,5 +1,5 @@
 import { Database } from "../store/Database";
-import { getAllPostsByTitlePrefix } from "../store/Posts";
+import { getAllPostsByTitlePrefix, PostId } from "../store/Posts";
 
 import { UserId } from "../store/Users";
 
@@ -10,6 +10,7 @@ export type CreateNewPostSuggestion = {
 
 export type NavigateToPostSuggestion = {
   title: string;
+  postId: PostId;
   authorId: UserId;
   authorUsername: string;
   action: "navigateToPost";
@@ -38,6 +39,7 @@ export const getSearchSuggestionsByTitlePrefix: (
   const matchingSuggestions: NavigateToPostSuggestion[] = allMatches.map(
     (s) => ({
       title: s.post.title,
+      postId: s.post.id!,
       authorId: s.user.uid,
       authorUsername: s.user.username,
       action: "navigateToPost",

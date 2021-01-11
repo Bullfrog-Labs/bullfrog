@@ -32,6 +32,7 @@ NavigateToOwnPost.args = {
   user: user,
   suggestion: {
     title: "Bar",
+    postId: "reojd",
     authorId: "123",
     authorUsername: "foo",
     action: "navigateToPost",
@@ -43,6 +44,7 @@ NavigateToOtherPost.args = {
   user: user,
   suggestion: {
     title: "Bar",
+    postId: "jklsd",
     authorId: "456“",
     authorUsername: "baz",
     action: "navigateToPost",
