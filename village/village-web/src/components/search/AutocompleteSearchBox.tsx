@@ -10,6 +10,7 @@ import {
   SearchSuggestionFetchFn,
 } from "../../services/search/Suggestions";
 import { UserRecord } from "../../services/store/Users";
+import { NavigateToPostSearchResult } from "./NavigateToPostSearchResult";
 
 const AUTOCOMPLETE_SEARCH_BOX_KEY = "u";
 const AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER = "command";
@@ -89,9 +90,10 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
         return <div>create new post: {suggestion.value}</div>;
       case "navigateToPost":
         return (
-          <div>
-            {suggestion.authorUsername}/{suggestion.value}
-          </div>
+          <NavigateToPostSearchResult
+            user={props.user}
+            suggestion={suggestion}
+          />
         );
       default:
         assertNever(suggestion);
