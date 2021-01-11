@@ -2,6 +2,7 @@ import { Dialog, makeStyles } from "@material-ui/core";
 import React, { useEffect, useRef, useState } from "react";
 import Autosuggest, {
   ChangeEvent,
+  OnSuggestionSelected,
   SuggestionsFetchRequested,
 } from "react-autosuggest";
 import { assertNever } from "../../utils";
@@ -11,6 +12,7 @@ import {
 } from "../../services/search/Suggestions";
 import { UserRecord } from "../../services/store/Users";
 import { NavigateToPostSearchResult } from "./NavigateToPostSearchResult";
+import { useHistory } from "react-router-dom";
 
 const AUTOCOMPLETE_SEARCH_BOX_KEY = "u";
 const AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER = "command";
@@ -100,6 +102,25 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
     }
   };
 
+  const history = useHistory();
+
+  const onSuggestionSelected: OnSuggestionSelected<SearchSuggestion> = (
+    event,
+    data
+  ) => {
+    switch (data.suggestion.action) {
+      case "createNewPost":
+        console.log("Creating a new post");
+        break;
+      case "navigateToPost":
+        console.log("Navigating to post");
+        history.push();
+        break;
+      default:
+        assertNever(data.suggestion);
+    }
+  };
+
   const inputRef = useRef<HTMLInputElement>(null);
   const inputProps = {
     onKeyDown: (event: React.KeyboardEvent) => {
@@ -124,6 +145,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
       onSuggestionsClearRequested={onSuggestionsClearRequested}
       getSuggestionValue={getSuggestionValue}
       renderSuggestion={renderSuggestion}
+      onSuggestionSelected={onSuggestionSelected}
       inputProps={inputProps}
       theme={{
         input: classes.input,

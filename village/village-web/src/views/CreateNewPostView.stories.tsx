@@ -2,6 +2,7 @@ import { Meta, Story } from "@storybook/react/types-6-0";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { useMentions } from "../hooks/useMentions";
+import { postURL } from "../routing/URLs";
 import {
   UserPost,
   CreatePostResult,
@@ -54,7 +55,7 @@ Untitled.args = {
   createPost: async (newTitle, newBody) => ({
     state: "success",
     postId: "123",
-    postUrl: `/posts/456/${newTitle}`,
+    postUrl: postURL("456", newTitle),
   }),
   redirectAfterCreate: (postUrl) => {
     console.log(`Redirecting to post url ${postUrl}`);
@@ -67,7 +68,7 @@ PrepopulatedTitle.args = {
   createPost: async (newTitle, newBody) => ({
     state: "success",
     postId: "123",
-    postUrl: `/posts/456/${newTitle}`,
+    postUrl: postURL("456", newTitle),
   }),
   redirectAfterCreate: (postUrl) => {
     console.log(`Redirecting to post url ${postUrl}`);

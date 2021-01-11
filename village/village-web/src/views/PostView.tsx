@@ -50,6 +50,7 @@ import {
 } from "../components/richtext/Utils";
 import { PostAuthorLink } from "../components/identity/PostAuthorLink";
 import { PostStackLink } from "../components/stacks/PostStackLink";
+import { postURL } from "../routing/URLs";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -387,7 +388,7 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
       >
         <ListItemText
           primary={
-            <Link to={`/post/${mention.post.authorId}/${mention.post.id}`}>
+            <Link to={postURL(mention.post.authorId, mention.post.id!)}>
               {mention.post.title}
             </Link>
           }
@@ -400,7 +401,7 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
       </ListItem>
     );
   });
-  if (mentionListItems.length == 0) {
+  if (mentionListItems.length === 0) {
     return <React.Fragment />;
   } else {
     return (

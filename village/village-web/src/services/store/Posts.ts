@@ -5,6 +5,7 @@ import { UserRecord, UserId, USERS_COLLECTION, getUsersForIds } from "./Users";
 import { RichText } from "../../components/richtext/Types";
 import { Node } from "slate";
 import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
+import { postURL } from "../../routing/URLs";
 
 export type PostId = string;
 export type PostTitle = string;
@@ -133,7 +134,7 @@ export const createPost: (
   return {
     state: "success",
     postId: newPostId,
-    postUrl: `/post/${user.uid}/${newPostId}`,
+    postUrl: postURL(user.uid, newPostId),
   };
 };
 
