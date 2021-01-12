@@ -68,7 +68,7 @@ export const mentionPreview = (body: RichText, path: Path): any => {
     preview,
     {
       type: "p",
-      children: [{ text: "..." }],
+      children: [{ text: "⋯" }],
     },
     { at: [0, 1] }
   );
@@ -77,7 +77,7 @@ export const mentionPreview = (body: RichText, path: Path): any => {
     preview,
     {
       type: "p",
-      children: [{ text: "..." }],
+      children: [{ text: "⋯" }],
     },
     { at: [0, 0] }
   );

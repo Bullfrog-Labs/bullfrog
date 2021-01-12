@@ -47,7 +47,6 @@ export const BlockquoteElement = ({
   children,
   htmlAttributes,
 }: any) => {
-  const logger = log.getLogger("BlockquoteElement");
   return (
     <Blockquote {...attributes} {...htmlAttributes}>
       {children}
@@ -55,18 +54,17 @@ export const BlockquoteElement = ({
   );
 };
 
-export const BlockquoteElementPreview = ({
+export const CompactBlockquoteElement = ({
   attributes,
   children,
   htmlAttributes,
 }: any) => {
-  const logger = log.getLogger("BlockquoteElement");
   const globalClasses = useGlobalStyles();
   return (
     <Blockquote
       {...attributes}
       {...htmlAttributes}
-      className={globalClasses.compactParagraph}
+      className={globalClasses.compactBlockquote}
     >
       {children}
     </Blockquote>
@@ -81,7 +79,7 @@ export const ParagraphElement = (props: any) => {
   );
 };
 
-export const ParagraphElementPreview = (props: any) => {
+export const CompactParagraphElement = (props: any) => {
   const globalClasses = useGlobalStyles();
   return (
     <Typography

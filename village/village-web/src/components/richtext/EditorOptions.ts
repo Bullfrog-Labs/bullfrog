@@ -5,34 +5,51 @@ import {
   H3Element,
   ParagraphElement,
   BlockquoteElement,
+  CompactParagraphElement,
+  CompactBlockquoteElement,
 } from "./Rendering";
 import {
   MentionPluginOptions,
   ParagraphPluginOptions,
   HeadingPluginOptions,
-  AutoformatRule,
+  BlockquotePluginOptions,
+  WithAutoformatOptions,
+  ExitBreakPluginOptions,
   SoftBreakPluginOptions,
+  ResetBlockTypePluginOptions,
+  AutoformatRule,
   isBlockAboveEmpty,
   isSelectionAtBlockStart,
+  unwrapList,
+  toggleList,
   ELEMENT_H2,
   ELEMENT_H3,
-  unwrapList,
   ELEMENT_PARAGRAPH,
-  ResetBlockTypePluginOptions,
   MARK_BOLD,
   MARK_CODE,
   MARK_ITALIC,
   MARK_STRIKETHROUGH,
   ELEMENT_BLOCKQUOTE,
   ELEMENT_LI,
-  toggleList,
   ELEMENT_UL,
-  BlockquotePluginOptions,
-  WithAutoformatOptions,
-  ExitBreakPluginOptions,
 } from "@blfrg.xyz/slate-plugins";
 
+export type Options = {
+  paragraph?: ParagraphPluginOptions;
+  heading?: HeadingPluginOptions;
+  mentions?: MentionPluginOptions;
+  blockquote?: BlockquotePluginOptions;
+  resetBlockType: ResetBlockTypePluginOptions;
+  softBreak?: SoftBreakPluginOptions;
+  exitBreak?: ExitBreakPluginOptions;
+  autoformat: WithAutoformatOptions;
+};
+
 const preFormat = (editor: Editor) => unwrapList(editor);
+
+/**
+ * Base editor options.
+ */
 
 export const autoformatRules: AutoformatRule[] = [
   {
@@ -167,4 +184,46 @@ export const exitBreakOptions: ExitBreakPluginOptions = {
 
 export const autoformatOptions: WithAutoformatOptions = {
   rules: autoformatRules,
+};
+
+/**
+ * Compact viewer options.
+ */
+
+export const compactParagraphOptions: ParagraphPluginOptions = {
+  p: {
+    component: CompactParagraphElement,
+  },
+};
+
+export const compactBlockquoteOptions: BlockquotePluginOptions = {
+  blockquote: {
+    component: CompactBlockquoteElement,
+  },
+};
+
+/**
+ * Options sets.
+ */
+
+export const postEditorOptions: Options = {
+  paragraph: paragraphOptions,
+  heading: headingOptions,
+  mentions: mentionOptions,
+  blockquote: blockquoteOptions,
+  resetBlockType: resetBlockTypeOptions,
+  softBreak: softBreakOptions,
+  exitBreak: exitBreakOptions,
+  autoformat: autoformatOptions,
+};
+
+export const compactViewerOptions: Options = {
+  paragraph: compactParagraphOptions,
+  heading: headingOptions,
+  mentions: mentionOptions,
+  blockquote: compactBlockquoteOptions,
+  resetBlockType: resetBlockTypeOptions,
+  softBreak: softBreakOptions,
+  exitBreak: exitBreakOptions,
+  autoformat: autoformatOptions,
 };

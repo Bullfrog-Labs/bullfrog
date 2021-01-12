@@ -10,7 +10,7 @@ import React, {
 } from "react";
 import RichTextEditor, {
   RichTextEditorImperativeHandle,
-  RichTextViewer,
+  RichTextCompactViewer,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
 import {
@@ -45,11 +45,7 @@ import { Link, Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import DocumentTitle from "../components/richtext/DocumentTitle";
-import {
-  EMPTY_RICH_TEXT,
-  richTextStringPreview,
-  mentionPreview,
-} from "../components/richtext/Utils";
+import { EMPTY_RICH_TEXT, mentionPreview } from "../components/richtext/Utils";
 import { PostAuthorLink } from "../components/identity/PostAuthorLink";
 import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useGlobalStyles } from "../styles/styles";
@@ -420,7 +416,7 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
           }
           secondary={
             <React.Fragment>
-              <RichTextViewer
+              <RichTextCompactViewer
                 body={mentionPreview(mention.post.body, [0, 0, 0])}
               />
             </React.Fragment>

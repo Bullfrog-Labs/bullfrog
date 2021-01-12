@@ -1,15 +1,5 @@
 import { Editor } from "slate";
-import {
-  MentionPluginOptions,
-  ParagraphPluginOptions,
-  HeadingPluginOptions,
-  ResetBlockTypePluginOptions,
-  BlockquotePluginOptions,
-  WithAutoformatOptions,
-  ExitBreakPluginOptions,
-  SoftBreakPluginOptions,
-  pipe,
-} from "@blfrg.xyz/slate-plugins";
+import { pipe } from "@blfrg.xyz/slate-plugins";
 import { SlatePlugin } from "@blfrg.xyz/slate-plugins-core";
 import {
   ResetBlockTypePlugin,
@@ -31,38 +21,22 @@ import {
 } from "@blfrg.xyz/slate-plugins";
 import { withHistory } from "slate-history";
 import { ReactEditor, withReact } from "slate-react";
-import {
-  paragraphOptions,
-  headingOptions,
-  mentionOptions,
-  blockquoteOptions,
-  resetBlockTypeOptions,
-  softBreakOptions,
-  exitBreakOptions,
-  autoformatOptions,
-} from "./EditorOptions";
+import { Options } from "./EditorOptions";
 
-type Options = {
-  paragraph?: ParagraphPluginOptions;
-  heading?: HeadingPluginOptions;
-  mentions?: MentionPluginOptions;
-  blockquote?: BlockquotePluginOptions;
-  resetBlockType?: ResetBlockTypePluginOptions;
-  softBreak?: SoftBreakPluginOptions;
-  exitBreak?: ExitBreakPluginOptions;
-  autoformat?: WithAutoformatOptions;
-};
+type PluginComponents = [SlatePlugin[], SlateReactWithPlugin];
 
-const createPlugins = (options: Options = {}): PluginComponents => {
+type SlateReactWithPlugin = <T extends Editor>(editor: T) => ReactEditor;
+
+export const createPlugins = (options: Options): PluginComponents => {
   const {
-    paragraph = paragraphOptions,
-    heading = headingOptions,
-    mentions = mentionOptions,
-    blockquote = blockquoteOptions,
-    resetBlockType = resetBlockTypeOptions,
-    softBreak = softBreakOptions,
-    exitBreak = exitBreakOptions,
-    autoformat = autoformatOptions,
+    paragraph,
+    heading,
+    mentions,
+    blockquote,
+    resetBlockType,
+    softBreak,
+    exitBreak,
+    autoformat,
   } = options;
 
   const plugins = [
@@ -94,14 +68,4 @@ const createPlugins = (options: Options = {}): PluginComponents => {
   };
 
   return [plugins, withPlugin];
-};
-
-export const createPreviewEditorPlugins = () => {};
-
-type PluginComponents = [SlatePlugin[], SlateReactWithPlugin];
-
-type SlateReactWithPlugin = <T extends Editor>(editor: T) => ReactEditor;
-
-export const createPostEditorPlugins = (): PluginComponents => {
-  return createPlugins();
 };

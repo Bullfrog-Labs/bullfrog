@@ -22,6 +22,11 @@ import {
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Typography } from "@material-ui/core";
 import * as EditorPlugins from "./EditorPlugins";
+import {
+  Options,
+  postEditorOptions,
+  compactViewerOptions,
+} from "./EditorOptions";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -33,11 +38,12 @@ export type Body = RichText;
 
 export type RichTextEditorProps = {
   body: Body;
-  onChange: (newBody: Body) => void;
   enableToolbar?: boolean;
   readOnly?: boolean;
-  onMentionSearchChanged: (search: string) => void;
   mentionables: MentionNodeData[];
+  options?: Options;
+  onChange: (newBody: Body) => void;
+  onMentionSearchChanged: (search: string) => void;
   onMentionAdded: (option: MentionNodeData) => void;
   mentionableElementFn?: (option: MentionNodeData) => JSX.Element;
 };
@@ -57,8 +63,8 @@ const RichTextEditor = forwardRef<
 >((props, ref) => {
   const logger = log.getLogger("RichTextEditor");
   const [plugins, decorator] = useMemo(
-    () => EditorPlugins.createPostEditorPlugins(),
-    []
+    () => EditorPlugins.createPlugins(props.options || postEditorOptions),
+    [props.options]
   );
   const editor = useMemo(() => pipe(createEditor(), decorator), [decorator]);
 
@@ -147,14 +153,15 @@ const RichTextEditor = forwardRef<
   );
 });
 
-export const RichTextViewer = (props: { body: RichText }) => {
+export const RichTextCompactViewer = (props: { body: RichText }) => {
   return (
     <RichTextEditor
       readOnly={true}
       body={props.body}
-      onChange={(newBody: Body) => {}}
       enableToolbar={false}
       mentionables={[]}
+      options={compactViewerOptions}
+      onChange={(newBody: Body) => {}}
       onMentionSearchChanged={(search: string) => {}}
       onMentionAdded={(option: MentionNodeData) => {}}
     />

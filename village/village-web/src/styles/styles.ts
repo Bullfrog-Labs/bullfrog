@@ -23,4 +23,16 @@ export const useGlobalStyles = makeStyles((theme) => ({
     marginTop: "0px",
     marginBottom: "0px",
   },
+  blockquote: {
+    borderLeft: "4px solid",
+    margin: "1em 0",
+    paddingLeft: "1em",
+    borderColor: theme.palette.secondary.dark,
+  },
+  compactBlockquote: {
+    borderLeft: "4px solid",
+    margin: "0 0",
+    paddingLeft: "1em",
+    borderColor: theme.palette.secondary.dark,
+  },
 }));
