@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import RichTextEditor, {
   RichTextEditorImperativeHandle,
+  RichTextCompactViewer,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
 import {
@@ -46,10 +47,12 @@ import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import DocumentTitle from "../components/richtext/DocumentTitle";
 import {
   EMPTY_RICH_TEXT,
-  richTextStringPreview,
+  MentionInContext,
+  findMentionsInPosts,
 } from "../components/richtext/Utils";
 import { PostAuthorLink } from "../components/identity/PostAuthorLink";
 import { PostStackLink } from "../components/stacks/PostStackLink";
+import { useGlobalStyles } from "../styles/styles";
 import { postURL } from "../routing/URLs";
 
 const useStyles = makeStyles((theme) => ({
@@ -72,6 +75,10 @@ const useStyles = makeStyles((theme) => ({
   postListItem: {
     paddingLeft: "0px",
     paddingRight: "0px",
+  },
+  username: {
+    fontWeight: 300,
+    color: "grey",
   },
 }));
 
@@ -161,6 +168,7 @@ const useEditablePostComponents: (
 export type BasePostViewProps = {
   readOnly: boolean;
   postView: React.ReactChild;
+  mentions?: MentionInContext[];
 };
 
 export const BasePostView = (props: BasePostViewProps) => {
@@ -169,7 +177,23 @@ export const BasePostView = (props: BasePostViewProps) => {
 
   return (
     <Container className={classes.postView} maxWidth="sm">
-      <Paper elevation={paperElevation}>{props.postView}</Paper>
+      <Grid container spacing={3}>
+        <Grid item sm={12}>
+          <Paper elevation={paperElevation}>{props.postView}</Paper>
+        </Grid>
+        {props.mentions && (
+          <Grid item sm={12}>
+            <Paper elevation={paperElevation}>
+              <Grid container spacing={1}>
+                <Grid item sm={1}></Grid>
+                <Grid item sm={11}>
+                  <MentionsSection mentions={props.mentions} />
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
+        )}
+      </Grid>
     </Container>
   );
 };
@@ -207,7 +231,7 @@ export type PostViewProps = {
 
   viewer: UserRecord;
   author: UserRecord;
-  mentions: UserPost[];
+  mentions: MentionInContext[];
 
   getTitle: () => Promise<PostTitle | undefined>;
 
@@ -223,25 +247,40 @@ type PostViewImperativeHandle = {
   blurBody: () => void;
 };
 
-const MentionsSection = (props: { mentions: UserPost[] }) => {
+const MentionsSection = (props: { mentions: MentionInContext[] }) => {
   const classes = useStyles();
   const { mentions } = props;
+  const globalClasses = useGlobalStyles();
+
   const mentionListItems = mentions.map((mention) => {
     return (
       <ListItem
         alignItems="flex-start"
-        key={mention.post.id}
+        key={mention.post.post.id}
         className={classes.postListItem}
       >
         <ListItemText
           primary={
-            <Link to={postURL(mention.post.authorId, mention.post.id!)}>
-              {mention.post.title}
-            </Link>
+            <>
+              <Typography variant="h6">
+                <Link
+                  className={globalClasses.link}
+                  to={postURL(
+                    mention.post.post.authorId,
+                    mention.post.post.id!
+                  )}
+                >
+                  {mention.post.post.title}
+                </Link>
+              </Typography>
+              <Typography variant="subtitle2" className={classes.username}>
+                <em>{mention.post.user.displayName}</em>
+              </Typography>
+            </>
           }
           secondary={
             <React.Fragment>
-              {richTextStringPreview(mention.post.body)}
+              <RichTextCompactViewer body={mention.text} />
             </React.Fragment>
           }
         />
@@ -261,7 +300,9 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
           spacing={4}
         >
           <Grid item>
-            <Typography variant="h5">Mentions</Typography>
+            <Typography variant="h6">
+              <em>Mentions</em>
+            </Typography>
             <List>{mentionListItems}</List>
           </Grid>
         </Grid>
@@ -453,7 +494,6 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
           </Grid>
           <Grid item sm={11}>
             {postDetails}
-            <MentionsSection mentions={props.mentions} />
           </Grid>
         </Grid>
       </>
@@ -463,7 +503,13 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
       blurBody: () => richTextEditorRef.current?.blurEditor(),
     }));
 
-    return <BasePostView readOnly={props.readOnly} postView={postView} />;
+    return (
+      <BasePostView
+        readOnly={props.readOnly}
+        postView={postView}
+        mentions={props.mentions}
+      />
+    );
   }
 );
 
@@ -492,7 +538,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const [title, setTitle] = useState<PostTitle>("");
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
-  const [mentions, setMentions] = useState<UserPost[]>([]);
+  const [mentionPosts, setMentionPosts] = useState<UserPost[]>([]);
 
   const [postRecordLoaded, setPostRecordLoaded] = useState(false);
   const [postRecordNotFound, setPostRecordNotFound] = useState(false);
@@ -510,6 +556,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
     authorUserRecord?.username || ""
   );
 
+  const mentions = findMentionsInPosts(mentionPosts, postId);
+
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
   // Attempt to load post
@@ -519,7 +567,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
     const loadPostRecord = async () => {
       const postRecord = await props.getPost(authorId, postId);
-      const newMentions = await props.getMentionUserPosts(postId);
+      const newMentionPosts = await props.getMentionUserPosts(postId);
       const postRecordNotFound = !postRecord;
 
       if (!isSubscribed) {
@@ -528,8 +576,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
       setPostRecordLoaded(true);
       setPostRecordNotFound(postRecordNotFound);
-
-      setMentions(newMentions);
+      setMentionPosts(newMentionPosts);
 
       if (postRecordNotFound) {
         logger.info(`Post ${postId} for author ${authorId} not found.`);

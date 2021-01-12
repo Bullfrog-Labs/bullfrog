@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import * as log from "loglevel";
 import { Blockquote } from "../Blockquote";
 import { postURL } from "../../routing/URLs";
+import { useGlobalStyles } from "../../styles/styles";
 
 export const MentionElement = ({
   attributes,
@@ -11,6 +12,7 @@ export const MentionElement = ({
   element,
   htmlAttributes,
 }: any) => {
+  const globalClasses = useGlobalStyles();
   const logger = log.getLogger("MentionElement");
   const postId = element["postId"];
   const authorId = element["authorId"];
@@ -27,6 +29,7 @@ export const MentionElement = ({
       <Tooltip title={authorUsername}>
         <Link
           {...attributes}
+          className={globalClasses.link}
           data-slate-value={title}
           to={postURL(authorId, postId)}
           contentEditable={false}
@@ -45,9 +48,25 @@ export const BlockquoteElement = ({
   children,
   htmlAttributes,
 }: any) => {
-  const logger = log.getLogger("BlockquoteElement");
   return (
     <Blockquote {...attributes} {...htmlAttributes}>
+      {children}
+    </Blockquote>
+  );
+};
+
+export const CompactBlockquoteElement = ({
+  attributes,
+  children,
+  htmlAttributes,
+}: any) => {
+  const globalClasses = useGlobalStyles();
+  return (
+    <Blockquote
+      {...attributes}
+      {...htmlAttributes}
+      className={globalClasses.compactBlockquote}
+    >
       {children}
     </Blockquote>
   );
@@ -56,6 +75,19 @@ export const BlockquoteElement = ({
 export const ParagraphElement = (props: any) => {
   return (
     <Typography paragraph={true} variant="body1">
+      {props.children}
+    </Typography>
+  );
+};
+
+export const CompactParagraphElement = (props: any) => {
+  const globalClasses = useGlobalStyles();
+  return (
+    <Typography
+      paragraph={true}
+      variant="body1"
+      className={globalClasses.compactParagraph}
+    >
       {props.children}
     </Typography>
   );
