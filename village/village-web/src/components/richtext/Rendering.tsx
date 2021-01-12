@@ -3,6 +3,7 @@ import { Typography, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import * as log from "loglevel";
 import { Blockquote } from "../Blockquote";
+import { postURL } from "../../routing/URLs";
 
 export const MentionElement = ({
   attributes,
@@ -27,7 +28,7 @@ export const MentionElement = ({
         <Link
           {...attributes}
           data-slate-value={title}
-          to={`/post/${authorId}/${postId}`}
+          to={postURL(authorId, postId)}
           contentEditable={false}
           {...htmlAttributes}
         >

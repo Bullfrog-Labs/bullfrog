@@ -24,10 +24,11 @@ import {
   createPost,
   renamePost,
   syncBody,
-  getGlobalMentions,
   getMentionUserPosts,
+  getAllPostsByTitlePrefix,
 } from "./services/store/Posts";
 import { useEffect } from "react";
+import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
 
 Logging.configure(log);
 
@@ -106,8 +107,11 @@ function App() {
         createPost={createPost(database)}
         renamePost={renamePost(database)}
         syncBody={syncBody(database)}
-        getGlobalMentions={getGlobalMentions(database)}
+        getGlobalMentions={getAllPostsByTitlePrefix(database)}
         getMentionUserPosts={getMentionUserPosts(database)}
+        getSearchSuggestionsByTitlePrefix={getSearchSuggestionsByTitlePrefix(
+          database
+        )}
         user={user}
       />
     </AuthContext.Provider>

@@ -12,6 +12,7 @@ import { Link, useParams } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
 import ListItemText from "@material-ui/core/ListItemText";
 import { useGlobalStyles } from "../styles/styles";
+import { postURL } from "../routing/URLs";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -108,7 +109,7 @@ export const ProfileView = (props: ProfileViewProps) => {
             <Link
               className={globalClasses.link}
               key={user.uid}
-              to={`/post/${post.authorId}/${post.id}`}
+              to={postURL(post.authorId, post.id!)}
             >
               <Typography variant="h6">{post.title}</Typography>
             </Link>

@@ -12,6 +12,7 @@ import { createMemoryHistory } from "history";
 import { PostId, UserPost, PostRecord } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
 import { userPosts0 } from "../testing/Fixtures";
+import { postURL } from "../routing/URLs";
 
 const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
   return <React.Fragment>option.value</React.Fragment>;
@@ -160,7 +161,7 @@ test("PostView to PostView navigation works", async () => {
     getMentionUserPosts: getMentionUserPosts0,
   };
 
-  history.push(`/post/${author.uid}/abc`);
+  history.push(postURL(author.uid, "abc"));
 
   render(
     <Router history={history}>

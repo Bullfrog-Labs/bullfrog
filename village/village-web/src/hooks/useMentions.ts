@@ -7,12 +7,12 @@ import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 
 import {
   UserPost,
-  GetGlobalMentionsFn,
+  GetAllPostsByTitlePrefixFn,
   CreatePostFn,
 } from "../services/store/Posts";
 
 export const useMentions = (
-  getGlobalMentions: GetGlobalMentionsFn,
+  getGlobalMentions: GetAllPostsByTitlePrefixFn,
   createPost: CreatePostFn,
   authorId: UserId,
   authorUsername: string

@@ -5,6 +5,7 @@ import { UserRecord, UserId, USERS_COLLECTION, getUsersForIds } from "./Users";
 import { RichText } from "../../components/richtext/Types";
 import { Node } from "slate";
 import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
+import { postURL } from "../../routing/URLs";
 
 export type PostId = string;
 export type PostTitle = string;
@@ -133,7 +134,7 @@ export const createPost: (
   return {
     state: "success",
     postId: newPostId,
-    postUrl: `/post/${user.uid}/${newPostId}`,
+    postUrl: postURL(user.uid, newPostId),
   };
 };
 
@@ -329,7 +330,7 @@ export const getStackPosts = (database: Database) => async (
 
 export type GetStackPostsFn = ReturnType<typeof getStackPosts>;
 
-export const getGlobalMentions = (database: Database) => async (
+export const getAllPostsByTitlePrefix = (database: Database) => async (
   titlePrefix: string
 ): Promise<UserPost[]> => {
   const logger = log.getLogger("getGlobalMentions");
@@ -351,7 +352,9 @@ export const getGlobalMentions = (database: Database) => async (
   return getUserPostsForPosts(database, posts);
 };
 
-export type GetGlobalMentionsFn = ReturnType<typeof getGlobalMentions>;
+export type GetAllPostsByTitlePrefixFn = ReturnType<
+  typeof getAllPostsByTitlePrefix
+>;
 
 export const getPostsForIds = (database: Database) => async (
   postIds: PostId[]
