@@ -76,7 +76,6 @@ export type CreatePostResult =
 
 export type CreatePostFn = (
   newTitle: PostTitle,
-  newBody?: PostBody,
   postId?: string
 ) => Promise<CreatePostResult>;
 
@@ -84,7 +83,6 @@ export const createPost: (
   database: Database
 ) => (user: UserRecord) => CreatePostFn = (database) => (user) => async (
   newTitle,
-  newBody,
   postId?: string
 ) => {
   const logger = log.getLogger("createPost");
@@ -111,7 +109,7 @@ export const createPost: (
   const newPostRecord: PostRecord = {
     authorId: user.uid,
     title: newTitle,
-    body: !!newBody ? newBody : EMPTY_RICH_TEXT,
+    body: EMPTY_RICH_TEXT,
     mentions: [],
     updatedAt: new Date(),
   };
