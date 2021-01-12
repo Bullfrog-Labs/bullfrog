@@ -55,9 +55,40 @@ export const BlockquoteElement = ({
   );
 };
 
+export const BlockquoteElementPreview = ({
+  attributes,
+  children,
+  htmlAttributes,
+}: any) => {
+  const logger = log.getLogger("BlockquoteElement");
+  const globalClasses = useGlobalStyles();
+  return (
+    <Blockquote
+      {...attributes}
+      {...htmlAttributes}
+      className={globalClasses.compactParagraph}
+    >
+      {children}
+    </Blockquote>
+  );
+};
+
 export const ParagraphElement = (props: any) => {
   return (
     <Typography paragraph={true} variant="body1">
+      {props.children}
+    </Typography>
+  );
+};
+
+export const ParagraphElementPreview = (props: any) => {
+  const globalClasses = useGlobalStyles();
+  return (
+    <Typography
+      paragraph={true}
+      variant="body1"
+      className={globalClasses.compactParagraph}
+    >
       {props.children}
     </Typography>
   );

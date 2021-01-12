@@ -421,7 +421,7 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
           secondary={
             <React.Fragment>
               <RichTextViewer
-                body={mentionPreview(mention.post.body, [0, 0, 1])}
+                body={mentionPreview(mention.post.body, [0, 0, 0])}
               />
             </React.Fragment>
           }
@@ -716,6 +716,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
       setPostRecordLoaded(true);
       setPostRecordNotFound(postRecordNotFound);
+
+      //console.dir(newMentions);
 
       setMentions(newMentions);
 

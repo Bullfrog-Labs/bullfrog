@@ -19,4 +19,8 @@ export const useGlobalStyles = makeStyles((theme) => ({
       color: "black",
     },
   },
+  compactParagraph: {
+    marginTop: "0px",
+    marginBottom: "0px",
+  },
 }));

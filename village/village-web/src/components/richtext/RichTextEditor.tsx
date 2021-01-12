@@ -1,69 +1,27 @@
 import React, {
   useEffect,
   useMemo,
-  useState,
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { ReactEditor, withReact, Slate } from "slate-react";
-import { createEditor, Operation, Editor } from "slate";
-import { withHistory } from "slate-history";
+import { ReactEditor, Slate } from "slate-react";
+import { createEditor, Operation } from "slate";
 import { RichText } from "./Types";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
-import {
-  MentionElement,
-  H2Element,
-  H3Element,
-  ParagraphElement,
-  BlockquoteElement,
-} from "./Rendering";
 import * as log from "loglevel";
 import {
-  ResetBlockTypePlugin,
-  SoftBreakPlugin,
-  ExitBreakPlugin,
-  MentionPlugin,
-  MentionPluginOptions,
-  ParagraphPlugin,
-  ParagraphPluginOptions,
-  HeadingPlugin,
-  HeadingPluginOptions,
   MentionSelect,
   MentionNodeData,
   HeadingToolbar,
   ToolbarElement,
   useMention,
-  withInlineVoid,
-  withAutoformat,
-  AutoformatRule,
   pipe,
-  isBlockAboveEmpty,
-  isSelectionAtBlockStart,
   ELEMENT_H2,
   ELEMENT_H3,
-  unwrapList,
-  ELEMENT_PARAGRAPH,
-  ResetBlockTypePluginOptions,
-  BoldPlugin,
-  CodePlugin,
-  ItalicPlugin,
-  StrikethroughPlugin,
-  MARK_BOLD,
-  MARK_CODE,
-  MARK_ITALIC,
-  MARK_STRIKETHROUGH,
-  BlockquotePlugin,
-  ELEMENT_BLOCKQUOTE,
-  ListPlugin,
-  withList,
-  ELEMENT_LI,
-  toggleList,
-  ELEMENT_UL,
-  KbdPlugin,
-  BlockquotePluginOptions,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
 import { Typography } from "@material-ui/core";
+import * as EditorPlugins from "./EditorPlugins";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -88,161 +46,6 @@ const didOpsAffectContent = (ops: Operation[]): boolean => {
   return ops.some((op) => !Operation.isSelectionOperation(op));
 };
 
-const preFormat = (editor: Editor) => unwrapList(editor);
-
-export const autoformatRules: AutoformatRule[] = [
-  {
-    type: ELEMENT_H2,
-    markup: "#",
-    preFormat,
-  },
-  {
-    type: ELEMENT_H3,
-    markup: "##",
-    preFormat,
-  },
-  {
-    type: MARK_BOLD,
-    between: ["**", "**"],
-    mode: "inline",
-    insertTrigger: true,
-  },
-  {
-    type: MARK_ITALIC,
-    between: ["*", "*"],
-    mode: "inline",
-    insertTrigger: true,
-  },
-  {
-    type: MARK_CODE,
-    between: ["`", "`"],
-    mode: "inline",
-    insertTrigger: true,
-  },
-  {
-    type: MARK_STRIKETHROUGH,
-    between: ["~~", "~~"],
-    mode: "inline",
-    insertTrigger: true,
-  },
-  {
-    type: ELEMENT_BLOCKQUOTE,
-    markup: [">"],
-    preFormat,
-  },
-  {
-    type: ELEMENT_LI,
-    markup: ["*", "-"],
-    preFormat,
-    format: (editor) => {
-      toggleList(editor, { typeList: ELEMENT_UL });
-    },
-  },
-];
-
-const mentionOptions: MentionPluginOptions = {
-  mention: {
-    component: MentionElement,
-  },
-};
-
-const paragraphOptions: ParagraphPluginOptions = {
-  p: {
-    component: ParagraphElement,
-  },
-};
-
-const headingOptions: HeadingPluginOptions = {
-  h2: {
-    component: H2Element,
-  },
-  h3: {
-    component: H3Element,
-  },
-};
-
-const blockquoteOptions: BlockquotePluginOptions = {
-  blockquote: {
-    component: BlockquoteElement,
-  },
-};
-
-export const headingTypes = [ELEMENT_H2, ELEMENT_H3];
-
-const resetBlockTypesCommonRule = {
-  types: [MARK_BOLD],
-  defaultType: ELEMENT_PARAGRAPH,
-};
-
-export const optionsResetBlockTypes: ResetBlockTypePluginOptions = {
-  rules: [
-    {
-      ...resetBlockTypesCommonRule,
-      hotkey: "Enter",
-      predicate: isBlockAboveEmpty,
-    },
-    {
-      ...resetBlockTypesCommonRule,
-      hotkey: "Backspace",
-      predicate: isSelectionAtBlockStart,
-    },
-  ],
-};
-
-const plugins = [
-  ParagraphPlugin(paragraphOptions),
-  HeadingPlugin(headingOptions),
-  MentionPlugin(mentionOptions),
-  BoldPlugin(),
-  ItalicPlugin(),
-  CodePlugin(),
-  StrikethroughPlugin(),
-  BlockquotePlugin(blockquoteOptions),
-  ListPlugin(),
-  KbdPlugin(),
-  ResetBlockTypePlugin(optionsResetBlockTypes),
-  SoftBreakPlugin({
-    rules: [
-      { hotkey: "shift+enter" },
-      {
-        hotkey: "enter",
-        query: {
-          allow: [ELEMENT_BLOCKQUOTE],
-        },
-      },
-    ],
-  }),
-  ExitBreakPlugin({
-    rules: [
-      {
-        hotkey: "mod+enter",
-      },
-      {
-        hotkey: "mod+shift+enter",
-        before: true,
-      },
-      {
-        hotkey: "enter",
-        query: {
-          start: true,
-          end: true,
-          allow: headingTypes,
-        },
-      },
-    ],
-  }),
-];
-
-const withPlugins = [
-  withReact,
-  withHistory,
-  withList(),
-  withAutoformat({
-    rules: autoformatRules,
-  }),
-  withInlineVoid({ plugins }),
-] as const;
-
 export type RichTextEditorImperativeHandle = {
   focusEditor: () => void;
   blurEditor: () => void;
@@ -253,7 +56,8 @@ const RichTextEditor = forwardRef<
   RichTextEditorProps
 >((props, ref) => {
   const logger = log.getLogger("RichTextEditor");
-  const editor = useMemo(() => pipe(createEditor(), ...withPlugins), []);
+  const [plugins, decorator] = EditorPlugins.createPostEditorPlugins();
+  const editor = useMemo(() => pipe(createEditor(), decorator), [decorator]);
 
   let onMentionAdded = props.onMentionAdded;
   if (!onMentionAdded) {
