@@ -4,5 +4,5 @@
   "venvPath": "~/.virtualenvs",
   "reportMissingImports": true,
   "reportMissingTypeStubs": false,
-  "pythonVersion": "3.8"
+  "pythonVersion": "3.9"
 }
