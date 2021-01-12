@@ -1,6 +1,12 @@
 import * as log from "loglevel";
-import { Dialog, makeStyles } from "@material-ui/core";
-import React, { useEffect, useRef, useState } from "react";
+import { CircularProgress, Dialog, Grid, makeStyles } from "@material-ui/core";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Autosuggest, {
   ChangeEvent,
   OnSuggestionSelected,
@@ -45,6 +51,7 @@ export type AutocompleteSearchBoxProps = {
   getSuggestions: SearchSuggestionFetchFn;
   createPost: CreatePostFn;
   onClose: () => void;
+  setShowProgress: Dispatch<SetStateAction<boolean>>;
 };
 
 export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
@@ -116,6 +123,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   ) => {
     switch (data.suggestion.action) {
       case "createNewPost":
+        props.setShowProgress(true);
         const createPostResult = await props.createPost(data.suggestion.title);
         const { postId } = createPostResult;
 
@@ -196,7 +204,31 @@ export const useAutocompleteSearchBoxDialog = (
   getSuggestions: SearchSuggestionFetchFn
 ) => {
   const [open, setOpen] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
   const onClose = () => setOpen(false);
+
+  const dialogComponent = showProgress ? (
+    <Grid
+      container
+      spacing={0}
+      direction={"column"}
+      alignItems={"center"}
+      justify={"center"}
+      style={{ minHeight: "100px" }}
+    >
+      <Grid item>
+        <CircularProgress />
+      </Grid>
+    </Grid>
+  ) : (
+    <AutocompleteSearchBox
+      createPost={createPost}
+      user={user}
+      getSuggestions={getSuggestions}
+      setShowProgress={setShowProgress}
+      onClose={onClose}
+    />
+  );
 
   const dialog = (
     <Dialog
@@ -207,12 +239,7 @@ export const useAutocompleteSearchBoxDialog = (
       aria-labelledby="search-box-dialog-title"
       aria-describedby="search-box-dialog-description"
     >
-      <AutocompleteSearchBox
-        createPost={createPost}
-        user={user}
-        getSuggestions={getSuggestions}
-        onClose={onClose}
-      />
+      {dialogComponent}
     </Dialog>
   );
 
