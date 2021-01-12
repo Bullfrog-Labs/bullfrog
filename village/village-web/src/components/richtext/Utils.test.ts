@@ -1,4 +1,4 @@
-import { createEditor } from "slate";
+import { Node } from "slate";
 import {
   richTextStringPreview,
   stringToSlateNode,
@@ -24,14 +24,14 @@ test("node <-> string is consistent", () => {
 
 test("extract preview for mention in p", () => {
   const previewDoc = mentionPreview(doc1, [0, 0, 1]);
-
-  console.log(JSON.stringify(previewDoc, null, 2));
+  expect(Node.string(previewDoc[0])).toEqual(
+    "⋯As I was saying in  Mango is goooooood.⋯"
+  );
 });
 
 test("extract preview for mention in ul", () => {
   const previewDoc = mentionPreview(doc1, [0, 1, 1, 0, 1]);
-
-  console.log(JSON.stringify(previewDoc, null, 2));
+  expect(Node.string(previewDoc[0])).toEqual("⋯heere we ⋯");
 });
 
 const doc0 = [

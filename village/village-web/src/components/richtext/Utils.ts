@@ -48,14 +48,14 @@ export const richTextStringPreview = (
     .join("\n");
 };
 
-export const mentionPreview = (body: RichText, path: Path): any => {
+export const mentionPreview = (body: RichText, path: Path): Node[] => {
   const editor = createEditor();
   editor.children = body;
   const block = Editor.above(editor, { at: path });
   const node = block && block[0];
 
   if (!node) {
-    return undefined;
+    return [];
   }
 
   const preview = createEditor();
