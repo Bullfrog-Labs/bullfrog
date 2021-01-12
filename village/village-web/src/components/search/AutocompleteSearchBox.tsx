@@ -29,6 +29,8 @@ const AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER = "command";
 export const AUTOCOMPLETE_SEARCH_BOX_HOTKEY = `${AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER}+${AUTOCOMPLETE_SEARCH_BOX_KEY}`;
 export const AUTOCOMPLETE_SEARCH_BOX_ESCKEY = "escape";
 
+export const AUTOCOMPLETE_SEARCH_BOX_PROMPT = "Type to search and create";
+
 const isAutocompleteSearchBoxHotkey = (event: React.KeyboardEvent) => {
   if (AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER !== "command") {
     // needs to match with key-matching logic in this function. This is simpler
@@ -100,6 +102,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
 
   const getSuggestionValue = (suggestion: SearchSuggestion) => suggestion.title;
   const renderSuggestion = (suggestion: SearchSuggestion) => {
+    console.log("WTF");
     switch (suggestion.action) {
       case "createNewPost":
         return <CreateNewPostSearchResult title={suggestion.title} />;
@@ -167,7 +170,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
         props.onClose();
       }
     },
-    placeholder: "Type to search and create",
+    placeholder: AUTOCOMPLETE_SEARCH_BOX_PROMPT,
     value: value,
     onChange: onChange,
     ref: inputRef,
