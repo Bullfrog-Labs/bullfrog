@@ -97,18 +97,21 @@ export const ProfileView = (props: ProfileViewProps) => {
   const globalClasses = useGlobalStyles();
   const { posts, user } = props;
 
+  const listKeyForPost = (post: PostRecord) => `${user.uid}/${post.id!}`;
+
   const listItems = posts.map((post) => {
     return (
       <ListItem
         alignItems="flex-start"
-        key={user.uid}
+        key={listKeyForPost(post)}
         className={classes.postListItem}
       >
         <ListItemText
+          disableTypography={true}
           primary={
             <Link
               className={globalClasses.link}
-              key={user.uid}
+              key={listKeyForPost(post)}
               to={postURL(post.authorId, post.id!)}
             >
               <Typography variant="h6">{post.title}</Typography>
