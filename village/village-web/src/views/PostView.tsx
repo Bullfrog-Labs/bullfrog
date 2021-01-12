@@ -76,6 +76,10 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: "0px",
     paddingRight: "0px",
   },
+  username: {
+    fontWeight: 300,
+    color: "grey",
+  },
 }));
 
 const DEFAULT_IDLE_TIME = 1 * 1000;
@@ -257,14 +261,22 @@ const MentionsSection = (props: { mentions: MentionInContext[] }) => {
       >
         <ListItemText
           primary={
-            <Typography variant="h6">
-              <Link
-                className={globalClasses.link}
-                to={postURL(mention.post.post.authorId, mention.post.post.id!)}
-              >
-                {mention.post.post.title}
-              </Link>
-            </Typography>
+            <>
+              <Typography variant="h6">
+                <Link
+                  className={globalClasses.link}
+                  to={postURL(
+                    mention.post.post.authorId,
+                    mention.post.post.id!
+                  )}
+                >
+                  {mention.post.post.title}
+                </Link>
+              </Typography>
+              <Typography variant="subtitle2" className={classes.username}>
+                <em>{mention.post.user.displayName}</em>
+              </Typography>
+            </>
           }
           secondary={
             <React.Fragment>
