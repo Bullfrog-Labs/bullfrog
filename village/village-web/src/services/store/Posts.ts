@@ -6,6 +6,7 @@ import { RichText } from "../../components/richtext/Types";
 import { Node } from "slate";
 import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
 import { postURL } from "../../routing/URLs";
+import { EMPTY_RICH_TEXT } from "../../components/richtext/Utils";
 
 export type PostId = string;
 export type PostTitle = string;
@@ -75,7 +76,6 @@ export type CreatePostResult =
 
 export type CreatePostFn = (
   newTitle: PostTitle,
-  newBody: PostBody,
   postId?: string
 ) => Promise<CreatePostResult>;
 
@@ -83,7 +83,6 @@ export const createPost: (
   database: Database
 ) => (user: UserRecord) => CreatePostFn = (database) => (user) => async (
   newTitle,
-  newBody,
   postId?: string
 ) => {
   const logger = log.getLogger("createPost");
@@ -110,7 +109,7 @@ export const createPost: (
   const newPostRecord: PostRecord = {
     authorId: user.uid,
     title: newTitle,
-    body: newBody,
+    body: EMPTY_RICH_TEXT,
     mentions: [],
     updatedAt: new Date(),
   };

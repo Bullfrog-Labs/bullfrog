@@ -1,6 +1,6 @@
 import React from "react";
 import { screen, render, waitFor } from "@testing-library/react";
-import { CreateNewPostView, PostView, PostViewController } from "./PostView";
+import { PostView, PostViewController } from "./PostView";
 import {
   EMPTY_RICH_TEXT,
   stringToSlateNode,
@@ -50,30 +50,6 @@ const posts: PostRecord[] = [
     mentions: [],
   },
 ];
-
-test("Renders CreateNewPostView", () => {
-  const createPost = jest.fn();
-  const redirectAfterCreate = jest.fn();
-
-  const onMentionSearchChanged = jest.fn();
-  const mentionables: MentionNodeData[] = [];
-  const onMentionAdded = jest.fn();
-
-  const { getByText } = render(
-    <CreateNewPostView
-      createPost={createPost}
-      redirectAfterCreate={redirectAfterCreate}
-      onMentionSearchChanged={onMentionSearchChanged}
-      mentionables={mentionables}
-      onMentionAdded={onMentionAdded}
-      mentionableElementFn={mentionableElementFn}
-      user={author}
-    />
-  );
-
-  const titleEl = getByText("Enter a title");
-  expect(titleEl).toBeInTheDocument();
-});
 
 const TestPostView = (props: { mentions?: UserPost[] }) => {
   const postProps = {

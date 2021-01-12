@@ -1,5 +1,12 @@
-import { Dialog, makeStyles } from "@material-ui/core";
-import React, { useEffect, useRef, useState } from "react";
+import * as log from "loglevel";
+import { CircularProgress, Dialog, Grid, makeStyles } from "@material-ui/core";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Autosuggest, {
   ChangeEvent,
   OnSuggestionSelected,
@@ -13,7 +20,9 @@ import {
 import { UserRecord } from "../../services/store/Users";
 import { NavigateToPostSearchResult } from "./NavigateToPostSearchResult";
 import { useHistory } from "react-router-dom";
-import { postURL } from "../../routing/URLs";
+import { postURL as makePostUrl } from "../../routing/URLs";
+import { CreatePostFn } from "../../services/store/Posts";
+import { CreateNewPostSearchResult } from "./CreateNewPostSearchResult";
 
 const AUTOCOMPLETE_SEARCH_BOX_KEY = "u";
 const AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER = "command";
@@ -40,10 +49,13 @@ type AutocompleteSearchBoxOnChangeFn = (
 export type AutocompleteSearchBoxProps = {
   user: UserRecord;
   getSuggestions: SearchSuggestionFetchFn;
+  createPost: CreatePostFn;
   onClose: () => void;
+  setShowProgress: Dispatch<SetStateAction<boolean>>;
 };
 
 export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
+  const logger = log.getLogger("AutocompleteSearchBox");
   const useStyles = makeStyles((theme) => ({
     input: {
       width: "100%",
@@ -90,7 +102,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   const renderSuggestion = (suggestion: SearchSuggestion) => {
     switch (suggestion.action) {
       case "createNewPost":
-        return <div>create new post: {suggestion.title}</div>;
+        return <CreateNewPostSearchResult title={suggestion.title} />;
       case "navigateToPost":
         return (
           <NavigateToPostSearchResult
@@ -105,16 +117,41 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
 
   const history = useHistory();
 
-  const onSuggestionSelected: OnSuggestionSelected<SearchSuggestion> = (
+  const onSuggestionSelected: OnSuggestionSelected<SearchSuggestion> = async (
     event,
     data
   ) => {
     switch (data.suggestion.action) {
       case "createNewPost":
-        console.log("Creating a new post");
+        props.setShowProgress(true);
+        const createPostResult = await props.createPost(data.suggestion.title);
+        const { postId } = createPostResult;
+
+        switch (createPostResult.state) {
+          case "success":
+            const { postUrl } = createPostResult;
+            logger.info(
+              `new post created with title ${data.suggestion.title} and post id ${postId}, redirecting to ${postUrl}`
+            );
+            history.push(postUrl); // do redirect to permanent note url
+            props.onClose();
+            return;
+          case "post-name-taken":
+            logger.info(
+              `new post creation with title ${data.suggestion.title} failed because that post name is already taken by post with id ${postId}, navigating to already-existing post`
+            );
+            history.push(makePostUrl(props.user.uid, createPostResult.postId));
+            props.onClose();
+            return;
+          default:
+            assertNever(createPostResult);
+        }
+
         break;
       case "navigateToPost":
-        history.push(postURL(data.suggestion.authorId, data.suggestion.postId));
+        history.push(
+          makePostUrl(data.suggestion.authorId, data.suggestion.postId)
+        );
         props.onClose();
         break;
       default:
@@ -163,10 +200,35 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
 
 export const useAutocompleteSearchBoxDialog = (
   user: UserRecord,
+  createPost: CreatePostFn,
   getSuggestions: SearchSuggestionFetchFn
 ) => {
   const [open, setOpen] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
   const onClose = () => setOpen(false);
+
+  const dialogComponent = showProgress ? (
+    <Grid
+      container
+      spacing={0}
+      direction={"column"}
+      alignItems={"center"}
+      justify={"center"}
+      style={{ minHeight: "100px" }}
+    >
+      <Grid item>
+        <CircularProgress />
+      </Grid>
+    </Grid>
+  ) : (
+    <AutocompleteSearchBox
+      createPost={createPost}
+      user={user}
+      getSuggestions={getSuggestions}
+      setShowProgress={setShowProgress}
+      onClose={onClose}
+    />
+  );
 
   const dialog = (
     <Dialog
@@ -177,11 +239,7 @@ export const useAutocompleteSearchBoxDialog = (
       aria-labelledby="search-box-dialog-title"
       aria-describedby="search-box-dialog-description"
     >
-      <AutocompleteSearchBox
-        user={user}
-        getSuggestions={getSuggestions}
-        onClose={onClose}
-      />
+      {dialogComponent}
     </Dialog>
   );
 
