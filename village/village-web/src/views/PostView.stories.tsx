@@ -4,13 +4,11 @@ import { MemoryRouter } from "react-router-dom";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 import { useMentions } from "../hooks/useMentions";
 import {
-  CreatePostResult,
-  PostBody,
-  PostId,
   UserPost,
   PostTitle,
   RenamePostFn,
   SyncBodyFn,
+  CreatePostFn,
 } from "../services/store/Posts";
 import { PostView, PostViewProps } from "./PostView";
 
@@ -28,16 +26,10 @@ const Template: Story<PostViewProps> = (args) => {
   args.body = body;
   args.setBody = setBody;
 
-  const getGlobalMentions = async (
-    titlePrefix: string
-  ): Promise<UserPost[]> => {
+  const getGlobalMentions = async (): Promise<UserPost[]> => {
     return [];
   };
-  const createPost = async (
-    title: PostTitle,
-    body: PostBody,
-    postId?: PostId
-  ): Promise<CreatePostResult> => {
+  const createPost: CreatePostFn = async () => {
     return { state: "success", postId: "hjkhj", postUrl: "" };
   };
   const authorId = "79832475341985234";
@@ -64,7 +56,7 @@ const getTitleHardcoded: () => Promise<PostTitle> = async () => {
   return "Original title";
 };
 
-const renamePostAlwaysSuccessful: RenamePostFn = async (postId, newTitle) => {
+const renamePostAlwaysSuccessful: RenamePostFn = async () => {
   return { state: "success" };
 };
 

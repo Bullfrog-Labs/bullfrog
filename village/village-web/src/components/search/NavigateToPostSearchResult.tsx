@@ -1,4 +1,3 @@
-import React from "react";
 import { NavigateToPostSuggestion } from "../../services/search/Suggestions";
 import { UserRecord } from "../../services/store/Users";
 

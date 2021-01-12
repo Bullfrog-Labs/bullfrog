@@ -67,6 +67,7 @@ export const Router = (props: {
   const AppContainerWithProps: React.FC<{}> = (props) => (
     <AppContainer
       user={user}
+      createPost={user ? createPost(user) : undefined}
       getSearchBoxSuggestions={getSearchSuggestionsByTitlePrefix}
     >
       {props.children}

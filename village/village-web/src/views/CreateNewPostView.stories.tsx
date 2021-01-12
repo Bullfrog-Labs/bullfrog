@@ -3,13 +3,7 @@ import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { useMentions } from "../hooks/useMentions";
 import { postURL } from "../routing/URLs";
-import {
-  UserPost,
-  CreatePostResult,
-  PostTitle,
-  PostBody,
-  PostId,
-} from "../services/store/Posts";
+import { UserPost, CreatePostFn } from "../services/store/Posts";
 import { CreateNewPostView, CreateNewPostViewProps } from "./PostView";
 
 export default {
@@ -18,16 +12,10 @@ export default {
 } as Meta;
 
 const Template: Story<CreateNewPostViewProps> = (args) => {
-  const getGlobalMentions = async (
-    titlePrefix: string
-  ): Promise<UserPost[]> => {
+  const getGlobalMentions = async (): Promise<UserPost[]> => {
     return [];
   };
-  const createPost = async (
-    title: PostTitle,
-    body: PostBody,
-    postId?: PostId
-  ): Promise<CreatePostResult> => {
+  const createPost: CreatePostFn = async () => {
     return { state: "success", postId: "hjkhj", postUrl: "" };
   };
   const authorId = "79832475341985234";
@@ -52,7 +40,7 @@ const Template: Story<CreateNewPostViewProps> = (args) => {
 
 export const Untitled = Template.bind({});
 Untitled.args = {
-  createPost: async (newTitle, newBody) => ({
+  createPost: async (newTitle) => ({
     state: "success",
     postId: "123",
     postUrl: postURL("456", newTitle),
@@ -65,7 +53,7 @@ Untitled.args = {
 export const PrepopulatedTitle = Template.bind({});
 PrepopulatedTitle.args = {
   prepopulatedTitle: "foo",
-  createPost: async (newTitle, newBody) => ({
+  createPost: async (newTitle) => ({
     state: "success",
     postId: "123",
     postUrl: postURL("456", newTitle),
