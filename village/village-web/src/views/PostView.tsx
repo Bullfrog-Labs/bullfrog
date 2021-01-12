@@ -716,9 +716,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
       setPostRecordLoaded(true);
       setPostRecordNotFound(postRecordNotFound);
-
-      //console.dir(newMentions);
-
       setMentions(newMentions);
 
       if (postRecordNotFound) {

@@ -56,7 +56,10 @@ const RichTextEditor = forwardRef<
   RichTextEditorProps
 >((props, ref) => {
   const logger = log.getLogger("RichTextEditor");
-  const [plugins, decorator] = EditorPlugins.createPostEditorPlugins();
+  const [plugins, decorator] = useMemo(
+    () => EditorPlugins.createPostEditorPlugins(),
+    []
+  );
   const editor = useMemo(() => pipe(createEditor(), decorator), [decorator]);
 
   let onMentionAdded = props.onMentionAdded;
