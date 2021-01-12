@@ -1,5 +1,11 @@
 import { RichText } from "./Types";
-import { createEditor, Editor, Node as SlateNode, Path } from "slate";
+import {
+  createEditor,
+  Editor,
+  Node as SlateNode,
+  Path,
+  Transforms,
+} from "slate";
 
 export const EMPTY_RICH_TEXT: RichText = [
   {
@@ -50,9 +56,31 @@ export const mentionPreview = (body: RichText, path: Path): any => {
   editor.children = body;
   const block = Editor.above(editor, { at: path });
   const node = block && block[0];
-  if (node) node["noGutter"] = true;
-  //const afterBlock = Editor.after(editor, path, { unit: "block" });
-  //const blockRange = aboveBlock && Editor.range(editor, aboveBlock, afterBlock);
 
-  return node && [{ children: [node] }];
+  if (!node) {
+    return undefined;
+  }
+
+  const preview = createEditor();
+  preview.children = [{ children: [node] }];
+
+  Transforms.insertNodes(
+    preview,
+    {
+      type: "p",
+      children: [{ text: "..." }],
+    },
+    { at: [0, 1] }
+  );
+
+  Transforms.insertNodes(
+    preview,
+    {
+      type: "p",
+      children: [{ text: "..." }],
+    },
+    { at: [0, 0] }
+  );
+
+  return preview.children;
 };
