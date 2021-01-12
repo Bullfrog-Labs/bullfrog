@@ -107,6 +107,7 @@ export const ProfileView = (props: ProfileViewProps) => {
         className={classes.postListItem}
       >
         <ListItemText
+          disableTypography={true}
           primary={
             <Link
               className={globalClasses.link}
