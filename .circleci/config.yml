@@ -8,7 +8,7 @@ jobs:
   run-ingest-gcf-type-checks:
     executor:
       name: python/default
-      tag: 3.8-node
+      tag: 3.9-node
     steps:
       - checkout
       - python/install-packages:
