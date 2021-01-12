@@ -12,6 +12,7 @@ import RichTextEditor, {
   RichTextEditorImperativeHandle,
   RichTextCompactViewer,
 } from "../components/richtext/RichTextEditor";
+import { RichText } from "../components/richtext/Types";
 import * as log from "loglevel";
 import {
   Container,
@@ -39,16 +40,19 @@ import {
   UserPost,
   GetMentionUserPostsFn,
 } from "../services/store/Posts";
+import { Node, ElementEntry, Path } from "slate";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
 import { useMentions } from "../hooks/useMentions";
 import { Link, Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
-import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
+import { MentionNodeData, ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
 import DocumentTitle from "../components/richtext/DocumentTitle";
 import { EMPTY_RICH_TEXT, mentionPreview } from "../components/richtext/Utils";
 import { PostAuthorLink } from "../components/identity/PostAuthorLink";
 import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useGlobalStyles } from "../styles/styles";
+import { isConstructorDeclaration } from "typescript";
+import { isObject } from "util";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -161,7 +165,7 @@ const useEditablePostComponents: (
 export type BasePostViewProps = {
   readOnly: boolean;
   postView: React.ReactChild;
-  mentions?: UserPost[];
+  mentions?: MentionInContext[];
 };
 
 export const BasePostView = (props: BasePostViewProps) => {
@@ -375,7 +379,7 @@ export type PostViewProps = {
 
   viewer: UserRecord;
   author: UserRecord;
-  mentions: UserPost[];
+  mentions: MentionInContext[];
 
   getTitle: () => Promise<PostTitle | undefined>;
 
@@ -391,7 +395,7 @@ type PostViewImperativeHandle = {
   blurBody: () => void;
 };
 
-const MentionsSection = (props: { mentions: UserPost[] }) => {
+const MentionsSection = (props: { mentions: MentionInContext[] }) => {
   const classes = useStyles();
   const { mentions } = props;
   const globalClasses = useGlobalStyles();
@@ -400,7 +404,7 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
     return (
       <ListItem
         alignItems="flex-start"
-        key={mention.post.id}
+        key={mention.post.post.id}
         className={classes.postListItem}
       >
         <ListItemText
@@ -408,17 +412,15 @@ const MentionsSection = (props: { mentions: UserPost[] }) => {
             <Typography variant="h6">
               <Link
                 className={globalClasses.link}
-                to={`/post/${mention.post.authorId}/${mention.post.id}`}
+                to={`/post/${mention.post.post.authorId}/${mention.post.post.id}`}
               >
-                {mention.post.title}
+                {mention.post.post.title}
               </Link>
             </Typography>
           }
           secondary={
             <React.Fragment>
-              <RichTextCompactViewer
-                body={mentionPreview(mention.post.body, [0, 0, 0])}
-              />
+              <RichTextCompactViewer body={mention.text} />
             </React.Fragment>
           }
         />
@@ -667,6 +669,48 @@ type PostViewControllerParams = {
   postId: PostId;
 };
 
+type MentionInContext = {
+  post: UserPost;
+  text: RichText;
+};
+
+const findMentionsInText = (text: RichText, postId: PostId) => {
+  return Array.from(Node.elements(text[0])).filter(
+    (n) => n[0]["type"] === ELEMENT_MENTION && n[0]["postId"] === postId
+  );
+};
+
+const findMentionsInPosts = (
+  posts: UserPost[],
+  postId: PostId
+): MentionInContext[] => {
+  const logger = log.getLogger("findMentionsInPosts");
+  const mentions: MentionInContext[] = [];
+  posts.forEach((post) => {
+    const previews = new Set<string>();
+    const mentionNodes = findMentionsInText(post.post.body, postId);
+    logger.debug(`got ${mentionNodes.length} mentionNodes`);
+    mentionNodes.forEach((mentionNode) => {
+      // The path returned by the search function is a little off because we
+      // search from the first child.
+      const path = [0, ...mentionNode[1]];
+      const preview = mentionPreview(post.post.body, path);
+      // This isn't perfect (assumes same object always serialized to the same
+      // thing), but probably ok for now.
+      const previewId = JSON.stringify(preview);
+      if (!previews.has(previewId)) {
+        const mentionInContext = {
+          post: post,
+          text: preview,
+        };
+        mentions.push(mentionInContext);
+        previews.add(previewId);
+      }
+    });
+  });
+  return mentions;
+};
+
 export const PostViewController = (props: PostViewControllerProps) => {
   const logger = log.getLogger("PostViewController");
   const classes = useStyles();
@@ -676,7 +720,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const [title, setTitle] = useState<PostTitle>("");
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
-  const [mentions, setMentions] = useState<UserPost[]>([]);
+  const [mentionPosts, setMentionPosts] = useState<UserPost[]>([]);
 
   const [postRecordLoaded, setPostRecordLoaded] = useState(false);
   const [postRecordNotFound, setPostRecordNotFound] = useState(false);
@@ -694,6 +738,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
     authorUserRecord?.username || ""
   );
 
+  const mentions = findMentionsInPosts(mentionPosts, postId);
+
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
   // Attempt to load post
@@ -703,7 +749,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
     const loadPostRecord = async () => {
       const postRecord = await props.getPost(authorId, postId);
-      const newMentions = await props.getMentionUserPosts(postId);
+      const newMentionPosts = await props.getMentionUserPosts(postId);
       const postRecordNotFound = !postRecord;
 
       if (!isSubscribed) {
@@ -712,7 +758,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
       setPostRecordLoaded(true);
       setPostRecordNotFound(postRecordNotFound);
-      setMentions(newMentions);
+      setMentionPosts(newMentionPosts);
 
       if (postRecordNotFound) {
         logger.info(`Post ${postId} for author ${authorId} not found.`);
