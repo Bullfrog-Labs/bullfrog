@@ -40,7 +40,7 @@ import {
 } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
 import { useMentions } from "../hooks/useMentions";
-import { Link, Redirect, useHistory, useParams } from "react-router-dom";
+import { Link, Redirect, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import DocumentTitle from "../components/richtext/DocumentTitle";
@@ -74,8 +74,6 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: "0px",
   },
 }));
-
-const EMPTY_TITLE = "";
 
 const DEFAULT_IDLE_TIME = 1 * 1000;
 
@@ -176,126 +174,6 @@ export const BasePostView = (props: BasePostViewProps) => {
   );
 };
 
-export interface CreateNewPostViewProps {
-  prepopulatedTitle?: PostTitle;
-  createPost: CreatePostFn;
-  redirectAfterCreate: (postUrl: string) => void;
-  onMentionSearchChanged: (newSearch: string) => void;
-  mentionables: MentionNodeData[];
-  onMentionAdded: (option: MentionNodeData) => void;
-  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
-  user: UserRecord;
-}
-
-export const CreateNewPostView = (props: CreateNewPostViewProps) => {
-  // Need to be able to pre-populate title, or have empty title.
-  // Note is not saved until it has a title and a body. Once the note is saved,
-  // it is redirected to the post view.
-  // Changing title of an unsaved note does nothing on the backend.
-  // Save note on idle if the title or body is changed. No saving on blank
-  // title.
-  const logger = log.getLogger("CreateNewPostView");
-
-  const [nonEmptyTitle, setNonEmptyTitle] = useState(!!props.prepopulatedTitle);
-  const [title, setTitle] = useState<string>(
-    !!props.prepopulatedTitle ? props.prepopulatedTitle : EMPTY_TITLE
-  );
-
-  const [nonEmptyBody, setNonEmptyBody] = useState(false);
-  const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
-
-  const onIdle = async () => {
-    if (!nonEmptyTitle || !nonEmptyBody) {
-      logger.debug("Title or body empty, not creating new post");
-      return;
-    }
-
-    const createPostResult = await props.createPost(title, body);
-    const { postId } = createPostResult;
-
-    switch (createPostResult.state) {
-      case "success":
-        const { postUrl } = createPostResult;
-        logger.info(
-          `new post created with title ${title} and post id ${postId}, redirecting to ${postUrl}`
-        );
-
-        // do redirect to permanent note url
-        props.redirectAfterCreate(postUrl);
-
-        return;
-      case "post-name-taken":
-        logger.info(
-          `new post creation with title ${title} failed because that post name is already taken by post with id ${postId}`
-        );
-        // TODO: Display something to show the user that the rename failed due
-        // to the new name already being taken.
-        return;
-      default:
-        assertNever(createPostResult);
-    }
-  };
-
-  const onTitleChange = (newTitle: PostTitle) => {
-    setTitle(newTitle);
-    setNonEmptyTitle(newTitle !== EMPTY_TITLE);
-  };
-  const onBodyChange = (newBody: PostBody) => {
-    setBody(newBody);
-    setNonEmptyBody(newBody !== EMPTY_RICH_TEXT);
-  };
-
-  const readOnly = false;
-
-  const {
-    idleTimer,
-    documentTitle,
-    richTextEditor,
-  } = useEditablePostComponents({
-    onIdle: onIdle,
-    readOnly: readOnly,
-
-    title: title,
-    body: body,
-
-    onTitleChange: onTitleChange,
-    onBodyChange: onBodyChange,
-
-    onMentionSearchChanged: props.onMentionSearchChanged,
-    mentionables: props.mentionables,
-    onMentionAdded: props.onMentionAdded,
-    mentionableElementFn: props.mentionableElementFn,
-  });
-
-  const postView = (
-    <Container>
-      {idleTimer}
-      <Grid
-        container
-        direction="column"
-        justify="flex-start"
-        alignItems="stretch"
-        spacing={3}
-      >
-        <Grid item>{documentTitle}</Grid>
-        <Grid item>{richTextEditor}</Grid>
-      </Grid>
-    </Container>
-  );
-
-  return <BasePostView readOnly={readOnly} postView={postView} />;
-};
-
-export type CreateNewPostViewControllerProps = {
-  createPost: CreatePostFn;
-  getGlobalMentions: GetAllPostsByTitlePrefixFn;
-  user: UserRecord;
-};
-
-export type CreateNewPostViewControllerParams = {
-  prepopulatedTitle?: PostTitle;
-};
-
 const mentionableElementFn = (uid: UserId) => (
   option: MentionNodeData
 ): JSX.Element => {
@@ -314,37 +192,6 @@ const mentionableElementFn = (uid: UserId) => (
       </Typography>
     );
   }
-};
-
-export const CreateNewPostViewController = (
-  props: CreateNewPostViewControllerProps
-) => {
-  const { prepopulatedTitle } = useParams<CreateNewPostViewControllerParams>();
-
-  const history = useHistory();
-  const redirectAfterCreate = (postUrl: string) => {
-    history.replace(postUrl);
-  };
-
-  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
-    props.getGlobalMentions,
-    props.createPost,
-    props.user.uid,
-    props.user.username
-  );
-
-  return (
-    <CreateNewPostView
-      prepopulatedTitle={prepopulatedTitle}
-      createPost={props.createPost}
-      redirectAfterCreate={redirectAfterCreate}
-      onMentionSearchChanged={onMentionSearchChanged}
-      mentionables={mentionables}
-      onMentionAdded={onMentionAdded}
-      mentionableElementFn={mentionableElementFn(props.user.uid)}
-      user={props.user}
-    />
-  );
 };
 
 export type PostViewProps = {

@@ -18,10 +18,7 @@ import {
   SyncBodyFn,
 } from "../services/store/Posts";
 import { UserRecord, GetUserFn } from "../services/store/Users";
-import {
-  CreateNewPostViewController,
-  PostViewController,
-} from "../views/PostView";
+import { PostViewController } from "../views/PostView";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
 
 const Sad404 = () => {
@@ -127,15 +124,6 @@ export const Router = (props: {
                 getGlobalMentions={getGlobalMentions}
                 createPost={createPost(user)}
                 getMentionUserPosts={getMentionUserPosts}
-              />
-            </AppContainerWithProps>
-          </PrivateRoute>
-          <PrivateRoute exact path="/create-new-post">
-            <AppContainerWithProps>
-              <CreateNewPostViewController
-                createPost={createPost(user)}
-                getGlobalMentions={getGlobalMentions}
-                user={user}
               />
             </AppContainerWithProps>
           </PrivateRoute>
