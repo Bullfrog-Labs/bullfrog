@@ -16,6 +16,7 @@ import { Link, useParams } from "react-router-dom";
 import { UserPost, GetStackPostsFn } from "../services/store/Posts";
 import { richTextStringPreview } from "./richtext/Utils";
 import { useGlobalStyles } from "../styles/styles";
+import { postURL } from "../routing/URLs";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -87,7 +88,7 @@ export const StackView = (props: StackViewProps) => {
         <Typography variant="h6">
           <Link
             className={globalClasses.link}
-            to={`/post/${post.user.uid}/${post.post.id}`}
+            to={postURL(post.user.uid, post.post.id!)}
           >
             {post.post.title}
           </Link>

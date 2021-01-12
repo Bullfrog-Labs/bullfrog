@@ -9,7 +9,7 @@ import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
 import {
   CreatePostFn,
-  GetGlobalMentionsFn,
+  GetAllPostsByTitlePrefixFn,
   GetPostFn,
   GetStackPostsFn,
   GetUserPostsFn,
@@ -18,10 +18,8 @@ import {
   SyncBodyFn,
 } from "../services/store/Posts";
 import { UserRecord, GetUserFn } from "../services/store/Users";
-import {
-  CreateNewPostViewController,
-  PostViewController,
-} from "../views/PostView";
+import { PostViewController } from "../views/PostView";
+import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
 
 const Sad404 = () => {
   let location = useLocation();
@@ -44,7 +42,8 @@ export const Router = (props: {
   createPost: (user: UserRecord) => CreatePostFn;
   renamePost: (user: UserRecord) => RenamePostFn;
   syncBody: (user: UserRecord) => SyncBodyFn;
-  getGlobalMentions: GetGlobalMentionsFn;
+  getGlobalMentions: GetAllPostsByTitlePrefixFn;
+  getSearchSuggestionsByTitlePrefix: SearchSuggestionFetchFn;
   getMentionUserPosts: GetMentionUserPostsFn;
   user?: UserRecord;
 }) => {
@@ -58,17 +57,27 @@ export const Router = (props: {
     renamePost,
     syncBody,
     getGlobalMentions,
+    getSearchSuggestionsByTitlePrefix,
     getMentionUserPosts,
     user,
   } = props;
+  const AppContainerWithProps: React.FC<{}> = (props) => (
+    <AppContainer
+      user={user}
+      createPost={user ? createPost(user) : undefined}
+      getSearchBoxSuggestions={getSearchSuggestionsByTitlePrefix}
+    >
+      {props.children}
+    </AppContainer>
+  );
   if (!user) {
     return (
       <BrowserRouter>
         <Switch>
           <Route path="/login">
-            <AppContainer>
+            <AppContainerWithProps>
               <LoginView authProvider={authProvider} />
-            </AppContainer>
+            </AppContainerWithProps>
           </Route>
           <Route path="*">
             <Sad404 />
@@ -81,31 +90,31 @@ export const Router = (props: {
       <BrowserRouter>
         <Switch>
           <Route path="/login">
-            <AppContainer>
+            <AppContainerWithProps>
               <LoginView authProvider={authProvider} />
-            </AppContainer>
+            </AppContainerWithProps>
           </Route>
           <PrivateRoute exact path="/">
-            <AppContainer>
+            <AppContainerWithProps>
               <MainView />
-            </AppContainer>
+            </AppContainerWithProps>
           </PrivateRoute>
           <PrivateRoute exact path="/profile/:userId?">
-            <AppContainer>
+            <AppContainerWithProps>
               <ProfileViewController
                 getUserPosts={getUserPosts}
                 getUser={getUser}
                 user={user}
               />
-            </AppContainer>
+            </AppContainerWithProps>
           </PrivateRoute>
           <PrivateRoute exact path="/stack/:stackId">
-            <AppContainer>
+            <AppContainerWithProps>
               <StackViewController getStackPosts={getStackPosts} />
-            </AppContainer>
+            </AppContainerWithProps>
           </PrivateRoute>
           <PrivateRoute exact path="/post/:authorId/:postId">
-            <AppContainer>
+            <AppContainerWithProps>
               <PostViewController
                 viewer={user}
                 getUser={getUser}
@@ -116,16 +125,7 @@ export const Router = (props: {
                 createPost={createPost(user)}
                 getMentionUserPosts={getMentionUserPosts}
               />
-            </AppContainer>
-          </PrivateRoute>
-          <PrivateRoute exact path="/create-new-post">
-            <AppContainer>
-              <CreateNewPostViewController
-                createPost={createPost(user)}
-                getGlobalMentions={getGlobalMentions}
-                user={user}
-              />
-            </AppContainer>
+            </AppContainerWithProps>
           </PrivateRoute>
           <Route path="*">
             <Sad404 />

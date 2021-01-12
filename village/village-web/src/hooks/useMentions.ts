@@ -7,12 +7,12 @@ import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 
 import {
   UserPost,
-  GetGlobalMentionsFn,
+  GetAllPostsByTitlePrefixFn,
   CreatePostFn,
 } from "../services/store/Posts";
 
 export const useMentions = (
-  getGlobalMentions: GetGlobalMentionsFn,
+  getGlobalMentions: GetAllPostsByTitlePrefixFn,
   createPost: CreatePostFn,
   authorId: UserId,
   authorUsername: string
@@ -73,7 +73,7 @@ export const useMentions = (
     const addMentionToDatabase = async () => {
       if ("exists" in mention && mention["exists"] === false && !!createPost) {
         logger.debug(`adding mention ${mention.value}`);
-        await createPost(mention.value, EMPTY_RICH_TEXT, mention.postId);
+        await createPost(mention.value, mention.postId);
       } else {
         logger.debug(`not adding mention ${mention.value}; already exists`);
       }

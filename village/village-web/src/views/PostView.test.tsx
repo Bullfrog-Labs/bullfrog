@@ -1,17 +1,18 @@
 import React from "react";
 import { screen, render, waitFor } from "@testing-library/react";
-import { CreateNewPostView, PostView, PostViewController } from "./PostView";
+import { PostView, PostViewController } from "./PostView";
 import {
   EMPTY_RICH_TEXT,
   stringToSlateNode,
+  MentionInContext,
 } from "../components/richtext/Utils";
 import { MemoryRouter, Route, Router } from "react-router-dom";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
-
 import { createMemoryHistory } from "history";
 import { PostId, UserPost, PostRecord } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
 import { userPosts0 } from "../testing/Fixtures";
+import { postURL } from "../routing/URLs";
 
 const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
   return <React.Fragment>option.value</React.Fragment>;
@@ -50,31 +51,7 @@ const posts: PostRecord[] = [
   },
 ];
 
-test("Renders CreateNewPostView", () => {
-  const createPost = jest.fn();
-  const redirectAfterCreate = jest.fn();
-
-  const onMentionSearchChanged = jest.fn();
-  const mentionables: MentionNodeData[] = [];
-  const onMentionAdded = jest.fn();
-
-  const { getByText } = render(
-    <CreateNewPostView
-      createPost={createPost}
-      redirectAfterCreate={redirectAfterCreate}
-      onMentionSearchChanged={onMentionSearchChanged}
-      mentionables={mentionables}
-      onMentionAdded={onMentionAdded}
-      mentionableElementFn={mentionableElementFn}
-      user={author}
-    />
-  );
-
-  const titleEl = getByText("Enter a title");
-  expect(titleEl).toBeInTheDocument();
-});
-
-const TestPostView = (props: { mentions?: UserPost[] }) => {
+const TestPostView = (props: { mentions?: MentionInContext[] }) => {
   const postProps = {
     readOnly: false,
     postId: "foo",
@@ -117,7 +94,12 @@ test("Renders PostView with no mentions", () => {
 });
 
 test("Renders PostView with mentions", () => {
-  const mentions = userPosts0;
+  const mentions = userPosts0.map((up) => {
+    return {
+      post: up,
+      text: stringToSlateNode("here i am, mr. mention!"),
+    };
+  });
   const { getByText, queryAllByText } = render(
     <TestPostView mentions={mentions} />
   );
@@ -160,7 +142,7 @@ test("PostView to PostView navigation works", async () => {
     getMentionUserPosts: getMentionUserPosts0,
   };
 
-  history.push(`/post/${author.uid}/abc`);
+  history.push(postURL(author.uid, "abc"));
 
   render(
     <Router history={history}>
