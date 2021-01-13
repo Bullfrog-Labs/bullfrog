@@ -12,6 +12,7 @@ import {
   CreateNewPostSuggestion,
   SearchSuggestionFetchFn,
   NavigateToPostSuggestion,
+  SearchSuggestion,
 } from "../../services/search/Suggestions";
 import { Logging } from "kmgmt-common";
 
@@ -132,5 +133,99 @@ describe("useAutocompleteState hook", () => {
     var [suggestions] = result.current;
 
     expect(suggestions).toEqual([ss2]);
+  });
+
+  test("aborts stale requests", async () => {
+    let resolveFetchFunctions: (value: unknown) => void | undefined;
+    const p = new Promise((resolve, reject) => {
+      resolveFetchFunctions = resolve;
+    });
+
+    /**
+     * Set up the get suggestions function to be delayable.
+     */
+    const getSuggestionsResult = (value: string): SearchSuggestion[] => {
+      return [
+        {
+          title: "Title fool! - " + value,
+          postId: "123",
+          authorId: "123",
+          authorUsername: "leighland",
+          action: "navigateToPost",
+        },
+      ];
+    };
+    function* getSuggestionsGenerator(): Generator<
+      Promise<SearchSuggestion[]>
+    > {
+      yield p.then((_) => {
+        return getSuggestionsResult("1");
+      });
+      yield Promise.resolve(getSuggestionsResult("2"));
+    }
+    const gsg = getSuggestionsGenerator();
+    const getSuggestions: SearchSuggestionFetchFn = async (value: string) => {
+      return gsg.next().value;
+    };
+
+    /**
+     * Set up the fetch title function to be delayable.
+     */
+    function* fetchTitleFromOpenGraphGenerator(): Generator<
+      Promise<string | undefined>
+    > {
+      yield p.then((_) => {
+        return "1";
+      });
+      yield Promise.resolve("2");
+    }
+    const ftg = fetchTitleFromOpenGraphGenerator();
+    const fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn = async (
+      value: string
+    ) => {
+      return ftg.next().value;
+    };
+
+    /**
+     * Run the test.
+     */
+
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useAutocompleteState(getSuggestions, fetchTitleFromOpenGraph)
+    );
+
+    var [suggestions, startSuggestionsRequest] = result.current;
+
+    await act(async () => {
+      startSuggestionsRequest("http://wabisabi.com");
+    });
+
+    await act(async () => {
+      startSuggestionsRequest("http://wabisabi.co.uk");
+      expect(resolveFetchFunctions).toBeDefined();
+      await waitForNextUpdate();
+    });
+
+    var [suggestions] = result.current;
+
+    const expSs1 = {
+      action: "navigateToPost",
+      authorId: "123",
+      authorUsername: "leighland",
+      postId: "123",
+      title: "Title fool! - 2",
+    };
+    const expSs2 = {
+      action: "createNewPost",
+      title: "2",
+    };
+    expect(suggestions).toEqual([expSs2, expSs1]);
+
+    await act(async () => {
+      resolveFetchFunctions(null);
+    });
+
+    var [suggestions] = result.current;
+    expect(suggestions).toEqual([expSs2, expSs1]);
   });
 });
