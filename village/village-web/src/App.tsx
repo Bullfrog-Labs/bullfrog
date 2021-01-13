@@ -29,6 +29,7 @@ import {
 } from "./services/store/Posts";
 import { useEffect } from "react";
 import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
+import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
 
 Logging.configure(log);
 
@@ -112,6 +113,7 @@ function App() {
         getSearchSuggestionsByTitlePrefix={getSearchSuggestionsByTitlePrefix(
           database
         )}
+        fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
         user={user}
       />
     </AuthContext.Provider>
