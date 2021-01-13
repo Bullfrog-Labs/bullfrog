@@ -375,6 +375,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
             logger.info(`Post renamed to ${props.title}`);
             setTitleChanged(false);
             props.setTitle(props.title);
+            documentTitleRef.current?.setSelectionToEnd();
             break;
           case "post-name-taken":
             const savedTitle = await props.getTitle();
