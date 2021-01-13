@@ -1,5 +1,5 @@
 import { Database } from "../store/Database";
-import { getAllPostsByTitlePrefix, PostId } from "../store/Posts";
+import { getAllPostsByTitlePrefix, PostId, UserPost } from "../store/Posts";
 
 import { UserId } from "../store/Users";
 
@@ -24,27 +24,32 @@ export type SearchSuggestionFetchFn = (
   value: string
 ) => Promise<SearchSuggestion[]>;
 
-export const getSearchSuggestionsByTitlePrefix: (
-  database: Database
-) => SearchSuggestionFetchFn = (database) => async (value) => {
-  const allMatches = await getAllPostsByTitlePrefix(database)(value);
-
+export const matchesToSearchSuggestions = (
+  matches: UserPost[],
+  value: string
+) => {
   const exactMatchExists =
-    allMatches.filter((s) => s.post.title === value).length !== 0;
+    matches.filter((s) => s.post.title === value).length !== 0;
 
   const createNewPostSuggestions: CreateNewPostSuggestion[] = exactMatchExists
     ? []
     : [{ action: "createNewPost", title: value }];
 
-  const matchingSuggestions: NavigateToPostSuggestion[] = allMatches.map(
-    (s) => ({
-      title: s.post.title,
-      postId: s.post.id!,
-      authorId: s.user.uid,
-      authorUsername: s.user.username,
-      action: "navigateToPost",
-    })
-  );
+  const matchingSuggestions: NavigateToPostSuggestion[] = matches.map((s) => ({
+    title: s.post.title,
+    postId: s.post.id!,
+    authorId: s.user.uid,
+    authorUsername: s.user.username,
+    action: "navigateToPost",
+  }));
 
   return [...createNewPostSuggestions, ...matchingSuggestions];
+};
+
+export const getSearchSuggestionsByTitlePrefix: (
+  database: Database
+) => SearchSuggestionFetchFn = (database) => async (value) => {
+  const allMatches = await getAllPostsByTitlePrefix(database)(value);
+
+  return matchesToSearchSuggestions(allMatches, value);
 };
