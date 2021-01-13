@@ -30,6 +30,7 @@ import { createMemoryHistory } from "history";
 import { Router } from "react-router-dom";
 import { postURL } from "../../routing/URLs";
 import { EMPTY_RICH_TEXT } from "../richtext/Utils";
+import delay from "delay";
 
 Logging.configure(log);
 
@@ -418,6 +419,8 @@ describe("useAutocompleteState hook", () => {
     });
 
     await act(async () => {
+      // Timestamp must advance by at least a ms.
+      await delay(1);
       startSuggestionsRequest("http://wabisabi.co.uk");
       expect(resolveFetchFunctions).toBeDefined();
       await waitForNextUpdate();
