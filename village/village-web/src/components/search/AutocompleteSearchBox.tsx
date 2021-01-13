@@ -14,6 +14,7 @@ import Autosuggest, {
 } from "react-autosuggest";
 import { assertNever } from "../../utils";
 import {
+  CreateNewPostSuggestion,
   SearchSuggestion,
   SearchSuggestionFetchFn,
 } from "../../services/search/Suggestions";
@@ -23,6 +24,8 @@ import { useHistory } from "react-router-dom";
 import { postURL as makePostUrl } from "../../routing/URLs";
 import { CreatePostFn } from "../../services/store/Posts";
 import { CreateNewPostSearchResult } from "./CreateNewPostSearchResult";
+import { AddBoxDimensions } from "@styled-icons/material/AddBox";
+import axios from "axios";
 
 const AUTOCOMPLETE_SEARCH_BOX_KEY = "u";
 const AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER = "command";
@@ -52,6 +55,33 @@ export type AutocompleteSearchBoxProps = {
   createPost: CreatePostFn;
   onClose: () => void;
   setShowProgress: Dispatch<SetStateAction<boolean>>;
+};
+
+const fetchUrlInfo = async (url: string) => {
+  const logger = log.getLogger("AutocompleteSearchBox");
+  const encodedUri = encodeURIComponent(url);
+  const rep = await axios.get(
+    `https://opengraph.io/api/1.1/site/${encodedUri}?app_id=c4bf9937-cc07-45d0-b3ec-549bab92dc39`
+  );
+  if (rep.status === 200) {
+    const data = rep.data;
+    const title =
+      data.openGraph.title || data.hybridGraph.title || data.htmlInferred.title;
+    if (title) {
+      return title;
+    } else {
+      logger.error(`Failed to fetch title; response=${rep}`);
+    }
+  } else {
+    return "cant find title";
+  }
+};
+
+const newCreateFromUrlItem = (title: string): CreateNewPostSuggestion => {
+  return {
+    title: title,
+    action: "createNewPost",
+  };
 };
 
 export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
@@ -90,7 +120,14 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   const onSuggestionsFetchRequested: SuggestionsFetchRequested = async (
     request
   ) => {
-    const suggestions = await props.getSuggestions(request.value);
+    const value = request.value;
+    logger.debug(`value is ${value}`);
+    if (value.startsWith("http") || value.startsWith("https")) {
+      fetchUrlInfo(value).then((title) => {
+        setSuggestions([newCreateFromUrlItem(title), ...suggestions]);
+      });
+    }
+    const suggestions = await props.getSuggestions(value);
     setSuggestions(suggestions);
   };
 
