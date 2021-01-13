@@ -1,12 +1,27 @@
-import React, { FunctionComponent, useMemo, useCallback } from "react";
-import { createEditor } from "slate";
+import React, {
+  useMemo,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+} from "react";
+import { createEditor, Text, Node, Transforms } from "slate";
 import { KBEventHandler, RichText } from "./Types";
 import { withEditableTypographyLayout } from "./EditorBehaviors";
 import { withHistory } from "slate-history";
 import { withReact, Slate, Editable } from "slate-react";
 
 import { Typography } from "@material-ui/core";
-import { slateNodeToString, stringToSlateNode } from "./Utils";
+import {
+  EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH,
+  slateNodeToString,
+  stringToSlateNode,
+} from "./Utils";
+
+export type EditableTypographyImperativeHandle = {
+  deselect: () => void;
+  setSelectionToEnd: () => void;
+};
 
 export type EditableTypographyProps = {
   readOnly?: boolean;
@@ -27,9 +42,10 @@ const handleExitEditable = (handleEscape?: KBEventHandler) => (
   }
 };
 
-export const EditableTypography: FunctionComponent<EditableTypographyProps> = (
-  props
-) => {
+export const EditableTypography = forwardRef<
+  EditableTypographyImperativeHandle,
+  EditableTypographyProps
+>((props, ref) => {
   const editor = useMemo(
     () => withReact(withEditableTypographyLayout(withHistory(createEditor()))),
     []
@@ -57,6 +73,22 @@ export const EditableTypography: FunctionComponent<EditableTypographyProps> = (
     [props.variant]
   );
 
+  useImperativeHandle(ref, () => ({
+    deselect: () => Transforms.deselect(editor),
+    setSelectionToEnd: () => {
+      const textNode = Node.get(editor, EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH);
+      if (!Text.isText(textNode)) {
+        throw new Error("Got non-text node when expecting a text node");
+      }
+      const textEndOffset = textNode.text.length;
+      const endPoint = {
+        path: EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH,
+        offset: textEndOffset,
+      };
+      Transforms.select(editor, endPoint);
+    },
+  }));
+
   return (
     <Slate
       editor={editor}
@@ -71,4 +103,4 @@ export const EditableTypography: FunctionComponent<EditableTypographyProps> = (
       />
     </Slate>
   );
-};
+});
