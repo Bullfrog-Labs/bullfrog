@@ -57,7 +57,7 @@ export type AutocompleteSearchBoxProps = {
   setShowProgress: Dispatch<SetStateAction<boolean>>;
 };
 
-const fetchUrlInfo = async (url: string) => {
+const fetchTitleFromOpenGraph = async (url: string) => {
   const logger = log.getLogger("AutocompleteSearchBox");
   const encodedUri = encodeURIComponent(url);
   const rep = await axios.get(
@@ -116,6 +116,23 @@ const useAutocompleteState = (
     }
   };
 
+  const startOpenGraphRequest = async (value: string, startTimeMs: number) => {
+    const title = await fetchTitleFromOpenGraph(value);
+
+    if (startTimeMs < suggestionsRequestStartTimeMs) {
+      logger.debug(`Got stale og request, aborting`);
+    } else {
+      logger.debug(`Og request complete, updating suggestions; title=${title}`);
+      const suggestion: CreateNewPostSuggestion = {
+        title: title,
+        action: "createNewPost",
+      };
+      setSuggestions2((prevState) => {
+        return Object.assign({}, prevState, { link: [suggestion] });
+      });
+    }
+  };
+
   const startSuggestionsRequest = (value: string) => {
     suggestionsRequestStartTimeMs = Date.now();
 
@@ -124,7 +141,10 @@ const useAutocompleteState = (
     }
 
     startDatabaseRequest(value, suggestionsRequestStartTimeMs);
-    // startFetchOG
+
+    if (value.startsWith("http") || value.startsWith("https")) {
+      startOpenGraphRequest(value, suggestionsRequestStartTimeMs);
+    }
   };
 
   return [suggestions, startSuggestionsRequest];
@@ -169,16 +189,6 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
     request
   ) => {
     const value = request.value;
-    /*
-    logger.debug(`value is ${value}`);
-    if (value.startsWith("http") || value.startsWith("https")) {
-      fetchUrlInfo(value).then((title) => {
-        setSuggestions([newCreateFromUrlItem(title), ...suggestions]);
-      });
-    }
-    const suggestions = await props.getSuggestions(value);
-    setSuggestions(suggestions);
-    */
     startSuggestionsRequest(value);
   };
 
