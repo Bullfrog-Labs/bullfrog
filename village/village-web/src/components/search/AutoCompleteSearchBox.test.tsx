@@ -41,10 +41,8 @@ test("renders AutocompleteSearchBox", () => {
 
 test("useAutocompleteSearchBoxDialog set up components correctly", async () => {
   const getSuggestions = jest.fn(async (value: string) => {
-    console.log(value);
     const matches: UserPost[] = [];
     const suggestions = matchesToSearchSuggestions(matches, value);
-    console.log(suggestions);
     return suggestions;
   });
 
@@ -80,9 +78,8 @@ test("useAutocompleteSearchBoxDialog set up components correctly", async () => {
 
   // getsuggestions should be called
   const mockSearchBoxInput = "baz";
-  // await act(() => userEvent.type(inputEl, mockSearchBoxInput));
   userEvent.type(inputEl, mockSearchBoxInput);
-  waitFor(() => expect(inputEl).toHaveTextContent(mockSearchBoxInput));
+  await waitFor(() => expect(inputEl).toHaveValue(mockSearchBoxInput));
   expect(getSuggestions).toHaveBeenCalled();
 
   // the option to create post should be present
@@ -90,7 +87,7 @@ test("useAutocompleteSearchBoxDialog set up components correctly", async () => {
   const createNewPostSearchResultEl = screen.getByText(createNewPostPromptText);
   expect(createNewPostSearchResultEl).toBeInTheDocument();
 
-  // Progress indicator should be rendered
-
-  // Dialog should be rendered again
+  // create post should be called
+  userEvent.click(createNewPostSearchResultEl);
+  expect(createPost).toHaveBeenCalledTimes(1);
 });
