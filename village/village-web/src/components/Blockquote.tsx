@@ -1,19 +1,16 @@
 import React, { ReactNode } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import { useGlobalStyles } from "../styles/styles";
 
-const useStyles = makeStyles((theme) => ({
-  blockquote: {
-    borderLeft: "4px solid",
-    margin: "1em 0",
-    paddingLeft: "1em",
-    borderColor: theme.palette.secondary.dark,
-  },
-}));
+export const Blockquote = (props: {
+  children?: ReactNode;
+  className?: string;
+}) => {
+  const classes = useGlobalStyles();
 
-export const Blockquote = (props: { children?: ReactNode }) => {
-  const classes = useStyles();
+  let className = classes.blockquote;
+  if (props.className) {
+    className = props.className;
+  }
 
-  return (
-    <blockquote className={classes.blockquote}>{props.children}</blockquote>
-  );
+  return <blockquote className={className}>{props.children}</blockquote>;
 };

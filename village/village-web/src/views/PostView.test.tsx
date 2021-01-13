@@ -4,10 +4,10 @@ import { PostView, PostViewController } from "./PostView";
 import {
   EMPTY_RICH_TEXT,
   stringToSlateNode,
+  MentionInContext,
 } from "../components/richtext/Utils";
 import { MemoryRouter, Route, Router } from "react-router-dom";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
-
 import { createMemoryHistory } from "history";
 import { PostId, UserPost, PostRecord } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
@@ -51,7 +51,7 @@ const posts: PostRecord[] = [
   },
 ];
 
-const TestPostView = (props: { mentions?: UserPost[] }) => {
+const TestPostView = (props: { mentions?: MentionInContext[] }) => {
   const postProps = {
     readOnly: false,
     postId: "foo",
@@ -94,7 +94,13 @@ test("Renders PostView with no mentions", () => {
 });
 
 test("Renders PostView with mentions", () => {
-  const mentions = userPosts0;
+  const mentions = userPosts0.map((up) => {
+    return {
+      post: up,
+      text: stringToSlateNode("here i am, mr. mention!"),
+      path: [0],
+    };
+  });
   const { getByText, queryAllByText } = render(
     <TestPostView mentions={mentions} />
   );
