@@ -14,6 +14,7 @@ import Autosuggest, {
 } from "react-autosuggest";
 import { assertNever } from "../../utils";
 import {
+  CreateNewPostSuggestion,
   SearchSuggestion,
   SearchSuggestionFetchFn,
 } from "../../services/search/Suggestions";
@@ -22,6 +23,7 @@ import { NavigateToPostSearchResult } from "./NavigateToPostSearchResult";
 import { useHistory } from "react-router-dom";
 import { postURL as makePostUrl } from "../../routing/URLs";
 import { CreatePostFn } from "../../services/store/Posts";
+import { FetchTitleFromOpenGraphFn } from "../../services/OpenGraph";
 import { CreateNewPostSearchResult } from "./CreateNewPostSearchResult";
 
 const AUTOCOMPLETE_SEARCH_BOX_KEY = "u";
@@ -51,9 +53,85 @@ type AutocompleteSearchBoxOnChangeFn = (
 export type AutocompleteSearchBoxProps = {
   user: UserRecord;
   getSuggestions: SearchSuggestionFetchFn;
+  fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
   createPost: CreatePostFn;
   onClose: () => void;
   setShowProgress: Dispatch<SetStateAction<boolean>>;
+};
+
+type SearchSuggestionState = {
+  link: SearchSuggestion[];
+  text: SearchSuggestion[];
+};
+
+export const useAutocompleteState = (
+  getSuggestions: SearchSuggestionFetchFn,
+  fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn
+): [SearchSuggestion[], (value: string) => void] => {
+  const logger = log.getLogger("AutocompleteSearchBox");
+  const [suggestions, setSuggestions] = useState<SearchSuggestionState>({
+    link: [],
+    text: [],
+  });
+  const suggestionsList = [...suggestions.link, ...suggestions.text];
+  let suggestionsRequestStartTimeMs = Date.now();
+
+  const startDatabaseRequest = async (value: string, startTimeMs: number) => {
+    logger.debug(`Issue db suggestions request`);
+    try {
+      const suggestions = await getSuggestions(value);
+      if (startTimeMs < suggestionsRequestStartTimeMs) {
+        logger.debug(
+          `Request has completed but the value has changed, ignoring result`
+        );
+      } else {
+        logger.debug(
+          `Request has completed, setting suggestions; count=${suggestions.length}`
+        );
+        setSuggestions((prevState) => {
+          return Object.assign({}, prevState, { text: suggestions });
+        });
+      }
+    } catch (e) {
+      logger.debug(`Db request failed, not adding suggestions; error=${e}`);
+    }
+  };
+
+  const startOpenGraphRequest = async (value: string, startTimeMs: number) => {
+    logger.debug(`Issue fetch title from og request`);
+    const title = await fetchTitleFromOpenGraph(value);
+
+    if (startTimeMs < suggestionsRequestStartTimeMs) {
+      logger.debug(`Got stale og request, aborting`);
+    } else if (title) {
+      logger.debug(`Og request complete, updating suggestions; title=${title}`);
+      const suggestion: CreateNewPostSuggestion = {
+        title: title,
+        action: "createNewPost",
+      };
+      setSuggestions((prevState) => {
+        return Object.assign({}, prevState, { link: [suggestion] });
+      });
+    } else {
+      logger.debug(`Og request failed, not adding suggestions`);
+    }
+  };
+
+  const startSuggestionsRequest = (value: string) => {
+    suggestionsRequestStartTimeMs = Date.now();
+
+    if (value === "") {
+      return;
+    }
+
+    startDatabaseRequest(value, suggestionsRequestStartTimeMs);
+
+    if (value.startsWith("http") || value.startsWith("https")) {
+      startOpenGraphRequest(value, suggestionsRequestStartTimeMs);
+    }
+  };
+
+  return [suggestionsList, startSuggestionsRequest];
 };
 
 export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
@@ -84,7 +162,10 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   const classes = useStyles();
 
   const [value, setValue] = useState<string>("");
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [suggestions, startSuggestionsRequest] = useAutocompleteState(
+    props.getSuggestions,
+    props.fetchTitleFromOpenGraph
+  );
 
   const onChange: AutocompleteSearchBoxOnChangeFn = (event, changeEvent) => {
     setValue(changeEvent.newValue);
@@ -92,12 +173,12 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   const onSuggestionsFetchRequested: SuggestionsFetchRequested = async (
     request
   ) => {
-    const suggestions = await props.getSuggestions(request.value);
-    setSuggestions(suggestions);
+    const value = request.value;
+    startSuggestionsRequest(value);
   };
 
   const onSuggestionsClearRequested = () => {
-    setSuggestions([]);
+    startSuggestionsRequest("");
   };
 
   const getSuggestionValue = (suggestion: SearchSuggestion) => suggestion.title;
@@ -203,7 +284,8 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
 export const useAutocompleteSearchBoxDialog = (
   user: UserRecord,
   createPost: CreatePostFn,
-  getSuggestions: SearchSuggestionFetchFn
+  getSuggestions: SearchSuggestionFetchFn,
+  fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn
 ) => {
   const [open, setOpen] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
@@ -229,6 +311,7 @@ export const useAutocompleteSearchBoxDialog = (
       getSuggestions={getSuggestions}
       setShowProgress={setShowProgress}
       onClose={onClose}
+      fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
     />
   );
 

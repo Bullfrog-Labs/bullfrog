@@ -6,6 +6,7 @@ import {
   Divider,
   Drawer,
 } from "@material-ui/core";
+import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
 import { makeStyles } from "@material-ui/core/styles";
 import theme from "../styles/theme";
 
@@ -89,6 +90,7 @@ export interface AppContainerProps extends React.PropsWithChildren<{}> {
   user?: UserRecord;
   createPost?: CreatePostFn;
   getSearchBoxSuggestions: SearchSuggestionFetchFn;
+  fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
 }
 
 export const AppContainer: React.FC<AppContainerProps> = (props) =>
@@ -114,7 +116,8 @@ const AuthedAppContainer = (props: AppContainerProps) => {
   const autocompleteSearchBox = useAutocompleteSearchBoxDialog(
     props.user,
     props.createPost!,
-    props.getSearchBoxSuggestions
+    props.getSearchBoxSuggestions,
+    props.fetchTitleFromOpenGraph
   );
 
   useHotkeys(AUTOCOMPLETE_SEARCH_BOX_HOTKEY, (event) => {

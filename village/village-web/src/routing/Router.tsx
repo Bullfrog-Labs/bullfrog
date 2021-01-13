@@ -7,6 +7,7 @@ import PrivateRoute from "./PrivateRoute";
 import MainView from "../views/MainView";
 import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
+import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
 import {
   CreatePostFn,
   GetAllPostsByTitlePrefixFn,
@@ -45,6 +46,7 @@ export const Router = (props: {
   getGlobalMentions: GetAllPostsByTitlePrefixFn;
   getSearchSuggestionsByTitlePrefix: SearchSuggestionFetchFn;
   getMentionUserPosts: GetMentionUserPostsFn;
+  fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
   user?: UserRecord;
 }) => {
   const {
@@ -59,6 +61,7 @@ export const Router = (props: {
     getGlobalMentions,
     getSearchSuggestionsByTitlePrefix,
     getMentionUserPosts,
+    fetchTitleFromOpenGraph,
     user,
   } = props;
   const AppContainerWithProps: React.FC<{}> = (props) => (
@@ -66,6 +69,7 @@ export const Router = (props: {
       user={user}
       createPost={user ? createPost(user) : undefined}
       getSearchBoxSuggestions={getSearchSuggestionsByTitlePrefix}
+      fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
     >
       {props.children}
     </AppContainer>
