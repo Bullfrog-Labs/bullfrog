@@ -48,11 +48,7 @@ export const BlockquoteElement = ({
   children,
   htmlAttributes,
 }: any) => {
-  return (
-    <Blockquote {...attributes} {...htmlAttributes}>
-      {children}
-    </Blockquote>
-  );
+  return <Blockquote>{children}</Blockquote>;
 };
 
 export const CompactBlockquoteElement = ({
@@ -62,11 +58,7 @@ export const CompactBlockquoteElement = ({
 }: any) => {
   const globalClasses = useGlobalStyles();
   return (
-    <Blockquote
-      {...attributes}
-      {...htmlAttributes}
-      className={globalClasses.compactBlockquote}
-    >
+    <Blockquote className={globalClasses.compactBlockquote}>
       {children}
     </Blockquote>
   );

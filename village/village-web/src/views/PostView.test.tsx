@@ -98,6 +98,7 @@ test("Renders PostView with mentions", () => {
     return {
       post: up,
       text: stringToSlateNode("here i am, mr. mention!"),
+      path: [0],
     };
   });
   const { getByText, queryAllByText } = render(

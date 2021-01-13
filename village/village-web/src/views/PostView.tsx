@@ -181,7 +181,7 @@ export const BasePostView = (props: BasePostViewProps) => {
         <Grid item sm={12}>
           <Paper elevation={paperElevation}>{props.postView}</Paper>
         </Grid>
-        {props.mentions && (
+        {props.mentions && props.mentions.length > 0 && (
           <Grid item sm={12}>
             <Paper elevation={paperElevation}>
               <Grid container spacing={1}>
@@ -253,13 +253,15 @@ const MentionsSection = (props: { mentions: MentionInContext[] }) => {
   const globalClasses = useGlobalStyles();
 
   const mentionListItems = mentions.map((mention) => {
+    const mentionKey = `${mention.post.post.id}_${mention.path.join("_")}`;
     return (
       <ListItem
         alignItems="flex-start"
-        key={mention.post.post.id}
+        key={mentionKey}
         className={classes.postListItem}
       >
         <ListItemText
+          disableTypography
           primary={
             <>
               <Typography variant="h6">
@@ -279,36 +281,33 @@ const MentionsSection = (props: { mentions: MentionInContext[] }) => {
             </>
           }
           secondary={
-            <React.Fragment>
+            <>
               <RichTextCompactViewer body={mention.text} />
-            </React.Fragment>
+            </>
           }
         />
       </ListItem>
     );
   });
-  if (mentionListItems.length === 0) {
-    return <React.Fragment />;
-  } else {
-    return (
-      <div className={classes.postDetails}>
-        <Grid
-          container
-          direction="column"
-          justify="flex-start"
-          alignItems="stretch"
-          spacing={4}
-        >
-          <Grid item>
-            <Typography variant="h6">
-              <em>Mentions</em>
-            </Typography>
-            <List>{mentionListItems}</List>
-          </Grid>
+
+  return (
+    <div className={classes.postDetails}>
+      <Grid
+        container
+        direction="column"
+        justify="flex-start"
+        alignItems="stretch"
+        spacing={4}
+      >
+        <Grid item>
+          <Typography variant="h6">
+            <em>Mentions</em>
+          </Typography>
+          <List>{mentionListItems}</List>
         </Grid>
-      </div>
-    );
-  }
+      </Grid>
+    </div>
+  );
 };
 
 // Changing title triggers a rename. Renames are not allowed if the title is
