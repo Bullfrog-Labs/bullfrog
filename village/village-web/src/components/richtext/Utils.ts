@@ -85,6 +85,7 @@ export const mentionPreview = (body: RichText, path: Path): Node[] => {
 export type MentionInContext = {
   post: UserPost;
   text: RichText;
+  path: Path;
 };
 
 const findMentionsInText = (text: RichText, postId: PostId) => {
@@ -102,7 +103,7 @@ export const findMentionsInPosts = (
   posts.forEach((post) => {
     const previews = new Set<string>();
     const mentionNodes = findMentionsInText(post.post.body, postId);
-    logger.debug(`got ${mentionNodes.length} mentionNodes`);
+    logger.trace(`got ${mentionNodes.length} mentionNodes`);
     mentionNodes.forEach((mentionNode) => {
       // The path returned by the search function is a little off because we
       // search from the first child.
@@ -115,6 +116,7 @@ export const findMentionsInPosts = (
         const mentionInContext = {
           post: post,
           text: preview,
+          path: path,
         };
         mentions.push(mentionInContext);
         previews.add(previewId);

@@ -253,13 +253,15 @@ const MentionsSection = (props: { mentions: MentionInContext[] }) => {
   const globalClasses = useGlobalStyles();
 
   const mentionListItems = mentions.map((mention) => {
+    const mentionKey = `${mention.post.post.id}_${mention.path.join("_")}`;
     return (
       <ListItem
         alignItems="flex-start"
-        key={mention.post.post.id}
+        key={mentionKey}
         className={classes.postListItem}
       >
         <ListItemText
+          disableTypography
           primary={
             <>
               <Typography variant="h6">
@@ -279,9 +281,9 @@ const MentionsSection = (props: { mentions: MentionInContext[] }) => {
             </>
           }
           secondary={
-            <React.Fragment>
+            <>
               <RichTextCompactViewer body={mention.text} />
-            </React.Fragment>
+            </>
           }
         />
       </ListItem>
