@@ -63,8 +63,8 @@ type SearchSuggestionState = {
 };
 
 const useAutocompleteState = (
-  getSuggestions: any,
-  fetchTitleFromOpenGraph: any
+  getSuggestions: SearchSuggestionFetchFn,
+  fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn
 ): [SearchSuggestion[], (value: string) => void] => {
   const logger = log.getLogger("AutocompleteSearchBox");
   const [suggestions, setSuggestions] = useState<SearchSuggestionState>({
