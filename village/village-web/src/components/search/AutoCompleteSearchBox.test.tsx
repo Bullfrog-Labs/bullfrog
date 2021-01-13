@@ -7,6 +7,7 @@ import {
 } from "../../services/search/Suggestions";
 import {
   CreatePostFn,
+  CreatePostResultPostNameTaken,
   CreatePostResultSuccess,
   UserPost,
 } from "../../services/store/Posts";
@@ -19,6 +20,7 @@ import {
 import { getCreateNewPostPrompt } from "./CreateNewPostSearchResult";
 import { createMemoryHistory } from "history";
 import { Router } from "react-router-dom";
+import { postURL } from "../../routing/URLs";
 
 const user0: UserRecord = {
   uid: "123",
@@ -71,7 +73,9 @@ const createMockSearchBoxContainer = (
   return { component: foo, ref: ref, history: history };
 };
 
-test("succesful post creation works", async () => {
+test("succesful post creation via search box", async () => {
+  const mockSearchBoxInput = "baz";
+
   const getSuggestions = jest.fn(async (value: string) => {
     const matches: UserPost[] = [];
     const suggestions = matchesToSearchSuggestions(matches, value);
@@ -106,7 +110,6 @@ test("succesful post creation works", async () => {
   expect(inputEl).toBeInTheDocument();
 
   // getsuggestions should be called
-  const mockSearchBoxInput = "baz";
   userEvent.type(inputEl, mockSearchBoxInput);
   await waitFor(() => expect(inputEl).toHaveValue(mockSearchBoxInput));
   expect(getSuggestions).toHaveBeenCalled();
@@ -119,5 +122,63 @@ test("succesful post creation works", async () => {
   // create post should be called
   userEvent.click(createNewPostSearchResultEl);
   await waitFor(() => expect(createPost).toHaveBeenCalledTimes(1));
+
+  // should be redirected to new note
   expect(testContainer.history.location.pathname).toEqual(mockNewPostUrl);
 });
+
+test("post creation of existing post via search box", async () => {
+  const mockSearchBoxInput = "baz";
+
+  const getSuggestions = jest.fn(async (value: string) => {
+    const matches: UserPost[] = [];
+    const suggestions = matchesToSearchSuggestions(matches, value);
+    return suggestions;
+  });
+
+  const mockNewPostId = "newpostid123";
+
+  const createPost = jest.fn(async () => {
+    const result: CreatePostResultPostNameTaken = {
+      postId: mockNewPostId,
+      state: "post-name-taken",
+    };
+
+    return result;
+  });
+
+  const testContainer = createMockSearchBoxContainer(
+    getSuggestions,
+    createPost
+  );
+  const { container } = render(testContainer.component);
+
+  // Dialog not yet rendered.
+  expect(container).toBeEmptyDOMElement();
+
+  // Dialog should be rendered.
+  act(() => testContainer.ref.current.setDialogOpen(true));
+  const inputEl = screen.getByPlaceholderText(AUTOCOMPLETE_SEARCH_BOX_PROMPT);
+  expect(inputEl).toBeInTheDocument();
+
+  // getsuggestions should be called
+  userEvent.type(inputEl, mockSearchBoxInput);
+  await waitFor(() => expect(inputEl).toHaveValue(mockSearchBoxInput));
+  expect(getSuggestions).toHaveBeenCalled();
+
+  // the option to create post should be present
+  const createNewPostPromptText = getCreateNewPostPrompt(mockSearchBoxInput);
+  const createNewPostSearchResultEl = screen.getByText(createNewPostPromptText);
+  expect(createNewPostSearchResultEl).toBeInTheDocument();
+
+  // create post should be called
+  userEvent.click(createNewPostSearchResultEl);
+  await waitFor(() => expect(createPost).toHaveBeenCalledTimes(1));
+
+  // should be redirected to existing note
+  expect(testContainer.history.location.pathname).toEqual(
+    postURL(user0.uid, mockNewPostId)
+  );
+});
+
+test("navigate to existing post via search box", async () => {});
