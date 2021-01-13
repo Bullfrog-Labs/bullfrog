@@ -44,7 +44,7 @@ import { useMentions } from "../hooks/useMentions";
 import { Link, Redirect, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
-import DocumentTitle from "../components/richtext/DocumentTitle";
+import { DocumentTitle } from "../components/richtext/DocumentTitle";
 import {
   EMPTY_RICH_TEXT,
   MentionInContext,
@@ -54,6 +54,7 @@ import { PostAuthorLink } from "../components/identity/PostAuthorLink";
 import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useGlobalStyles } from "../styles/styles";
 import { postURL } from "../routing/URLs";
+import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -86,7 +87,9 @@ const DEFAULT_IDLE_TIME = 1 * 1000;
 
 type EditablePostInputs = {
   idleTime?: number;
-  onIdle: (event: Event) => void;
+  buildOnIdle: (
+    documentTitleRef: RefObject<EditableTypographyImperativeHandle>
+  ) => (event: Event) => void;
 
   readOnly: boolean;
 
@@ -113,7 +116,7 @@ const useEditablePostComponents: (
   inputs: EditablePostInputs
 ) => EditablePostComponents = ({
   idleTime,
-  onIdle,
+  buildOnIdle,
   readOnly,
   title,
   body,
@@ -125,6 +128,9 @@ const useEditablePostComponents: (
   mentionableElementFn,
 }) => {
   const richTextEditorRef = useRef<RichTextEditorImperativeHandle>(null);
+  const documentTitleRef = useRef<EditableTypographyImperativeHandle>(null);
+
+  const onIdle = buildOnIdle(documentTitleRef);
 
   const idleTimer = (
     <IdleTimer timeout={idleTime ?? DEFAULT_IDLE_TIME} onIdle={onIdle} />
@@ -132,6 +138,7 @@ const useEditablePostComponents: (
 
   const documentTitle = (
     <DocumentTitle
+      ref={documentTitleRef}
       readOnly={readOnly}
       handleEscape={() => {
         richTextEditorRef.current?.focusEditor();
@@ -324,7 +331,9 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
     const [bodyChanged, setBodyChanged] = useState(false);
     const [titleChanged, setTitleChanged] = useState(false);
 
-    const onIdle = async () => {
+    const buildOnIdle = (
+      documentTitleRef: RefObject<EditableTypographyImperativeHandle>
+    ) => async () => {
       // TODO: Post should only be renamed if the user is idle and focus is not on
       // the title itself.
       // TODO: If the title is set to empty or blank, the title is reset back to the
@@ -366,6 +375,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
             logger.info(`Post renamed to ${props.title}`);
             setTitleChanged(false);
             props.setTitle(props.title);
+            documentTitleRef.current?.setSelectionToEnd();
             break;
           case "post-name-taken":
             const savedTitle = await props.getTitle();
@@ -384,8 +394,10 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
               `Post rename failed, ${props.title} already taken. Reverting to saved title ${savedTitle}`
             );
 
+            documentTitleRef.current?.deselect();
             props.setTitle(savedTitle);
             setTitleChanged(false);
+            documentTitleRef.current?.setSelectionToEnd();
 
             break;
           default:
@@ -413,7 +425,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
       richTextEditor,
       richTextEditorRef,
     } = useEditablePostComponents({
-      onIdle: onIdle,
+      buildOnIdle: buildOnIdle,
       readOnly: props.readOnly,
 
       title: props.title,
@@ -582,6 +594,10 @@ export const PostViewController = (props: PostViewControllerProps) => {
       } else {
         setTitle(postRecord!.title);
 
+        // when navigating from PostView to another PostView, we need to remove
+        // focus from the body when loading in the destination body because
+        // using the source cursor position may be unexpected for the user and
+        // it may not even be a valid cursor position.
         postViewRef.current?.blurBody();
         setBody(postRecord!.body);
       }
