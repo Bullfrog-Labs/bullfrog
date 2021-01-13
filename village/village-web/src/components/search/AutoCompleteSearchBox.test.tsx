@@ -1,18 +1,15 @@
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React, { forwardRef, useImperativeHandle } from "react";
 import {
-  SearchSuggestionFetchFn,
-  SearchSuggestion,
   matchesToSearchSuggestions,
+  SearchSuggestionFetchFn,
 } from "../../services/search/Suggestions";
-import { UserPost } from "../../services/store/Posts";
+import {
+  CreatePostFn,
+  CreatePostResultSuccess,
+  UserPost,
+} from "../../services/store/Posts";
 import { UserRecord } from "../../services/store/Users";
 import {
   AutocompleteSearchBox,
@@ -20,6 +17,8 @@ import {
   useAutocompleteSearchBoxDialog,
 } from "./AutocompleteSearchBox";
 import { getCreateNewPostPrompt } from "./CreateNewPostSearchResult";
+import { createMemoryHistory } from "history";
+import { Router } from "react-router-dom";
 
 const user0: UserRecord = {
   uid: "123",
@@ -39,21 +38,18 @@ test("renders AutocompleteSearchBox", () => {
   );
 });
 
-test("useAutocompleteSearchBoxDialog set up components correctly", async () => {
-  const getSuggestions = jest.fn(async (value: string) => {
-    const matches: UserPost[] = [];
-    const suggestions = matchesToSearchSuggestions(matches, value);
-    return suggestions;
-  });
-
-  const createPost = jest.fn();
+const createMockSearchBoxContainer = (
+  getSuggestions: SearchSuggestionFetchFn,
+  createPost: CreatePostFn
+) => {
+  const history = createMemoryHistory();
 
   const TestComponent = forwardRef((props, ref) => {
-    const {
-      dialogOpen,
-      setDialogOpen,
-      dialog,
-    } = useAutocompleteSearchBoxDialog(user0, createPost, getSuggestions);
+    const { setDialogOpen, dialog } = useAutocompleteSearchBoxDialog(
+      user0,
+      createPost,
+      getSuggestions
+    );
 
     useImperativeHandle(ref, () => ({
       setDialogOpen: (open: boolean) => setDialogOpen(open),
@@ -66,13 +62,46 @@ test("useAutocompleteSearchBoxDialog set up components correctly", async () => {
     current: { setDialogOpen: jest.fn() },
   };
 
-  const { container } = render(<TestComponent ref={ref} />);
+  const foo = (
+    <Router history={history}>
+      <TestComponent ref={ref} />
+    </Router>
+  );
+
+  return { component: foo, ref: ref, history: history };
+};
+
+test("succesful post creation works", async () => {
+  const getSuggestions = jest.fn(async (value: string) => {
+    const matches: UserPost[] = [];
+    const suggestions = matchesToSearchSuggestions(matches, value);
+    return suggestions;
+  });
+
+  const mockNewPostId = "newpostid123";
+  const mockNewPostUrl = "/mockurl123";
+
+  const createPost = jest.fn(async () => {
+    const result: CreatePostResultSuccess = {
+      postId: mockNewPostId,
+      postUrl: mockNewPostUrl,
+      state: "success",
+    };
+
+    return result;
+  });
+
+  const testContainer = createMockSearchBoxContainer(
+    getSuggestions,
+    createPost
+  );
+  const { container } = render(testContainer.component);
 
   // Dialog not yet rendered.
   expect(container).toBeEmptyDOMElement();
 
   // Dialog should be rendered.
-  act(() => ref.current.setDialogOpen(true));
+  act(() => testContainer.ref.current.setDialogOpen(true));
   const inputEl = screen.getByPlaceholderText(AUTOCOMPLETE_SEARCH_BOX_PROMPT);
   expect(inputEl).toBeInTheDocument();
 
@@ -89,5 +118,6 @@ test("useAutocompleteSearchBoxDialog set up components correctly", async () => {
 
   // create post should be called
   userEvent.click(createNewPostSearchResultEl);
-  expect(createPost).toHaveBeenCalledTimes(1);
+  await waitFor(() => expect(createPost).toHaveBeenCalledTimes(1));
+  expect(testContainer.history.location.pathname).toEqual(mockNewPostUrl);
 });

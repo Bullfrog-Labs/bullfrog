@@ -102,7 +102,6 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
 
   const getSuggestionValue = (suggestion: SearchSuggestion) => suggestion.title;
   const renderSuggestion = (suggestion: SearchSuggestion) => {
-    console.log("WTF");
     switch (suggestion.action) {
       case "createNewPost":
         return <CreateNewPostSearchResult title={suggestion.title} />;
