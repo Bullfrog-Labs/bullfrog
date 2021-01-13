@@ -62,7 +62,7 @@ type SearchSuggestionState = {
   text: SearchSuggestion[];
 };
 
-const useAutocompleteState = (
+export const useAutocompleteState = (
   getSuggestions: SearchSuggestionFetchFn,
   fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn
 ): [SearchSuggestion[], (value: string) => void] => {
@@ -75,22 +75,28 @@ const useAutocompleteState = (
   let suggestionsRequestStartTimeMs = Date.now();
 
   const startDatabaseRequest = async (value: string, startTimeMs: number) => {
-    const suggestions = await getSuggestions(value);
-    if (startTimeMs < suggestionsRequestStartTimeMs) {
-      logger.debug(
-        `Request has completed but the value has changed, ignoring result`
-      );
-    } else {
-      logger.debug(
-        `Request has completed, setting suggestions; count=${suggestions.length}`
-      );
-      setSuggestions((prevState) => {
-        return Object.assign({}, prevState, { text: suggestions });
-      });
+    logger.debug(`Issue db suggestions request`);
+    try {
+      const suggestions = await getSuggestions(value);
+      if (startTimeMs < suggestionsRequestStartTimeMs) {
+        logger.debug(
+          `Request has completed but the value has changed, ignoring result`
+        );
+      } else {
+        logger.debug(
+          `Request has completed, setting suggestions; count=${suggestions.length}`
+        );
+        setSuggestions((prevState) => {
+          return Object.assign({}, prevState, { text: suggestions });
+        });
+      }
+    } catch (e) {
+      logger.debug(`Db request failed, not adding suggestions; error=${e}`);
     }
   };
 
   const startOpenGraphRequest = async (value: string, startTimeMs: number) => {
+    logger.debug(`Issue fetch title from og request`);
     const title = await fetchTitleFromOpenGraph(value);
 
     if (startTimeMs < suggestionsRequestStartTimeMs) {
