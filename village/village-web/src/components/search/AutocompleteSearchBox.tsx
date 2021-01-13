@@ -84,6 +84,52 @@ const newCreateFromUrlItem = (title: string): CreateNewPostSuggestion => {
   };
 };
 
+type SearchSuggestionState = {
+  link: SearchSuggestion[];
+  text: SearchSuggestion[];
+};
+
+const useAutocompleteState = (
+  getSuggestions: any
+): [SearchSuggestion[], (value: string) => void] => {
+  const logger = log.getLogger("AutocompleteSearchBox");
+  const [suggestions2, setSuggestions2] = useState<SearchSuggestionState>({
+    link: [],
+    text: [],
+  });
+  const suggestions = [...suggestions2.link, ...suggestions2.text];
+  let suggestionsRequestStartTimeMs = Date.now();
+
+  const startDatabaseRequest = async (value: string, startTimeMs: number) => {
+    const suggestions = await getSuggestions(value);
+    if (startTimeMs < suggestionsRequestStartTimeMs) {
+      logger.debug(
+        `Request has completed but the value has changed, ignoring result`
+      );
+    } else {
+      logger.debug(
+        `Request has completed, setting suggestions; count=${suggestions.length}`
+      );
+      setSuggestions2((prevState) => {
+        return Object.assign({}, prevState, { text: suggestions });
+      });
+    }
+  };
+
+  const startSuggestionsRequest = (value: string) => {
+    suggestionsRequestStartTimeMs = Date.now();
+
+    if (value === "") {
+      return;
+    }
+
+    startDatabaseRequest(value, suggestionsRequestStartTimeMs);
+    // startFetchOG
+  };
+
+  return [suggestions, startSuggestionsRequest];
+};
+
 export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   const logger = log.getLogger("AutocompleteSearchBox");
   const useStyles = makeStyles((theme) => ({
@@ -112,7 +158,9 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   const classes = useStyles();
 
   const [value, setValue] = useState<string>("");
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [suggestions, startSuggestionsRequest] = useAutocompleteState(
+    props.getSuggestions
+  );
 
   const onChange: AutocompleteSearchBoxOnChangeFn = (event, changeEvent) => {
     setValue(changeEvent.newValue);
@@ -121,6 +169,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
     request
   ) => {
     const value = request.value;
+    /*
     logger.debug(`value is ${value}`);
     if (value.startsWith("http") || value.startsWith("https")) {
       fetchUrlInfo(value).then((title) => {
@@ -129,10 +178,12 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
     }
     const suggestions = await props.getSuggestions(value);
     setSuggestions(suggestions);
+    */
+    startSuggestionsRequest(value);
   };
 
   const onSuggestionsClearRequested = () => {
-    setSuggestions([]);
+    startSuggestionsRequest("");
   };
 
   const getSuggestionValue = (suggestion: SearchSuggestion) => suggestion.title;
