@@ -21,6 +21,7 @@ import { getCreateNewPostPrompt } from "./CreateNewPostSearchResult";
 import { createMemoryHistory } from "history";
 import { Router } from "react-router-dom";
 import { postURL } from "../../routing/URLs";
+import { EMPTY_RICH_TEXT } from "../richtext/Utils";
 
 const user0: UserRecord = {
   uid: "123",
@@ -99,10 +100,10 @@ test("succesful post creation via search box", async () => {
     getSuggestions,
     createPost
   );
-  const { container } = render(testContainer.component);
+
+  render(testContainer.component);
 
   // Dialog not yet rendered.
-  expect(container).toBeEmptyDOMElement();
 
   // Dialog should be rendered.
   act(() => testContainer.ref.current.setDialogOpen(true));
@@ -151,10 +152,10 @@ test("post creation of existing post via search box", async () => {
     getSuggestions,
     createPost
   );
-  const { container } = render(testContainer.component);
+
+  render(testContainer.component);
 
   // Dialog not yet rendered.
-  expect(container).toBeEmptyDOMElement();
 
   // Dialog should be rendered.
   act(() => testContainer.ref.current.setDialogOpen(true));
@@ -181,4 +182,61 @@ test("post creation of existing post via search box", async () => {
   );
 });
 
-test("navigate to existing post via search box", async () => {});
+test("navigate to existing post via search box", async () => {
+  const mockSearchBoxInput = "baz";
+  const mockPostId = "mockPost123";
+
+  const getSuggestions = jest.fn(async (value: string) => {
+    const matches: UserPost[] = [
+      {
+        user: user0,
+        post: {
+          id: mockPostId,
+          authorId: user0.uid,
+          title: mockSearchBoxInput,
+          body: EMPTY_RICH_TEXT,
+          mentions: [],
+        },
+      },
+    ];
+    const suggestions = matchesToSearchSuggestions(matches, value);
+    return suggestions;
+  });
+
+  const createPost = jest.fn(async () => {
+    throw new Error("Unexpected call to mock createPost");
+  });
+
+  const testContainer = createMockSearchBoxContainer(
+    getSuggestions,
+    createPost
+  );
+
+  render(testContainer.component);
+
+  // Dialog not yet rendered.
+
+  // Dialog should be rendered.
+  act(() => testContainer.ref.current.setDialogOpen(true));
+  const inputEl = screen.getByPlaceholderText(AUTOCOMPLETE_SEARCH_BOX_PROMPT);
+  expect(inputEl).toBeInTheDocument();
+
+  // getsuggestions should be called
+  userEvent.type(inputEl, mockSearchBoxInput);
+  await waitFor(() => expect(inputEl).toHaveValue(mockSearchBoxInput));
+  expect(getSuggestions).toHaveBeenCalled();
+
+  // the option to create post should be present
+  const navigateToPostSearchResultEl = screen.getByText(mockSearchBoxInput);
+  expect(navigateToPostSearchResultEl).toBeInTheDocument();
+
+  // create post should be called
+  userEvent.click(navigateToPostSearchResultEl);
+
+  // should be redirected to existing note
+  expect(testContainer.history.location.pathname).toEqual(
+    postURL(user0.uid, mockPostId)
+  );
+
+  // Dialog should be closed
+});
