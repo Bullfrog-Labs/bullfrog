@@ -29,6 +29,8 @@ export const stringToSlateNode = (s: string): RichText => [
 export const slateNodeToString = (text: RichText): string =>
   Node.string(text[0]);
 
+export const EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH = [0, 0, 0];
+
 // TODO: This should probably be converted to a TSX function, so that the
 // preview is a React component. Code from Rendering.tsx can probably be used to
 // generate the preview.

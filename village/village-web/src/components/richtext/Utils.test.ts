@@ -1,12 +1,24 @@
-import { Node } from "slate";
+import { Node, Text } from "slate";
 import {
   richTextStringPreview,
   stringToSlateNode,
   slateNodeToString,
   mentionPreview,
   findMentionsInPosts,
+  EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH,
 } from "./Utils";
 import { doc1, userPosts2 } from "../../testing/Fixtures";
+
+test("gets the correct path for text node in editable typography", () => {
+  const content = "foo bar baz";
+  const richText = stringToSlateNode(content);
+
+  const textNode = Node.get(
+    { children: richText },
+    EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH
+  );
+  expect(Text.isText(textNode)).toBeTruthy();
+});
 
 test("rich text string preview works for paragraph", () => {
   const content = "foo bar baz";
