@@ -136,7 +136,7 @@ const RichTextEditor = forwardRef<
       <EditablePlugins
         plugins={plugins}
         readOnly={props.readOnly ?? false}
-        placeholder="Enter some text"
+        placeholder={props.readOnly ? "Nothing here yet" : "Enter some text"}
         autoFocus
         spellCheck={false}
         onKeyDown={[onKeyDownMention]}
