@@ -112,7 +112,7 @@ test("succesful post creation via search box", async () => {
 
   const getSuggestions = jest.fn(async (value: string) => {
     const matches: UserPost[] = [];
-    const suggestions = matchesToSearchSuggestions(matches, value);
+    const suggestions = matchesToSearchSuggestions(matches, user0, value);
     return suggestions;
   });
 
@@ -166,7 +166,7 @@ test("post creation of existing post via search box", async () => {
 
   const getSuggestions = jest.fn(async (value: string) => {
     const matches: UserPost[] = [];
-    const suggestions = matchesToSearchSuggestions(matches, value);
+    const suggestions = matchesToSearchSuggestions(matches, user0, value);
     return suggestions;
   });
 
@@ -232,7 +232,7 @@ test("navigate to existing post via search box", async () => {
         },
       },
     ];
-    const suggestions = matchesToSearchSuggestions(matches, value);
+    const suggestions = matchesToSearchSuggestions(matches, user0, value);
     return suggestions;
   });
 

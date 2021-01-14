@@ -127,7 +127,8 @@ function App() {
           getGlobalMentions={getAllPostsByTitlePrefix(database)}
           getMentionUserPosts={getMentionUserPosts(database)}
           getSearchSuggestionsByTitlePrefix={getSearchSuggestionsByTitlePrefix(
-            database
+            database,
+            user!
           )}
           fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
           user={user}
