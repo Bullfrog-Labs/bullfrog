@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle } from "react";
-import { renderHook } from "@testing-library/react-hooks";
+import { act as actHook, renderHook } from "@testing-library/react-hooks";
 import * as log from "loglevel";
 import { FetchTitleFromOpenGraphFn } from "../../services/OpenGraph";
 import { Logging } from "kmgmt-common";
@@ -276,7 +276,6 @@ test("navigate to existing post via search box", async () => {
 
 describe("useAutocompleteState hook", () => {
   const getSuggestionsFail: SearchSuggestionFetchFn = async (value: string) => {
-    //throw new Error("db request failed");
     return Promise.reject(new Error("db request failed"));
   };
   const fetchTitleFromOpenGraphFail: FetchTitleFromOpenGraphFn = async (
@@ -292,7 +291,7 @@ describe("useAutocompleteState hook", () => {
 
     var [suggestions, startSuggestionsRequest] = result.current;
 
-    await act(async () => {
+    await actHook(async () => {
       startSuggestionsRequest("wabisabi");
       await waitForNextUpdate();
     });
@@ -309,7 +308,7 @@ describe("useAutocompleteState hook", () => {
 
     var [suggestions, startSuggestionsRequest] = result.current;
 
-    await act(async () => {
+    await actHook(async () => {
       startSuggestionsRequest("http://wabisabi.com");
       await waitForNextUpdate();
     });
@@ -326,7 +325,7 @@ describe("useAutocompleteState hook", () => {
 
     var [suggestions, startSuggestionsRequest] = result.current;
 
-    await act(async () => {
+    await actHook(async () => {
       startSuggestionsRequest("http://wabisabi.com");
       await waitForNextUpdate();
     });
@@ -343,7 +342,7 @@ describe("useAutocompleteState hook", () => {
 
     var [suggestions, startSuggestionsRequest] = result.current;
 
-    await act(async () => {
+    await actHook(async () => {
       startSuggestionsRequest("http://wabisabi.com");
       await waitForNextUpdate();
     });
@@ -414,11 +413,11 @@ describe("useAutocompleteState hook", () => {
 
     var [suggestions, startSuggestionsRequest] = result.current;
 
-    await act(async () => {
+    await actHook(async () => {
       startSuggestionsRequest("http://wabisabi.com");
     });
 
-    await act(async () => {
+    await actHook(async () => {
       // Timestamp must advance by at least a ms.
       await delay(1);
       startSuggestionsRequest("http://wabisabi.co.uk");
