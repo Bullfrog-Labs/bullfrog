@@ -86,7 +86,7 @@ function App() {
   const [user, setUser] = useState<UserRecord>();
   useEffect(() => {
     const fetchUser = async () => {
-      if (authState?.uid) {
+      if (!!authState) {
         const user = await getUser(database)(authState.uid);
         if (user != null) {
           logger.debug(`setting user ${user.displayName}`);
@@ -96,7 +96,7 @@ function App() {
       }
     };
     fetchUser();
-  }, [authState?.uid, logger]);
+  }, [authState, logger]);
 
   authProvider.onAuthStateChanged = makeOnAuthStateChanged(
     authState,
