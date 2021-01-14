@@ -74,61 +74,75 @@ export const useAutocompleteState = (
     text: [],
   });
   const suggestionsList = [...suggestions.link, ...suggestions.text];
-  let suggestionsRequestStartTimeMs = Date.now();
+  const [value, setValue] = useState<string>();
 
-  const startDatabaseRequest = async (value: string, startTimeMs: number) => {
-    logger.debug(`Issue db suggestions request`);
-    try {
-      const suggestions = await getSuggestions(value);
-      if (startTimeMs < suggestionsRequestStartTimeMs) {
-        logger.debug(
-          `Request has completed but the value has changed, ignoring result`
-        );
-      } else {
-        logger.debug(
-          `Request has completed, setting suggestions; count=${suggestions.length}`
-        );
-        setSuggestions((prevState) => {
-          return Object.assign({}, prevState, { text: suggestions });
-        });
+  useEffect(() => {
+    let isSubscribed = true;
+
+    const startDatabaseRequest = async (value: string) => {
+      logger.debug(`Issue db suggestions request`);
+      try {
+        const suggestions = await getSuggestions(value);
+        if (!isSubscribed) {
+          logger.debug(`Got stale db response, ignoring`);
+        } else {
+          logger.debug(
+            `Request has completed, setting suggestions; count=${suggestions.length}`
+          );
+          setSuggestions((prevState) => {
+            return Object.assign({}, prevState, { text: suggestions });
+          });
+        }
+      } catch (e) {
+        logger.debug(`Db request failed, not adding suggestions; error=${e}`);
       }
-    } catch (e) {
-      logger.debug(`Db request failed, not adding suggestions; error=${e}`);
+    };
+
+    const startOpenGraphRequest = async (value: string) => {
+      logger.debug(`Issue fetch title from og request`);
+      const title = await fetchTitleFromOpenGraph(value);
+
+      if (!isSubscribed) {
+        logger.debug(`Got stale og response, ignoring`);
+      } else if (title) {
+        logger.debug(
+          `Og request complete, updating suggestions; title=${title}`
+        );
+        const suggestion: CreateNewPostSuggestion = {
+          title: title,
+          action: "createNewPost",
+        };
+        setSuggestions((prevState) => {
+          return Object.assign({}, prevState, { link: [suggestion] });
+        });
+      } else {
+        logger.debug(`Og request failed, not adding suggestions`);
+      }
+    };
+
+    const startRequests = (value: string) => {
+      if (value === "") {
+        return;
+      }
+
+      startDatabaseRequest(value);
+
+      if (value.startsWith("http") || value.startsWith("https")) {
+        startOpenGraphRequest(value);
+      }
+    };
+
+    if (value) {
+      startRequests(value);
     }
-  };
 
-  const startOpenGraphRequest = async (value: string, startTimeMs: number) => {
-    logger.debug(`Issue fetch title from og request`);
-    const title = await fetchTitleFromOpenGraph(value);
+    return () => {
+      isSubscribed = false;
+    };
+  }, [value, fetchTitleFromOpenGraph, getSuggestions, logger]);
 
-    if (startTimeMs < suggestionsRequestStartTimeMs) {
-      logger.debug(`Got stale og request, aborting`);
-    } else if (title) {
-      logger.debug(`Og request complete, updating suggestions; title=${title}`);
-      const suggestion: CreateNewPostSuggestion = {
-        title: title,
-        action: "createNewPost",
-      };
-      setSuggestions((prevState) => {
-        return Object.assign({}, prevState, { link: [suggestion] });
-      });
-    } else {
-      logger.debug(`Og request failed, not adding suggestions`);
-    }
-  };
-
-  const startSuggestionsRequest = (value: string) => {
-    suggestionsRequestStartTimeMs = Date.now();
-
-    if (value === "") {
-      return;
-    }
-
-    startDatabaseRequest(value, suggestionsRequestStartTimeMs);
-
-    if (value.startsWith("http") || value.startsWith("https")) {
-      startOpenGraphRequest(value, suggestionsRequestStartTimeMs);
-    }
+  const startSuggestionsRequest = (newValue: string | undefined) => {
+    setValue(newValue);
   };
 
   return [suggestionsList, startSuggestionsRequest];
