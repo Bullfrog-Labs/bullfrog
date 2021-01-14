@@ -142,6 +142,7 @@ export const useAutocompleteState = (
   }, [value, fetchTitleFromOpenGraph, getSuggestions, logger]);
 
   const startSuggestionsRequest = (newValue: string | undefined) => {
+    logger.debug(`Kick off suggestions requests for ${newValue}`);
     setValue(newValue);
   };
 
