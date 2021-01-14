@@ -320,6 +320,7 @@ export const useAutocompleteSearchBoxDialog = (
       maxWidth={"sm"}
       fullWidth={true}
       onClose={onClose}
+      onExited={() => setShowProgress(false)}
       open={open}
       aria-labelledby="search-box-dialog-title"
       aria-describedby="search-box-dialog-description"

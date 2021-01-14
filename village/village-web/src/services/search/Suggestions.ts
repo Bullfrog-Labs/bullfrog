@@ -1,7 +1,7 @@
 import { Database } from "../store/Database";
 import { getAllPostsByTitlePrefix, PostId, UserPost } from "../store/Posts";
 
-import { UserId } from "../store/Users";
+import { UserId, UserRecord } from "../store/Users";
 
 export type CreateNewPostSuggestion = {
   title: string;
@@ -26,10 +26,12 @@ export type SearchSuggestionFetchFn = (
 
 export const matchesToSearchSuggestions = (
   matches: UserPost[],
+  user: UserRecord,
   value: string
 ) => {
   const exactMatchExists =
-    matches.filter((s) => s.post.title === value).length !== 0;
+    matches.filter((s) => s.post.title === value && s.user.uid === user.uid)
+      .length !== 0;
 
   const createNewPostSuggestions: CreateNewPostSuggestion[] = exactMatchExists
     ? []
@@ -47,9 +49,10 @@ export const matchesToSearchSuggestions = (
 };
 
 export const getSearchSuggestionsByTitlePrefix: (
-  database: Database
-) => SearchSuggestionFetchFn = (database) => async (value) => {
+  database: Database,
+  user: UserRecord
+) => SearchSuggestionFetchFn = (database, user) => async (value) => {
   const allMatches = await getAllPostsByTitlePrefix(database)(value);
 
-  return matchesToSearchSuggestions(allMatches, value);
+  return matchesToSearchSuggestions(allMatches, user, value);
 };
