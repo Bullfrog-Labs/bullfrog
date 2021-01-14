@@ -30,8 +30,17 @@ import {
 import { useEffect } from "react";
 import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
+import { CircularProgress, makeStyles } from "@material-ui/core";
 
 Logging.configure(log);
+
+const useStyles = makeStyles((theme) => ({
+  loadingIndicator: {
+    position: "fixed",
+    top: "30%",
+    left: "50%",
+  },
+}));
 
 const [app, auth] = initializeFirebaseApp();
 const authProvider = FirebaseAuthProvider.create(app, auth);
@@ -39,7 +48,8 @@ const database = FirestoreDatabase.fromApp(app);
 
 const makeOnAuthStateChanged = (
   authState: AuthState,
-  setAuthState: Dispatch<SetStateAction<AuthState>>
+  setAuthState: Dispatch<SetStateAction<AuthState>>,
+  setAuthCompleted: Dispatch<SetStateAction<boolean>>
 ): OnAuthStateChangedHandle => async (authedUser: firebase.User) => {
   const logger = log.getLogger("App");
   logger.debug("Auth state changed, updating auth state.");
@@ -47,6 +57,7 @@ const makeOnAuthStateChanged = (
 
   if (!authedUser) {
     logger.debug("Empty auth state, not logged in. Done updating auth state");
+    setAuthCompleted(true);
     return;
   }
 
@@ -66,27 +77,31 @@ const makeOnAuthStateChanged = (
 };
 
 function App() {
+  const classes = useStyles();
   const logger = log.getLogger("App");
+  const [authCompleted, setAuthCompleted] = useState(false);
   const [authState, setAuthState] = useState(
     authProvider.getInitialAuthState()
   );
   const [user, setUser] = useState<UserRecord>();
   useEffect(() => {
     const fetchUser = async () => {
-      if (authState?.uid) {
+      if (!!authState) {
         const user = await getUser(database)(authState.uid);
         if (user != null) {
           logger.debug(`setting user ${user.displayName}`);
           setUser(user);
         }
+        setAuthCompleted(true);
       }
     };
     fetchUser();
-  }, [authState?.uid, logger]);
+  }, [authState, logger]);
 
   authProvider.onAuthStateChanged = makeOnAuthStateChanged(
     authState,
-    setAuthState
+    setAuthState,
+    setAuthCompleted
   );
 
   if (authState) {
@@ -97,27 +112,31 @@ function App() {
     logger.info(`Not logged in`);
   }
 
-  return (
-    <AuthContext.Provider value={authState}>
-      <Router
-        authProvider={authProvider}
-        getUserPosts={getUserPosts(database)}
-        getStackPosts={getStackPosts(database)}
-        getUser={getUser(database)}
-        getPost={getPost(database)}
-        createPost={createPost(database)}
-        renamePost={renamePost(database)}
-        syncBody={syncBody(database)}
-        getGlobalMentions={getAllPostsByTitlePrefix(database)}
-        getMentionUserPosts={getMentionUserPosts(database)}
-        getSearchSuggestionsByTitlePrefix={getSearchSuggestionsByTitlePrefix(
-          database
-        )}
-        fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
-        user={user}
-      />
-    </AuthContext.Provider>
-  );
+  if (authCompleted) {
+    return (
+      <AuthContext.Provider value={authState}>
+        <Router
+          authProvider={authProvider}
+          getUserPosts={getUserPosts(database)}
+          getStackPosts={getStackPosts(database)}
+          getUser={getUser(database)}
+          getPost={getPost(database)}
+          createPost={createPost(database)}
+          renamePost={renamePost(database)}
+          syncBody={syncBody(database)}
+          getGlobalMentions={getAllPostsByTitlePrefix(database)}
+          getMentionUserPosts={getMentionUserPosts(database)}
+          getSearchSuggestionsByTitlePrefix={getSearchSuggestionsByTitlePrefix(
+            database
+          )}
+          fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
+          user={user}
+        />
+      </AuthContext.Provider>
+    );
+  } else {
+    return <CircularProgress className={classes.loadingIndicator} />;
+  }
 }
 
 export default App;
