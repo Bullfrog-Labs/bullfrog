@@ -183,25 +183,23 @@ export const BasePostView = (props: BasePostViewProps) => {
   const paperElevation = props.readOnly ? 0 : 1;
 
   return (
-    <Container className={classes.postView} maxWidth="sm">
-      <Grid container spacing={3}>
-        <Grid item sm={12}>
-          <Paper elevation={paperElevation}>{props.postView}</Paper>
-        </Grid>
-        {props.mentions && props.mentions.length > 0 && (
-          <Grid item sm={12}>
-            <Paper elevation={paperElevation}>
-              <Grid container spacing={1}>
-                <Grid item sm={1}></Grid>
-                <Grid item sm={11}>
-                  <MentionsSection mentions={props.mentions} />
-                </Grid>
-              </Grid>
-            </Paper>
-          </Grid>
-        )}
+    <Grid container spacing={3}>
+      <Grid item sm={12}>
+        <Paper elevation={paperElevation}>{props.postView}</Paper>
       </Grid>
-    </Container>
+      {props.mentions && props.mentions.length > 0 && (
+        <Grid item sm={12}>
+          <Paper elevation={paperElevation}>
+            <Grid container spacing={1}>
+              <Grid item sm={1}></Grid>
+              <Grid item sm={11}>
+                <MentionsSection mentions={props.mentions} />
+              </Grid>
+            </Grid>
+          </Paper>
+        </Grid>
+      )}
+    </Grid>
   );
 };
 
