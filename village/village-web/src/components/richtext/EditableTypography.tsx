@@ -9,7 +9,7 @@ import { createEditor, Text, Node, Transforms } from "slate";
 import { KBEventHandler, RichText } from "./Types";
 import { withEditableTypographyLayout } from "./EditorBehaviors";
 import { withHistory } from "slate-history";
-import { withReact, Slate, Editable } from "slate-react";
+import { withReact, Slate, Editable, ReactEditor } from "slate-react";
 
 import { Typography } from "@material-ui/core";
 import {
@@ -19,6 +19,7 @@ import {
 } from "./Utils";
 
 export type EditableTypographyImperativeHandle = {
+  blurEditor: () => void;
   deselect: () => void;
   setSelectionToEnd: () => void;
 };
@@ -74,6 +75,7 @@ export const EditableTypography = forwardRef<
   );
 
   useImperativeHandle(ref, () => ({
+    blurEditor: () => ReactEditor.blur(editor),
     deselect: () => Transforms.deselect(editor),
     setSelectionToEnd: () => {
       const textNode = Node.get(editor, EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH);
