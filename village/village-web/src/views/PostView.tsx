@@ -108,6 +108,7 @@ type EditablePostInputs = {
 type EditablePostComponents = {
   idleTimer: React.ReactChild;
   documentTitle: React.ReactChild;
+  documentTitleRef: RefObject<EditableTypographyImperativeHandle>;
   richTextEditor: React.ReactChild;
   richTextEditorRef: RefObject<RichTextEditorImperativeHandle>;
 };
@@ -165,6 +166,7 @@ const useEditablePostComponents: (
   const result: EditablePostComponents = {
     idleTimer: idleTimer,
     documentTitle: documentTitle,
+    documentTitleRef: documentTitleRef,
     richTextEditor: richTextEditor,
     richTextEditorRef: richTextEditorRef,
   };
@@ -179,7 +181,6 @@ export type BasePostViewProps = {
 };
 
 export const BasePostView = (props: BasePostViewProps) => {
-  const classes = useStyles();
   const paperElevation = props.readOnly ? 0 : 1;
 
   return (
@@ -249,6 +250,7 @@ export type PostViewProps = {
 };
 
 type PostViewImperativeHandle = {
+  blurTitle: () => void;
   blurBody: () => void;
 };
 
@@ -420,6 +422,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
     const {
       idleTimer,
       documentTitle,
+      documentTitleRef,
       richTextEditor,
       richTextEditorRef,
     } = useEditablePostComponents({
@@ -509,6 +512,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
     );
 
     useImperativeHandle(ref, () => ({
+      blurTitle: () => documentTitleRef.current?.blurEditor(),
       blurBody: () => richTextEditorRef.current?.blurEditor(),
     }));
 
@@ -590,13 +594,13 @@ export const PostViewController = (props: PostViewControllerProps) => {
       if (postRecordNotFound) {
         logger.info(`Post ${postId} for author ${authorId} not found.`);
       } else {
-        setTitle(postRecord!.title);
-
         // when navigating from PostView to another PostView, we need to remove
-        // focus from the body when loading in the destination body because
-        // using the source cursor position may be unexpected for the user and
-        // it may not even be a valid cursor position.
+        // focus from the title and body when loading in the destination title
+        // and body because using the source cursor position may be unexpected
+        // for the user and it may not even be a valid cursor position.
+        postViewRef.current?.blurTitle();
         postViewRef.current?.blurBody();
+        setTitle(postRecord!.title);
         setBody(postRecord!.body);
       }
     };
