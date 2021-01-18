@@ -51,6 +51,12 @@ const theme = createMuiTheme({
   direction: "ltr",
   palette: {
     type: "light",
+    //divider: "#fafafa",
+    background: {
+      //paper: "#fafafa",
+      paper: "#fff",
+      default: "#fff",
+    },
     primary: {
       main: "#011627",
     },

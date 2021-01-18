@@ -14,7 +14,6 @@ import RichTextEditor, {
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
 import {
-  Container,
   CircularProgress,
   makeStyles,
   Paper,
@@ -23,6 +22,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  Divider,
 } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
 import {
@@ -181,7 +181,8 @@ export type BasePostViewProps = {
 };
 
 export const BasePostView = (props: BasePostViewProps) => {
-  const paperElevation = props.readOnly ? 0 : 1;
+  //const paperElevation = props.readOnly ? 0 : 1;
+  const paperElevation = 0;
 
   return (
     <Grid container spacing={3}>
@@ -189,16 +190,19 @@ export const BasePostView = (props: BasePostViewProps) => {
         <Paper elevation={paperElevation}>{props.postView}</Paper>
       </Grid>
       {props.mentions && props.mentions.length > 0 && (
-        <Grid item sm={12}>
-          <Paper elevation={paperElevation}>
-            <Grid container spacing={1}>
-              <Grid item sm={1}></Grid>
-              <Grid item sm={11}>
-                <MentionsSection mentions={props.mentions} />
+        <React.Fragment>
+          <Grid item sm={12}>
+            <Paper elevation={paperElevation}>
+              <Divider />
+              <Grid container spacing={1}>
+                <Grid item sm={1}></Grid>
+                <Grid item sm={11}>
+                  <MentionsSection mentions={props.mentions} />
+                </Grid>
               </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
+            </Paper>
+          </Grid>
+        </React.Fragment>
       )}
     </Grid>
   );

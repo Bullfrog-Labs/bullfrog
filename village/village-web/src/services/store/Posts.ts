@@ -40,7 +40,7 @@ const POST_RECORD_CONVERTER = {
   ): PostRecord => {
     const data = snapshot.data(options)!;
     return {
-      updatedAt: data.updatedAt,
+      updatedAt: data.updatedAt?.toDate(),
       authorId: data.authorId,
       id: snapshot.id,
       body: data.body,
