@@ -266,6 +266,7 @@ export const getUserPosts = (database: Database) => async (
     .collection(USERS_COLLECTION)
     .doc(uid)
     .collection(POSTS_COLLECTION)
+    .orderBy("updatedAt", "desc")
     .withConverter(POST_RECORD_CONVERTER)
     .get();
 
