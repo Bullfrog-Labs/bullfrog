@@ -14,7 +14,6 @@ import RichTextEditor, {
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
 import {
-  Container,
   CircularProgress,
   makeStyles,
   Paper,
@@ -55,6 +54,7 @@ import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useGlobalStyles } from "../styles/styles";
 import { postURL } from "../routing/URLs";
 import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
+import { Helmet } from "react-helmet";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -642,25 +642,36 @@ export const PostViewController = (props: PostViewControllerProps) => {
     return postRecord ? postRecord.title : undefined;
   };
 
+  const pageTitle = `${title!} by ${
+    authorUserRecord.uid === props.viewer.uid
+      ? "you"
+      : authorUserRecord.username
+  }`;
+
   return (
-    <PostView
-      ref={postViewRef}
-      viewer={props.viewer}
-      author={authorUserRecord}
-      readOnly={readOnly}
-      postId={postId}
-      title={title!}
-      setTitle={setTitle}
-      body={body!}
-      mentions={mentions!}
-      setBody={setBody}
-      getTitle={getTitle}
-      renamePost={props.renamePost}
-      syncBody={props.syncBody}
-      mentionables={mentionables}
-      onMentionSearchChanged={onMentionSearchChanged}
-      onMentionAdded={onMentionAdded}
-      mentionableElementFn={mentionableElementFn(authorUserRecord.uid)}
-    />
+    <>
+      <Helmet>
+        <title>{pageTitle}</title>
+      </Helmet>
+      <PostView
+        ref={postViewRef}
+        viewer={props.viewer}
+        author={authorUserRecord}
+        readOnly={readOnly}
+        postId={postId}
+        title={title!}
+        setTitle={setTitle}
+        body={body!}
+        mentions={mentions!}
+        setBody={setBody}
+        getTitle={getTitle}
+        renamePost={props.renamePost}
+        syncBody={props.syncBody}
+        mentionables={mentionables}
+        onMentionSearchChanged={onMentionSearchChanged}
+        onMentionAdded={onMentionAdded}
+        mentionableElementFn={mentionableElementFn(authorUserRecord.uid)}
+      />
+    </>
   );
 };
