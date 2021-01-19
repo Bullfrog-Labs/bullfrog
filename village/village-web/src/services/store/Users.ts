@@ -49,6 +49,24 @@ export const getUser = (database: Database) => async (
 
 export type GetUserFn = ReturnType<typeof getUser>;
 
+export const getUserByUsername = (database: Database) => async (
+  username: string
+): Promise<UserRecord | undefined> => {
+  const logger = log.getLogger("getUserByUsername");
+  logger.debug(`Fetching user with username ${username}`);
+  const userDocs = await database
+    .getHandle()
+    .collection(USERS_COLLECTION)
+    .where("username", "==", username)
+    .limit(1) // usernames are unique
+    .withConverter(USER_RECORD_CONVERTER)
+    .get();
+
+  return userDocs.size === 0 ? undefined : userDocs.docs[0].data();
+};
+
+export type GetUserByUsernameFn = ReturnType<typeof getUserByUsername>;
+
 export const getUsersForIds = async (
   database: Database,
   userIds: UserId[]
