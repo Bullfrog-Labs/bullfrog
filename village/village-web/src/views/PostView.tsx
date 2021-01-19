@@ -45,6 +45,7 @@ import { Link, Redirect, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import { DocumentTitle } from "../components/richtext/DocumentTitle";
+import { MentionPostCard } from "../components/MentionPostCard";
 import {
   EMPTY_RICH_TEXT,
   MentionInContext,
@@ -195,8 +196,7 @@ export const BasePostView = (props: BasePostViewProps) => {
             <Paper elevation={paperElevation}>
               <Divider />
               <Grid container spacing={1}>
-                <Grid item sm={1}></Grid>
-                <Grid item sm={11}>
+                <Grid item sm={12}>
                   <MentionsSection mentions={props.mentions} />
                 </Grid>
               </Grid>
@@ -271,32 +271,7 @@ const MentionsSection = (props: { mentions: MentionInContext[] }) => {
         key={mentionKey}
         className={classes.postListItem}
       >
-        <ListItemText
-          disableTypography
-          primary={
-            <>
-              <Typography variant="h6">
-                <Link
-                  className={globalClasses.link}
-                  to={postURL(
-                    mention.post.post.authorId,
-                    mention.post.post.id!
-                  )}
-                >
-                  {mention.post.post.title}
-                </Link>
-              </Typography>
-              <Typography variant="subtitle2" className={classes.username}>
-                <em>{mention.post.user.displayName}</em>
-              </Typography>
-            </>
-          }
-          secondary={
-            <>
-              <RichTextCompactViewer body={mention.text} />
-            </>
-          }
-        />
+        <MentionPostCard mention={mention} />
       </ListItem>
     );
   });
@@ -464,22 +439,6 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
       </Grid>
     );
 
-    const leftGutter = (
-      <div className={classes.leftGutter}>
-        <Grid
-          container
-          direction="row"
-          justify="center"
-          alignItems="flex-start"
-          spacing={1}
-        >
-          <Grid item>
-            <PostStackLink postTitle={props.title} />
-          </Grid>
-        </Grid>
-      </div>
-    );
-
     const postDetails = (
       <div className={classes.postDetails}>
         <Grid
@@ -505,10 +464,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
           alignItems="flex-start"
           spacing={1}
         >
-          <Grid item sm={1}>
-            {leftGutter}
-          </Grid>
-          <Grid item sm={11}>
+          <Grid item sm={12}>
             {postDetails}
           </Grid>
         </Grid>
