@@ -8,9 +8,8 @@ import ListItem from "@material-ui/core/ListItem";
 import { PostRecord, GetUserPostsFn } from "../services/store/Posts";
 import { UserRecord, UserId, GetUserFn } from "../services/store/Users";
 import { useParams } from "react-router-dom";
-import { RichTextCompactViewer } from "../components/richtext/RichTextEditor";
-
 import { ProfilePostCard } from "./ProfilePostCard";
+import { useGlobalStyles } from "../styles/styles";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -19,10 +18,6 @@ const useStyles = makeStyles((theme) => ({
   },
   profileDivider: {
     margin: "10px 0 0 0",
-  },
-  postListItem: {
-    paddingLeft: "0px",
-    paddingRight: "0px",
   },
 }));
 
@@ -76,7 +71,7 @@ export const ProfileViewController = (props: {
   getUser: GetUserFn;
   user: UserRecord;
 }) => {
-  const { getUserPosts, getUser, user } = props;
+  const { getUserPosts, getUser } = props;
   const authState = useContext(AuthContext);
   const { userId } = useParams<ProfileViewParams>();
   const profileViewUserId = userId || authState.uid;
@@ -92,13 +87,14 @@ export const ProfileView = (props: ProfileViewProps) => {
   const logger = log.getLogger("ProfileView");
   const { posts, user } = props;
   const classes = useStyles();
+  const globalClasses = useGlobalStyles();
 
   const listItems = posts.map((post) => {
     return (
       <ListItem
         alignItems="flex-start"
         key={listKeyForPost(post)}
-        className={classes.postListItem}
+        className={globalClasses.cardListItem}
       >
         <ProfilePostCard post={post} />
       </ListItem>

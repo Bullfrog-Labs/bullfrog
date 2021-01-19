@@ -1,7 +1,6 @@
 import * as log from "loglevel";
 import React from "react";
 import { Typography, Paper } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
 import { PostRecord } from "../services/store/Posts";
 import { Link, useHistory } from "react-router-dom";
 import { useGlobalStyles } from "../styles/styles";
@@ -10,46 +9,26 @@ import { DateTime } from "luxon";
 import { MentionInContext } from "../components/richtext/Utils";
 import { RichTextCompactViewer } from "../components/richtext/RichTextEditor";
 
-const useStyles = makeStyles((theme) => ({
-  root: {},
-  postListItem: {
-    paddingLeft: "0px",
-    paddingRight: "0px",
-  },
-  card: {
-    "&:hover": {
-      backgroundColor: "#fafafa",
-    },
-    border: "0px",
-    width: "100%",
-  },
-  datePart: {
-    color: theme.palette.grey[600],
-    paddingLeft: "8px",
-    display: "inline",
-  },
-  emptyMentionsLine: {
-    fontWeight: 200,
-  },
-  username: {
-    fontWeight: 300,
-    color: "grey",
-  },
-}));
-
 const listKeyForPost = (post: PostRecord) => `${post.id!}`;
 
 export const MentionPostCard = (props: { mention: MentionInContext }) => {
-  const classes = useStyles();
   const globalClasses = useGlobalStyles();
   const history = useHistory();
   const { mention } = props;
   const post = mention.post.post;
   const dt = DateTime.fromJSDate(post.updatedAt || new Date());
+  const previewParts = [<RichTextCompactViewer body={mention.text} />];
+  if (mention.truncatedStart) {
+    previewParts.unshift(<Typography variant="body1">...</Typography>);
+  }
+  if (mention.truncatedEnd) {
+    previewParts.push(<Typography variant="body1">...</Typography>);
+  }
+  const preview = <React.Fragment>{previewParts}</React.Fragment>;
 
   return (
     <Paper
-      className={classes.card}
+      className={globalClasses.postPreviewCard}
       elevation={0}
       onClick={() => {
         history.push(postURL(post.authorId, post.id!));
@@ -57,7 +36,7 @@ export const MentionPostCard = (props: { mention: MentionInContext }) => {
     >
       <Typography
         variant="body1"
-        style={{ fontWeight: "bold", display: "inline" }}
+        className={globalClasses.cardTitle}
         gutterBottom
       >
         <Link
@@ -68,14 +47,14 @@ export const MentionPostCard = (props: { mention: MentionInContext }) => {
         >
           {post.title}
         </Link>
-        <span className={classes.datePart}>{dt.toFormat("MMM d")}</span>
+        <span className={globalClasses.cardTitleDatePart}>
+          <em>by {mention.post.user.displayName}</em>
+        </span>
+        <span className={globalClasses.cardTitleDatePart}>
+          {dt.toFormat("MMM d")}
+        </span>
       </Typography>
-      <Typography variant="subtitle2" className={classes.username}>
-        <em>{mention.post.user.displayName}</em>
-      </Typography>
-      <Typography paragraph={false} variant="body1">
-        <RichTextCompactViewer body={mention.text} />
-      </Typography>
+      {preview}
     </Paper>
   );
 };

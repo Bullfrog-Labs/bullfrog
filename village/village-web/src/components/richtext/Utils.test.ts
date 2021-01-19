@@ -37,15 +37,15 @@ test("node <-> string is consistent", () => {
 });
 
 test("extract preview for mention in p", () => {
-  const previewDoc = mentionPreview(doc1, [0, 0, 1]);
+  const [previewDoc] = mentionPreview(doc1, [0, 0, 1]);
   expect(Node.string(previewDoc[0])).toEqual(
-    "⋯As I was saying in  Mango is goooooood.⋯"
+    "As I was saying in  Mango is goooooood.here we goooooooheere we "
   );
 });
 
 test("extract preview for mention in ul", () => {
-  const previewDoc = mentionPreview(doc1, [0, 1, 1, 0, 1]);
-  expect(Node.string(previewDoc[0])).toEqual("⋯heere we ⋯");
+  const [previewDoc] = mentionPreview(doc1, [0, 1, 1, 0, 1]);
+  expect(Node.string(previewDoc[0])).toEqual("heere we ");
 });
 
 test("find mentions in a post", () => {

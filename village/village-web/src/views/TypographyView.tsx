@@ -31,7 +31,6 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: "#fafafa",
     },
     border: "0px",
-    //padding: theme.spacing(1),
   },
 }));
 

@@ -35,4 +35,32 @@ export const useGlobalStyles = makeStyles((theme) => ({
     paddingLeft: "1em",
     borderColor: theme.palette.secondary.dark,
   },
+  cardListItem: {
+    paddingLeft: "0px",
+    paddingRight: "0px",
+  },
+  postPreviewCard: {
+    "&:hover": {
+      backgroundColor: "#fafafa",
+    },
+    border: "0px",
+    width: "100%",
+    padding: "0 0",
+  },
+  cardEmptyPreview: {
+    fontWeight: 200,
+  },
+  cardTitle: {
+    fontWeight: 700,
+    display: "inline",
+  },
+  cardTitleDatePart: {
+    color: theme.palette.grey[600],
+    paddingLeft: "8px",
+    display: "inline",
+  },
+  cardUsernamePart: {
+    fontWeight: 300,
+    color: "grey",
+  },
 }));

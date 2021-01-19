@@ -10,7 +10,6 @@ import React, {
 } from "react";
 import RichTextEditor, {
   RichTextEditorImperativeHandle,
-  RichTextCompactViewer,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
 import {
@@ -21,7 +20,6 @@ import {
   Typography,
   List,
   ListItem,
-  ListItemText,
   Divider,
 } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
@@ -41,7 +39,7 @@ import {
 } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
 import { useMentions } from "../hooks/useMentions";
-import { Link, Redirect, useParams } from "react-router-dom";
+import { Redirect, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import { DocumentTitle } from "../components/richtext/DocumentTitle";
@@ -52,9 +50,7 @@ import {
   findMentionsInPosts,
 } from "../components/richtext/Utils";
 import { PostAuthorLink } from "../components/identity/PostAuthorLink";
-import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useGlobalStyles } from "../styles/styles";
-import { postURL } from "../routing/URLs";
 import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 
 const useStyles = makeStyles((theme) => ({
@@ -73,14 +69,6 @@ const useStyles = makeStyles((theme) => ({
     position: "fixed",
     top: "30%",
     left: "50%",
-  },
-  postListItem: {
-    paddingLeft: "0px",
-    paddingRight: "0px",
-  },
-  username: {
-    fontWeight: 300,
-    color: "grey",
   },
 }));
 
@@ -269,7 +257,7 @@ const MentionsSection = (props: { mentions: MentionInContext[] }) => {
       <ListItem
         alignItems="flex-start"
         key={mentionKey}
-        className={classes.postListItem}
+        className={globalClasses.cardListItem}
       >
         <MentionPostCard mention={mention} />
       </ListItem>
