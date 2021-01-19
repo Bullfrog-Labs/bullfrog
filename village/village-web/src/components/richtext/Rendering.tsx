@@ -89,6 +89,22 @@ export const H2Element = (props: any) => {
   return <Typography variant="h2">{props.children}</Typography>;
 };
 
+export const CompactH2Element = (props: any) => {
+  return (
+    <Typography style={{ fontWeight: 500 }} variant="body1">
+      {props.children}
+    </Typography>
+  );
+};
+
 export const H3Element = (props: any) => {
   return <Typography variant="h3">{props.children}</Typography>;
+};
+
+export const CompactH3Element = (props: any) => {
+  return (
+    <Typography style={{ fontWeight: 400 }} variant="body1">
+      {props.children}
+    </Typography>
+  );
 };
