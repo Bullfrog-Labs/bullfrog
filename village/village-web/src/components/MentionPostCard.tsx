@@ -19,10 +19,10 @@ export const MentionPostCard = (props: { mention: MentionInContext }) => {
   const dt = DateTime.fromJSDate(post.updatedAt || new Date());
   const previewParts = [<RichTextCompactViewer body={mention.text} />];
   if (mention.truncatedStart) {
-    previewParts.unshift(<Typography variant="body1">...</Typography>);
+    previewParts.unshift(<Typography variant="body2">⋯</Typography>);
   }
   if (mention.truncatedEnd) {
-    previewParts.push(<Typography variant="body1">...</Typography>);
+    previewParts.push(<Typography variant="body2">⋯</Typography>);
   }
   const preview = <React.Fragment>{previewParts}</React.Fragment>;
 
