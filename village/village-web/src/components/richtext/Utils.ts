@@ -1,8 +1,16 @@
 import { RichText } from "./Types";
-import { createEditor, Editor, Node, Path, Transforms } from "slate";
+import { createEditor, Editor, Node, Path } from "slate";
 import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
 import { UserPost, PostId } from "../../services/store/Posts";
 import * as log from "loglevel";
+
+export type MentionInContext = {
+  post: UserPost;
+  text: RichText;
+  path: Path;
+  truncatedStart: boolean;
+  truncatedEnd: boolean;
+};
 
 export const EMPTY_RICH_TEXT: RichText = [
   {
@@ -35,12 +43,8 @@ export const EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH = [0, 0, 0];
 // preview is a React component. Code from Rendering.tsx can probably be used to
 // generate the preview.
 export const richTextStringPreview = (
-  richText: RichText | string // '| string' is temporary - working around data form transition
+  richText: RichText
 ): string | undefined => {
-  if (typeof richText === "string") {
-    return richText;
-  }
-
   if (!richText || richText.length === 0) {
     return undefined;
   }
@@ -51,24 +55,11 @@ export const richTextStringPreview = (
 };
 
 export const wrapNodeAsDoc = (node: Node) => {
-  return [{ children: [node] }];
+  return wrapNodesAsDoc([node]);
 };
 
 export const wrapNodesAsDoc = (nodes: Node[]) => {
   return [{ children: nodes }];
-};
-
-export const postPreviewFromStart = (
-  body: RichText
-): [RichText, boolean, boolean] => {
-  return postPreview(body, [0, 0, 0]);
-};
-
-export const mentionPreview = (
-  body: RichText,
-  path: Path
-): [RichText, boolean, boolean] => {
-  return postPreview(body, path);
 };
 
 /**
@@ -86,14 +77,26 @@ const isLastBlock = (editor: Editor, path: Path) => {
   return true;
 };
 
+export const postPreviewFromStart = (
+  body: RichText
+): [RichText, boolean, boolean] => {
+  return postPreview(body, [0, 0, 0]);
+};
+
+export const mentionPreview = (
+  body: RichText,
+  path: Path
+): [RichText, boolean, boolean] => {
+  return postPreview(body, path);
+};
+
 /**
  * V2 postPreview function, still very hacky. This only attempts to pull a
  * little more context if its *easy*. Basically it will look for the next
  * sibling node and include it if it exists. Else it will just return the
  * one node.
- * @param body
- * @param path
- * @param maxChars
+ *
+ * @returns [preview, truncated-start, truncated-end]
  */
 export const postPreview = (
   body: RichText,
@@ -132,14 +135,6 @@ export const postPreview = (
   const truncatedEnd = !isLastBlock(editor, blockPath);
 
   return [previewDoc, truncatedStart, truncatedEnd];
-};
-
-export type MentionInContext = {
-  post: UserPost;
-  text: RichText;
-  path: Path;
-  truncatedStart: boolean;
-  truncatedEnd: boolean;
 };
 
 const findMentionsInText = (text: RichText, postId: PostId) => {
