@@ -63,4 +63,7 @@ export const useGlobalStyles = makeStyles((theme) => ({
     fontWeight: 300,
     color: "grey",
   },
+  cardNoContent: {
+    color: theme.palette.grey[600],
+  },
 }));

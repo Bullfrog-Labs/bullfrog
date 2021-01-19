@@ -115,7 +115,14 @@ export const TypographyView = ({}: TypographyViewProps) => {
         className={classes.emptyMentionsLine}
         variant="body2"
       >
-        <em>No content</em>
+        <em>
+          Mentioned by{" "}
+          <Link className={globalClasses.link}>Revolt of the Public</Link>,{" "}
+          <Link className={globalClasses.link}>
+            All the News Thats Fit to Sell
+          </Link>
+          , and <Link className={globalClasses.link}>3 more...</Link>
+        </em>
       </Typography>
     </React.Fragment>
   );
