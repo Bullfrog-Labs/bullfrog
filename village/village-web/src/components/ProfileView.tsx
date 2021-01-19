@@ -41,7 +41,7 @@ export type ProfileViewProps = {
   user: UserRecord;
 };
 
-export const useProfileState = (
+const useProfileState = (
   getUserPosts: GetUserPostsFn,
   getUser: GetUserFn,
   userId: UserId
