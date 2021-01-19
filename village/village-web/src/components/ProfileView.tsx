@@ -8,6 +8,7 @@ import ListItem from "@material-ui/core/ListItem";
 import { PostRecord, GetUserPostsFn } from "../services/store/Posts";
 import { UserRecord, UserId, GetUserFn } from "../services/store/Users";
 import { useParams } from "react-router-dom";
+import { RichTextCompactViewer } from "../components/richtext/RichTextEditor";
 
 import { ProfilePostCard } from "./ProfilePostCard";
 

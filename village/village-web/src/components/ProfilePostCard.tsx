@@ -6,8 +6,9 @@ import { PostRecord } from "../services/store/Posts";
 import { Link, useHistory } from "react-router-dom";
 import { useGlobalStyles } from "../styles/styles";
 import { postURL } from "../routing/URLs";
-import { richTextStringPreview } from "./richtext/Utils";
+import { postPreview, isEmptyDoc } from "./richtext/Utils";
 import { DateTime } from "luxon";
+import { RichTextCompactViewer } from "../components/richtext/RichTextEditor";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -40,7 +41,11 @@ export const ProfilePostCard = (props: { post: PostRecord }) => {
   const history = useHistory();
   const { post } = props;
   const dt = DateTime.fromJSDate(post.updatedAt || new Date());
-  const preview = richTextStringPreview(post.body);
+  let preview = undefined;
+  if (!isEmptyDoc(post.body)) {
+    const previewDoc = postPreview(post.body);
+    preview = <RichTextCompactViewer body={previewDoc} />;
+  }
 
   return (
     <Paper

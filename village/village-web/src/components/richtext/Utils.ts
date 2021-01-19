@@ -50,6 +50,23 @@ export const richTextStringPreview = (
     .join("\n");
 };
 
+export const postPreview = (body: RichText): Node[] => {
+  const editor = createEditor();
+  editor.children = body;
+  const paragraphs = body && body.length > 0 && body[0].children;
+  const node =
+    Array.isArray(paragraphs) && paragraphs.length > 0 && paragraphs[0];
+
+  const preview = createEditor();
+  if (!node) {
+    preview.children = [{ children: [] }];
+  } else {
+    preview.children = [{ children: [node] }];
+  }
+
+  return preview.children;
+};
+
 export const mentionPreview = (body: RichText, path: Path): Node[] => {
   const editor = createEditor();
   editor.children = body;
@@ -126,4 +143,10 @@ export const findMentionsInPosts = (
     });
   });
   return mentions;
+};
+
+export const isEmptyDoc = (doc: RichText): boolean => {
+  const str = Node.string(doc[0]);
+  if (!str) return true;
+  return str.length === 0;
 };
