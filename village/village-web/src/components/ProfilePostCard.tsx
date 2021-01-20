@@ -2,7 +2,7 @@ import * as log from "loglevel";
 import React from "react";
 import { Typography, Paper } from "@material-ui/core";
 import { PostRecord } from "../services/store/Posts";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useGlobalStyles } from "../styles/styles";
 import { postURL } from "../routing/URLs";
 import { postPreviewFromStart, isEmptyDoc } from "./richtext/Utils";
@@ -11,7 +11,6 @@ import { RichTextCompactViewer } from "../components/richtext/RichTextEditor";
 
 export const ProfilePostCard = (props: { post: PostRecord }) => {
   const globalClasses = useGlobalStyles();
-  const history = useHistory();
   const { post } = props;
   const dt = DateTime.fromJSDate(post.updatedAt || new Date());
   let preview = undefined;

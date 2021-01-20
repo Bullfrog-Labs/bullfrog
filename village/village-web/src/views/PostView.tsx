@@ -38,7 +38,6 @@ import {
   GetMentionUserPostsFn,
 } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
-import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useMentions } from "../hooks/useMentions";
 import { Redirect, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
@@ -225,6 +224,7 @@ export type PostViewProps = {
 
   body: PostBody;
   setBody: Dispatch<SetStateAction<PostBody>>;
+  updatedAt: Date | undefined;
 
   viewer: UserRecord;
   author: UserRecord;
@@ -413,6 +413,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
         author={props.author}
         postTitle={props.title}
         postId={props.postId}
+        updatedAt={props.updatedAt}
       />
     );
 
@@ -503,6 +504,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const [title, setTitle] = useState<PostTitle>("");
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
+  const [updatedAt, setUpdatedAt] = useState<Date>();
   const [mentionPosts, setMentionPosts] = useState<UserPost[]>([]);
 
   const [postRecordLoaded, setPostRecordLoaded] = useState(false);
@@ -554,6 +556,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
         postViewRef.current?.blurBody();
         setTitle(postRecord!.title);
         setBody(postRecord!.body);
+        setUpdatedAt(postRecord!.updatedAt);
       }
     };
     loadPostRecord();
@@ -623,6 +626,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
         onMentionSearchChanged={onMentionSearchChanged}
         onMentionAdded={onMentionAdded}
         mentionableElementFn={mentionableElementFn(authorUserRecord.uid)}
+        updatedAt={updatedAt}
       />
     </>
   );

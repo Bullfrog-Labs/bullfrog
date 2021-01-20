@@ -3,7 +3,6 @@ import React, {
   useCallback,
   forwardRef,
   useImperativeHandle,
-  useRef,
 } from "react";
 import { createEditor, Text, Node, Transforms } from "slate";
 import { KBEventHandler, RichText } from "./Types";
