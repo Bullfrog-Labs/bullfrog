@@ -276,7 +276,7 @@ const MentionsSection = (props: { mentions: MentionInContext[] }) => {
           <Typography variant="h6">
             <em>Mentions</em>
           </Typography>
-          <List>{mentionListItems}</List>
+          <List dense={true}>{mentionListItems}</List>
         </Grid>
       </Grid>
     </div>

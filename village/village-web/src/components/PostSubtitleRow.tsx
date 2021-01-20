@@ -27,7 +27,7 @@ export const PostSubtitleRow = (props: PostAuthorLinkProps) => {
   const dt = DateTime.fromJSDate(props.updatedAt || new Date());
 
   return (
-    <Typography variant="subtitle2">
+    <Typography variant="body1" className={globalClasses.postSubtitle}>
       <div>
         <Link
           className={globalClasses.link}
