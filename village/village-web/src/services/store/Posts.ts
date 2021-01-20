@@ -40,7 +40,7 @@ const POST_RECORD_CONVERTER = {
   ): PostRecord => {
     const data = snapshot.data(options)!;
     return {
-      updatedAt: data.updatedAt,
+      updatedAt: data.updatedAt?.toDate(),
       authorId: data.authorId,
       id: snapshot.id,
       body: data.body,
@@ -266,6 +266,7 @@ export const getUserPosts = (database: Database) => async (
     .collection(USERS_COLLECTION)
     .doc(uid)
     .collection(POSTS_COLLECTION)
+    .orderBy("updatedAt", "desc")
     .withConverter(POST_RECORD_CONVERTER)
     .get();
 

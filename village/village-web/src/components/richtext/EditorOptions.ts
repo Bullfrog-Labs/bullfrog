@@ -5,6 +5,8 @@ import {
   H3Element,
   ParagraphElement,
   BlockquoteElement,
+  CompactH2Element,
+  CompactH3Element,
   CompactParagraphElement,
   CompactBlockquoteElement,
 } from "./Rendering";
@@ -202,6 +204,15 @@ export const compactBlockquoteOptions: BlockquotePluginOptions = {
   },
 };
 
+export const compactHeadingOptions: HeadingPluginOptions = {
+  h2: {
+    component: CompactH2Element,
+  },
+  h3: {
+    component: CompactH3Element,
+  },
+};
+
 /**
  * Options sets.
  */
@@ -219,7 +230,7 @@ export const postEditorOptions: Options = {
 
 export const compactViewerOptions: Options = {
   paragraph: compactParagraphOptions,
-  heading: headingOptions,
+  heading: compactHeadingOptions,
   mentions: mentionOptions,
   blockquote: compactBlockquoteOptions,
   resetBlockType: resetBlockTypeOptions,

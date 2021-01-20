@@ -10,7 +10,6 @@ import React, {
 } from "react";
 import RichTextEditor, {
   RichTextEditorImperativeHandle,
-  RichTextCompactViewer,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
 import {
@@ -21,7 +20,7 @@ import {
   Typography,
   List,
   ListItem,
-  ListItemText,
+  Divider,
 } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
 import {
@@ -39,20 +38,20 @@ import {
   GetMentionUserPostsFn,
 } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
+import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useMentions } from "../hooks/useMentions";
-import { Link, Redirect, useParams } from "react-router-dom";
+import { Redirect, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import { DocumentTitle } from "../components/richtext/DocumentTitle";
+import { MentionPostCard } from "../components/MentionPostCard";
 import {
   EMPTY_RICH_TEXT,
   MentionInContext,
   findMentionsInPosts,
 } from "../components/richtext/Utils";
 import { PostAuthorLink } from "../components/identity/PostAuthorLink";
-import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useGlobalStyles } from "../styles/styles";
-import { postURL } from "../routing/URLs";
 import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 import { Helmet } from "react-helmet";
 
@@ -72,14 +71,6 @@ const useStyles = makeStyles((theme) => ({
     position: "fixed",
     top: "30%",
     left: "50%",
-  },
-  postListItem: {
-    paddingLeft: "0px",
-    paddingRight: "0px",
-  },
-  username: {
-    fontWeight: 300,
-    color: "grey",
   },
 }));
 
@@ -189,16 +180,19 @@ export const BasePostView = (props: BasePostViewProps) => {
         <Paper elevation={paperElevation}>{props.postView}</Paper>
       </Grid>
       {props.mentions && props.mentions.length > 0 && (
-        <Grid item sm={12}>
-          <Paper elevation={paperElevation}>
-            <Grid container spacing={1}>
-              <Grid item sm={1}></Grid>
-              <Grid item sm={11}>
-                <MentionsSection mentions={props.mentions} />
+        <React.Fragment>
+          <Grid item sm={12}>
+            <Paper elevation={paperElevation}>
+              <Divider />
+              <Grid container spacing={1}>
+                <Grid item sm={1}></Grid>
+                <Grid item sm={11}>
+                  <MentionsSection mentions={props.mentions} />
+                </Grid>
               </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
+            </Paper>
+          </Grid>
+        </React.Fragment>
       )}
     </Grid>
   );
@@ -265,34 +259,9 @@ const MentionsSection = (props: { mentions: MentionInContext[] }) => {
       <ListItem
         alignItems="flex-start"
         key={mentionKey}
-        className={classes.postListItem}
+        className={globalClasses.cardListItem}
       >
-        <ListItemText
-          disableTypography
-          primary={
-            <>
-              <Typography variant="h6">
-                <Link
-                  className={globalClasses.link}
-                  to={postURL(
-                    mention.post.post.authorId,
-                    mention.post.post.id!
-                  )}
-                >
-                  {mention.post.post.title}
-                </Link>
-              </Typography>
-              <Typography variant="subtitle2" className={classes.username}>
-                <em>{mention.post.user.displayName}</em>
-              </Typography>
-            </>
-          }
-          secondary={
-            <>
-              <RichTextCompactViewer body={mention.text} />
-            </>
-          }
-        />
+        <MentionPostCard mention={mention} />
       </ListItem>
     );
   });
