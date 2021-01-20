@@ -53,7 +53,7 @@ const useProfileState = (
     coalesceMaybeToLoadableRecord(await getUserByUsername(username))
   );
 
-  const userId = 123;
+  const userId = "123";
 
   // need to get user id to fetch posts. how to do that?
 

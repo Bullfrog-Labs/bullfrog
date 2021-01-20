@@ -18,7 +18,11 @@ import {
   RenamePostFn,
   SyncBodyFn,
 } from "../services/store/Posts";
-import { UserRecord, GetUserFn } from "../services/store/Users";
+import {
+  UserRecord,
+  GetUserFn,
+  GetUserByUsernameFn,
+} from "../services/store/Users";
 import { PostViewController } from "../views/PostView";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
 
@@ -38,7 +42,7 @@ export const Router = (props: {
   authProvider: AuthProvider;
   getUserPosts: GetUserPostsFn;
   getStackPosts: GetStackPostsFn;
-  getUser: GetUserFn;
+  getUserByUsername: GetUserByUsernameFn;
   getPost: GetPostFn;
   createPost: (user: UserRecord) => CreatePostFn;
   renamePost: (user: UserRecord) => RenamePostFn;
@@ -53,7 +57,7 @@ export const Router = (props: {
     authProvider,
     getUserPosts,
     getStackPosts,
-    getUser,
+    getUserByUsername,
     getPost,
     createPost,
     renamePost,
@@ -107,7 +111,7 @@ export const Router = (props: {
             <AppContainerWithProps>
               <ProfileViewController
                 getUserPosts={getUserPosts}
-                getUser={getUser}
+                getUserByUsername={getUserByUsername}
                 user={user}
               />
             </AppContainerWithProps>
@@ -121,7 +125,7 @@ export const Router = (props: {
             <AppContainerWithProps>
               <PostViewController
                 viewer={user}
-                getUser={getUser}
+                getUserByUsername={getUserByUsername}
                 getPost={getPost}
                 renamePost={renamePost(user)}
                 syncBody={syncBody(user)}
