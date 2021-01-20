@@ -81,9 +81,8 @@ export const ProfileViewController = (props: {
   user: UserRecord;
 }) => {
   const { getUserPosts, getUser, user } = props;
-  const authState = useContext(AuthContext);
   const { userId } = useParams<ProfileViewParams>();
-  const profileViewUserId = userId || authState.uid;
+  const profileViewUserId = userId || user.uid;
   const state = useProfileState(getUserPosts, getUser, profileViewUserId);
   if (state && state.user && state.posts) {
     return <ProfileView posts={state.posts} user={state.user} />;
