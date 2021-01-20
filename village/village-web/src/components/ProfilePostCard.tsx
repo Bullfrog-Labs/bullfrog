@@ -34,9 +34,6 @@ export const ProfilePostCard = (props: { post: PostRecord }) => {
       className={globalClasses.postPreviewCard}
       elevation={0}
       key={listKeyForPost(post)}
-      onClick={() => {
-        history.push(postURL(post.authorId, post.id!));
-      }}
     >
       <Typography
         variant="body1"
