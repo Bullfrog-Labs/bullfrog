@@ -7,13 +7,22 @@ import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import { PostRecord, GetUserPostsFn } from "../services/store/Posts";
-import { UserRecord, UserId, GetUserFn } from "../services/store/Users";
+import {
+  UserRecord,
+  UserId,
+  GetUserFn,
+  GetUserByUsernameFn,
+} from "../services/store/Users";
 import { Link, useParams } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
 import ListItemText from "@material-ui/core/ListItemText";
 import { useGlobalStyles } from "../styles/styles";
 import { postURL } from "../routing/URLs";
 import { Helmet } from "react-helmet";
+import {
+  coalesceMaybeToLoadableRecord,
+  useLoadableRecord,
+} from "../hooks/useLoadableRecord";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -33,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type ProfileViewParams = {
-  userId: string;
+  username: string;
 };
 
 export type ProfileViewProps = {
@@ -43,9 +52,17 @@ export type ProfileViewProps = {
 
 const useProfileState = (
   getUserPosts: GetUserPostsFn,
-  getUser: GetUserFn,
-  userId: UserId
+  getUserByUsername: GetUserByUsernameFn,
+  username: string
 ) => {
+  const userRecord = useLoadableRecord(async () =>
+    coalesceMaybeToLoadableRecord(await getUserByUsername(username))
+  );
+
+  const userId = 123;
+
+  // need to get user id to fetch posts. how to do that?
+
   const [posts, setPosts] = useState<PostRecord[]>([]);
   const [user, setUser] = useState<UserRecord>();
 
@@ -57,6 +74,7 @@ const useProfileState = (
     fetchPosts();
   }, [getUserPosts, userId]);
 
+  /*
   useEffect(() => {
     const fetchUser = async () => {
       const profileUser = await getUser(userId);
@@ -67,6 +85,7 @@ const useProfileState = (
     };
     fetchUser();
   }, [getUserPosts, getUser, userId]);
+  */
 
   return {
     posts: posts,
@@ -76,13 +95,18 @@ const useProfileState = (
 
 export const ProfileViewController = (props: {
   getUserPosts: GetUserPostsFn;
-  getUser: GetUserFn;
+  getUserByUsername: GetUserByUsernameFn;
   user: UserRecord;
 }) => {
-  const { getUserPosts, getUser, user } = props;
-  const { userId } = useParams<ProfileViewParams>();
-  const profileViewUserId = userId || user.uid;
-  const state = useProfileState(getUserPosts, getUser, profileViewUserId);
+  const { getUserPosts, getUserByUsername, user } = props;
+  const { username } = useParams<ProfileViewParams>();
+  const profileViewUsername = username || user.username;
+
+  const state = useProfileState(
+    getUserPosts,
+    getUserByUsername,
+    profileViewUsername
+  );
   if (state && state.user && state.posts) {
     return <ProfileView posts={state.posts} user={state.user} />;
   } else {
