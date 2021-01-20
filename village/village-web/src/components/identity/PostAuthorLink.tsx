@@ -9,6 +9,8 @@ import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
 export type PostAuthorLinkProps = {
   viewer: UserRecord;
   author: UserRecord;
+  postTitle: string;
+  postId: string;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -33,9 +35,14 @@ export const PostAuthorLink = (props: PostAuthorLinkProps) => {
         <span className={classes.subtitlePart}>Jan 21</span>
         <span className={classes.subtitlePart}>
           <Tooltip title="View stack">
-            <IconButton size="small">
-              <LibraryBooksIcon fontSize={"inherit"} />
-            </IconButton>
+            <Link
+              className={globalClasses.link}
+              to={`/stack/${props.postTitle}`}
+            >
+              <IconButton size="small">
+                <LibraryBooksIcon fontSize={"inherit"} />
+              </IconButton>
+            </Link>
           </Tooltip>
           <Tooltip title="Delete, settings, and more...">
             <IconButton size="small">
