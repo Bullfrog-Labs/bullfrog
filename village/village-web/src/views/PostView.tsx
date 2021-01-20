@@ -38,6 +38,7 @@ import {
   GetMentionUserPostsFn,
 } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
+import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useMentions } from "../hooks/useMentions";
 import { Redirect, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
@@ -170,8 +171,7 @@ export type BasePostViewProps = {
 };
 
 export const BasePostView = (props: BasePostViewProps) => {
-  //const paperElevation = props.readOnly ? 0 : 1;
-  const paperElevation = 0;
+  const paperElevation = props.readOnly ? 0 : 1;
 
   return (
     <Grid container spacing={3}>
@@ -184,7 +184,8 @@ export const BasePostView = (props: BasePostViewProps) => {
             <Paper elevation={paperElevation}>
               <Divider />
               <Grid container spacing={1}>
-                <Grid item sm={12}>
+                <Grid item sm={1}></Grid>
+                <Grid item sm={11}>
                   <MentionsSection mentions={props.mentions} />
                 </Grid>
               </Grid>
@@ -427,6 +428,22 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
       </Grid>
     );
 
+    const leftGutter = (
+      <div className={classes.leftGutter}>
+        <Grid
+          container
+          direction="row"
+          justify="center"
+          alignItems="flex-start"
+          spacing={1}
+        >
+          <Grid item>
+            <PostStackLink postTitle={props.title} />
+          </Grid>
+        </Grid>
+      </div>
+    );
+
     const postDetails = (
       <div className={classes.postDetails}>
         <Grid
@@ -452,7 +469,10 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
           alignItems="flex-start"
           spacing={1}
         >
-          <Grid item sm={12}>
+          <Grid item sm={1}>
+            {leftGutter}
+          </Grid>
+          <Grid item sm={11}>
             {postDetails}
           </Grid>
         </Grid>
