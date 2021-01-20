@@ -64,7 +64,7 @@ export const ProfilePostCard = (props: { post: PostRecord }) => {
           variant="body2"
           className={globalClasses.cardEmptyPreview}
         >
-          <em className={globalClasses.cardNoContent}>No content</em>
+          <em className={globalClasses.cardNoContent}>Empty post</em>
         </Typography>
       )}
     </Paper>

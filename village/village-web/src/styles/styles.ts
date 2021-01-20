@@ -64,6 +64,6 @@ export const useGlobalStyles = makeStyles((theme) => ({
     color: "grey",
   },
   cardNoContent: {
-    color: theme.palette.grey[600],
+    color: theme.palette.grey[500],
   },
 }));

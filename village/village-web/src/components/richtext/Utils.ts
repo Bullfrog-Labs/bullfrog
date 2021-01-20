@@ -1,8 +1,9 @@
 import { RichText } from "./Types";
-import { createEditor, Editor, Node, Path } from "slate";
-import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
+import { createEditor, Editor, Node, Path, Text, Element } from "slate";
 import { UserPost, PostId } from "../../services/store/Posts";
+import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
 import * as log from "loglevel";
+import * as _ from "lodash";
 
 export type MentionInContext = {
   post: UserPost;
@@ -182,7 +183,5 @@ export const findMentionsInPosts = (
 
 // This is not totally correct. It wouldn't "see" mentions etc.
 export const isEmptyDoc = (doc: RichText): boolean => {
-  const str = Node.string(doc[0]);
-  if (!str) return true;
-  return str.length === 0;
+  return _.isEqual(doc, EMPTY_RICH_TEXT);
 };
