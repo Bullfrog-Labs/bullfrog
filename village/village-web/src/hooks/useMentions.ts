@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 import { v4 as uuid } from "uuid";
 import { UserId } from "../services/store/Users";
 import * as log from "loglevel";
