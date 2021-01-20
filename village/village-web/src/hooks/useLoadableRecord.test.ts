@@ -7,6 +7,7 @@ import {
   useLoadableRecord,
 } from "./useLoadableRecord";
 import { setTimeout } from "timers";
+import { useCallback } from "react";
 
 Logging.configure(log);
 
@@ -97,5 +98,51 @@ test("Correctly reflects load/exist state of record", async () => {
 
     expect(result.current.get()).toEqual(theAnswer);
     expect(result.current.record).toEqual(theAnswer);
+  });
+});
+
+test("Dependent loading should work", async () => {
+  const theQuestion =
+    "What is the meaning of life, the universe and everything?";
+  const theAnswer = 42;
+
+  const firstLoad = renderHook(() => {
+    const delayedLoadCallback: LoadRecordFn<string> = async () => {
+      console.log("firstLoad foo");
+      await new Promise((r) => setTimeout(r, 100));
+      console.log("firstLoad bar");
+      return [theQuestion, "exists"];
+    };
+    return useLoadableRecord(delayedLoadCallback, "firstLoad", []);
+  });
+
+  const secondLoad = renderHook(() => {
+    const delayedLoadCallback: LoadRecordFn<number> = async () => {
+      console.log("secondLoad foo");
+      if (!firstLoad.result.current.loaded()) {
+        console.log("secondLoad bar");
+        return [null, "unknown"];
+      }
+      console.log("secondLoad baz");
+      await new Promise((r) => setTimeout(r, 100));
+      return [theAnswer, "exists"];
+    };
+    return useLoadableRecord(delayedLoadCallback, "secondLoad", [
+      firstLoad.result.current.record,
+    ]);
+  });
+
+  expect(firstLoad.result.current.loaded()).toBeFalsy();
+  expect(secondLoad.result.current.loaded()).toBeFalsy();
+
+  await firstLoad.waitFor(() => {
+    expect(firstLoad.result.current.loaded()).toBeTruthy();
+    expect(secondLoad.result.current.loaded()).toBeFalsy();
+    expect(firstLoad.result.current.get()).toEqual(theQuestion);
+  });
+
+  await secondLoad.waitFor(() => {
+    expect(secondLoad.result.current.loaded()).toBeTruthy();
+    expect(secondLoad.result.current.get()).toEqual(theAnswer);
   });
 });

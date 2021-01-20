@@ -4,7 +4,7 @@ type RecordExistenceUnknown = "unknown";
 type RecordExistenceKnown = "exists" | "does-not-exist";
 export type RecordExistence = RecordExistenceUnknown | RecordExistenceKnown;
 
-export type LoadRecordFn<R> = () => Promise<[R | null, RecordExistenceKnown]>;
+export type LoadRecordFn<R> = () => Promise<[R | null, RecordExistence]>;
 
 interface LoadableRecord<R> {
   existence: RecordExistence;
@@ -26,7 +26,9 @@ export const coalesceMaybeToLoadableRecord = <R extends unknown>(
 };
 
 export const useLoadableRecord = <R extends unknown>(
-  loadRecord: LoadRecordFn<R>
+  loadRecord: LoadRecordFn<R>,
+  name?: string,
+  deps?: any[]
 ): LoadableRecord<R> => {
   type MaybeR = R | null;
   const [recordExists, setRecordExists] = useState<RecordExistence>("unknown");
@@ -34,6 +36,7 @@ export const useLoadableRecord = <R extends unknown>(
 
   useEffect(() => {
     let isSubscribed = true; // used to prevent state updates on unmounted components
+    console.log(`${name} subscribing`);
     const loadRecordWrapper = async () => {
       const [retrievedRecord, retrievedRecordExists] = await loadRecord();
       if (isSubscribed) {
@@ -43,9 +46,10 @@ export const useLoadableRecord = <R extends unknown>(
     };
     loadRecordWrapper();
     return () => {
+      console.log(`${name} unsubscribing`);
       isSubscribed = false;
     };
-  }, [loadRecord]);
+  }, deps);
 
   return {
     existence: recordExists,
