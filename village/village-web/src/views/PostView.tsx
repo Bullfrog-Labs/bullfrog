@@ -49,7 +49,7 @@ import {
   MentionInContext,
   findMentionsInPosts,
 } from "../components/richtext/Utils";
-import { PostSubtitleRow } from "../components/identity/PostSubtitleRow";
+import { PostSubtitleRow } from "../components/PostSubtitleRow";
 import { useGlobalStyles } from "../styles/styles";
 import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 import { Helmet } from "react-helmet";

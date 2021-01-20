@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { UserRecord } from "../../services/store/Users";
-import { useGlobalStyles } from "../../styles/styles";
+import { UserRecord } from "../services/store/Users";
+import { useGlobalStyles } from "../styles/styles";
 import { makeStyles, Typography, IconButton, Tooltip } from "@material-ui/core";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const PostAuthorLink = (props: PostAuthorLinkProps) => {
+export const PostSubtitleRow = (props: PostAuthorLinkProps) => {
   const globalClasses = useGlobalStyles();
   const classes = useStyles();
   const dt = DateTime.fromJSDate(props.updatedAt || new Date());
