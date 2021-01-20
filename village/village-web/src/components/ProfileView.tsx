@@ -71,7 +71,6 @@ const useProfileState = (
   return {
     posts: posts,
     user: user,
-    addPost: (post: PostRecord) => {},
   };
 };
 
