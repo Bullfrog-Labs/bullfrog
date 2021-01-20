@@ -38,6 +38,7 @@ import {
   GetMentionUserPostsFn,
 } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
+import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useMentions } from "../hooks/useMentions";
 import { Redirect, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
