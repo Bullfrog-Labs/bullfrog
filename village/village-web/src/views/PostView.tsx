@@ -3,6 +3,7 @@ import React, {
   forwardRef,
   RefObject,
   SetStateAction,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -37,6 +38,7 @@ import {
   GetAllPostsByTitlePrefixFn,
   UserPost,
   GetMentionUserPostsFn,
+  GetPostFn,
 } from "../services/store/Posts";
 import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
 import { useMentions } from "../hooks/useMentions";
@@ -55,6 +57,7 @@ import { useGlobalStyles } from "../styles/styles";
 import { postURL } from "../routing/URLs";
 import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 import { Helmet } from "react-helmet";
+import { useRecord } from "../hooks/useRecord";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -529,7 +532,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
 type PostViewControllerProps = {
   viewer: UserRecord;
   getUser: GetUserFn;
-  getPost: (uid: UserId, postId: PostId) => Promise<PostRecord | undefined>;
+  getPost: GetPostFn;
   getGlobalMentions: GetAllPostsByTitlePrefixFn;
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
@@ -610,27 +613,23 @@ export const PostViewController = (props: PostViewControllerProps) => {
     };
   }, [authorId, postId, logger, postRecordNotFound, props]);
 
-  useEffect(() => {
-    let isSubscribed = true; // used to prevent state updates on unmounted components
-    const loadAuthorUserRecord = async () => {
-      const authorUserRecord = await props.getUser(authorId);
-      if (isSubscribed) {
-        setAuthorUserRecord(authorUserRecord);
-        setAuthorUserRecordLoaded(true);
+  const authorRecord = useRecord<UserRecord>(
+    useCallback(async () => {
+      const result = await props.getUser(authorId);
+      if (!!result) {
+        return [result, "exists"];
+      } else {
+        return [null, "does-not-exist"];
       }
-    };
-    loadAuthorUserRecord();
-    return () => {
-      isSubscribed = false;
-    };
-  }, [authorId, props]);
+    }, [authorId, props])
+  );
 
-  if (!postRecordLoaded || !authorUserRecordLoaded) {
+  if (!postRecordLoaded || !authorRecord.loaded()) {
     return <CircularProgress className={classes.loadingIndicator} />;
   } else if (postRecordNotFound) {
     // TODO: Is this the right place to redirect?
     return <Redirect to={"/404"} />;
-  } else if (!authorUserRecord) {
+  } else if (!authorRecord.exists()) {
     const errMessage = `Loaded post ${postId} for author ${authorId}, but author user record was not found`;
     logger.error(errMessage);
     throw new Error(errMessage);
@@ -643,9 +642,9 @@ export const PostViewController = (props: PostViewControllerProps) => {
   };
 
   const pageTitle = `${title!} by ${
-    authorUserRecord.uid === props.viewer.uid
+    authorRecord.get().uid === props.viewer.uid
       ? "you"
-      : authorUserRecord.username
+      : authorRecord.get()?.username
   }`;
 
   return (
@@ -656,7 +655,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
       <PostView
         ref={postViewRef}
         viewer={props.viewer}
-        author={authorUserRecord}
+        author={authorRecord.get()}
         readOnly={readOnly}
         postId={postId}
         title={title!}
@@ -670,7 +669,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
         mentionables={mentionables}
         onMentionSearchChanged={onMentionSearchChanged}
         onMentionAdded={onMentionAdded}
-        mentionableElementFn={mentionableElementFn(authorUserRecord.uid)}
+        mentionableElementFn={mentionableElementFn(authorRecord.get().uid)}
       />
     </>
   );
