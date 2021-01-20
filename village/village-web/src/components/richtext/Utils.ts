@@ -1,8 +1,17 @@
 import { RichText } from "./Types";
-import { createEditor, Editor, Node, Path, Transforms } from "slate";
-import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
+import { createEditor, Editor, Node, Path, Text, Element } from "slate";
 import { UserPost, PostId } from "../../services/store/Posts";
+import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
 import * as log from "loglevel";
+import * as _ from "lodash";
+
+export type MentionInContext = {
+  post: UserPost;
+  text: RichText;
+  path: Path;
+  truncatedStart: boolean;
+  truncatedEnd: boolean;
+};
 
 export const EMPTY_RICH_TEXT: RichText = [
   {
@@ -35,12 +44,8 @@ export const EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH = [0, 0, 0];
 // preview is a React component. Code from Rendering.tsx can probably be used to
 // generate the preview.
 export const richTextStringPreview = (
-  richText: RichText | string // '| string' is temporary - working around data form transition
+  richText: RichText
 ): string | undefined => {
-  if (typeof richText === "string") {
-    return richText;
-  }
-
   if (!richText || richText.length === 0) {
     return undefined;
   }
@@ -50,44 +55,87 @@ export const richTextStringPreview = (
     .join("\n");
 };
 
-export const mentionPreview = (body: RichText, path: Path): Node[] => {
+export const wrapNodeAsDoc = (node: Node) => {
+  return wrapNodesAsDoc([node]);
+};
+
+export const wrapNodesAsDoc = (nodes: Node[]) => {
+  return [{ children: nodes }];
+};
+
+/**
+ * The idea here is: for each level in the path, see if there is a next node.
+ * If not, we must be at the final node for the given level.
+ */
+const isLastBlock = (editor: Editor, path: Path) => {
+  for (let i = path.length; i > 0; i--) {
+    const curr = path.slice(0, i);
+    const next = Path.next(curr);
+    if (Node.has(editor, next)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+export const postPreviewFromStart = (
+  body: RichText
+): [RichText, boolean, boolean] => {
+  return postPreview(body, [0, 0, 0]);
+};
+
+export const mentionPreview = (
+  body: RichText,
+  path: Path
+): [RichText, boolean, boolean] => {
+  return postPreview(body, path);
+};
+
+/**
+ * V2 postPreview function, still very hacky. This only attempts to pull a
+ * little more context if its *easy*. Basically it will look for the next
+ * sibling node and include it if it exists. Else it will just return the
+ * one node.
+ *
+ * @returns [preview, truncated-start, truncated-end]
+ */
+export const postPreview = (
+  body: RichText,
+  path: Path,
+  maxChars: number = 200
+): [RichText, boolean, boolean] => {
   const editor = createEditor();
   editor.children = body;
   const block = Editor.above(editor, { at: path });
-  const node = block && block[0];
+  if (!block) {
+    return [[], false, false];
+  }
+  const blockPath = block[1];
+  const node = block[0];
 
-  if (!node) {
-    return [];
+  const previewNodes: Node[] = [node];
+  const nodeStr = Node.string(node);
+
+  if (nodeStr.length < maxChars) {
+    const nextPath = Path.next(blockPath);
+    if (Node.has(editor, nextPath)) {
+      const [nextNode] = Editor.node(editor, nextPath);
+      if (nextNode) {
+        const nextNodeStr = Node.string(nextNode);
+        if (nodeStr.length + nextNodeStr.length <= maxChars) {
+          previewNodes.push(nextNode);
+        }
+      }
+    }
   }
 
-  const preview = createEditor();
-  preview.children = [{ children: [node] }];
+  const previewDoc = wrapNodesAsDoc(previewNodes);
 
-  Transforms.insertNodes(
-    preview,
-    {
-      type: "p",
-      children: [{ text: "⋯" }],
-    },
-    { at: [0, 1] }
-  );
+  // Hopefully means we've always taken the entire first block.
+  const truncatedStart = !!blockPath.find((p) => p !== 0);
+  const truncatedEnd = !isLastBlock(editor, blockPath);
 
-  Transforms.insertNodes(
-    preview,
-    {
-      type: "p",
-      children: [{ text: "⋯" }],
-    },
-    { at: [0, 0] }
-  );
-
-  return preview.children;
-};
-
-export type MentionInContext = {
-  post: UserPost;
-  text: RichText;
-  path: Path;
+  return [previewDoc, truncatedStart, truncatedEnd];
 };
 
 const findMentionsInText = (text: RichText, postId: PostId) => {
@@ -110,7 +158,10 @@ export const findMentionsInPosts = (
       // The path returned by the search function is a little off because we
       // search from the first child.
       const path = [0, ...mentionNode[1]];
-      const preview = mentionPreview(post.post.body, path);
+      const [preview, truncatedStart, truncatedEnd] = mentionPreview(
+        post.post.body,
+        path
+      );
       // This isn't perfect (assumes same object always serialized to the same
       // thing), but probably ok for now.
       const previewId = JSON.stringify(preview);
@@ -119,6 +170,8 @@ export const findMentionsInPosts = (
           post: post,
           text: preview,
           path: path,
+          truncatedStart: truncatedStart,
+          truncatedEnd: truncatedEnd,
         };
         mentions.push(mentionInContext);
         previews.add(previewId);
@@ -126,4 +179,9 @@ export const findMentionsInPosts = (
     });
   });
   return mentions;
+};
+
+// This is not totally correct. It wouldn't "see" mentions etc.
+export const isEmptyDoc = (doc: RichText): boolean => {
+  return _.isEqual(doc, EMPTY_RICH_TEXT);
 };

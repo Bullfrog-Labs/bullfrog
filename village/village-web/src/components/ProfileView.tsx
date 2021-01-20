@@ -1,8 +1,7 @@
 import * as log from "loglevel";
 import React, { useContext, useState, useEffect } from "react";
-import { Typography } from "@material-ui/core";
 import { AuthContext } from "../services/auth/Auth";
-import Divider from "@material-ui/core/Divider";
+import { Typography, Divider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -16,8 +15,8 @@ import {
 import { Link, useParams } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
 import ListItemText from "@material-ui/core/ListItemText";
+import { ProfilePostCard } from "./ProfilePostCard";
 import { useGlobalStyles } from "../styles/styles";
-import { postURL } from "../routing/URLs";
 import { Helmet } from "react-helmet";
 import {
   coalesceMaybeToLoadableRecord,
@@ -32,14 +31,9 @@ const useStyles = makeStyles((theme) => ({
   profileDivider: {
     margin: "10px 0 0 0",
   },
-  postListItem: {
-    paddingLeft: "0px",
-    paddingRight: "0px",
-  },
-  postCard: {
-    width: "100%",
-  },
 }));
+
+const listKeyForPost = (post: PostRecord) => `${post.id!}`;
 
 type ProfileViewParams = {
   username: string;
@@ -116,38 +110,18 @@ export const ProfileViewController = (props: {
 
 export const ProfileView = (props: ProfileViewProps) => {
   const logger = log.getLogger("ProfileView");
+  const { posts, user } = props;
   const classes = useStyles();
   const globalClasses = useGlobalStyles();
-  const { posts, user } = props;
-
-  const listKeyForPost = (post: PostRecord) => `${user.uid}/${post.id!}`;
 
   const listItems = posts.map((post) => {
     return (
       <ListItem
         alignItems="flex-start"
         key={listKeyForPost(post)}
-        className={classes.postListItem}
+        className={globalClasses.cardListItem}
       >
-        <ListItemText
-          disableTypography={true}
-          primary={
-            <Link
-              className={globalClasses.link}
-              key={listKeyForPost(post)}
-              to={postURL(post.authorId, post.id!)}
-            >
-              <Typography variant="h6">{post.title}</Typography>
-            </Link>
-          }
-          secondary={
-            <React.Fragment>
-              <Typography variant="body1">
-                {richTextStringPreview(post.body)}
-              </Typography>
-            </React.Fragment>
-          }
-        />
+        <ProfilePostCard post={post} />
       </ListItem>
     );
   });
