@@ -49,7 +49,7 @@ import {
   MentionInContext,
   findMentionsInPosts,
 } from "../components/richtext/Utils";
-import { PostAuthorLink } from "../components/identity/PostAuthorLink";
+import { PostSubtitleRow } from "../components/identity/PostSubtitleRow";
 import { useGlobalStyles } from "../styles/styles";
 import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 import { Helmet } from "react-helmet";
@@ -408,7 +408,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
     });
 
     const authorLink = (
-      <PostAuthorLink
+      <PostSubtitleRow
         viewer={props.viewer}
         author={props.author}
         postTitle={props.title}
