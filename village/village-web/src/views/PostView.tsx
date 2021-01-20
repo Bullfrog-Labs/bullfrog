@@ -172,21 +172,18 @@ export type BasePostViewProps = {
 };
 
 export const BasePostView = (props: BasePostViewProps) => {
-  const paperElevation = props.readOnly ? 0 : 1;
-
   return (
     <Grid container spacing={3}>
       <Grid item sm={12}>
-        <Paper elevation={paperElevation}>{props.postView}</Paper>
+        <Paper elevation={0}>{props.postView}</Paper>
       </Grid>
       {props.mentions && props.mentions.length > 0 && (
         <React.Fragment>
           <Grid item sm={12}>
-            <Paper elevation={paperElevation}>
+            <Paper elevation={0}>
               <Divider />
               <Grid container spacing={1}>
-                <Grid item sm={1}></Grid>
-                <Grid item sm={11}>
+                <Grid item sm={12}>
                   <MentionsSection mentions={props.mentions} />
                 </Grid>
               </Grid>
@@ -429,22 +426,6 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
       </Grid>
     );
 
-    const leftGutter = (
-      <div className={classes.leftGutter}>
-        <Grid
-          container
-          direction="row"
-          justify="center"
-          alignItems="flex-start"
-          spacing={1}
-        >
-          <Grid item>
-            <PostStackLink postTitle={props.title} />
-          </Grid>
-        </Grid>
-      </div>
-    );
-
     const postDetails = (
       <div className={classes.postDetails}>
         <Grid
@@ -470,10 +451,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
           alignItems="flex-start"
           spacing={1}
         >
-          <Grid item sm={1}>
-            {leftGutter}
-          </Grid>
-          <Grid item sm={11}>
+          <Grid item sm={12}>
             {postDetails}
           </Grid>
         </Grid>
