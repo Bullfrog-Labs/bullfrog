@@ -112,6 +112,36 @@ function App() {
     logger.info(`Not logged in`);
   }
 
+  return (
+    <>
+      {authCompleted ? (
+        <AuthContext.Provider value={authState}>
+          <Router
+            authProvider={authProvider}
+            getUserPosts={getUserPosts(database)}
+            getStackPosts={getStackPosts(database)}
+            getUser={getUser(database)}
+            getPost={getPost(database)}
+            createPost={createPost(database)}
+            renamePost={renamePost(database)}
+            syncBody={syncBody(database)}
+            getGlobalMentions={getAllPostsByTitlePrefix(database)}
+            getMentionUserPosts={getMentionUserPosts(database)}
+            getSearchSuggestionsByTitlePrefix={getSearchSuggestionsByTitlePrefix(
+              database,
+              user!
+            )}
+            fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
+            user={user}
+          />
+        </AuthContext.Provider>
+      ) : (
+        <CircularProgress className={classes.loadingIndicator} />
+      )}
+    </>
+  );
+
+  /*
   if (authCompleted) {
     return (
       <AuthContext.Provider value={authState}>
@@ -138,6 +168,7 @@ function App() {
   } else {
     return <CircularProgress className={classes.loadingIndicator} />;
   }
+  */
 }
 
 export default App;

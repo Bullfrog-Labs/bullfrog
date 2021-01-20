@@ -10,6 +10,7 @@ import { UserRecord, UserId, GetUserFn } from "../services/store/Users";
 import { useParams } from "react-router-dom";
 import { ProfilePostCard } from "./ProfilePostCard";
 import { useGlobalStyles } from "../styles/styles";
+import { Helmet } from "react-helmet";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -103,10 +104,15 @@ export const ProfileView = (props: ProfileViewProps) => {
 
   return (
     <>
-      <Typography variant="h1">{user.displayName}</Typography>
-      <Typography variant="h5">{user.description}</Typography>
-      <Divider className={classes.profileDivider} />
-      <List className={classes.root}>{listItems}</List>
+      <Helmet>
+        <title>{user.username}</title>
+      </Helmet>
+      <>
+        <Typography variant="h1">{user.displayName}</Typography>
+        <Typography variant="h5">{user.description}</Typography>
+        <Divider className={classes.profileDivider} />
+        <List className={classes.root}>{listItems}</List>
+      </>
     </>
   );
 };

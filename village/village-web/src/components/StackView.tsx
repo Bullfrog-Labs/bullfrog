@@ -17,6 +17,7 @@ import { UserPost, GetStackPostsFn } from "../services/store/Posts";
 import { richTextStringPreview } from "./richtext/Utils";
 import { useGlobalStyles } from "../styles/styles";
 import { postURL } from "../routing/URLs";
+import { Helmet } from "react-helmet";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -122,10 +123,15 @@ export const StackView = (props: StackViewProps) => {
   });
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h1">{source.name}</Typography>
-      <Divider className={classes.profileDivider} />
-      <List className={classes.root}>{listItems}</List>
-    </Container>
+    <>
+      <Helmet>
+        <title>Stack for {source.name}</title>
+      </Helmet>
+      <Container maxWidth="sm">
+        <Typography variant="h1">{source.name}</Typography>
+        <Divider className={classes.profileDivider} />
+        <List className={classes.root}>{listItems}</List>
+      </Container>
+    </>
   );
 };
