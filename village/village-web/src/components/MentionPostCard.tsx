@@ -15,16 +15,17 @@ export const MentionPostCard = (props: { mention: MentionInContext }) => {
   const globalClasses = useGlobalStyles();
   const history = useHistory();
   const { mention } = props;
+  const { truncatedStart, truncatedEnd, text } = mention;
   const post = mention.post.post;
   const dt = DateTime.fromJSDate(post.updatedAt || new Date());
-  const previewParts = [<RichTextCompactViewer body={mention.text} />];
-  if (mention.truncatedStart) {
-    previewParts.unshift(<Typography variant="body2">⋯</Typography>);
-  }
-  if (mention.truncatedEnd) {
-    previewParts.push(<Typography variant="body2">⋯</Typography>);
-  }
-  const preview = <React.Fragment>{previewParts}</React.Fragment>;
+
+  const preview = (
+    <React.Fragment>
+      {truncatedStart && <Typography>⋯</Typography>}
+      <RichTextCompactViewer body={text} />
+      {truncatedEnd && <Typography>⋯</Typography>}
+    </React.Fragment>
+  );
 
   return (
     <Paper

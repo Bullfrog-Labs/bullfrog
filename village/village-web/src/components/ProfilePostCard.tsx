@@ -9,8 +9,6 @@ import { postPreviewFromStart, isEmptyDoc } from "./richtext/Utils";
 import { DateTime } from "luxon";
 import { RichTextCompactViewer } from "../components/richtext/RichTextEditor";
 
-const listKeyForPost = (post: PostRecord) => `${post.id!}`;
-
 export const ProfilePostCard = (props: { post: PostRecord }) => {
   const globalClasses = useGlobalStyles();
   const history = useHistory();
@@ -21,20 +19,21 @@ export const ProfilePostCard = (props: { post: PostRecord }) => {
     const [previewDoc, truncatedStart, truncatedEnd] = postPreviewFromStart(
       post.body
     );
-    const previewParts = [<RichTextCompactViewer body={previewDoc} />];
-    if (truncatedStart) {
-      previewParts.unshift(<Typography>⋯</Typography>);
-    }
-    if (truncatedEnd) {
-      previewParts.push(<Typography>⋯</Typography>);
-    }
-    preview = <React.Fragment>{previewParts}</React.Fragment>;
+    preview = (
+      <React.Fragment>
+        {truncatedStart && <Typography>⋯</Typography>}
+        <RichTextCompactViewer body={previewDoc} />
+        {truncatedEnd && <Typography>⋯</Typography>}
+      </React.Fragment>
+    );
   }
 
+  const listKeyForPost = (post: PostRecord) => `${post.id!}`;
   return (
     <Paper
       className={globalClasses.postPreviewCard}
       elevation={0}
+      key={listKeyForPost(post)}
       onClick={() => {
         history.push(postURL(post.authorId, post.id!));
       }}
@@ -46,7 +45,6 @@ export const ProfilePostCard = (props: { post: PostRecord }) => {
       >
         <Link
           className={globalClasses.link}
-          key={listKeyForPost(post)}
           to={postURL(post.authorId, post.id!)}
           style={{ display: "inline" }}
         >
