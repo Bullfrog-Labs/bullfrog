@@ -560,8 +560,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
-  // TODO: Encapsulate this in a use*-style hook
-
   const postRecord = useLoadableRecord<PostRecord>(
     useCallback(async () => {
       const result = coalesceMaybeToLoadableRecord(

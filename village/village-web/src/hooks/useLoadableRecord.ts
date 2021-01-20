@@ -4,7 +4,7 @@ type RecordExistenceUnknown = "unknown";
 type RecordExistenceKnown = "exists" | "does-not-exist";
 export type RecordExistence = RecordExistenceUnknown | RecordExistenceKnown;
 
-type LoadRecordFn<R> = () => Promise<[R | null, RecordExistenceKnown]>;
+export type LoadRecordFn<R> = () => Promise<[R | null, RecordExistenceKnown]>;
 
 interface LoadableRecord<R> {
   existence: RecordExistence;
