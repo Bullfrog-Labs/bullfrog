@@ -58,7 +58,7 @@ import { postURL } from "../routing/URLs";
 import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 import { Helmet } from "react-helmet";
 import {
-  coaleaseResultToLoadableRecord,
+  coalesceMaybeToLoadableRecord,
   useLoadableRecord,
 } from "../hooks/useLoadableRecord";
 
@@ -557,35 +557,14 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const [title, setTitle] = useState<PostTitle>("");
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
-  const [mentionPosts, setMentionPosts] = useState<UserPost[]>([]);
 
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
-  const mentions = findMentionsInPosts(mentionPosts, postId);
-
-  // Attempt to load post
   // TODO: Encapsulate this in a use*-style hook
-  useEffect(() => {
-    let isSubscribed = true; // used to prevent state updates on unmounted components
-
-    const loadPostRecord = async () => {
-      const newMentionPosts = await props.getMentionUserPosts(postId);
-
-      if (!isSubscribed) {
-        return;
-      }
-
-      setMentionPosts(newMentionPosts);
-    };
-    loadPostRecord();
-    return () => {
-      isSubscribed = false;
-    };
-  }, [authorId, postId, logger, props]);
 
   const postRecord = useLoadableRecord<PostRecord>(
     useCallback(async () => {
-      const result = coaleaseResultToLoadableRecord(
+      const result = coalesceMaybeToLoadableRecord(
         await props.getPost(authorId, postId)
       );
       const [postRecord, postRecordExistence] = result;
@@ -615,10 +594,21 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const authorRecord = useLoadableRecord<UserRecord>(
     useCallback(
-      async () => coaleaseResultToLoadableRecord(await props.getUser(authorId)),
+      async () => coalesceMaybeToLoadableRecord(await props.getUser(authorId)),
       [authorId, props]
     )
   );
+
+  const mentionPosts = useLoadableRecord<UserPost[]>(
+    useCallback(async () => {
+      const result = await props.getMentionUserPosts(postId);
+      return [result, "exists"];
+    }, [postId, props])
+  );
+
+  const mentions = !!mentionPosts.record
+    ? findMentionsInPosts(mentionPosts.record, postId)
+    : [];
 
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     props.getGlobalMentions,

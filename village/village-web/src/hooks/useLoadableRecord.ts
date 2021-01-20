@@ -15,7 +15,7 @@ interface LoadableRecord<R> {
   get(): R;
 }
 
-export const coaleaseResultToLoadableRecord = <R extends unknown>(
+export const coalesceMaybeToLoadableRecord = <R extends unknown>(
   result: R | undefined | null
 ): [R | null, RecordExistenceKnown] => {
   if (!!result) {
