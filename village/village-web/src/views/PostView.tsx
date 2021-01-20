@@ -57,7 +57,10 @@ import { useGlobalStyles } from "../styles/styles";
 import { postURL } from "../routing/URLs";
 import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 import { Helmet } from "react-helmet";
-import { useRecord } from "../hooks/useRecord";
+import {
+  coaleaseResultToLoadableRecord,
+  useLoadableRecord,
+} from "../hooks/useLoadableRecord";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -556,25 +559,9 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
   const [mentionPosts, setMentionPosts] = useState<UserPost[]>([]);
 
-  const [postRecordLoaded, setPostRecordLoaded] = useState(false);
-  const [postRecordNotFound, setPostRecordNotFound] = useState(false);
-
-  const [authorUserRecord, setAuthorUserRecord] = useState<
-    UserRecord | undefined
-  >(undefined);
-
-  const [authorUserRecordLoaded, setAuthorUserRecordLoaded] = useState(false);
-
-  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
-    props.getGlobalMentions,
-    props.createPost,
-    authorId,
-    authorUserRecord?.username || ""
-  );
+  const postViewRef = useRef<PostViewImperativeHandle>(null);
 
   const mentions = findMentionsInPosts(mentionPosts, postId);
-
-  const postViewRef = useRef<PostViewImperativeHandle>(null);
 
   // Attempt to load post
   // TODO: Encapsulate this in a use*-style hook
@@ -582,57 +569,69 @@ export const PostViewController = (props: PostViewControllerProps) => {
     let isSubscribed = true; // used to prevent state updates on unmounted components
 
     const loadPostRecord = async () => {
-      const postRecord = await props.getPost(authorId, postId);
       const newMentionPosts = await props.getMentionUserPosts(postId);
-      const postRecordNotFound = !postRecord;
 
       if (!isSubscribed) {
         return;
       }
 
-      setPostRecordLoaded(true);
-      setPostRecordNotFound(postRecordNotFound);
       setMentionPosts(newMentionPosts);
-
-      if (postRecordNotFound) {
-        logger.info(`Post ${postId} for author ${authorId} not found.`);
-      } else {
-        // when navigating from PostView to another PostView, we need to remove
-        // focus from the title and body when loading in the destination title
-        // and body because using the source cursor position may be unexpected
-        // for the user and it may not even be a valid cursor position.
-        postViewRef.current?.blurTitle();
-        postViewRef.current?.blurBody();
-        setTitle(postRecord!.title);
-        setBody(postRecord!.body);
-      }
     };
     loadPostRecord();
     return () => {
       isSubscribed = false;
     };
-  }, [authorId, postId, logger, postRecordNotFound, props]);
+  }, [authorId, postId, logger, props]);
 
-  const authorRecord = useRecord<UserRecord>(
+  const postRecord = useLoadableRecord<PostRecord>(
     useCallback(async () => {
-      const result = await props.getUser(authorId);
-      if (!!result) {
-        return [result, "exists"];
-      } else {
-        return [null, "does-not-exist"];
+      const result = coaleaseResultToLoadableRecord(
+        await props.getPost(authorId, postId)
+      );
+      const [postRecord, postRecordExistence] = result;
+
+      switch (postRecordExistence) {
+        case "does-not-exist":
+          logger.info(`Post ${postId} for author ${authorId} not found.`);
+          break;
+        case "exists":
+          // when navigating from PostView to another PostView, we need to remove
+          // focus from the title and body when loading in the destination title
+          // and body because using the source cursor position may be unexpected
+          // for the user and it may not even be a valid cursor position.
+          postViewRef.current?.blurTitle();
+          postViewRef.current?.blurBody();
+          setTitle(postRecord!.title);
+          setBody(postRecord!.body);
+          break;
+        default:
+          assertNever(postRecordExistence);
+          break;
       }
-    }, [authorId, props])
+
+      return result;
+    }, [authorId, postId, props, logger])
   );
 
-  if (!postRecordLoaded || !authorRecord.loaded()) {
+  const authorRecord = useLoadableRecord<UserRecord>(
+    useCallback(
+      async () => coaleaseResultToLoadableRecord(await props.getUser(authorId)),
+      [authorId, props]
+    )
+  );
+
+  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
+    props.getGlobalMentions,
+    props.createPost,
+    authorId,
+    authorRecord.record?.username || ""
+  );
+
+  if (!postRecord.loaded() || !authorRecord.loaded()) {
     return <CircularProgress className={classes.loadingIndicator} />;
-  } else if (postRecordNotFound) {
-    // TODO: Is this the right place to redirect?
+  } else if (!postRecord.exists() || !authorRecord.exists()) {
+    logger.info(`Post ${postId} for author ${authorId} not found`);
     return <Redirect to={"/404"} />;
-  } else if (!authorRecord.exists()) {
-    const errMessage = `Loaded post ${postId} for author ${authorId}, but author user record was not found`;
-    logger.error(errMessage);
-    throw new Error(errMessage);
   }
 
   // Define helpers

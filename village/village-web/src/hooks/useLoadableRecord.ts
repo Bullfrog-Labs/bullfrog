@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 type RecordExistenceUnknown = "unknown";
 type RecordExistenceKnown = "exists" | "does-not-exist";
@@ -15,7 +15,17 @@ interface LoadableRecord<R> {
   get(): R;
 }
 
-export const useRecord = <R extends unknown>(
+export const coaleaseResultToLoadableRecord = <R extends unknown>(
+  result: R | undefined | null
+): [R | null, RecordExistenceKnown] => {
+  if (!!result) {
+    return [result, "exists"];
+  } else {
+    return [null, "does-not-exist"];
+  }
+};
+
+export const useLoadableRecord = <R extends unknown>(
   loadRecord: LoadRecordFn<R>
 ): LoadableRecord<R> => {
   type MaybeR = R | null;
