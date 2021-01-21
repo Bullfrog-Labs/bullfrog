@@ -9,7 +9,7 @@ import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
 import { DateTime } from "luxon";
 import { HashLink } from "react-router-hash-link";
 
-export type PostAuthorLinkProps = {
+export type PostSubtitleRowProps = {
   viewer: UserRecord;
   author: UserRecord;
   postTitle: string;
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const PostSubtitleRow = (props: PostAuthorLinkProps) => {
+export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
   const globalClasses = useGlobalStyles();
   const classes = useStyles();
   const dt = DateTime.fromJSDate(props.updatedAt || new Date());

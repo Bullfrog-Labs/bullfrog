@@ -1,10 +1,10 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
 import { MemoryRouter } from "react-router-dom";
-import { PostAuthorLink, PostAuthorLinkProps } from "./PostAuthorLink";
+import { PostSubtitleRow, PostSubtitleRowProps } from "./PostSubtitleRow";
 
 export default {
-  title: "Identity/PostAuthorLink",
-  component: PostAuthorLink,
+  title: "PostView/PostSubtitleRow",
+  component: PostSubtitleRow,
   decorators: [
     (Story) => (
       <MemoryRouter>
@@ -14,8 +14,8 @@ export default {
   ],
 } as Meta;
 
-const Template: Story<PostAuthorLinkProps> = (args) => (
-  <PostAuthorLink {...args} />
+const Template: Story<PostSubtitleRowProps> = (args) => (
+  <PostSubtitleRow {...args} />
 );
 
 export const UserIsAuthor = Template.bind({});
