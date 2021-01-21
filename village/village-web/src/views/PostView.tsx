@@ -3,7 +3,6 @@ import React, {
   forwardRef,
   RefObject,
   SetStateAction,
-  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -535,11 +534,11 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
-  const { getUser, getPost } = props;
+  const { getUser, getPost, getMentionUserPosts } = props;
 
-  const authorRecord = useLoadableRecord<UserRecord>();
-  const postRecord = useLoadableRecord<PostRecord>();
-  const mentionPosts = useLoadableRecord<UserPost[]>();
+  const [authorRecord, setAuthorRecord] = useLoadableRecord<UserRecord>();
+  const [postRecord, setPostRecord] = useLoadableRecord<PostRecord>();
+  const [mentionPosts, setMentionPosts] = useLoadableRecord<UserPost[]>();
 
   useEffect(() => {
     let isSubscribed = true; // used to prevent state updates on unmounted components
@@ -548,13 +547,13 @@ export const PostViewController = (props: PostViewControllerProps) => {
       if (!isSubscribed) {
         return;
       }
-      authorRecord.set(...result);
+      setAuthorRecord(...result);
     };
     loadAuthorRecord();
     return () => {
       isSubscribed = false;
     };
-  }, [authorId, authorRecord, getUser]);
+  }, [authorId, getUser, setAuthorRecord]);
 
   useEffect(() => {
     let isSubscribed = true; // used to prevent state updates on unmounted components
@@ -567,7 +566,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
         return;
       }
 
-      postRecord.set(...result);
+      setPostRecord(...result);
 
       const [record, existence] = result;
       switch (existence) {
@@ -595,23 +594,23 @@ export const PostViewController = (props: PostViewControllerProps) => {
     return () => {
       isSubscribed = false;
     };
-  }, [authorId, getPost, logger, postId, postRecord]);
+  }, [authorId, getPost, logger, postId, setPostRecord]);
 
   useEffect(() => {
     let isSubscribed = true;
     const loadMentionPosts = async () => {
-      const result = await props.getMentionUserPosts(postId);
+      const result = await getMentionUserPosts(postId);
       if (!isSubscribed) {
         return;
       }
-      mentionPosts.set(result, "exists");
+      setMentionPosts(result, "exists");
     };
     loadMentionPosts();
 
     return () => {
       isSubscribed = false;
     };
-  }, []);
+  }, [getMentionUserPosts, postId, setMentionPosts]);
 
   const mentions = !!mentionPosts.record
     ? findMentionsInPosts(mentionPosts.record, postId)
