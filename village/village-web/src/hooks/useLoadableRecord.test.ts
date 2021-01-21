@@ -110,7 +110,6 @@ test("Dependent loading should work", async () => {
     const firstLoad = useEffect(() => {
       const load = async () => {
         await new Promise((r) => setTimeout(r, 100));
-        console.log("Loaded first");
         setFirstLR(theQuestion, "exists");
       };
       load();
@@ -119,12 +118,10 @@ test("Dependent loading should work", async () => {
     const secondLoad = useEffect(() => {
       const load = async () => {
         if (!firstLR.loaded()) {
-          console.log("first Not loaded yet");
           return;
         }
         await new Promise((r) => setTimeout(r, 50));
-        // setNextLR(theAnswer, "exists");
-        console.log("Loaded second");
+        setNextLR(theAnswer, "exists");
       };
       load();
     }, [firstLR, setNextLR]);
