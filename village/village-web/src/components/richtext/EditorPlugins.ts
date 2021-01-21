@@ -18,6 +18,8 @@ import {
   ListPlugin,
   withList,
   KbdPlugin,
+  LinkPlugin,
+  withLink,
 } from "@blfrg.xyz/slate-plugins";
 import { withHistory } from "slate-history";
 import { ReactEditor, withReact } from "slate-react";
@@ -33,6 +35,7 @@ export const createPlugins = (options: Options): PluginComponents => {
     heading,
     mentions,
     blockquote,
+    link,
     resetBlockType,
     softBreak,
     exitBreak,
@@ -49,6 +52,7 @@ export const createPlugins = (options: Options): PluginComponents => {
     StrikethroughPlugin(),
     BlockquotePlugin(blockquote),
     ListPlugin(),
+    LinkPlugin(link),
     KbdPlugin(),
     ResetBlockTypePlugin(resetBlockType),
     SoftBreakPlugin(softBreak),
@@ -58,6 +62,7 @@ export const createPlugins = (options: Options): PluginComponents => {
   const withPlugins = [
     withReact,
     withHistory,
+    withLink(link),
     withList(),
     withAutoformat(autoformat),
     withInlineVoid({ plugins }),
