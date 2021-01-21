@@ -31,17 +31,10 @@ import {
 import { useEffect } from "react";
 import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
-import { CircularProgress, makeStyles } from "@material-ui/core";
+import { CircularProgress } from "@material-ui/core";
+import { useGlobalStyles } from "./styles/styles";
 
 Logging.configure(log);
-
-const useStyles = makeStyles((theme) => ({
-  loadingIndicator: {
-    position: "fixed",
-    top: "30%",
-    left: "50%",
-  },
-}));
 
 const [app, auth] = initializeFirebaseApp();
 const authProvider = FirebaseAuthProvider.create(app, auth);
@@ -78,7 +71,7 @@ const makeOnAuthStateChanged = (
 };
 
 function App() {
-  const classes = useStyles();
+  const globalClasses = useGlobalStyles();
   const logger = log.getLogger("App");
   const [authCompleted, setAuthCompleted] = useState(false);
   const [authState, setAuthState] = useState(
@@ -138,7 +131,7 @@ function App() {
           />
         </AuthContext.Provider>
       ) : (
-        <CircularProgress className={classes.loadingIndicator} />
+        <CircularProgress className={globalClasses.loadingIndicator} />
       )}
     </>
   );

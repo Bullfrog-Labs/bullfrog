@@ -109,13 +109,12 @@ export const Router = (props: {
               <MainView />
             </AppContainerWithProps>
           </PrivateRoute>
-          <PrivateRoute exact path="/profile/:userId?">
+          <PrivateRoute exact path="/profile/:username?">
             <AppContainerWithProps>
               <ProfileViewController
                 getUserPosts={getUserPosts}
-                getUser={getUser}
                 getUserByUsername={getUserByUsername}
-                user={user}
+                viewer={user}
               />
             </AppContainerWithProps>
           </PrivateRoute>

@@ -79,11 +79,6 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: theme.spacing(1),
     paddingRight: theme.spacing(2),
   },
-  loadingIndicator: {
-    position: "fixed",
-    top: "30%",
-    left: "50%",
-  },
 }));
 
 const DEFAULT_IDLE_TIME = 1 * 1000;
@@ -527,7 +522,7 @@ type PostViewControllerParams = {
 export const PostViewController = (props: PostViewControllerProps) => {
   const logger = log.getLogger("PostViewController");
   const history = useHistory();
-  const classes = useStyles();
+  const globalClasses = useGlobalStyles();
 
   const { authorIdOrUsername, postId } = useParams<PostViewControllerParams>();
   const query = useQuery();
@@ -643,7 +638,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
   );
 
   const progressIndicator = (
-    <CircularProgress className={classes.loadingIndicator} />
+    <CircularProgress className={globalClasses.loadingIndicator} />
   );
   const onAuthorOrPostNotFound = () => {
     logger.info(`Post ${postId} for author ${authorIdOrUsername} not found`);

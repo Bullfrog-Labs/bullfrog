@@ -66,4 +66,9 @@ export const useGlobalStyles = makeStyles((theme) => ({
   cardNoContent: {
     color: theme.palette.grey[500],
   },
+  loadingIndicator: {
+    position: "fixed",
+    top: "30%",
+    left: "50%",
+  },
 }));
