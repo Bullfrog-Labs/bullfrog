@@ -13,6 +13,7 @@ import {
   checkIfUserExists,
   createNewUserRecord,
   getUser,
+  getUserByUsername,
   UserRecord,
 } from "./services/store/Users";
 import { Router } from "./routing/Router";
@@ -121,6 +122,7 @@ function App() {
             getUserPosts={getUserPosts(database)}
             getStackPosts={getStackPosts(database)}
             getUser={getUser(database)}
+            getUserByUsername={getUserByUsername(database)}
             getPost={getPost(database)}
             createPost={createPost(database)}
             renamePost={renamePost(database)}
@@ -140,35 +142,6 @@ function App() {
       )}
     </>
   );
-
-  /*
-  if (authCompleted) {
-    return (
-      <AuthContext.Provider value={authState}>
-        <Router
-          authProvider={authProvider}
-          getUserPosts={getUserPosts(database)}
-          getStackPosts={getStackPosts(database)}
-          getUser={getUser(database)}
-          getPost={getPost(database)}
-          createPost={createPost(database)}
-          renamePost={renamePost(database)}
-          syncBody={syncBody(database)}
-          getGlobalMentions={getAllPostsByTitlePrefix(database)}
-          getMentionUserPosts={getMentionUserPosts(database)}
-          getSearchSuggestionsByTitlePrefix={getSearchSuggestionsByTitlePrefix(
-            database,
-            user!
-          )}
-          fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
-          user={user}
-        />
-      </AuthContext.Provider>
-    );
-  } else {
-    return <CircularProgress className={classes.loadingIndicator} />;
-  }
-  */
 }
 
 export default App;
