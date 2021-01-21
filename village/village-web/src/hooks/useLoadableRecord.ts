@@ -22,10 +22,6 @@ export const coalesceMaybeToLoadableRecord = <R extends unknown>(
   }
 };
 
-// Fix this shit
-// 2. make it easy to write a callback function that operates on LoadableRecords.
-// 3. LoadableRecords have a method to set record and recordExistence.
-
 type LoadableRecordSetter<R> = (
   record: R | null,
   existence: RecordExistence
