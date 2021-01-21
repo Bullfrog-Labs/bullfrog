@@ -7,6 +7,7 @@ import {
   useLoadableRecord,
 } from "./useLoadableRecord";
 import { setTimeout } from "timers";
+import { useEffect } from "react";
 
 Logging.configure(log);
 
@@ -99,22 +100,41 @@ test("Dependent loading should work", async () => {
     "What is the meaning of life, the universe and everything?";
   const theAnswer = 42;
 
-  const { waitFor, result } = renderHook(() => ({
-    first: useLoadableRecord(),
-    next: useLoadableRecord(),
-  }));
+  const { waitFor, result } = renderHook(() => {
+    const first = useLoadableRecord();
+    const next = useLoadableRecord();
 
-  act(() => {
-    const delayed = async () => {
-      await new Promise((r) => setTimeout(r, 100));
-      const [, setFirstLR] = result.current.first;
-      setFirstLR(theQuestion, "exists");
+    const [firstLR, setFirstLR] = first;
+    const [, setNextLR] = next;
 
-      await new Promise((r) => setTimeout(r, 200));
-      const [, setNextLR] = result.current.next;
-      setNextLR(theAnswer, "exists");
+    const firstLoad = useEffect(() => {
+      const load = async () => {
+        await new Promise((r) => setTimeout(r, 100));
+        console.log("Loaded first");
+        setFirstLR(theQuestion, "exists");
+      };
+      load();
+    }, [setFirstLR]);
+
+    const secondLoad = useEffect(() => {
+      const load = async () => {
+        if (!firstLR.loaded()) {
+          console.log("first Not loaded yet");
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 50));
+        // setNextLR(theAnswer, "exists");
+        console.log("Loaded second");
+      };
+      load();
+    }, [firstLR, setNextLR]);
+
+    return {
+      first: first,
+      next: next,
+      firstLoad: firstLoad,
+      secondLoad: secondLoad,
     };
-    delayed();
   });
 
   await waitFor(() => {
