@@ -1,10 +1,9 @@
-import * as log from "loglevel";
 import React from "react";
 import { Typography, Paper } from "@material-ui/core";
 import { PostRecord } from "../services/store/Posts";
 import { Link, useHistory } from "react-router-dom";
 import { useGlobalStyles } from "../styles/styles";
-import { postURL } from "../routing/URLs";
+import { postURLById } from "../routing/URLs";
 import { DateTime } from "luxon";
 import { MentionInContext } from "../components/richtext/Utils";
 import { RichTextCompactViewer } from "../components/richtext/RichTextEditor";
@@ -32,7 +31,7 @@ export const MentionPostCard = (props: { mention: MentionInContext }) => {
       className={globalClasses.postPreviewCard}
       elevation={0}
       onClick={() => {
-        history.push(postURL(post.authorId, post.id!));
+        history.push(postURLById(post.authorId, post.id!));
       }}
     >
       <Typography
@@ -43,7 +42,7 @@ export const MentionPostCard = (props: { mention: MentionInContext }) => {
         <Link
           className={globalClasses.link}
           key={listKeyForPost(post)}
-          to={postURL(post.authorId, post.id!)}
+          to={postURLById(post.authorId, post.id!)}
           style={{ display: "inline" }}
         >
           {post.title}

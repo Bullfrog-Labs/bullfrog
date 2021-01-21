@@ -46,7 +46,7 @@ import {
 } from "../services/store/Users";
 import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useMentions } from "../hooks/useMentions";
-import { Redirect, useParams } from "react-router-dom";
+import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import { DocumentTitle } from "../components/richtext/DocumentTitle";
@@ -64,6 +64,8 @@ import {
   coalesceMaybeToLoadableRecord,
   useLoadableRecord,
 } from "../hooks/useLoadableRecord";
+import { useQuery } from "../hooks/useQuery";
+import { postURL } from "../routing/URLs";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -518,15 +520,18 @@ type PostViewControllerProps = {
 };
 
 type PostViewControllerParams = {
-  authorUsername: string;
+  authorIdOrUsername: UserId | string;
   postId: PostId;
 };
 
 export const PostViewController = (props: PostViewControllerProps) => {
   const logger = log.getLogger("PostViewController");
+  const history = useHistory();
   const classes = useStyles();
 
-  const { authorUsername, postId } = useParams<PostViewControllerParams>();
+  const { authorIdOrUsername, postId } = useParams<PostViewControllerParams>();
+  const query = useQuery();
+  const authorById = !!query.get("byId");
 
   const [title, setTitle] = useState<PostTitle>("");
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
@@ -543,19 +548,26 @@ export const PostViewController = (props: PostViewControllerProps) => {
     let isSubscribed = true; // used to prevent state updates on unmounted components
     const loadAuthorRecord = async () => {
       const result = coalesceMaybeToLoadableRecord(
-        await getUserByUsername(authorUsername)
+        await (authorById
+          ? getUser(authorIdOrUsername)
+          : getUserByUsername(authorIdOrUsername))
       );
       if (!isSubscribed) {
         return;
       }
       setAuthorRecord(...result);
-      console.log("set author record");
     };
     loadAuthorRecord();
     return () => {
       isSubscribed = false;
     };
-  }, [authorUsername, getUserByUsername, setAuthorRecord]);
+  }, [
+    authorById,
+    authorIdOrUsername,
+    getUser,
+    getUserByUsername,
+    setAuthorRecord,
+  ]);
 
   useEffect(() => {
     let isSubscribed = true; // used to prevent state updates on unmounted components
@@ -633,7 +645,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
     <CircularProgress className={classes.loadingIndicator} />
   );
   const onAuthorOrPostNotFound = () => {
-    logger.info(`Post ${postId} for author ${authorUsername} not found`);
+    logger.info(`Post ${postId} for author ${authorIdOrUsername} not found`);
     return <Redirect to={"/404"} />;
   };
 
@@ -647,6 +659,10 @@ export const PostViewController = (props: PostViewControllerProps) => {
     return onAuthorOrPostNotFound();
   } else if (!mentionPosts.loaded()) {
     return progressIndicator;
+  }
+
+  if (authorById) {
+    history.replace(postURL(authorRecord.get().username, postId));
   }
 
   const mentions = findMentionsInPosts(mentionPosts.get(), postId);

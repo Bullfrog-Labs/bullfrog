@@ -124,7 +124,7 @@ export const Router = (props: {
               <StackViewController getStackPosts={getStackPosts} />
             </AppContainerWithProps>
           </PrivateRoute>
-          <PrivateRoute exact path="/post/:authorUsername/:postId">
+          <PrivateRoute exact path="/post/:authorIdOrUsername/:postId">
             <AppContainerWithProps>
               <PostViewController
                 viewer={user}

@@ -154,7 +154,7 @@ test("PostView to PostView navigation works", async () => {
 
   render(
     <Router history={history}>
-      <Route exact path="/post/:authorUsername/:postId">
+      <Route exact path="/post/:authorIdOrUsername/:postId">
         <PostViewController {...props} />
       </Route>
     </Router>
