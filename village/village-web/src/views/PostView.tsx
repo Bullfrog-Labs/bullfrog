@@ -39,6 +39,7 @@ import {
   GetPostFn,
 } from "../services/store/Posts";
 import {
+  getUserByUsername,
   GetUserByUsernameFn,
   GetUserFn,
   UserId,
@@ -508,6 +509,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
 type PostViewControllerProps = {
   viewer: UserRecord;
   getUser: GetUserFn;
+  getUserByUsername: GetUserByUsernameFn;
   getPost: GetPostFn;
   getGlobalMentions: GetAllPostsByTitlePrefixFn;
   renamePost: RenamePostFn;
@@ -517,8 +519,7 @@ type PostViewControllerProps = {
 };
 
 type PostViewControllerParams = {
-  // authorUsername: string;
-  authorId: UserId;
+  authorUsername: string;
   postId: PostId;
 };
 
@@ -526,15 +527,14 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const logger = log.getLogger("PostViewController");
   const classes = useStyles();
 
-  const { authorId, postId } = useParams<PostViewControllerParams>();
-  const readOnly = props.viewer.uid !== authorId;
+  const { authorUsername, postId } = useParams<PostViewControllerParams>();
 
   const [title, setTitle] = useState<PostTitle>("");
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
 
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
-  const { getUser, getPost, getMentionUserPosts } = props;
+  const { getUser, getUserByUsername, getPost, getMentionUserPosts } = props;
 
   const [authorRecord, setAuthorRecord] = useLoadableRecord<UserRecord>();
   const [postRecord, setPostRecord] = useLoadableRecord<PostRecord>();
@@ -543,21 +543,35 @@ export const PostViewController = (props: PostViewControllerProps) => {
   useEffect(() => {
     let isSubscribed = true; // used to prevent state updates on unmounted components
     const loadAuthorRecord = async () => {
-      const result = coalesceMaybeToLoadableRecord(await getUser(authorId));
+      const result = coalesceMaybeToLoadableRecord(
+        await getUserByUsername(authorUsername)
+      );
       if (!isSubscribed) {
         return;
       }
       setAuthorRecord(...result);
+      console.log("set author record");
     };
     loadAuthorRecord();
     return () => {
       isSubscribed = false;
     };
-  }, [authorId, getUser, setAuthorRecord]);
+  }, [authorUsername, getUserByUsername, setAuthorRecord]);
 
   useEffect(() => {
     let isSubscribed = true; // used to prevent state updates on unmounted components
     const loadPostRecord = async () => {
+      if (!authorRecord.loaded()) {
+        console.log("authorRecord not loaded, returning");
+        return;
+      }
+
+      if (!authorRecord.exists()) {
+        console.log("authorRecord not found, returning");
+        return;
+      }
+
+      const authorId = authorRecord.get().uid;
       const result = coalesceMaybeToLoadableRecord(
         await getPost(authorId, postId)
       );
@@ -587,14 +601,12 @@ export const PostViewController = (props: PostViewControllerProps) => {
           assertNever(existence);
           break;
       }
-
-      return result;
     };
     loadPostRecord();
     return () => {
       isSubscribed = false;
     };
-  }, [authorId, getPost, logger, postId, setPostRecord]);
+  }, [authorRecord, getPost, logger, postId, setPostRecord]);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -619,15 +631,25 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     props.getGlobalMentions,
     props.createPost,
-    authorId,
     authorRecord.record?.username || ""
   );
 
-  if (!postRecord.loaded() || !authorRecord.loaded()) {
-    return <CircularProgress className={classes.loadingIndicator} />;
-  } else if (!postRecord.exists() || !authorRecord.exists()) {
-    logger.info(`Post ${postId} for author ${authorId} not found`);
+  const progressIndicator = (
+    <CircularProgress className={classes.loadingIndicator} />
+  );
+  const onAuthorOrPostNotFound = () => {
+    logger.info(`Post ${postId} for author ${authorUsername} not found`);
     return <Redirect to={"/404"} />;
+  };
+
+  if (!authorRecord.loaded()) {
+    return progressIndicator;
+  } else if (!authorRecord.exists()) {
+    return onAuthorOrPostNotFound();
+  } else if (!postRecord.loaded()) {
+    return progressIndicator;
+  } else if (!postRecord.exists()) {
+    return onAuthorOrPostNotFound();
   }
 
   // Define helpers
@@ -636,10 +658,11 @@ export const PostViewController = (props: PostViewControllerProps) => {
     return postRecord ? postRecord.title : undefined;
   };
 
+  const authorId = authorRecord.get().uid;
+  const readOnly = props.viewer.uid !== authorId;
+
   const pageTitle = `${title!} by ${
-    authorRecord.get().uid === props.viewer.uid
-      ? "you"
-      : authorRecord.get()?.username
+    authorId === props.viewer.uid ? "you" : authorRecord.get()?.username
   }`;
 
   return (
@@ -662,9 +685,9 @@ export const PostViewController = (props: PostViewControllerProps) => {
         renamePost={props.renamePost}
         syncBody={props.syncBody}
         mentionables={mentionables}
-        onMentionSearchChanged={onMentionSearchChanged}
+        onMentionSearchChanged={onMentionSearchChanged(authorId)}
         onMentionAdded={onMentionAdded}
-        mentionableElementFn={mentionableElementFn(authorRecord.get().uid)}
+        mentionableElementFn={mentionableElementFn(authorId)}
       />
     </>
   );
