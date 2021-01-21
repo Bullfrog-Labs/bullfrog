@@ -17,16 +17,16 @@ const expectExistsAndEqualTo = <R extends unknown>(
 ) => {
   expect(result.loaded()).toBeTruthy();
   expect(result.exists()).toBeTruthy();
-  expect(result.existence).toEqual("exists");
+  expect(result.state.existence).toEqual("exists");
 
   expect(result.get()).toEqual(value);
-  expect(result.record).toEqual(value);
+  expect(result.state.record).toEqual(value);
 };
 
 const expectDoesNotExist = <R extends unknown>(result: LoadableRecord<R>) => {
   expect(result.loaded()).toBeTruthy();
   expect(result.exists()).toBeFalsy();
-  expect(result.existence).toEqual("does-not-exist");
+  expect(result.state.existence).toEqual("does-not-exist");
 
   expect(() => result.get()).toThrowError();
 };

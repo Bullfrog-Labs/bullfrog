@@ -5,8 +5,7 @@ type RecordExistenceKnown = "exists" | "does-not-exist";
 export type RecordExistence = RecordExistenceUnknown | RecordExistenceKnown;
 
 export interface LoadableRecord<R> {
-  existence: RecordExistence;
-  record: R | null;
+  state: LoadableRecordState<R>;
 
   loaded(): boolean;
   exists(): boolean;
@@ -32,42 +31,52 @@ type LoadableRecordSetter<R> = (
   existence: RecordExistence
 ) => void;
 
+type LoadableRecordState<R> = {
+  record: R | null;
+  existence: RecordExistence;
+};
+
 export const useLoadableRecord = <R extends unknown>(): [
   LoadableRecord<R>,
   LoadableRecordSetter<R>
 ] => {
-  type MaybeR = R | null;
-  const [recordExists, setRecordExists] = useState<RecordExistence>("unknown");
-  const [record, setRecord] = useState<MaybeR>(null);
+  const [state, setState] = useState<LoadableRecordState<R>>({
+    existence: "unknown",
+    record: null,
+  });
 
   const loadableRecord = useMemo(
     () => ({
-      existence: recordExists,
-      record: record,
-      loaded: () => recordExists !== "unknown",
+      state: state,
+      loaded: () => state.existence !== "unknown",
       exists: () => {
-        if (recordExists === "unknown") {
+        if (state.existence === "unknown") {
           throw new Error("LoadableRecord.exists called before record loaded");
         }
-        return recordExists === "exists";
+        return state.existence === "exists";
       },
       get: () => {
-        if (recordExists !== "exists") {
+        if (state.existence !== "exists") {
           throw new Error(
             "LoadableRecord.get called before record loaded or for non-existent record"
           );
         }
 
-        return record!;
+        return state.record!;
       },
     }),
-    [record, recordExists]
+    [state]
   );
 
-  const setLoadableRecord = useCallback((record, existence) => {
-    setRecordExists(existence);
-    setRecord(record);
-  }, []);
+  const setLoadableRecord = useCallback(
+    (record, existence) => {
+      setState({
+        existence: existence,
+        record: record,
+      });
+    },
+    [setState]
+  );
 
   return [loadableRecord, setLoadableRecord];
 };
