@@ -12,14 +12,13 @@ import RichTextEditor, {
   RichTextEditorImperativeHandle,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
+import { MentionsSection } from "../components/MentionsSection";
 import {
   CircularProgress,
   makeStyles,
   Paper,
   Grid,
   Typography,
-  List,
-  ListItem,
   Divider,
 } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
@@ -43,14 +42,12 @@ import { Redirect, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import { DocumentTitle } from "../components/richtext/DocumentTitle";
-import { MentionPostCard } from "../components/MentionPostCard";
 import {
   EMPTY_RICH_TEXT,
   MentionInContext,
   findMentionsInPosts,
 } from "../components/richtext/Utils";
 import { PostSubtitleRow } from "../components/PostSubtitleRow";
-import { useGlobalStyles } from "../styles/styles";
 import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 import { Helmet } from "react-helmet";
 
@@ -243,44 +240,6 @@ export type PostViewProps = {
 type PostViewImperativeHandle = {
   blurTitle: () => void;
   blurBody: () => void;
-};
-
-const MentionsSection = (props: { mentions: MentionInContext[] }) => {
-  const classes = useStyles();
-  const { mentions } = props;
-  const globalClasses = useGlobalStyles();
-
-  const mentionListItems = mentions.map((mention) => {
-    const mentionKey = `${mention.post.post.id}_${mention.path.join("_")}`;
-    return (
-      <ListItem
-        alignItems="flex-start"
-        key={mentionKey}
-        className={globalClasses.cardListItem}
-      >
-        <MentionPostCard mention={mention} />
-      </ListItem>
-    );
-  });
-
-  return (
-    <div className={classes.postDetails}>
-      <Grid
-        container
-        direction="column"
-        justify="flex-start"
-        alignItems="stretch"
-        spacing={4}
-      >
-        <Grid item>
-          <Typography variant="h6">
-            <em>Mentions</em>
-          </Typography>
-          <List dense={true}>{mentionListItems}</List>
-        </Grid>
-      </Grid>
-    </div>
-  );
 };
 
 // Changing title triggers a rename. Renames are not allowed if the title is

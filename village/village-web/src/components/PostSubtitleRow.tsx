@@ -4,8 +4,10 @@ import { UserRecord } from "../services/store/Users";
 import { useGlobalStyles } from "../styles/styles";
 import { makeStyles, Typography, IconButton, Tooltip } from "@material-ui/core";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import CallReceivedIcon from "@material-ui/icons/CallReceived";
 import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
 import { DateTime } from "luxon";
+import { HashLink } from "react-router-hash-link";
 
 export type PostAuthorLinkProps = {
   viewer: UserRecord;
@@ -46,6 +48,13 @@ export const PostSubtitleRow = (props: PostAuthorLinkProps) => {
                 <LibraryBooksIcon fontSize={"inherit"} />
               </IconButton>
             </Link>
+          </Tooltip>
+          <Tooltip title="View mentions">
+            <HashLink smooth className={globalClasses.link} to={`#mentions`}>
+              <IconButton size="small" style={{ marginLeft: "-3px" }}>
+                <CallReceivedIcon fontSize={"inherit"} />
+              </IconButton>
+            </HashLink>
           </Tooltip>
           <Tooltip title="Delete, settings, and more...">
             <IconButton size="small">

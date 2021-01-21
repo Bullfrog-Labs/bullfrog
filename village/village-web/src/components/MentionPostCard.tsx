@@ -2,7 +2,7 @@ import * as log from "loglevel";
 import React from "react";
 import { Typography, Paper } from "@material-ui/core";
 import { PostRecord } from "../services/store/Posts";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useGlobalStyles } from "../styles/styles";
 import { postURL } from "../routing/URLs";
 import { DateTime } from "luxon";
@@ -13,7 +13,6 @@ const listKeyForPost = (post: PostRecord) => `${post.id!}`;
 
 export const MentionPostCard = (props: { mention: MentionInContext }) => {
   const globalClasses = useGlobalStyles();
-  const history = useHistory();
   const { mention } = props;
   const { truncatedStart, truncatedEnd, text } = mention;
   const post = mention.post.post;
