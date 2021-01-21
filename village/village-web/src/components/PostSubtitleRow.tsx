@@ -27,6 +27,7 @@ export const PostSubtitleRow = (props: PostAuthorLinkProps) => {
   const globalClasses = useGlobalStyles();
   const classes = useStyles();
   const dt = DateTime.fromJSDate(props.updatedAt || new Date());
+  const isLoggedIn = props.author.uid === props.viewer.uid;
 
   return (
     <Typography variant="body1" className={globalClasses.postSubtitle}>
@@ -56,11 +57,13 @@ export const PostSubtitleRow = (props: PostAuthorLinkProps) => {
               </IconButton>
             </HashLink>
           </Tooltip>
-          <Tooltip title="Delete, settings, and more...">
-            <IconButton size="small" style={{ marginLeft: "-3px" }}>
-              <MoreHorizIcon fontSize={"inherit"} />
-            </IconButton>
-          </Tooltip>
+          {isLoggedIn && (
+            <Tooltip title="Delete, settings, and more...">
+              <IconButton size="small" style={{ marginLeft: "-3px" }}>
+                <MoreHorizIcon fontSize={"inherit"} />
+              </IconButton>
+            </Tooltip>
+          )}
         </span>
       </div>
     </Typography>
