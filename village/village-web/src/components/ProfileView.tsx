@@ -36,7 +36,8 @@ const useStyles = makeStyles((theme) => ({
 const listKeyForPost = (post: PostRecord) => `${post.id!}`;
 
 type ProfileViewParams = {
-  username: string;
+  // username: string;
+  userId: string;
 };
 
 export type ProfileViewProps = {
@@ -46,15 +47,9 @@ export type ProfileViewProps = {
 
 const useProfileState = (
   getUserPosts: GetUserPostsFn,
-  getUserByUsername: GetUserByUsernameFn,
-  username: string
+  getUser: GetUserFn,
+  userId: UserId
 ) => {
-  const userRecord = useLoadableRecord(async () =>
-    coalesceMaybeToLoadableRecord(await getUserByUsername(username))
-  );
-
-  const userId = "123";
-
   // need to get user id to fetch posts. how to do that?
 
   const [posts, setPosts] = useState<PostRecord[]>([]);
@@ -68,7 +63,6 @@ const useProfileState = (
     fetchPosts();
   }, [getUserPosts, userId]);
 
-  /*
   useEffect(() => {
     const fetchUser = async () => {
       const profileUser = await getUser(userId);
@@ -79,7 +73,6 @@ const useProfileState = (
     };
     fetchUser();
   }, [getUserPosts, getUser, userId]);
-  */
 
   return {
     posts: posts,
@@ -89,18 +82,15 @@ const useProfileState = (
 
 export const ProfileViewController = (props: {
   getUserPosts: GetUserPostsFn;
+  getUser: GetUserFn;
   getUserByUsername: GetUserByUsernameFn;
   user: UserRecord;
 }) => {
-  const { getUserPosts, getUserByUsername, user } = props;
-  const { username } = useParams<ProfileViewParams>();
-  const profileViewUsername = username || user.username;
+  const { getUserPosts, getUser, getUserByUsername, user } = props;
+  const { userId } = useParams<ProfileViewParams>();
+  const profileViewUserId = userId || user.uid;
 
-  const state = useProfileState(
-    getUserPosts,
-    getUserByUsername,
-    profileViewUsername
-  );
+  const state = useProfileState(getUserPosts, getUser, profileViewUserId);
   if (state && state.user && state.posts) {
     return <ProfileView posts={state.posts} user={state.user} />;
   } else {

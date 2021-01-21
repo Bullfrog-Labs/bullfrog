@@ -113,6 +113,7 @@ export const Router = (props: {
             <AppContainerWithProps>
               <ProfileViewController
                 getUserPosts={getUserPosts}
+                getUser={getUser}
                 getUserByUsername={getUserByUsername}
                 user={user}
               />
