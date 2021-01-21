@@ -4,11 +4,12 @@ type RecordExistenceUnknown = "unknown";
 type RecordExistenceKnown = "exists" | "does-not-exist";
 export type RecordExistence = RecordExistenceUnknown | RecordExistenceKnown;
 
-export type LoadRecordFn<R> = () => Promise<[R | null, RecordExistence]>;
+export type LoadRecordFn<R> = () => Promise<[R | null, RecordExistenceKnown]>;
 
-interface LoadableRecord<R> {
+export interface LoadableRecord<R> {
   existence: RecordExistence;
   record: R | null;
+  set(record: R | null, existence: RecordExistence): void;
 
   loaded(): boolean;
   exists(): boolean;
@@ -25,35 +26,23 @@ export const coalesceMaybeToLoadableRecord = <R extends unknown>(
   }
 };
 
-export const useLoadableRecord = <R extends unknown>(
-  loadRecord: LoadRecordFn<R>,
-  name?: string,
-  deps?: any[]
-): LoadableRecord<R> => {
+// Fix this shit
+// 1. useLoadableRecord creates LoadableRecords, with no useEffect involved.
+// 2. make it easy to write a callback function that operates on LoadableRecords.
+// 3. LoadableRecords have a method to set record and recordExistence.
+
+export const useLoadableRecord = <R extends unknown>(): LoadableRecord<R> => {
   type MaybeR = R | null;
   const [recordExists, setRecordExists] = useState<RecordExistence>("unknown");
   const [record, setRecord] = useState<MaybeR>(null);
 
-  useEffect(() => {
-    let isSubscribed = true; // used to prevent state updates on unmounted components
-    console.log(`${name} subscribing`);
-    const loadRecordWrapper = async () => {
-      const [retrievedRecord, retrievedRecordExists] = await loadRecord();
-      if (isSubscribed) {
-        setRecord(retrievedRecord);
-        setRecordExists(retrievedRecordExists);
-      }
-    };
-    loadRecordWrapper();
-    return () => {
-      console.log(`${name} unsubscribing`);
-      isSubscribed = false;
-    };
-  }, deps);
-
   return {
     existence: recordExists,
     record: record,
+    set: (record: MaybeR, existence: RecordExistence) => {
+      setRecordExists(existence);
+      setRecord(record);
+    },
     loaded: () => recordExists !== "unknown",
     exists: () => {
       if (recordExists === "unknown") {
