@@ -20,8 +20,8 @@ import {
 } from "../services/store/Posts";
 import {
   UserRecord,
-  GetUserFn,
   GetUserByUsernameFn,
+  GetUserFn,
 } from "../services/store/Users";
 import { PostViewController } from "../views/PostView";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
@@ -42,6 +42,7 @@ export const Router = (props: {
   authProvider: AuthProvider;
   getUserPosts: GetUserPostsFn;
   getStackPosts: GetStackPostsFn;
+  getUser: GetUserFn;
   getUserByUsername: GetUserByUsernameFn;
   getPost: GetPostFn;
   createPost: (user: UserRecord) => CreatePostFn;
@@ -57,6 +58,7 @@ export const Router = (props: {
     authProvider,
     getUserPosts,
     getStackPosts,
+    getUser,
     getUserByUsername,
     getPost,
     createPost,
@@ -125,7 +127,8 @@ export const Router = (props: {
             <AppContainerWithProps>
               <PostViewController
                 viewer={user}
-                getUserByUsername={getUserByUsername}
+                // getUserByUsername={getUserByUsername}
+                getUser={getUser}
                 getPost={getPost}
                 renamePost={renamePost(user)}
                 syncBody={syncBody(user)}

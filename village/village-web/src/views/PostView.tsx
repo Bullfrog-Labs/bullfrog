@@ -508,7 +508,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
 
 type PostViewControllerProps = {
   viewer: UserRecord;
-  getUserByUsername: GetUserByUsernameFn;
+  getUser: GetUserFn;
   getPost: GetPostFn;
   getGlobalMentions: GetAllPostsByTitlePrefixFn;
   renamePost: RenamePostFn;
@@ -518,7 +518,8 @@ type PostViewControllerProps = {
 };
 
 type PostViewControllerParams = {
-  authorUsername: string;
+  // authorUsername: string;
+  authorId: UserId;
   postId: PostId;
 };
 
@@ -526,7 +527,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const logger = log.getLogger("PostViewController");
   const classes = useStyles();
 
-  const { authorUsername, postId } = useParams<PostViewControllerParams>();
+  const { authorId, postId } = useParams<PostViewControllerParams>();
   const readOnly = props.viewer.uid !== authorId;
 
   const [title, setTitle] = useState<PostTitle>("");
@@ -534,7 +535,11 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
-  const authorRecord = useLoadableRecord<UserRecord>(
+  const authorRecord = useLoadableRecord<UserRecord>();
+  const postRecord = useLoadableRecord<PostRecord>();
+  const mentionPosts = useLoadableRecord<UserPost[]>();
+
+  /*
     useCallback(
       async () =>
         coalesceMaybeToLoadableRecord(
@@ -542,7 +547,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
         ),
       [authorUsername, props]
     )
-  );
+    */
 
   const postRecord = useLoadableRecord<PostRecord>(
     useCallback(async () => {
