@@ -210,7 +210,7 @@ test("post creation of existing post via search box", async () => {
 
   // should be redirected to existing note
   expect(testContainer.history.location.pathname).toEqual(
-    postURL(user0.uid, mockNewPostId)
+    postURL(user0.username, mockNewPostId)
   );
 });
 
@@ -267,7 +267,7 @@ test("navigate to existing post via search box", async () => {
 
   // should be redirected to existing note
   expect(testContainer.history.location.pathname).toEqual(
-    postURL(user0.uid, mockPostId)
+    postURL(user0.username, mockPostId)
   );
 
   // Dialog should be closed

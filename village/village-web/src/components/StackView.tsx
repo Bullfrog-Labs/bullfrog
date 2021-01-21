@@ -89,7 +89,7 @@ export const StackView = (props: StackViewProps) => {
         <Typography variant="h6">
           <Link
             className={globalClasses.link}
-            to={postURL(post.user.uid, post.post.id!)}
+            to={postURL(post.user.username, post.post.id!)}
           >
             {post.post.title}
           </Link>
