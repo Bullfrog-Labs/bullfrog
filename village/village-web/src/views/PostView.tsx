@@ -8,18 +8,18 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useGlobalStyles } from "../styles/styles";
 import RichTextEditor, {
   RichTextEditorImperativeHandle,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
+import { MentionsSection } from "../components/MentionsSection";
 import {
   CircularProgress,
   makeStyles,
   Paper,
   Grid,
   Typography,
-  List,
-  ListItem,
   Divider,
 } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
@@ -44,20 +44,17 @@ import {
   UserId,
   UserRecord,
 } from "../services/store/Users";
-import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useMentions } from "../hooks/useMentions";
 import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import { DocumentTitle } from "../components/richtext/DocumentTitle";
-import { MentionPostCard } from "../components/MentionPostCard";
 import {
   EMPTY_RICH_TEXT,
   MentionInContext,
   findMentionsInPosts,
 } from "../components/richtext/Utils";
-import { PostAuthorLink } from "../components/identity/PostAuthorLink";
-import { useGlobalStyles } from "../styles/styles";
+import { PostSubtitleRow } from "../components/PostSubtitleRow";
 import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 import { Helmet } from "react-helmet";
 import {
@@ -179,21 +176,18 @@ export type BasePostViewProps = {
 };
 
 export const BasePostView = (props: BasePostViewProps) => {
-  const paperElevation = props.readOnly ? 0 : 1;
-
   return (
     <Grid container spacing={3}>
       <Grid item sm={12}>
-        <Paper elevation={paperElevation}>{props.postView}</Paper>
+        <Paper elevation={0}>{props.postView}</Paper>
       </Grid>
       {props.mentions && props.mentions.length > 0 && (
         <React.Fragment>
           <Grid item sm={12}>
-            <Paper elevation={paperElevation}>
+            <Paper elevation={0}>
               <Divider />
               <Grid container spacing={1}>
-                <Grid item sm={1}></Grid>
-                <Grid item sm={11}>
+                <Grid item sm={12}>
                   <MentionsSection mentions={props.mentions} />
                 </Grid>
               </Grid>
@@ -235,6 +229,7 @@ export type PostViewProps = {
 
   body: PostBody;
   setBody: Dispatch<SetStateAction<PostBody>>;
+  updatedAt: Date | undefined;
 
   viewer: UserRecord;
   author: UserRecord;
@@ -253,44 +248,6 @@ export type PostViewProps = {
 type PostViewImperativeHandle = {
   blurTitle: () => void;
   blurBody: () => void;
-};
-
-const MentionsSection = (props: { mentions: MentionInContext[] }) => {
-  const classes = useStyles();
-  const { mentions } = props;
-  const globalClasses = useGlobalStyles();
-
-  const mentionListItems = mentions.map((mention) => {
-    const mentionKey = `${mention.post.post.id}_${mention.path.join("_")}`;
-    return (
-      <ListItem
-        alignItems="flex-start"
-        key={mentionKey}
-        className={globalClasses.cardListItem}
-      >
-        <MentionPostCard mention={mention} />
-      </ListItem>
-    );
-  });
-
-  return (
-    <div className={classes.postDetails}>
-      <Grid
-        container
-        direction="column"
-        justify="flex-start"
-        alignItems="stretch"
-        spacing={4}
-      >
-        <Grid item>
-          <Typography variant="h6">
-            <em>Mentions</em>
-          </Typography>
-          <List>{mentionListItems}</List>
-        </Grid>
-      </Grid>
-    </div>
-  );
 };
 
 // Changing title triggers a rename. Renames are not allowed if the title is
@@ -418,7 +375,13 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
     });
 
     const authorLink = (
-      <PostAuthorLink viewer={props.viewer} author={props.author} />
+      <PostSubtitleRow
+        viewer={props.viewer}
+        author={props.author}
+        postTitle={props.title}
+        postId={props.postId}
+        updatedAt={props.updatedAt}
+      />
     );
 
     const header = (
@@ -436,22 +399,6 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
       </Grid>
     );
 
-    const leftGutter = (
-      <div className={classes.leftGutter}>
-        <Grid
-          container
-          direction="row"
-          justify="center"
-          alignItems="flex-start"
-          spacing={1}
-        >
-          <Grid item>
-            <PostStackLink postTitle={props.title} />
-          </Grid>
-        </Grid>
-      </div>
-    );
-
     const postDetails = (
       <div className={classes.postDetails}>
         <Grid
@@ -462,7 +409,9 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
           spacing={4}
         >
           <Grid item>{header}</Grid>
-          <Grid item>{richTextEditor}</Grid>
+          <Grid item>
+            <div>{richTextEditor}</div>
+          </Grid>
         </Grid>
       </div>
     );
@@ -477,10 +426,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
           alignItems="flex-start"
           spacing={1}
         >
-          <Grid item sm={1}>
-            {leftGutter}
-          </Grid>
-          <Grid item sm={11}>
+          <Grid item sm={12}>
             {postDetails}
           </Grid>
         </Grid>
@@ -530,6 +476,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const [title, setTitle] = useState<PostTitle>("");
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
+  const [updatedAt, setUpdatedAt] = useState<Date>();
 
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
@@ -603,6 +550,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
           postViewRef.current?.blurBody();
           setTitle(record!.title);
           setBody(record!.body);
+          setUpdatedAt(record!.updatedAt);
           break;
         default:
           assertNever(existence);
@@ -695,6 +643,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
         onMentionSearchChanged={onMentionSearchChanged(authorId)}
         onMentionAdded={onMentionAdded}
         mentionableElementFn={mentionableElementFn(authorId)}
+        updatedAt={updatedAt}
       />
     </>
   );

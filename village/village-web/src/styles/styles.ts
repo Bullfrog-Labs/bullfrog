@@ -39,6 +39,12 @@ export const useGlobalStyles = makeStyles((theme) => ({
     paddingLeft: "0px",
     paddingRight: "0px",
   },
+  editableRichText: {
+    "&:hover:not(:focus)": {
+      backgroundColor: "#fafafa",
+    },
+  },
+  readOnlyRichText: {},
   postPreviewCard: {
     "&:hover": {
       backgroundColor: "#fafafa",
@@ -54,8 +60,13 @@ export const useGlobalStyles = makeStyles((theme) => ({
     fontWeight: 700,
     display: "inline",
   },
+  postSubtitle: {
+    fontWeight: 700,
+    display: "inline",
+    color: "rgba(0, 0, 0, 0.54)",
+  },
   cardTitleDatePart: {
-    color: theme.palette.grey[600],
+    color: "rgba(0, 0, 0, 0.54)",
     paddingLeft: "8px",
     display: "inline",
   },
