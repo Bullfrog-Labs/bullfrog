@@ -9,7 +9,7 @@ import { KBEventHandler, RichText } from "./Types";
 import { withEditableTypographyLayout } from "./EditorBehaviors";
 import { withHistory } from "slate-history";
 import { withReact, Slate, Editable, ReactEditor } from "slate-react";
-
+import { useGlobalStyles } from "../../styles/styles";
 import { Typography } from "@material-ui/core";
 import {
   EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH,
@@ -46,6 +46,8 @@ export const EditableTypography = forwardRef<
   EditableTypographyImperativeHandle,
   EditableTypographyProps
 >((props, ref) => {
+  const globalClasses = useGlobalStyles();
+
   const editor = useMemo(
     () => withReact(withEditableTypographyLayout(withHistory(createEditor()))),
     []
@@ -101,6 +103,11 @@ export const EditableTypography = forwardRef<
         placeholder="Enter a title"
         renderLeaf={renderLeaf}
         onKeyDown={handleExitEditable(props.handleEscape)}
+        className={
+          props.readOnly
+            ? globalClasses.readOnlyRichText
+            : globalClasses.editableRichText
+        }
       />
     </Slate>
   );

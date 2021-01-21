@@ -39,6 +39,12 @@ export const useGlobalStyles = makeStyles((theme) => ({
     paddingLeft: "0px",
     paddingRight: "0px",
   },
+  editableRichText: {
+    "&:hover:not(:focus)": {
+      backgroundColor: "#fafafa",
+    },
+  },
+  readOnlyRichText: {},
   postPreviewCard: {
     "&:hover": {
       backgroundColor: "#fafafa",

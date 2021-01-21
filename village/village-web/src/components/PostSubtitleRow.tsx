@@ -57,7 +57,7 @@ export const PostSubtitleRow = (props: PostAuthorLinkProps) => {
             </HashLink>
           </Tooltip>
           <Tooltip title="Delete, settings, and more...">
-            <IconButton size="small">
+            <IconButton size="small" style={{ marginLeft: "-3px" }}>
               <MoreHorizIcon fontSize={"inherit"} />
             </IconButton>
           </Tooltip>

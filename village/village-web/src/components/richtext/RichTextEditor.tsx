@@ -27,6 +27,7 @@ import {
   postEditorOptions,
   compactViewerOptions,
 } from "./EditorOptions";
+import { useGlobalStyles } from "../../styles/styles";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -67,6 +68,7 @@ const RichTextEditor = forwardRef<
     [props.options]
   );
   const editor = useMemo(() => pipe(createEditor(), decorator), [decorator]);
+  const globalClasses = useGlobalStyles();
 
   let onMentionAdded = props.onMentionAdded;
   if (!onMentionAdded) {
@@ -141,6 +143,11 @@ const RichTextEditor = forwardRef<
         spellCheck={false}
         onKeyDown={[onKeyDownMention]}
         onKeyDownDeps={[index, search, target, values]}
+        className={
+          props.readOnly
+            ? globalClasses.readOnlyRichText
+            : globalClasses.editableRichText
+        }
       />
       <MentionSelect
         at={target}

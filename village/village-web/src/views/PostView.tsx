@@ -401,7 +401,9 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
           spacing={4}
         >
           <Grid item>{header}</Grid>
-          <Grid item>{richTextEditor}</Grid>
+          <Grid item>
+            <div>{richTextEditor}</div>
+          </Grid>
         </Grid>
       </div>
     );
