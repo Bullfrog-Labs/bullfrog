@@ -36,7 +36,6 @@ const Template: Story<PostViewProps> = (args) => {
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     getGlobalMentions,
     createPost,
-    authorId,
     "l4stewar"
   );
 
@@ -45,7 +44,7 @@ const Template: Story<PostViewProps> = (args) => {
       <PostView
         {...args}
         mentionables={mentionables}
-        onMentionSearchChanged={onMentionSearchChanged}
+        onMentionSearchChanged={onMentionSearchChanged(authorId)}
         onMentionAdded={onMentionAdded}
       />
     </MemoryRouter>

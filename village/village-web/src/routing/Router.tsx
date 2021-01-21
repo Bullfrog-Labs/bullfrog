@@ -124,11 +124,11 @@ export const Router = (props: {
               <StackViewController getStackPosts={getStackPosts} />
             </AppContainerWithProps>
           </PrivateRoute>
-          <PrivateRoute exact path="/post/:authorId/:postId">
+          <PrivateRoute exact path="/post/:authorUsername/:postId">
             <AppContainerWithProps>
               <PostViewController
                 viewer={user}
-                // getUserByUsername={getUserByUsername}
+                getUserByUsername={getUserByUsername}
                 getUser={getUser}
                 getPost={getPost}
                 renamePost={renamePost(user)}

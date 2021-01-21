@@ -10,7 +10,12 @@ import { MemoryRouter, Route, Router } from "react-router-dom";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import { createMemoryHistory } from "history";
 import { PostId, UserPost, PostRecord } from "../services/store/Posts";
-import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
+import {
+  GetUserByUsernameFn,
+  GetUserFn,
+  UserId,
+  UserRecord,
+} from "../services/store/Users";
 import { userPosts0 } from "../testing/Fixtures";
 import { postURL } from "../routing/URLs";
 
@@ -124,6 +129,7 @@ test("PostView to PostView navigation works", async () => {
   const postsMap = new Map(posts.map((post) => [post.id, post]));
 
   const getUser: GetUserFn = jest.fn(async () => author);
+  const getUserByUsername: GetUserByUsernameFn = jest.fn(async () => author);
   const getPost = jest.fn(async (uid: UserId, postId: PostId) => {
     return postsMap.get(postId);
   });
@@ -135,6 +141,7 @@ test("PostView to PostView navigation works", async () => {
   const props = {
     viewer: viewer,
     getUser: getUser,
+    getUserByUsername: getUserByUsername,
     getPost: getPost,
     getGlobalMentions: getGlobalMentions,
     renamePost: jest.fn(),
@@ -143,11 +150,11 @@ test("PostView to PostView navigation works", async () => {
     getMentionUserPosts: getMentionUserPosts0,
   };
 
-  history.push(postURL(author.uid, "abc"));
+  history.push(postURL(author.username, "abc"));
 
   render(
     <Router history={history}>
-      <Route exact path="/post/:authorId/:postId">
+      <Route exact path="/post/:authorUsername/:postId">
         <PostViewController {...props} />
       </Route>
     </Router>
