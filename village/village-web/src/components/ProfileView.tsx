@@ -1,18 +1,22 @@
 import * as log from "loglevel";
-import React, { useContext, useState, useEffect } from "react";
-import { AuthContext } from "../services/auth/Auth";
-import { Typography, Divider } from "@material-ui/core";
+import React, { useEffect } from "react";
+import { Typography, Divider, CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import { PostRecord, GetUserPostsFn } from "../services/store/Posts";
-import { UserRecord, UserId, GetUserFn } from "../services/store/Users";
-import { useParams } from "react-router-dom";
+import { UserRecord, GetUserByUsernameFn } from "../services/store/Users";
+import { Redirect, useHistory, useParams } from "react-router-dom";
 import { ProfilePostCard } from "./ProfilePostCard";
 import { useGlobalStyles } from "../styles/styles";
 import { Helmet } from "react-helmet";
+import {
+  coalesceMaybeToLoadableRecord,
+  useLoadableRecord,
+} from "../hooks/useLoadableRecord";
+import { profileURL } from "../routing/URLs";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: {},
   inline: {
     display: "inline",
@@ -25,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
 const listKeyForPost = (post: PostRecord) => `${post.id!}`;
 
 type ProfileViewParams = {
-  userId: string;
+  username: string;
 };
 
 export type ProfileViewProps = {
@@ -33,59 +37,102 @@ export type ProfileViewProps = {
   user: UserRecord;
 };
 
-export const useProfileState = (
+const useProfileState = (
   getUserPosts: GetUserPostsFn,
-  getUser: GetUserFn,
-  userId: UserId
+  getUserByUsername: GetUserByUsernameFn,
+  username: string
 ) => {
-  const [posts, setPosts] = useState<PostRecord[]>([]);
-  const [user, setUser] = useState<UserRecord>();
+  const [userRecord, setUserRecord] = useLoadableRecord<UserRecord>();
+  const [postsRecord, setPostsRecord] = useLoadableRecord<PostRecord[]>();
+  const history = useHistory();
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      const userPosts = await getUserPosts(userId);
-      setPosts(userPosts);
-    };
-    fetchPosts();
-  }, [getUserPosts, userId]);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const profileUser = await getUser(userId);
-      if (!profileUser) {
-        throw new Error("Missing user for userId");
+    let isSubscribed = true;
+    const loadUserRecord = async () => {
+      const result = coalesceMaybeToLoadableRecord(
+        await getUserByUsername(username)
+      );
+      if (!isSubscribed) {
+        return;
       }
-      setUser(profileUser);
+      if (result[0] !== null) {
+        // replace URL with normalized URL, in case we got here through the
+        // default /profile URL which goes to the viewer's own profile
+        history.replace(profileURL(result[0].username));
+      }
+      setUserRecord(...result);
     };
-    fetchUser();
-  }, [getUserPosts, getUser, userId]);
+    loadUserRecord();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [getUserByUsername, history, setUserRecord, username]);
+
+  useEffect(() => {
+    let isSubscribed = true;
+    const loadPostsRecord = async () => {
+      if (!userRecord.loaded() || !userRecord.exists()) {
+        return;
+      }
+      const userId = userRecord.get().uid;
+      const result = await getUserPosts(userId);
+      if (!isSubscribed) {
+        return;
+      }
+      setPostsRecord(result, "exists");
+    };
+    loadPostsRecord();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [getUserPosts, setPostsRecord, userRecord]);
 
   return {
-    posts: posts,
-    user: user,
-    addPost: (post: PostRecord) => {},
+    user: userRecord,
+    posts: postsRecord,
   };
 };
 
 export const ProfileViewController = (props: {
   getUserPosts: GetUserPostsFn;
-  getUser: GetUserFn;
-  user: UserRecord;
+  getUserByUsername: GetUserByUsernameFn;
+  viewer: UserRecord;
 }) => {
-  const { getUserPosts, getUser } = props;
-  const authState = useContext(AuthContext);
-  const { userId } = useParams<ProfileViewParams>();
-  const profileViewUserId = userId || authState.uid;
-  const state = useProfileState(getUserPosts, getUser, profileViewUserId);
-  if (state && state.user && state.posts) {
-    return <ProfileView posts={state.posts} user={state.user} />;
-  } else {
-    return <React.Fragment />;
+  const globalClasses = useGlobalStyles();
+  const logger = log.getLogger("ProfileView");
+
+  const { getUserPosts, getUserByUsername, viewer } = props;
+  const { username } = useParams<ProfileViewParams>();
+  const profileViewUsername = username || viewer.username;
+
+  const { user, posts } = useProfileState(
+    getUserPosts,
+    getUserByUsername,
+    profileViewUsername
+  );
+
+  const progressIndicator = (
+    <CircularProgress className={globalClasses.loadingIndicator} />
+  );
+  const onUserNotFound = () => {
+    logger.info(`User ${profileViewUsername} not found`);
+    return <Redirect to={"/404"} />;
+  };
+
+  if (!user.loaded()) {
+    return progressIndicator;
+  } else if (!user.exists()) {
+    return onUserNotFound();
+  } else if (!posts.loaded()) {
+    return progressIndicator;
+  } else if (!posts.exists()) {
+    return onUserNotFound();
   }
+
+  return <ProfileView posts={posts.get()} user={user.get()} />;
 };
 
 export const ProfileView = (props: ProfileViewProps) => {
-  const logger = log.getLogger("ProfileView");
   const { posts, user } = props;
   const classes = useStyles();
   const globalClasses = useGlobalStyles();

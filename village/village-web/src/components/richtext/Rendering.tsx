@@ -31,7 +31,7 @@ export const MentionElement = ({
           {...attributes}
           className={globalClasses.link}
           data-slate-value={title}
-          to={postURL(authorId, postId)}
+          to={postURL(authorUsername, postId)}
           contentEditable={false}
           {...htmlAttributes}
         >

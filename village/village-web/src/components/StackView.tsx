@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Avatar,
   Container,
@@ -19,7 +19,7 @@ import { useGlobalStyles } from "../styles/styles";
 import { postURL } from "../routing/URLs";
 import { Helmet } from "react-helmet";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: {},
   inline: {
     display: "inline",
@@ -78,7 +78,6 @@ export const StackViewController = (props: {
 };
 
 export const StackView = (props: StackViewProps) => {
-  const logger = log.getLogger("StackView");
   const { posts, source } = props;
   const classes = useStyles();
   const globalClasses = useGlobalStyles();
@@ -89,7 +88,7 @@ export const StackView = (props: StackViewProps) => {
         <Typography variant="h6">
           <Link
             className={globalClasses.link}
-            to={postURL(post.user.uid, post.post.id!)}
+            to={postURL(post.user.username, post.post.id!)}
           >
             {post.post.title}
           </Link>

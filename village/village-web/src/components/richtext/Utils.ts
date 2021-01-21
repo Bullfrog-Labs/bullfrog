@@ -153,7 +153,7 @@ export const findMentionsInPosts = (
   posts.forEach((post) => {
     const previews = new Set<string>();
     const mentionNodes = findMentionsInText(post.post.body, postId);
-    logger.trace(`got ${mentionNodes.length} mentionNodes`);
+    logger.debug(`got ${mentionNodes.length} mentionNodes`);
     mentionNodes.forEach((mentionNode) => {
       // The path returned by the search function is a little off because we
       // search from the first child.

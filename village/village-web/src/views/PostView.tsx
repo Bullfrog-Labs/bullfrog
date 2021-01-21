@@ -36,11 +36,17 @@ import {
   GetAllPostsByTitlePrefixFn,
   UserPost,
   GetMentionUserPostsFn,
+  GetPostFn,
 } from "../services/store/Posts";
-import { GetUserFn, UserId, UserRecord } from "../services/store/Users";
+import {
+  GetUserByUsernameFn,
+  GetUserFn,
+  UserId,
+  UserRecord,
+} from "../services/store/Users";
 import { PostStackLink } from "../components/stacks/PostStackLink";
 import { useMentions } from "../hooks/useMentions";
-import { Redirect, useParams } from "react-router-dom";
+import { Redirect, useHistory, useParams } from "react-router-dom";
 import { assertNever } from "../utils";
 import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import { DocumentTitle } from "../components/richtext/DocumentTitle";
@@ -54,6 +60,12 @@ import { PostAuthorLink } from "../components/identity/PostAuthorLink";
 import { useGlobalStyles } from "../styles/styles";
 import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 import { Helmet } from "react-helmet";
+import {
+  coalesceMaybeToLoadableRecord,
+  useLoadableRecord,
+} from "../hooks/useLoadableRecord";
+import { useQuery } from "../hooks/useQuery";
+import { postURL } from "../routing/URLs";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -66,11 +78,6 @@ const useStyles = makeStyles((theme) => ({
   postDetails: {
     paddingTop: theme.spacing(1),
     paddingRight: theme.spacing(2),
-  },
-  loadingIndicator: {
-    position: "fixed",
-    top: "30%",
-    left: "50%",
   },
 }));
 
@@ -498,7 +505,8 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
 type PostViewControllerProps = {
   viewer: UserRecord;
   getUser: GetUserFn;
-  getPost: (uid: UserId, postId: PostId) => Promise<PostRecord | undefined>;
+  getUserByUsername: GetUserByUsernameFn;
+  getPost: GetPostFn;
   getGlobalMentions: GetAllPostsByTitlePrefixFn;
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
@@ -507,103 +515,149 @@ type PostViewControllerProps = {
 };
 
 type PostViewControllerParams = {
-  authorId: UserId;
+  authorIdOrUsername: UserId | string;
   postId: PostId;
 };
 
 export const PostViewController = (props: PostViewControllerProps) => {
   const logger = log.getLogger("PostViewController");
-  const classes = useStyles();
+  const history = useHistory();
+  const globalClasses = useGlobalStyles();
 
-  const { authorId, postId } = useParams<PostViewControllerParams>();
-  const readOnly = props.viewer.uid !== authorId;
+  const { authorIdOrUsername, postId } = useParams<PostViewControllerParams>();
+  const query = useQuery();
+  const authorById = !!query.get("byId");
 
   const [title, setTitle] = useState<PostTitle>("");
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
-  const [mentionPosts, setMentionPosts] = useState<UserPost[]>([]);
-
-  const [postRecordLoaded, setPostRecordLoaded] = useState(false);
-  const [postRecordNotFound, setPostRecordNotFound] = useState(false);
-
-  const [authorUserRecord, setAuthorUserRecord] = useState<
-    UserRecord | undefined
-  >(undefined);
-
-  const [authorUserRecordLoaded, setAuthorUserRecordLoaded] = useState(false);
-
-  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
-    props.getGlobalMentions,
-    props.createPost,
-    authorId,
-    authorUserRecord?.username || ""
-  );
-
-  const mentions = findMentionsInPosts(mentionPosts, postId);
 
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
-  // Attempt to load post
-  // TODO: Encapsulate this in a use*-style hook
+  const { getUser, getUserByUsername, getPost, getMentionUserPosts } = props;
+
+  const [authorRecord, setAuthorRecord] = useLoadableRecord<UserRecord>();
+  const [postRecord, setPostRecord] = useLoadableRecord<PostRecord>();
+  const [mentionPosts, setMentionPosts] = useLoadableRecord<UserPost[]>();
+
   useEffect(() => {
     let isSubscribed = true; // used to prevent state updates on unmounted components
-
-    const loadPostRecord = async () => {
-      const postRecord = await props.getPost(authorId, postId);
-      const newMentionPosts = await props.getMentionUserPosts(postId);
-      const postRecordNotFound = !postRecord;
+    const loadAuthorRecord = async () => {
+      const result = coalesceMaybeToLoadableRecord(
+        await (authorById
+          ? getUser(authorIdOrUsername)
+          : getUserByUsername(authorIdOrUsername))
+      );
 
       if (!isSubscribed) {
         return;
       }
 
-      setPostRecordLoaded(true);
-      setPostRecordNotFound(postRecordNotFound);
-      setMentionPosts(newMentionPosts);
+      if (authorById && !!result[0]) {
+        history.replace(postURL(result[0].username, postId));
+      }
+      setAuthorRecord(...result);
+    };
+    loadAuthorRecord();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [
+    authorById,
+    authorIdOrUsername,
+    getUser,
+    getUserByUsername,
+    history,
+    postId,
+    setAuthorRecord,
+  ]);
 
-      if (postRecordNotFound) {
-        logger.info(`Post ${postId} for author ${authorId} not found.`);
-      } else {
-        // when navigating from PostView to another PostView, we need to remove
-        // focus from the title and body when loading in the destination title
-        // and body because using the source cursor position may be unexpected
-        // for the user and it may not even be a valid cursor position.
-        postViewRef.current?.blurTitle();
-        postViewRef.current?.blurBody();
-        setTitle(postRecord!.title);
-        setBody(postRecord!.body);
+  useEffect(() => {
+    let isSubscribed = true; // used to prevent state updates on unmounted components
+    const loadPostRecord = async () => {
+      if (!authorRecord.loaded() || !authorRecord.exists()) {
+        return;
+      }
+
+      const authorId = authorRecord.get().uid;
+      const result = coalesceMaybeToLoadableRecord(
+        await getPost(authorId, postId)
+      );
+
+      if (!isSubscribed) {
+        return;
+      }
+
+      setPostRecord(...result);
+
+      const [record, existence] = result;
+      switch (existence) {
+        case "does-not-exist":
+          logger.info(`Post ${postId} for author ${authorId} not found.`);
+          break;
+        case "exists":
+          // when navigating from PostView to another PostView, we need to remove
+          // focus from the title and body when loading in the destination title
+          // and body because using the source cursor position may be unexpected
+          // for the user and it may not even be a valid cursor position.
+          postViewRef.current?.blurTitle();
+          postViewRef.current?.blurBody();
+          setTitle(record!.title);
+          setBody(record!.body);
+          break;
+        default:
+          assertNever(existence);
+          break;
       }
     };
     loadPostRecord();
     return () => {
       isSubscribed = false;
     };
-  }, [authorId, postId, logger, postRecordNotFound, props]);
+  }, [authorRecord, getPost, logger, postId, setPostRecord]);
 
   useEffect(() => {
-    let isSubscribed = true; // used to prevent state updates on unmounted components
-    const loadAuthorUserRecord = async () => {
-      const authorUserRecord = await props.getUser(authorId);
-      if (isSubscribed) {
-        setAuthorUserRecord(authorUserRecord);
-        setAuthorUserRecordLoaded(true);
+    let isSubscribed = true;
+    const loadMentionPosts = async () => {
+      const result = await getMentionUserPosts(postId);
+      if (!isSubscribed) {
+        return;
       }
+      setMentionPosts(result, "exists");
     };
-    loadAuthorUserRecord();
+    loadMentionPosts();
+
     return () => {
       isSubscribed = false;
     };
-  }, [authorId, props]);
+  }, [getMentionUserPosts, postId, setMentionPosts]);
 
-  if (!postRecordLoaded || !authorUserRecordLoaded) {
-    return <CircularProgress className={classes.loadingIndicator} />;
-  } else if (postRecordNotFound) {
-    // TODO: Is this the right place to redirect?
+  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
+    props.getGlobalMentions,
+    props.createPost,
+    authorRecord.state.record?.username || ""
+  );
+
+  const progressIndicator = (
+    <CircularProgress className={globalClasses.loadingIndicator} />
+  );
+  const onAuthorOrPostNotFound = () => {
+    logger.info(`Post ${postId} for author ${authorIdOrUsername} not found`);
     return <Redirect to={"/404"} />;
-  } else if (!authorUserRecord) {
-    const errMessage = `Loaded post ${postId} for author ${authorId}, but author user record was not found`;
-    logger.error(errMessage);
-    throw new Error(errMessage);
+  };
+
+  if (!authorRecord.loaded()) {
+    return progressIndicator;
+  } else if (!authorRecord.exists()) {
+    return onAuthorOrPostNotFound();
+  } else if (!postRecord.loaded()) {
+    return progressIndicator;
+  } else if (!postRecord.exists()) {
+    return onAuthorOrPostNotFound();
+  } else if (!mentionPosts.loaded()) {
+    return progressIndicator;
   }
+
+  const mentions = findMentionsInPosts(mentionPosts.get(), postId);
 
   // Define helpers
   const getTitle: () => Promise<PostTitle | undefined> = async () => {
@@ -611,10 +665,11 @@ export const PostViewController = (props: PostViewControllerProps) => {
     return postRecord ? postRecord.title : undefined;
   };
 
+  const authorId = authorRecord.get().uid;
+  const readOnly = props.viewer.uid !== authorId;
+
   const pageTitle = `${title!} by ${
-    authorUserRecord.uid === props.viewer.uid
-      ? "you"
-      : authorUserRecord.username
+    authorId === props.viewer.uid ? "you" : authorRecord.get()?.username
   }`;
 
   return (
@@ -625,7 +680,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
       <PostView
         ref={postViewRef}
         viewer={props.viewer}
-        author={authorUserRecord}
+        author={authorRecord.get()}
         readOnly={readOnly}
         postId={postId}
         title={title!}
@@ -637,9 +692,9 @@ export const PostViewController = (props: PostViewControllerProps) => {
         renamePost={props.renamePost}
         syncBody={props.syncBody}
         mentionables={mentionables}
-        onMentionSearchChanged={onMentionSearchChanged}
+        onMentionSearchChanged={onMentionSearchChanged(authorId)}
         onMentionAdded={onMentionAdded}
-        mentionableElementFn={mentionableElementFn(authorUserRecord.uid)}
+        mentionableElementFn={mentionableElementFn(authorId)}
       />
     </>
   );
