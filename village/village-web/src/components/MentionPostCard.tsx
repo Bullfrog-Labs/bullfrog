@@ -26,17 +26,7 @@ export const MentionPostCard = (props: { mention: MentionInContext }) => {
   );
 
   return (
-<<<<<<< HEAD
     <Paper className={globalClasses.postPreviewCard} elevation={0}>
-=======
-    <Paper
-      className={globalClasses.postPreviewCard}
-      elevation={0}
-      onClick={() => {
-        history.push(postURLById(post.authorId, post.id!));
-      }}
-    >
->>>>>>> master
       <Typography
         variant="body1"
         className={globalClasses.cardTitle}

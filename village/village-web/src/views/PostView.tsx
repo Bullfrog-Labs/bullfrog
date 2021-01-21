@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useGlobalStyles } from "../../styles/styles";
+import { useGlobalStyles } from "../styles/styles";
 import RichTextEditor, {
   RichTextEditorImperativeHandle,
 } from "../components/richtext/RichTextEditor";
