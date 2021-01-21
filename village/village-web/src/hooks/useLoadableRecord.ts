@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type RecordExistenceUnknown = "unknown";
 type RecordExistenceKnown = "exists" | "does-not-exist";
@@ -33,28 +33,31 @@ export const useLoadableRecord = <R extends unknown>(): LoadableRecord<R> => {
   const [recordExists, setRecordExists] = useState<RecordExistence>("unknown");
   const [record, setRecord] = useState<MaybeR>(null);
 
-  return {
-    existence: recordExists,
-    record: record,
-    set: (record: MaybeR, existence: RecordExistence) => {
-      setRecordExists(existence);
-      setRecord(record);
-    },
-    loaded: () => recordExists !== "unknown",
-    exists: () => {
-      if (recordExists === "unknown") {
-        throw new Error("LoadableRecord.exists called before record loaded");
-      }
-      return recordExists === "exists";
-    },
-    get: () => {
-      if (recordExists !== "exists") {
-        throw new Error(
-          "LoadableRecord.get called before record loaded or for non-existent record"
-        );
-      }
+  return useMemo(
+    () => ({
+      existence: recordExists,
+      record: record,
+      set: (record: MaybeR, existence: RecordExistence) => {
+        setRecordExists(existence);
+        setRecord(record);
+      },
+      loaded: () => recordExists !== "unknown",
+      exists: () => {
+        if (recordExists === "unknown") {
+          throw new Error("LoadableRecord.exists called before record loaded");
+        }
+        return recordExists === "exists";
+      },
+      get: () => {
+        if (recordExists !== "exists") {
+          throw new Error(
+            "LoadableRecord.get called before record loaded or for non-existent record"
+          );
+        }
 
-      return record!;
-    },
-  };
+        return record!;
+      },
+    }),
+    [record, recordExists]
+  );
 };
