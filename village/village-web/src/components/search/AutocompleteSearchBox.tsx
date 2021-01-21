@@ -238,7 +238,9 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
             logger.info(
               `new post creation with title ${data.suggestion.title} failed because that post name is already taken by post with id ${postId}, navigating to already-existing post`
             );
-            history.push(makePostUrl(props.user.uid, createPostResult.postId));
+            history.push(
+              makePostUrl(props.user.username, createPostResult.postId)
+            );
             props.onClose();
             return;
           default:
@@ -248,7 +250,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
         break;
       case "navigateToPost":
         history.push(
-          makePostUrl(data.suggestion.authorId, data.suggestion.postId)
+          makePostUrl(data.suggestion.authorUsername, data.suggestion.postId)
         );
         props.onClose();
         break;

@@ -8,6 +8,7 @@ import CallReceivedIcon from "@material-ui/icons/CallReceived";
 import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
 import { DateTime } from "luxon";
 import { HashLink } from "react-router-hash-link";
+import { profileURL } from "../routing/URLs";
 
 export type PostSubtitleRowProps = {
   viewer: UserRecord;
@@ -34,7 +35,7 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
       <div>
         <Link
           className={globalClasses.link}
-          to={`/profile/${props.author.uid}`}
+          to={profileURL(props.author.username)}
         >
           <em>{props.author.displayName}</em>
         </Link>

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 import { v4 as uuid } from "uuid";
 import { UserId } from "../services/store/Users";
 import * as log from "loglevel";
@@ -14,11 +13,10 @@ import {
 export const useMentions = (
   getGlobalMentions: GetAllPostsByTitlePrefixFn,
   createPost: CreatePostFn,
-  authorId: UserId,
   authorUsername: string
 ): [
   MentionNodeData[],
-  (newSearch: string) => void,
+  (authorId: UserId) => (newSearch: string) => void,
   (option: MentionNodeData) => void
 ] => {
   const logger = log.getLogger("useMentions");
@@ -40,7 +38,7 @@ export const useMentions = (
   const [mentionables, setMentionables] = useState<MentionNodeData[]>([]);
   const [search, setSearch] = useState<string>();
 
-  const onMentionSearchChanged = (newSearch: string) => {
+  const onMentionSearchChanged = (authorId: UserId) => (newSearch: string) => {
     const updateMentionables = async () => {
       if (search !== newSearch) {
         const newMentionables = await getMentionables(newSearch);

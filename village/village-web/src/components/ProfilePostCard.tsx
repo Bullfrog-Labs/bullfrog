@@ -1,10 +1,9 @@
-import * as log from "loglevel";
 import React from "react";
 import { Typography, Paper } from "@material-ui/core";
 import { PostRecord } from "../services/store/Posts";
 import { Link } from "react-router-dom";
 import { useGlobalStyles } from "../styles/styles";
-import { postURL } from "../routing/URLs";
+import { postURLById } from "../routing/URLs";
 import { postPreviewFromStart, isEmptyDoc } from "./richtext/Utils";
 import { DateTime } from "luxon";
 import { RichTextCompactViewer } from "../components/richtext/RichTextEditor";
@@ -41,7 +40,7 @@ export const ProfilePostCard = (props: { post: PostRecord }) => {
       >
         <Link
           className={globalClasses.link}
-          to={postURL(post.authorId, post.id!)}
+          to={postURLById(post.authorId, post.id!)}
           style={{ display: "inline" }}
         >
           {post.title}

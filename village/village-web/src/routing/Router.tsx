@@ -18,7 +18,11 @@ import {
   RenamePostFn,
   SyncBodyFn,
 } from "../services/store/Posts";
-import { UserRecord, GetUserFn } from "../services/store/Users";
+import {
+  UserRecord,
+  GetUserByUsernameFn,
+  GetUserFn,
+} from "../services/store/Users";
 import { PostViewController } from "../views/PostView";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
 
@@ -39,6 +43,7 @@ export const Router = (props: {
   getUserPosts: GetUserPostsFn;
   getStackPosts: GetStackPostsFn;
   getUser: GetUserFn;
+  getUserByUsername: GetUserByUsernameFn;
   getPost: GetPostFn;
   createPost: (user: UserRecord) => CreatePostFn;
   renamePost: (user: UserRecord) => RenamePostFn;
@@ -54,6 +59,7 @@ export const Router = (props: {
     getUserPosts,
     getStackPosts,
     getUser,
+    getUserByUsername,
     getPost,
     createPost,
     renamePost,
@@ -103,12 +109,12 @@ export const Router = (props: {
               <MainView />
             </AppContainerWithProps>
           </PrivateRoute>
-          <PrivateRoute exact path="/profile/:userId?">
+          <PrivateRoute exact path="/profile/:username?">
             <AppContainerWithProps>
               <ProfileViewController
                 getUserPosts={getUserPosts}
-                getUser={getUser}
-                user={user}
+                getUserByUsername={getUserByUsername}
+                viewer={user}
               />
             </AppContainerWithProps>
           </PrivateRoute>
@@ -117,10 +123,11 @@ export const Router = (props: {
               <StackViewController getStackPosts={getStackPosts} />
             </AppContainerWithProps>
           </PrivateRoute>
-          <PrivateRoute exact path="/post/:authorId/:postId">
+          <PrivateRoute exact path="/post/:authorIdOrUsername/:postId">
             <AppContainerWithProps>
               <PostViewController
                 viewer={user}
+                getUserByUsername={getUserByUsername}
                 getUser={getUser}
                 getPost={getPost}
                 renamePost={renamePost(user)}

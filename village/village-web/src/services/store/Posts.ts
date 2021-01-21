@@ -133,7 +133,7 @@ export const createPost: (
   return {
     state: "success",
     postId: newPostId,
-    postUrl: postURL(user.uid, newPostId),
+    postUrl: postURL(user.username, newPostId),
   };
 };
 
