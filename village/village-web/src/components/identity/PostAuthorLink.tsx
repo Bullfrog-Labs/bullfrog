@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { profileURL } from "../../routing/URLs";
 import { UserRecord } from "../../services/store/Users";
 import { useGlobalStyles } from "../../styles/styles";
 
@@ -15,7 +16,10 @@ export const PostAuthorLink = (props: PostAuthorLinkProps) => {
   return (
     <div>
       by{" "}
-      <Link className={globalClasses.link} to={`/profile/${props.author.uid}`}>
+      <Link
+        className={globalClasses.link}
+        to={profileURL(props.author.username)}
+      >
         {userIsAuthor ? "you" : props.author.username}
       </Link>
     </div>
