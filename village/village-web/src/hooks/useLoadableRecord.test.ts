@@ -40,48 +40,57 @@ test("Existing record works correctly", async () => {
   const theAnswer = 42;
   const { result } = renderHook(() => useLoadableRecord());
   act(() => {
-    result.current.set(theAnswer, "exists");
+    const [, setLR] = result.current;
+    setLR(theAnswer, "exists");
   });
-  expectExistsAndEqualTo(result.current, theAnswer);
+  expectExistsAndEqualTo(result.current[0], theAnswer);
 });
 
 test("Loaded, but non-existent, record works correctly", async () => {
   const { result } = renderHook(() => useLoadableRecord());
   act(() => {
-    result.current.set(undefined, "does-not-exist");
+    const [, setLR] = result.current;
+    setLR(undefined, "does-not-exist");
   });
-  expectDoesNotExist(result.current);
+  expectDoesNotExist(result.current[0]);
 });
 
 test("Coalescing Maybe works as expected for Exists", async () => {
   const theAnswer = 42;
   const { result } = renderHook(() => useLoadableRecord());
-  act(() => result.current.set(...coalesceMaybeToLoadableRecord(theAnswer)));
-  expectExistsAndEqualTo(result.current, theAnswer);
+  act(() => {
+    const [, setLR] = result.current;
+    setLR(...coalesceMaybeToLoadableRecord(theAnswer));
+  });
+  expectExistsAndEqualTo(result.current[0], theAnswer);
 });
 
 test("Coalescing Maybe works as expected for DNExists", async () => {
   const { result } = renderHook(() => useLoadableRecord());
-  act(() => result.current.set(...coalesceMaybeToLoadableRecord(undefined)));
-  expectDoesNotExist(result.current);
+  act(() => {
+    const [, setLR] = result.current;
+    setLR(...coalesceMaybeToLoadableRecord(undefined));
+  });
+  expectDoesNotExist(result.current[0]);
 });
 
 test("Correctly reflects load/exist state of record", async () => {
   const theAnswer = 42;
   const { waitFor, result } = renderHook(() => useLoadableRecord());
 
-  expectNotLoaded(result.current);
+  expectNotLoaded(result.current[0]);
 
   act(() => {
     const delayed = async () => {
       await new Promise((r) => setTimeout(r, 100));
-      result.current.set(theAnswer, "exists");
+      const [, setLR] = result.current;
+      setLR(theAnswer, "exists");
     };
     delayed();
   });
 
   await waitFor(() => {
-    expectExistsAndEqualTo(result.current, theAnswer);
+    expectExistsAndEqualTo(result.current[0], theAnswer);
   });
 });
 
@@ -90,28 +99,31 @@ test("Dependent loading should work", async () => {
     "What is the meaning of life, the universe and everything?";
   const theAnswer = 42;
 
-  const { waitFor, result } = renderHook(() => [
-    useLoadableRecord(),
-    useLoadableRecord(),
-  ]);
+  const { waitFor, result } = renderHook(() => ({
+    first: useLoadableRecord(),
+    next: useLoadableRecord(),
+  }));
 
   act(() => {
     const delayed = async () => {
       await new Promise((r) => setTimeout(r, 100));
-      result.current[0].set(theQuestion, "exists");
+      const [, setFirstLR] = result.current.first;
+      setFirstLR(theQuestion, "exists");
+
       await new Promise((r) => setTimeout(r, 200));
-      result.current[1].set(theAnswer, "exists");
+      const [, setNextLR] = result.current.next;
+      setNextLR(theAnswer, "exists");
     };
     delayed();
   });
 
   await waitFor(() => {
-    expectExistsAndEqualTo(result.current[0], theQuestion);
-    expectNotLoaded(result.current[1]);
+    expectExistsAndEqualTo(result.current.first[0], theQuestion);
+    expectNotLoaded(result.current.next[0]);
   });
 
   await waitFor(() => {
-    expectExistsAndEqualTo(result.current[0], theQuestion);
-    expectExistsAndEqualTo(result.current[1], theAnswer);
+    expectExistsAndEqualTo(result.current.first[0], theQuestion);
+    expectExistsAndEqualTo(result.current.next[0], theAnswer);
   });
 });

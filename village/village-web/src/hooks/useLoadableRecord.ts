@@ -1,4 +1,10 @@
-import { useMemo, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 
 type RecordExistenceUnknown = "unknown";
 type RecordExistenceKnown = "exists" | "does-not-exist";
@@ -7,7 +13,6 @@ export type RecordExistence = RecordExistenceUnknown | RecordExistenceKnown;
 export interface LoadableRecord<R> {
   existence: RecordExistence;
   record: R | null;
-  set(record: R | null, existence: RecordExistence): void;
 
   loaded(): boolean;
   exists(): boolean;
@@ -28,19 +33,23 @@ export const coalesceMaybeToLoadableRecord = <R extends unknown>(
 // 2. make it easy to write a callback function that operates on LoadableRecords.
 // 3. LoadableRecords have a method to set record and recordExistence.
 
-export const useLoadableRecord = <R extends unknown>(): LoadableRecord<R> => {
+type LoadableRecordSetter<R> = (
+  record: R | null,
+  existence: RecordExistence
+) => void;
+
+export const useLoadableRecord = <R extends unknown>(): [
+  LoadableRecord<R>,
+  LoadableRecordSetter<R>
+] => {
   type MaybeR = R | null;
   const [recordExists, setRecordExists] = useState<RecordExistence>("unknown");
   const [record, setRecord] = useState<MaybeR>(null);
 
-  return useMemo(
+  const loadableRecord = useMemo(
     () => ({
       existence: recordExists,
       record: record,
-      set: (record: MaybeR, existence: RecordExistence) => {
-        setRecordExists(existence);
-        setRecord(record);
-      },
       loaded: () => recordExists !== "unknown",
       exists: () => {
         if (recordExists === "unknown") {
@@ -60,4 +69,11 @@ export const useLoadableRecord = <R extends unknown>(): LoadableRecord<R> => {
     }),
     [record, recordExists]
   );
+
+  const setLoadableRecord = useCallback((record, existence) => {
+    setRecordExists(existence);
+    setRecord(record);
+  }, []);
+
+  return [loadableRecord, setLoadableRecord];
 };
