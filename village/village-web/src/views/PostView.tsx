@@ -552,8 +552,13 @@ export const PostViewController = (props: PostViewControllerProps) => {
           ? getUser(authorIdOrUsername)
           : getUserByUsername(authorIdOrUsername))
       );
+
       if (!isSubscribed) {
         return;
+      }
+
+      if (authorById && !!result[0]) {
+        history.replace(postURL(result[0].username, postId));
       }
       setAuthorRecord(...result);
     };
@@ -566,19 +571,15 @@ export const PostViewController = (props: PostViewControllerProps) => {
     authorIdOrUsername,
     getUser,
     getUserByUsername,
+    history,
+    postId,
     setAuthorRecord,
   ]);
 
   useEffect(() => {
     let isSubscribed = true; // used to prevent state updates on unmounted components
     const loadPostRecord = async () => {
-      if (!authorRecord.loaded()) {
-        console.log("authorRecord not loaded, returning");
-        return;
-      }
-
-      if (!authorRecord.exists()) {
-        console.log("authorRecord not found, returning");
+      if (!authorRecord.loaded() || !authorRecord.exists()) {
         return;
       }
 
@@ -659,10 +660,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
     return onAuthorOrPostNotFound();
   } else if (!mentionPosts.loaded()) {
     return progressIndicator;
-  }
-
-  if (authorById) {
-    history.replace(postURL(authorRecord.get().username, postId));
   }
 
   const mentions = findMentionsInPosts(mentionPosts.get(), postId);

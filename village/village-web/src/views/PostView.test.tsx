@@ -17,7 +17,7 @@ import {
   UserRecord,
 } from "../services/store/Users";
 import { userPosts0 } from "../testing/Fixtures";
-import { postURL } from "../routing/URLs";
+import { postURL, postURLById } from "../routing/URLs";
 
 const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
   return <React.Fragment>option.value</React.Fragment>;
@@ -150,8 +150,6 @@ test("PostView to PostView navigation works", async () => {
     getMentionUserPosts: getMentionUserPosts0,
   };
 
-  history.push(postURL(author.username, "abc"));
-
   render(
     <Router history={history}>
       <Route exact path="/post/:authorIdOrUsername/:postId">
@@ -160,10 +158,18 @@ test("PostView to PostView navigation works", async () => {
     </Router>
   );
 
-  await waitFor(() => screen.getByText("Foo"));
+  history.push(postURLById(author.uid, "def"));
+  await waitFor(() => {
+    expect(screen.getByText("Bar")).toBeInTheDocument();
+  });
 
-  // TODO: disabled: enable after merging fixes in
-  // https://github.com/Bullfrog-Labs/bullfrog/pull/61 await waitFor(() =>
-  // history.push(`/post/${author.uid}/def`);
-  // screen.getByText("Bar"));
+  history.push(postURL(author.username, "abc"));
+  await waitFor(() => {
+    expect(screen.getByText("Foo")).toBeInTheDocument();
+  });
+
+  history.push(postURL(author.username, "def"));
+  await waitFor(() => {
+    expect(screen.getByText("Bar")).toBeInTheDocument();
+  });
 });
