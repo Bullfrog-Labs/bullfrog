@@ -535,30 +535,42 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
+  const { getUser, getPost } = props;
+
   const authorRecord = useLoadableRecord<UserRecord>();
   const postRecord = useLoadableRecord<PostRecord>();
   const mentionPosts = useLoadableRecord<UserPost[]>();
 
-  /*
-    useCallback(
-      async () =>
-        coalesceMaybeToLoadableRecord(
-          await props.getUserByUsername(authorUsername)
-        ),
-      [authorUsername, props]
-    )
-    */
+  useEffect(() => {
+    let isSubscribed = true; // used to prevent state updates on unmounted components
+    const loadAuthorRecord = async () => {
+      const result = coalesceMaybeToLoadableRecord(await getUser(authorId));
+      if (!isSubscribed) {
+        return;
+      }
+      authorRecord.set(...result);
+    };
+    loadAuthorRecord();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [authorId, authorRecord, getUser]);
 
-  const postRecord = useLoadableRecord<PostRecord>(
-    useCallback(async () => {
-      // TODO: need to get author id from author record first
-
+  useEffect(() => {
+    let isSubscribed = true; // used to prevent state updates on unmounted components
+    const loadPostRecord = async () => {
       const result = coalesceMaybeToLoadableRecord(
-        await props.getPost(authorId, postId)
+        await getPost(authorId, postId)
       );
-      const [postRecord, postRecordExistence] = result;
 
-      switch (postRecordExistence) {
+      if (!isSubscribed) {
+        return;
+      }
+
+      postRecord.set(...result);
+
+      const [record, existence] = result;
+      switch (existence) {
         case "does-not-exist":
           logger.info(`Post ${postId} for author ${authorId} not found.`);
           break;
@@ -569,24 +581,37 @@ export const PostViewController = (props: PostViewControllerProps) => {
           // for the user and it may not even be a valid cursor position.
           postViewRef.current?.blurTitle();
           postViewRef.current?.blurBody();
-          setTitle(postRecord!.title);
-          setBody(postRecord!.body);
+          setTitle(record!.title);
+          setBody(record!.body);
           break;
         default:
-          assertNever(postRecordExistence);
+          assertNever(existence);
           break;
       }
 
       return result;
-    }, [authorId, postId, props, logger])
-  );
+    };
+    loadPostRecord();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [authorId, getPost, logger, postId, postRecord]);
 
-  const mentionPosts = useLoadableRecord<UserPost[]>(
-    useCallback(async () => {
+  useEffect(() => {
+    let isSubscribed = true;
+    const loadMentionPosts = async () => {
       const result = await props.getMentionUserPosts(postId);
-      return [result, "exists"];
-    }, [postId, props])
-  );
+      if (!isSubscribed) {
+        return;
+      }
+      mentionPosts.set(result, "exists");
+    };
+    loadMentionPosts();
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, []);
 
   const mentions = !!mentionPosts.record
     ? findMentionsInPosts(mentionPosts.record, postId)
