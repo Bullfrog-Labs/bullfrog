@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type RecordExistenceUnknown = "unknown";
 type RecordExistenceKnown = "exists" | "does-not-exist";
 export type RecordExistence = RecordExistenceUnknown | RecordExistenceKnown;
-
-export type LoadRecordFn<R> = () => Promise<[R | null, RecordExistenceKnown]>;
 
 export interface LoadableRecord<R> {
   existence: RecordExistence;
@@ -27,7 +25,6 @@ export const coalesceMaybeToLoadableRecord = <R extends unknown>(
 };
 
 // Fix this shit
-// 1. useLoadableRecord creates LoadableRecords, with no useEffect involved.
 // 2. make it easy to write a callback function that operates on LoadableRecords.
 // 3. LoadableRecords have a method to set record and recordExistence.
 

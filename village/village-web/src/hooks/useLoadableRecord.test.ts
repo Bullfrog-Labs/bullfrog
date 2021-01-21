@@ -4,11 +4,9 @@ import { Logging } from "kmgmt-common";
 import {
   coalesceMaybeToLoadableRecord,
   LoadableRecord,
-  LoadRecordFn,
   useLoadableRecord,
 } from "./useLoadableRecord";
 import { setTimeout } from "timers";
-import { useEffect } from "react";
 
 Logging.configure(log);
 
