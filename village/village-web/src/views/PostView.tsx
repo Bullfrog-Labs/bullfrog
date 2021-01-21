@@ -39,7 +39,6 @@ import {
   GetPostFn,
 } from "../services/store/Posts";
 import {
-  getUserByUsername,
   GetUserByUsernameFn,
   GetUserFn,
   UserId,
@@ -624,14 +623,10 @@ export const PostViewController = (props: PostViewControllerProps) => {
     };
   }, [getMentionUserPosts, postId, setMentionPosts]);
 
-  const mentions = !!mentionPosts.record
-    ? findMentionsInPosts(mentionPosts.record, postId)
-    : [];
-
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     props.getGlobalMentions,
     props.createPost,
-    authorRecord.record?.username || ""
+    authorRecord.state.record?.username || ""
   );
 
   const progressIndicator = (
@@ -650,7 +645,11 @@ export const PostViewController = (props: PostViewControllerProps) => {
     return progressIndicator;
   } else if (!postRecord.exists()) {
     return onAuthorOrPostNotFound();
+  } else if (!mentionPosts.loaded()) {
+    return progressIndicator;
   }
+
+  const mentions = findMentionsInPosts(mentionPosts.get(), postId);
 
   // Define helpers
   const getTitle: () => Promise<PostTitle | undefined> = async () => {

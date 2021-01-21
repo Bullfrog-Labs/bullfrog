@@ -43,7 +43,7 @@ test("creates suggested mention when only other user match exists", async () => 
   var [mentionables, onMentionSearchChanged] = result.current;
 
   await act(async () => {
-    onMentionSearchChanged("Artifice");
+    onMentionSearchChanged(authorId)("Artifice");
     await waitForNextUpdate();
   });
 
@@ -61,7 +61,7 @@ test("fetches non empty mentions", async () => {
   var [mentionables, onMentionSearchChanged] = result.current;
 
   await act(async () => {
-    onMentionSearchChanged("Title");
+    onMentionSearchChanged(authorId)("Title");
     await waitForNextUpdate();
   });
 
@@ -85,4 +85,6 @@ const getGlobalMentions1 = async (): Promise<UserPost[]> => {
 const createPost0: CreatePostFn = async () => {
   return { state: "success", postId: "hjkhj", postUrl: "" };
 };
+
+const authorId = "79832475341985234";
 const authorUsername = "donkeyKong";
