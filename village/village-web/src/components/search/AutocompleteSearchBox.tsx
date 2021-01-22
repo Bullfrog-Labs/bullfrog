@@ -1,12 +1,13 @@
 import * as log from "loglevel";
-import { CircularProgress, Dialog, Grid, makeStyles } from "@material-ui/core";
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import {
+  CircularProgress,
+  Dialog,
+  Divider,
+  Grid,
+  makeStyles,
+} from "@material-ui/core";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { TextField } from "@material-ui/core";
 import Autosuggest, {
   ChangeEvent,
   OnSuggestionSelected,
@@ -152,25 +153,30 @@ export const useAutocompleteState = (
 export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   const logger = log.getLogger("AutocompleteSearchBox");
   const useStyles = makeStyles((theme) => ({
-    input: {
-      width: "100%",
-      ...theme.typography.h5,
-    },
     suggestionsContainer: {},
     container: {
       width: "100%",
       height: "100%",
-      padding: theme.spacing(4),
+      padding: theme.spacing(0),
     },
     suggestionsList: {
       listStyleType: "none",
       paddingLeft: theme.spacing(2),
+      paddingRight: theme.spacing(2),
     },
     suggestionHighlighted: {
       backgroundColor: theme.palette.action.selected,
     },
-    suggestion: {
-      ...theme.typography.h5,
+    cssOutlinedInput: {
+      "&$cssFocused $notchedOutline": {
+        borderColor: `${theme.palette.primary.main} !important`,
+        borderWidth: "0px",
+      },
+      borderBottom: "1px",
+    },
+    cssFocused: {},
+    notchedOutline: {
+      borderWidth: "0px",
     },
   }));
 
@@ -259,7 +265,30 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
     }
   };
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const renderInputComponent = (inputProps: any) => {
+    return (
+      <React.Fragment>
+        <TextField
+          color="primary"
+          variant="outlined"
+          margin="none"
+          fullWidth
+          autoFocus
+          rowsMax={1}
+          InputProps={{
+            classes: {
+              root: classes.cssOutlinedInput,
+              focused: classes.cssFocused,
+              notchedOutline: classes.notchedOutline,
+            },
+            ...inputProps,
+          }}
+        />
+        <Divider />
+      </React.Fragment>
+    );
+  };
+
   const inputProps = {
     onKeyDown: (event: React.KeyboardEvent) => {
       if (isAutocompleteSearchBoxHotkey(event)) {
@@ -270,12 +299,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
     placeholder: AUTOCOMPLETE_SEARCH_BOX_PROMPT,
     value: value,
     onChange: onChange,
-    ref: inputRef,
   };
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
 
   return (
     <Autosuggest
@@ -286,13 +310,12 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
       renderSuggestion={renderSuggestion}
       onSuggestionSelected={onSuggestionSelected}
       inputProps={inputProps}
+      renderInputComponent={renderInputComponent}
       theme={{
-        input: classes.input,
         container: classes.container,
         suggestionsContainer: classes.suggestionsContainer,
         suggestionsList: classes.suggestionsList,
         suggestionHighlighted: classes.suggestionHighlighted,
-        suggestion: classes.suggestion,
       }}
     />
   );

@@ -9,6 +9,7 @@ import {
   CompactH3Element,
   CompactParagraphElement,
   CompactBlockquoteElement,
+  LinkElement,
 } from "./Rendering";
 import {
   MentionPluginOptions,
@@ -19,6 +20,7 @@ import {
   ExitBreakPluginOptions,
   SoftBreakPluginOptions,
   ResetBlockTypePluginOptions,
+  LinkPluginOptions,
   AutoformatRule,
   isBlockAboveEmpty,
   isSelectionAtBlockStart,
@@ -45,6 +47,7 @@ export type Options = {
   softBreak?: SoftBreakPluginOptions;
   exitBreak?: ExitBreakPluginOptions;
   autoformat: WithAutoformatOptions;
+  link: LinkPluginOptions;
 };
 
 const preFormat = (editor: Editor) => unwrapList(editor);
@@ -102,6 +105,12 @@ export const autoformatRules: AutoformatRule[] = [
     },
   },
 ];
+
+export const linkOptions: LinkPluginOptions = {
+  link: {
+    component: LinkElement,
+  },
+};
 
 export const mentionOptions: MentionPluginOptions = {
   mention: {
@@ -222,6 +231,7 @@ export const postEditorOptions: Options = {
   heading: headingOptions,
   mentions: mentionOptions,
   blockquote: blockquoteOptions,
+  link: linkOptions,
   resetBlockType: resetBlockTypeOptions,
   softBreak: softBreakOptions,
   exitBreak: exitBreakOptions,
@@ -232,6 +242,7 @@ export const compactViewerOptions: Options = {
   paragraph: compactParagraphOptions,
   heading: compactHeadingOptions,
   mentions: mentionOptions,
+  link: linkOptions,
   blockquote: compactBlockquoteOptions,
   resetBlockType: resetBlockTypeOptions,
   softBreak: softBreakOptions,

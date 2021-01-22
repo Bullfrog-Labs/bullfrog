@@ -199,24 +199,48 @@ export const BasePostView = (props: BasePostViewProps) => {
   );
 };
 
-const mentionableElementFn = (uid: UserId) => (
-  option: MentionNodeData
-): JSX.Element => {
+const MentionSuggestionLine = (props: {
+  option: MentionNodeData;
+  uid: string;
+}) => {
+  const { option, uid } = props;
+  const globalClasses = useGlobalStyles();
   if (!option.exists) {
     return (
-      <Typography>
-        <em>Create "{option.value}"</em>
+      <Typography
+        variant="body1"
+        className={globalClasses.searchSuggestionLine}
+      >
+        <span className={globalClasses.searchPrefixPart}>New post: </span>{" "}
+        {option.value}
       </Typography>
     );
   } else if (option.authorId === uid) {
-    return <Typography>{option.value}</Typography>;
+    return (
+      <Typography
+        variant="body1"
+        className={globalClasses.searchSuggestionLine}
+      >
+        {option.value}
+      </Typography>
+    );
   } else {
     return (
-      <Typography>
-        {option.value} - <em>{option.authorUsername}</em>
+      <Typography
+        variant="body1"
+        className={globalClasses.searchSuggestionLine}
+      >
+        {option.value}{" "}
+        <em style={{ fontWeight: 400 }}>by {option.authorUsername}</em>
       </Typography>
     );
   }
+};
+
+const mentionableElementFn = (uid: UserId) => (
+  option: MentionNodeData
+): JSX.Element => {
+  return <MentionSuggestionLine uid={uid} option={option} />;
 };
 
 export type PostViewProps = {
