@@ -405,6 +405,7 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
         postTitle={props.title}
         postId={props.postId}
         updatedAt={props.updatedAt}
+        numMentions={props.mentions.length}
       />
     );
 

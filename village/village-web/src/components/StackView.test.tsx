@@ -19,7 +19,7 @@ test("displays a few posts", () => {
   );
 
   const expectedPreview = richTextStringPreview(posts0[0].body)!;
-  expect(getAllByText(u0.displayName!)[0]).toBeInTheDocument();
+  expect(getAllByText("by " + u0.displayName!)[0]).toBeInTheDocument();
   expect(getAllByText(posts0[0].title)[0]).toBeInTheDocument();
   expect(getAllByText(expectedPreview)[0]).toBeInTheDocument();
 });
