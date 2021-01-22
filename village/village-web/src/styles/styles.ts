@@ -82,4 +82,15 @@ export const useGlobalStyles = makeStyles((theme) => ({
     top: "30%",
     left: "50%",
   },
+  searchSuggestionLine: {
+    fontWeight: "bold",
+    width: "100%",
+    display: "inline",
+    whiteSpace: "nowrap",
+    lineHeight: "1.8em",
+  },
+  searchPrefixPart: {
+    fontWeight: 700,
+    color: theme.palette.secondary.light,
+  },
 }));
