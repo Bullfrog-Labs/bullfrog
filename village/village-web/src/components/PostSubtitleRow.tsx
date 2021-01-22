@@ -16,6 +16,7 @@ export type PostSubtitleRowProps = {
   postTitle: string;
   postId: string;
   updatedAt: Date | undefined;
+  numMentions: number;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -30,6 +31,7 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
   const dt = DateTime.fromJSDate(props.updatedAt || new Date());
   const isLoggedIn = props.author.uid === props.viewer.uid;
   const stackURLPath = `/stack/${encodeURIComponent(props.postTitle)}`;
+  const postHasMentions = props.numMentions;
 
   return (
     <Typography
@@ -56,7 +58,11 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
           </Tooltip>
           <Tooltip title="View mentions">
             <HashLink smooth className={globalClasses.link} to={`#mentions`}>
-              <IconButton size="small" style={{ marginLeft: "-3px" }}>
+              <IconButton
+                size="small"
+                style={{ marginLeft: "-3px" }}
+                disabled={!postHasMentions}
+              >
                 <CallReceivedIcon fontSize={"inherit"} />
               </IconButton>
             </HashLink>
