@@ -28,6 +28,7 @@ import {
   compactViewerOptions,
 } from "./EditorOptions";
 import { useGlobalStyles } from "../../styles/styles";
+import theme from "../../styles/theme";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -155,6 +156,11 @@ const RichTextEditor = forwardRef<
         options={values}
         onClickMention={onClickMention}
         rowElementFn={mentionableElementFn}
+        styles={{
+          mentionItemSelected: {
+            backgroundColor: theme.palette.action.selected,
+          },
+        }}
       />
     </Slate>
   );

@@ -50,7 +50,6 @@ export const LinkElement = ({
   htmlAttributes,
 }: any) => {
   const globalClasses = useGlobalStyles();
-  console.dir(element);
   return (
     <a
       {...attributes}

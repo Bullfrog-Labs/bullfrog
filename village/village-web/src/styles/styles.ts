@@ -41,13 +41,13 @@ export const useGlobalStyles = makeStyles((theme) => ({
   },
   editableRichText: {
     "&:hover:not(:focus)": {
-      backgroundColor: "#fafafa",
+      backgroundColor: theme.palette.action.selected,
     },
   },
   readOnlyRichText: {},
   postPreviewCard: {
     "&:hover": {
-      backgroundColor: "#fafafa",
+      backgroundColor: theme.palette.action.selected,
     },
     border: "0px",
     width: "100%",

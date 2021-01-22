@@ -29,7 +29,7 @@ export const NavigateToPostSearchResult = (
     </React.Fragment>
   );
 
-  const tooltip = `${titlePartStr} ${authorPartStr}`;
+  const tooltip = `${titlePartStr} ${authorPartStr || ""}`;
 
   return (
     <Typography variant="body1" className={globalClasses.searchSuggestionLine}>
