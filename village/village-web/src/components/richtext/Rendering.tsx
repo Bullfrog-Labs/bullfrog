@@ -43,6 +43,27 @@ export const MentionElement = ({
   );
 };
 
+export const LinkElement = ({
+  attributes,
+  children,
+  element,
+  htmlAttributes,
+}: any) => {
+  const globalClasses = useGlobalStyles();
+  return (
+    <a
+      {...attributes}
+      data-slate-value={element.url}
+      className={globalClasses.link}
+      href={element.url}
+      contentEditable={false}
+      {...htmlAttributes}
+    >
+      {children}
+    </a>
+  );
+};
+
 export const BlockquoteElement = ({
   attributes,
   children,

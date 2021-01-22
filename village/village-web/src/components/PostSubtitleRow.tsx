@@ -31,7 +31,12 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
   const isLoggedIn = props.author.uid === props.viewer.uid;
 
   return (
-    <Typography variant="body1" className={globalClasses.postSubtitle}>
+    <Typography
+      variant="body1"
+      className={globalClasses.postSubtitle}
+      paragraph={false}
+      component="div"
+    >
       <div>
         <Link
           className={globalClasses.link}

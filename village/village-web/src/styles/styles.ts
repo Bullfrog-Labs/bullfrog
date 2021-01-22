@@ -41,13 +41,13 @@ export const useGlobalStyles = makeStyles((theme) => ({
   },
   editableRichText: {
     "&:hover:not(:focus)": {
-      backgroundColor: "#fafafa",
+      backgroundColor: theme.palette.action.selected,
     },
   },
   readOnlyRichText: {},
   postPreviewCard: {
     "&:hover": {
-      backgroundColor: "#fafafa",
+      backgroundColor: theme.palette.action.selected,
     },
     border: "0px",
     width: "100%",
@@ -81,5 +81,16 @@ export const useGlobalStyles = makeStyles((theme) => ({
     position: "fixed",
     top: "30%",
     left: "50%",
+  },
+  searchSuggestionLine: {
+    fontWeight: "bold",
+    width: "100%",
+    display: "inline",
+    whiteSpace: "nowrap",
+    lineHeight: "1.8em",
+  },
+  searchPrefixPart: {
+    fontWeight: 700,
+    color: theme.palette.secondary.light,
   },
 }));
