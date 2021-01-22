@@ -1,11 +1,11 @@
-import * as log from "loglevel";
 import { render } from "@testing-library/react";
-import { ProfileView } from "./ProfileView";
 import { Logging } from "kmgmt-common";
-import { AuthContext } from "../services/auth/Auth";
-import { u0, posts0, authProvider } from "../testing/Fixtures";
-import { richTextStringPreview } from "./richtext/Utils";
+import * as log from "loglevel";
 import { MemoryRouter } from "react-router-dom";
+import { AuthContext } from "../services/auth/Auth";
+import { authProvider, posts0, u0 } from "../testing/Fixtures";
+import { ProfileView } from "./ProfileView";
+import { richTextStringPreview } from "./richtext/Utils";
 
 Logging.configure(log);
 

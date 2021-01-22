@@ -1,14 +1,28 @@
-import * as log from "loglevel";
-import { Dispatch, SetStateAction, useState } from "react";
+import { CircularProgress } from "@material-ui/core";
 import { Logging } from "kmgmt-common";
-import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
-import { initializeFirebaseApp } from "./services/Firebase";
-import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
+import * as log from "loglevel";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Router } from "./routing/Router";
 import {
   AuthContext,
-  AuthState,
+  AuthProviderState,
   OnAuthStateChangedHandle,
 } from "./services/auth/Auth";
+import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
+import { initializeFirebaseApp } from "./services/Firebase";
+import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
+import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
+import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
+import {
+  createPost,
+  getAllPostsByTitlePrefix,
+  getMentionUserPosts,
+  getPost,
+  getStackPosts,
+  getUserPosts,
+  renamePost,
+  syncBody,
+} from "./services/store/Posts";
 import {
   checkIfUserExists,
   createNewUserRecord,
@@ -16,22 +30,6 @@ import {
   getUserByUsername,
   UserRecord,
 } from "./services/store/Users";
-import { Router } from "./routing/Router";
-import firebase from "firebase";
-import {
-  getUserPosts,
-  getStackPosts,
-  getPost,
-  createPost,
-  renamePost,
-  syncBody,
-  getMentionUserPosts,
-  getAllPostsByTitlePrefix,
-} from "./services/store/Posts";
-import { useEffect } from "react";
-import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
-import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
-import { CircularProgress } from "@material-ui/core";
 import { useGlobalStyles } from "./styles/styles";
 
 Logging.configure(log);
@@ -41,30 +39,31 @@ const authProvider = FirebaseAuthProvider.create(app, auth);
 const database = FirestoreDatabase.fromApp(app);
 
 const makeOnAuthStateChanged = (
-  authState: AuthState,
-  setAuthState: Dispatch<SetStateAction<AuthState>>,
+  setAuthState: Dispatch<SetStateAction<AuthProviderState | null>>,
   setAuthCompleted: Dispatch<SetStateAction<boolean>>
-): OnAuthStateChangedHandle => async (authedUser: firebase.User) => {
+): OnAuthStateChangedHandle => async (
+  authProviderState: AuthProviderState | null
+) => {
   const logger = log.getLogger("App");
   logger.debug("Auth state changed, updating auth state.");
-  setAuthState(authedUser);
+  setAuthState(authProviderState);
 
-  if (!authedUser) {
+  if (!authProviderState) {
     logger.debug("Empty auth state, not logged in. Done updating auth state");
     setAuthCompleted(true);
     return;
   }
 
-  if (!authedUser.uid) {
+  if (!authProviderState.uid) {
     throw new Error("Authed user uid should not be null");
   }
 
-  const userExists = await checkIfUserExists(database, authedUser.uid);
+  const userExists = await checkIfUserExists(database, authProviderState.uid);
   if (!userExists) {
     logger.debug(
-      `User document does not exist for user ${authedUser.uid}, creating new one.`
+      `User document does not exist for user ${authProviderState.uid}, creating new one.`
     );
-    await createNewUserRecord(database, authedUser);
+    await createNewUserRecord(database, authProviderState);
   }
 
   logger.debug("User logged in. Done updating auth state.");
@@ -93,14 +92,13 @@ function App() {
   }, [authState, logger]);
 
   authProvider.onAuthStateChanged = makeOnAuthStateChanged(
-    authState,
     setAuthState,
     setAuthCompleted
   );
 
   if (authState) {
     logger.debug(
-      `Logged in as user ${authState.uid} with ${authState.displayName} / ${authState.email}`
+      `Logged in as user ${authState.uid} with ${authState.displayName} / ${authState.username}`
     );
   } else {
     logger.info(`Not logged in`);

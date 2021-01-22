@@ -1,30 +1,30 @@
 import React from "react";
-import { Switch, Route, BrowserRouter, useLocation } from "react-router-dom";
-import { AuthProvider } from "../services/auth/Auth";
+import { BrowserRouter, Route, Switch, useLocation } from "react-router-dom";
 import AppContainer from "../components/AppContainer";
-import { LoginView } from "../views/LoginView";
-import PrivateRoute from "./PrivateRoute";
-import MainView from "../views/MainView";
 import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
+import { AuthProvider } from "../services/auth/Auth";
 import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
+import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
 import {
   CreatePostFn,
   GetAllPostsByTitlePrefixFn,
+  GetMentionUserPostsFn,
   GetPostFn,
   GetStackPostsFn,
   GetUserPostsFn,
-  GetMentionUserPostsFn,
   RenamePostFn,
   SyncBodyFn,
 } from "../services/store/Posts";
 import {
-  UserRecord,
   GetUserByUsernameFn,
   GetUserFn,
+  UserRecord,
 } from "../services/store/Users";
+import { LoginView } from "../views/LoginView";
+import MainView from "../views/MainView";
 import { PostViewController } from "../views/PostView";
-import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
+import PrivateRoute from "./PrivateRoute";
 
 const Sad404 = () => {
   let location = useLocation();
@@ -38,7 +38,7 @@ const Sad404 = () => {
   );
 };
 
-export const Router = (props: {
+export type RouterProps = {
   authProvider: AuthProvider;
   getUserPosts: GetUserPostsFn;
   getStackPosts: GetStackPostsFn;
@@ -53,7 +53,9 @@ export const Router = (props: {
   getMentionUserPosts: GetMentionUserPostsFn;
   fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
   user?: UserRecord;
-}) => {
+};
+
+export const Router = (props: RouterProps) => {
   const {
     authProvider,
     getUserPosts,

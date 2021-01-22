@@ -1,7 +1,7 @@
-import { UserPost, PostRecord } from "../services/store/Posts";
-import { UserRecord } from "../services/store/Users";
-import { AuthProvider } from "../services/auth/Auth";
 import { stringToSlateNode } from "../components/richtext/Utils";
+import { AuthProvider } from "../services/auth/Auth";
+import { PostRecord, UserPost } from "../services/store/Posts";
+import { UserRecord } from "../services/store/Users";
 
 /**
  * Users
@@ -223,7 +223,8 @@ export const userPosts2: UserPost[] = [
 export const authProvider: AuthProvider = {
   onAuthStateChanged: (authState) => {},
   getInitialAuthState: () => ({
+    uid: "123",
     displayName: "Test user",
-    email: "testuser@somewhere.com",
+    username: "foo",
   }),
 };

@@ -1,9 +1,9 @@
+import { render } from "@testing-library/react";
+import { Logging } from "kmgmt-common";
 import * as log from "loglevel";
 import React from "react";
-import { render } from "@testing-library/react";
+import { AuthContext, AuthProvider } from "../services/auth/Auth";
 import MainView from "./MainView";
-import { Logging } from "kmgmt-common";
-import { AuthProvider, AuthContext } from "../services/auth/Auth";
 
 Logging.configure(log);
 
@@ -13,7 +13,8 @@ test("renders", () => {
     onAuthStateChanged: (authState) => {},
     getInitialAuthState: () => ({
       displayName: "Test user",
-      email: "testuser@somewhere.com",
+      uid: "123",
+      username: "foo",
     }),
   };
 

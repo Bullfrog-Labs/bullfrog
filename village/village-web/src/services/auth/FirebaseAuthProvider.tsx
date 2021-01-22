@@ -1,6 +1,18 @@
-import * as log from "loglevel";
 import firebase from "firebase/app";
-import { AuthProvider, OnAuthStateChangedHandle } from "./Auth";
+import * as log from "loglevel";
+import {
+  AuthProvider,
+  AuthProviderState,
+  OnAuthStateChangedHandle,
+} from "./Auth";
+
+export const userToAuthProviderState = (
+  apUser: firebase.User
+): AuthProviderState => ({
+  uid: apUser.uid,
+  displayName: apUser.displayName ?? "",
+  username: apUser.providerData[0]?.displayName ?? "",
+});
 
 export default class FirebaseAuthProvider implements AuthProvider {
   logger = log.getLogger("FirebaseAuth");
@@ -17,7 +29,9 @@ export default class FirebaseAuthProvider implements AuthProvider {
     this.auth = auth;
 
     this.auth.onAuthStateChanged((userAuth) => {
-      this.onAuthStateChanged(userAuth);
+      this.onAuthStateChanged(
+        userAuth ? userToAuthProviderState(userAuth) : null
+      );
     });
 
     this.logger.debug("created FirebaseAuth");
@@ -28,6 +42,7 @@ export default class FirebaseAuthProvider implements AuthProvider {
   }
 
   getInitialAuthState() {
-    return this.auth.currentUser;
+    const apUser = this.auth.currentUser;
+    return !!apUser ? userToAuthProviderState(apUser) : null;
   }
 }

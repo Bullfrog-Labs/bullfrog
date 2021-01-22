@@ -1,16 +1,11 @@
-import * as log from "loglevel";
-import React, { useContext } from "react";
 import { Container } from "@material-ui/core";
-import { AuthContext } from "../services/auth/Auth";
+import React from "react";
 
 function EmptyUserStatePlaceholder() {
   return <div>"Welcome to Village!"</div>;
 }
 
-export default function MainView(props: any) {
-  const logger = log.getLogger("MainView");
-  const authState = useContext(AuthContext);
-
+export default function MainView() {
   return (
     <Container maxWidth="md">
       <EmptyUserStatePlaceholder />

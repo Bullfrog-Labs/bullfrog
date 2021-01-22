@@ -1,11 +1,19 @@
 import React from "react";
+import { UserId } from "../store/Users";
 
-export type AuthState = any;
-export type OnAuthStateChangedHandle = (authState: AuthState) => void;
+export interface AuthProviderState {
+  uid: UserId;
+  displayName: string;
+  username: string;
+}
+
+export type OnAuthStateChangedHandle = (
+  authProviderState: AuthProviderState | null
+) => void;
 
 export interface AuthProvider {
   onAuthStateChanged: OnAuthStateChangedHandle;
-  getInitialAuthState(): AuthState;
+  getInitialAuthState(): AuthProviderState | null;
 }
 
-export const AuthContext: React.Context<AuthState> = React.createContext(null);
+export const AuthContext = React.createContext<AuthProviderState | null>(null);
