@@ -58,15 +58,9 @@ const makeOnAuthStateChanged = (
     throw new Error("Authed user uid should not be null");
   }
 
-  const userExists = await checkIfUserExists(database, authProviderState.uid);
-  if (!userExists) {
-    logger.debug(
-      `User document does not exist for user ${authProviderState.uid}, creating new one.`
-    );
-    await createNewUserRecord(database, authProviderState);
-  }
-
-  logger.debug("User logged in. Done updating auth state.");
+  logger.debug(
+    "Logged in with non-empty auth state. Done updating auth state."
+  );
 };
 
 function App() {
@@ -80,6 +74,14 @@ function App() {
   useEffect(() => {
     const fetchUser = async () => {
       if (!!authState) {
+        const userExists = await checkIfUserExists(database, authState.uid);
+        if (!userExists) {
+          logger.debug(
+            `User document does not exist for user ${authState.uid}, creating new one.`
+          );
+          await createNewUserRecord(database, authState);
+        }
+
         const user = await getUser(database)(authState.uid);
         if (user != null) {
           logger.debug(`setting user ${user.displayName}`);
