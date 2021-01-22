@@ -29,3 +29,6 @@ test("displays a few posts", () => {
   expect(getByText(posts0[0].title)).toBeInTheDocument();
   expect(getByText(expectedPreview)).toBeInTheDocument();
 });
+
+test("profile view controller works in logged-in mode", () => {});
+test("profile view controller works in logged-out mode", () => {});

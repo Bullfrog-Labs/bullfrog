@@ -86,7 +86,6 @@ const BaseAppContainer: React.FC<BaseAppContainerProps> = (props) => {
 };
 
 export interface AppContainerProps extends React.PropsWithChildren<{}> {
-  user?: UserRecord;
   createPost?: CreatePostFn;
   getSearchBoxSuggestions: SearchSuggestionFetchFn;
   fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
