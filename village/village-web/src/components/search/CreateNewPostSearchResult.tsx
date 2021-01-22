@@ -20,7 +20,12 @@ export const CreateNewPostSearchResult = (
   const globalClasses = useGlobalStyles();
   const prompt = `New post: ${props.title}`;
   return (
-    <Typography variant="body1" className={globalClasses.searchSuggestionLine}>
+    <Typography
+      variant="body1"
+      paragraph={false}
+      className={globalClasses.searchSuggestionLine}
+      component="div"
+    >
       <Tooltip title={prompt} placement="bottom-start">
         <Box textOverflow="ellipsis" overflow="hidden">
           <span className={classes.prefixPart}>New post:</span> {props.title}

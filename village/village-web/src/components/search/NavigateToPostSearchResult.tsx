@@ -32,7 +32,12 @@ export const NavigateToPostSearchResult = (
   const tooltip = `${titlePartStr} ${authorPartStr || ""}`;
 
   return (
-    <Typography variant="body1" className={globalClasses.searchSuggestionLine}>
+    <Typography
+      variant="body1"
+      className={globalClasses.searchSuggestionLine}
+      paragraph={false}
+      component="div"
+    >
       <Tooltip title={tooltip} placement="bottom-start">
         <Box textOverflow="ellipsis" overflow="hidden">
           {textElement}
