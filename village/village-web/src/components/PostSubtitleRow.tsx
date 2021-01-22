@@ -29,6 +29,7 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
   const classes = useStyles();
   const dt = DateTime.fromJSDate(props.updatedAt || new Date());
   const isLoggedIn = props.author.uid === props.viewer.uid;
+  const stackURLPath = `/stack/${encodeURIComponent(props.postTitle)}`;
 
   return (
     <Typography
@@ -47,10 +48,7 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
         <span className={classes.subtitlePart}>{dt.toFormat("MMM d")}</span>
         <span className={classes.subtitlePart}>
           <Tooltip title="View stack">
-            <Link
-              className={globalClasses.link}
-              to={`/stack/${props.postTitle}`}
-            >
+            <Link className={globalClasses.link} to={stackURLPath}>
               <IconButton size="small" style={{ marginLeft: "-3px" }}>
                 <LibraryBooksIcon fontSize={"inherit"} />
               </IconButton>
