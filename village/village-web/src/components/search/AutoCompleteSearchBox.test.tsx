@@ -25,7 +25,6 @@ import {
   AUTOCOMPLETE_SEARCH_BOX_PROMPT,
   useAutocompleteSearchBoxDialog,
 } from "./AutocompleteSearchBox";
-import { getCreateNewPostPrompt } from "./CreateNewPostSearchResult";
 import { createMemoryHistory } from "history";
 import { Router } from "react-router-dom";
 import { postURL } from "../../routing/URLs";
@@ -148,8 +147,10 @@ test("succesful post creation via search box", async () => {
   expect(getSuggestions).toHaveBeenCalled();
 
   // the option to create post should be present
-  const createNewPostPromptText = getCreateNewPostPrompt(mockSearchBoxInput);
-  const createNewPostSearchResultEl = screen.getByText(createNewPostPromptText);
+  const createNewPostPromptText = "New post: baz";
+  const createNewPostSearchResultEl = screen.getByTitle(
+    createNewPostPromptText
+  );
   expect(createNewPostSearchResultEl).toBeInTheDocument();
 
   // create post should be called
@@ -200,8 +201,10 @@ test("post creation of existing post via search box", async () => {
   expect(getSuggestions).toHaveBeenCalled();
 
   // the option to create post should be present
-  const createNewPostPromptText = getCreateNewPostPrompt(mockSearchBoxInput);
-  const createNewPostSearchResultEl = screen.getByText(createNewPostPromptText);
+  const createNewPostPromptText = "New post: " + mockSearchBoxInput;
+  const createNewPostSearchResultEl = screen.getByTitle(
+    createNewPostPromptText
+  );
   expect(createNewPostSearchResultEl).toBeInTheDocument();
 
   // create post should be called
