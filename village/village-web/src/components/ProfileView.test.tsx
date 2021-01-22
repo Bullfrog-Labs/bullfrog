@@ -2,7 +2,7 @@ import { render } from "@testing-library/react";
 import { Logging } from "kmgmt-common";
 import * as log from "loglevel";
 import { MemoryRouter } from "react-router-dom";
-import { AuthContext } from "../services/auth/Auth";
+import { AppAuthContext } from "../services/auth/AppAuthContext";
 import { authProvider, posts0, u0 } from "../testing/Fixtures";
 import { ProfileView } from "./ProfileView";
 import { richTextStringPreview } from "./richtext/Utils";
@@ -10,12 +10,17 @@ import { richTextStringPreview } from "./richtext/Utils";
 Logging.configure(log);
 
 test("displays a few posts", () => {
+  const appAuthState = {
+    authCompleted: true,
+    authProviderState: authProvider.getInitialAuthProviderState(),
+  };
+
   const { getByText } = render(
-    <AuthContext.Provider value={authProvider.getInitialAuthProviderState()}>
+    <AppAuthContext.Provider value={appAuthState}>
       <MemoryRouter initialEntries={["/"]} initialIndex={0}>
         <ProfileView user={u0} posts={posts0} />
       </MemoryRouter>
-    </AuthContext.Provider>
+    </AppAuthContext.Provider>
   );
 
   const expectedPreview = richTextStringPreview(posts0[0].body)!;

@@ -5,7 +5,7 @@ import { StyledFirebaseAuth } from "react-firebaseui";
 import firebaseui from "firebaseui";
 import FirebaseAuthProvider from "../../services/auth/FirebaseAuthProvider";
 import { useHistory, useLocation, Redirect } from "react-router-dom";
-import { AuthContext } from "../../services/auth/Auth";
+import { AppAuthContext } from "../../services/auth/AppAuthContext";
 
 interface LocationState {
   from: {
@@ -34,9 +34,9 @@ export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps
   };
 
   return (
-    <AuthContext.Consumer>
-      {(authState) => {
-        if (authState) {
+    <AppAuthContext.Consumer>
+      {({ authProviderState }) => {
+        if (authProviderState) {
           // short-circuit because authState has been populated and there is no
           // need to get the user to authenticate manually via the auth component.
           return <Redirect to={redirectTo.pathname} />;
@@ -75,6 +75,6 @@ export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps
           );
         }
       }}
-    </AuthContext.Consumer>
+    </AppAuthContext.Consumer>
   );
 };

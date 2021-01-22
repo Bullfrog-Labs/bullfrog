@@ -2,26 +2,34 @@ import { render } from "@testing-library/react";
 import { Logging } from "kmgmt-common";
 import * as log from "loglevel";
 import React from "react";
-import { AuthContext, AuthProvider } from "../services/auth/Auth";
+import { AppAuthContext } from "../services/auth/AppAuthContext";
+import { AuthProvider } from "../services/auth/Auth";
 import MainView from "./MainView";
 
 Logging.configure(log);
 
 test("renders", () => {
   // this authProvider always authenticates the user automatically
+  const user = {
+    displayName: "Test user",
+    uid: "123",
+    username: "foo",
+  };
   const authProvider: AuthProvider = {
     onAuthStateChanged: (authState) => {},
-    getInitialAuthProviderState: () => ({
-      displayName: "Test user",
-      uid: "123",
-      username: "foo",
-    }),
+    getInitialAuthProviderState: () => user,
+  };
+
+  const appAuthState = {
+    authCompleted: true,
+    authProviderState: authProvider.getInitialAuthProviderState(),
+    authedUser: user,
   };
 
   // Smoke test
   render(
-    <AuthContext.Provider value={authProvider.getInitialAuthProviderState()}>
+    <AppAuthContext.Provider value={appAuthState}>
       <MainView />
-    </AuthContext.Provider>
+    </AppAuthContext.Provider>
   );
 });

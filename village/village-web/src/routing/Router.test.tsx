@@ -1,22 +1,24 @@
 import { render } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import { AuthContext, AuthProvider } from "../services/auth/Auth";
+import { AppAuthContext } from "../services/auth/AppAuthContext";
+import { AuthProvider } from "../services/auth/Auth";
 import { Router, RouterProps } from "./Router";
 
 test("renders AppContainer", async () => {
   // this authProvider always authenticates the user automatically
+  const user = {
+    displayName: "Test user",
+    uid: "123",
+    username: "foo",
+  };
   const authProvider: AuthProvider = {
     onAuthStateChanged: (authState) => {},
-    getInitialAuthProviderState: () => ({
-      displayName: "Test user",
-      uid: "123",
-      username: "foo",
-    }),
+    getInitialAuthProviderState: () => user,
   };
 
   const routerProps: RouterProps = {
-    authProvider: authProvider,
+    loginView: <div>Login here</div>,
     getUserPosts: jest.fn(),
     getStackPosts: jest.fn(),
     getUser: jest.fn(),
@@ -31,11 +33,17 @@ test("renders AppContainer", async () => {
     fetchTitleFromOpenGraph: jest.fn(),
   };
 
+  const appAuthState = {
+    authCompleted: true,
+    authProviderState: authProvider.getInitialAuthProviderState(),
+    authedUser: user,
+  };
+
   // Smoke test
   const router = (
-    <AuthContext.Provider value={authProvider.getInitialAuthProviderState()}>
+    <AppAuthContext.Provider value={appAuthState}>
       <Router {...routerProps} />
-    </AuthContext.Provider>
+    </AppAuthContext.Provider>
   );
   render(
     <MemoryRouter initialEntries={["/"]} initialIndex={0}>

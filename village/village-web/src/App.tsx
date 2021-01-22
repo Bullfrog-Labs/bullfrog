@@ -3,7 +3,8 @@ import { Logging } from "kmgmt-common";
 import * as log from "loglevel";
 import { useEffect, useState } from "react";
 import { Router } from "./routing/Router";
-import { AuthContext, useAuthState } from "./services/auth/Auth";
+import { AppAuthContext } from "./services/auth/AppAuthContext";
+import { useAuthState } from "./services/auth/Auth";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
 import { initializeFirebaseApp } from "./services/Firebase";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
@@ -27,6 +28,7 @@ import {
   UserRecord,
 } from "./services/store/Users";
 import { useGlobalStyles } from "./styles/styles";
+import { LoginView } from "./views/LoginView";
 
 Logging.configure(log);
 
@@ -43,6 +45,7 @@ function App() {
   const [authProviderState] = authState.authProviderState;
 
   const [user, setUser] = useState<UserRecord>();
+
   useEffect(() => {
     const fetchUser = async () => {
       if (!!authProviderState) {
@@ -76,12 +79,20 @@ function App() {
     logger.info(`Not logged in`);
   }
 
+  const appAuthState = {
+    authCompleted: authCompleted,
+    authProviderState: authProviderState,
+    authedUser: user,
+  };
+
+  const loginView = <LoginView authProvider={authProvider} />;
+
   return (
     <>
       {authCompleted ? (
-        <AuthContext.Provider value={authProviderState}>
+        <AppAuthContext.Provider value={appAuthState}>
           <Router
-            authProvider={authProvider}
+            loginView={loginView}
             getUserPosts={getUserPosts(database)}
             getStackPosts={getStackPosts(database)}
             getUser={getUser(database)}
@@ -97,9 +108,8 @@ function App() {
               user!
             )}
             fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
-            user={user}
           />
-        </AuthContext.Provider>
+        </AppAuthContext.Provider>
       ) : (
         <CircularProgress className={globalClasses.loadingIndicator} />
       )}

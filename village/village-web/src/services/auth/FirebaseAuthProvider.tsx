@@ -30,7 +30,7 @@ export default class FirebaseAuthProvider implements AuthProvider {
 
     this.auth.onAuthStateChanged((userAuth) => {
       this.onAuthStateChanged(
-        userAuth ? userToAuthProviderState(userAuth) : null
+        userAuth ? userToAuthProviderState(userAuth) : undefined
       );
     });
 
@@ -43,6 +43,6 @@ export default class FirebaseAuthProvider implements AuthProvider {
 
   getInitialAuthProviderState() {
     const apUser = this.auth.currentUser;
-    return !!apUser ? userToAuthProviderState(apUser) : null;
+    return !!apUser ? userToAuthProviderState(apUser) : undefined;
   }
 }

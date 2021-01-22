@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { UserId } from "../store/Users";
 
 export interface AuthProviderState {
@@ -8,22 +8,20 @@ export interface AuthProviderState {
   username: string;
 }
 
-export type MaybeAuthProviderState = AuthProviderState | null;
-
 export type OnAuthStateChangedHandle = (
-  authProviderState: MaybeAuthProviderState
+  authProviderState?: AuthProviderState
 ) => void;
 
 export interface AuthProvider {
   onAuthStateChanged: OnAuthStateChangedHandle;
-  getInitialAuthProviderState(): MaybeAuthProviderState;
+  getInitialAuthProviderState(): AuthProviderState | undefined;
 }
 
 export interface AuthState {
   authCompleted: [boolean, Dispatch<SetStateAction<boolean>>];
   authProviderState: [
-    MaybeAuthProviderState,
-    Dispatch<SetStateAction<MaybeAuthProviderState>>
+    AuthProviderState | undefined,
+    Dispatch<SetStateAction<AuthProviderState | undefined>>
   ];
 }
 
@@ -34,9 +32,7 @@ export const useAuthState = (authProvider: AuthProvider): AuthState => {
     authProvider.getInitialAuthProviderState()
   );
 
-  authProvider.onAuthStateChanged = (
-    authProviderState: MaybeAuthProviderState
-  ) => {
+  authProvider.onAuthStateChanged = (authProviderState?: AuthProviderState) => {
     logger.debug("Auth state changed, updating auth state.");
     setAuthProviderState(authProviderState);
 
@@ -60,5 +56,3 @@ export const useAuthState = (authProvider: AuthProvider): AuthState => {
     authProviderState: [authProviderState, setAuthProviderState],
   };
 };
-
-export const AuthContext = React.createContext<MaybeAuthProviderState>(null);

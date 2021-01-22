@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Redirect, RouteProps } from "react-router-dom";
-import { AuthContext } from "../services/auth/Auth";
 import * as log from "loglevel";
+import { AppAuthContext } from "../services/auth/AppAuthContext";
 
 export default function PrivateRoute(props: RouteProps) {
   let { children, ...rest } = props;
@@ -12,10 +12,10 @@ export default function PrivateRoute(props: RouteProps) {
       {...rest}
       render={({ location }) => (
         // check auth, if authed then render children, otherwise redirect to login
-        <AuthContext.Consumer>
-          {(authState) => {
+        <AppAuthContext.Consumer>
+          {({ authProviderState }) => {
             logger.debug(`Accessing private route ${props.path}`);
-            if (authState) {
+            if (authProviderState) {
               return children;
             } else {
               logger.debug(
@@ -31,7 +31,7 @@ export default function PrivateRoute(props: RouteProps) {
               );
             }
           }}
-        </AuthContext.Consumer>
+        </AppAuthContext.Consumer>
       )}
     />
   );
