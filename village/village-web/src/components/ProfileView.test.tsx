@@ -11,7 +11,7 @@ Logging.configure(log);
 
 test("displays a few posts", () => {
   const { getByText } = render(
-    <AuthContext.Provider value={authProvider.getInitialAuthState()}>
+    <AuthContext.Provider value={authProvider.getInitialAuthProviderState()}>
       <MemoryRouter initialEntries={["/"]} initialIndex={0}>
         <ProfileView user={u0} posts={posts0} />
       </MemoryRouter>

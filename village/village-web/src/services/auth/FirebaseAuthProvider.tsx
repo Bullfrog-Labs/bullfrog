@@ -41,7 +41,7 @@ export default class FirebaseAuthProvider implements AuthProvider {
     return new FirebaseAuthProvider(app, auth);
   }
 
-  getInitialAuthState() {
+  getInitialAuthProviderState() {
     const apUser = this.auth.currentUser;
     return !!apUser ? userToAuthProviderState(apUser) : null;
   }

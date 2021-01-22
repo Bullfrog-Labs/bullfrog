@@ -222,7 +222,7 @@ export const userPosts2: UserPost[] = [
 
 export const authProvider: AuthProvider = {
   onAuthStateChanged: (authState) => {},
-  getInitialAuthState: () => ({
+  getInitialAuthProviderState: () => ({
     uid: "123",
     displayName: "Test user",
     username: "foo",

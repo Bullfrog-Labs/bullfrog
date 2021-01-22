@@ -8,7 +8,7 @@ test("renders AppContainer", async () => {
   // this authProvider always authenticates the user automatically
   const authProvider: AuthProvider = {
     onAuthStateChanged: (authState) => {},
-    getInitialAuthState: () => ({
+    getInitialAuthProviderState: () => ({
       displayName: "Test user",
       uid: "123",
       username: "foo",
@@ -33,7 +33,7 @@ test("renders AppContainer", async () => {
 
   // Smoke test
   const router = (
-    <AuthContext.Provider value={authProvider.getInitialAuthState()}>
+    <AuthContext.Provider value={authProvider.getInitialAuthProviderState()}>
       <Router {...routerProps} />
     </AuthContext.Provider>
   );

@@ -11,7 +11,7 @@ Logging.configure(log);
 
 test("displays a few posts", () => {
   const { getAllByText } = render(
-    <AuthContext.Provider value={authProvider.getInitialAuthState()}>
+    <AuthContext.Provider value={authProvider.getInitialAuthProviderState()}>
       <MemoryRouter>
         <StackView posts={userPosts0} source={{ name: p0.title }} />
       </MemoryRouter>

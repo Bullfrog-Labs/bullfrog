@@ -1,13 +1,9 @@
 import { CircularProgress } from "@material-ui/core";
 import { Logging } from "kmgmt-common";
 import * as log from "loglevel";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Router } from "./routing/Router";
-import {
-  AuthContext,
-  AuthProviderState,
-  OnAuthStateChangedHandle,
-} from "./services/auth/Auth";
+import { AuthContext, useAuthState } from "./services/auth/Auth";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
 import { initializeFirebaseApp } from "./services/Firebase";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
@@ -38,51 +34,30 @@ const [app, auth] = initializeFirebaseApp();
 const authProvider = FirebaseAuthProvider.create(app, auth);
 const database = FirestoreDatabase.fromApp(app);
 
-const makeOnAuthStateChanged = (
-  setAuthState: Dispatch<SetStateAction<AuthProviderState | null>>,
-  setAuthCompleted: Dispatch<SetStateAction<boolean>>
-): OnAuthStateChangedHandle => async (
-  authProviderState: AuthProviderState | null
-) => {
-  const logger = log.getLogger("App");
-  logger.debug("Auth state changed, updating auth state.");
-  setAuthState(authProviderState);
-
-  if (!authProviderState) {
-    logger.debug("Empty auth state, not logged in. Done updating auth state");
-    setAuthCompleted(true);
-    return;
-  }
-
-  if (!authProviderState.uid) {
-    throw new Error("Authed user uid should not be null");
-  }
-
-  logger.debug(
-    "Logged in with non-empty auth state. Done updating auth state."
-  );
-};
-
 function App() {
   const globalClasses = useGlobalStyles();
   const logger = log.getLogger("App");
-  const [authCompleted, setAuthCompleted] = useState(false);
-  const [authState, setAuthState] = useState(
-    authProvider.getInitialAuthState()
-  );
+
+  const authState = useAuthState(authProvider);
+  const [authCompleted, setAuthCompleted] = authState.authCompleted;
+  const [authProviderState] = authState.authProviderState;
+
   const [user, setUser] = useState<UserRecord>();
   useEffect(() => {
     const fetchUser = async () => {
-      if (!!authState) {
-        const userExists = await checkIfUserExists(database, authState.uid);
+      if (!!authProviderState) {
+        const userExists = await checkIfUserExists(
+          database,
+          authProviderState.uid
+        );
         if (!userExists) {
           logger.debug(
-            `User document does not exist for user ${authState.uid}, creating new one.`
+            `User document does not exist for user ${authProviderState.uid}, creating new one.`
           );
-          await createNewUserRecord(database, authState);
+          await createNewUserRecord(database, authProviderState);
         }
 
-        const user = await getUser(database)(authState.uid);
+        const user = await getUser(database)(authProviderState.uid);
         if (user != null) {
           logger.debug(`setting user ${user.displayName}`);
           setUser(user);
@@ -91,16 +66,11 @@ function App() {
       }
     };
     fetchUser();
-  }, [authState, logger]);
+  }, [authProviderState, logger, setAuthCompleted]);
 
-  authProvider.onAuthStateChanged = makeOnAuthStateChanged(
-    setAuthState,
-    setAuthCompleted
-  );
-
-  if (authState) {
+  if (!!authProviderState) {
     logger.debug(
-      `Logged in as user ${authState.uid} with ${authState.displayName} / ${authState.username}`
+      `Logged in as user ${authProviderState.uid} with ${authProviderState.displayName} / ${authProviderState.username}`
     );
   } else {
     logger.info(`Not logged in`);
@@ -109,7 +79,7 @@ function App() {
   return (
     <>
       {authCompleted ? (
-        <AuthContext.Provider value={authState}>
+        <AuthContext.Provider value={authProviderState}>
           <Router
             authProvider={authProvider}
             getUserPosts={getUserPosts(database)}
