@@ -21,4 +21,12 @@ export const useUserFromAppAuthContext = (): UserRecord | undefined => {
     : undefined;
 };
 
+export const useLoggedInUserFromAppAuthContext = (): UserRecord => {
+  const user = useUserFromAppAuthContext();
+  if (!user) {
+    throw new Error("Expected user to be logged in, but they were not");
+  }
+  return user;
+};
+
 export type CurriedByUser<T> = (user: UserRecord) => T;
