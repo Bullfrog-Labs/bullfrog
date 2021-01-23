@@ -1,7 +1,10 @@
 import React from "react";
 import { BrowserRouter, Route, Switch, useLocation } from "react-router-dom";
 import AppContainer from "../components/AppContainer";
-import { ProfileViewController } from "../components/ProfileView";
+import {
+  DefaultProfileViewController,
+  ProfileViewController,
+} from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
 import { CurriedByUser } from "../services/auth/AppAuth";
 import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
@@ -87,12 +90,17 @@ export const Router = (props: RouterProps) => {
             <MainView />
           </AppContainerWithProps>
         </PrivateRoute>
-        <PrivateRoute exact path="/profile/:username?">
+        <PrivateRoute exact path="/profile/:username">
           <AppContainerWithProps>
             <ProfileViewController
               getUserPosts={getUserPosts}
               getUserByUsername={getUserByUsername}
             />
+          </AppContainerWithProps>
+        </PrivateRoute>
+        <PrivateRoute exact path="/profile">
+          <AppContainerWithProps>
+            <DefaultProfileViewController />
           </AppContainerWithProps>
         </PrivateRoute>
         <PrivateRoute exact path="/stack/:stackId">

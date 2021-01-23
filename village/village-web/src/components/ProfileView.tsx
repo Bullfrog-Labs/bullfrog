@@ -1,20 +1,21 @@
-import * as log from "loglevel";
-import React, { useEffect } from "react";
-import { Typography, Divider, CircularProgress } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { CircularProgress, Divider, Typography } from "@material-ui/core";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import { PostRecord, GetUserPostsFn } from "../services/store/Posts";
-import { UserRecord, GetUserByUsernameFn } from "../services/store/Users";
-import { Redirect, useHistory, useParams } from "react-router-dom";
-import { ProfilePostCard } from "./ProfilePostCard";
-import { useGlobalStyles } from "../styles/styles";
+import { makeStyles } from "@material-ui/core/styles";
+import * as log from "loglevel";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
+import { Redirect, useHistory, useParams } from "react-router-dom";
 import {
   coalesceMaybeToLoadableRecord,
   useLoadableRecord,
 } from "../hooks/useLoadableRecord";
 import { profileURL } from "../routing/URLs";
+import { useUserFromAppAuthContext } from "../services/auth/AppAuth";
+import { GetUserPostsFn, PostRecord } from "../services/store/Posts";
+import { GetUserByUsernameFn, UserRecord } from "../services/store/Users";
+import { useGlobalStyles } from "../styles/styles";
+import { ProfilePostCard } from "./ProfilePostCard";
 
 const useStyles = makeStyles(() => ({
   root: {},
@@ -93,6 +94,11 @@ const useProfileState = (
   };
 };
 
+export const DefaultProfileViewController = (props: {}) => {
+  const viewer = useUserFromAppAuthContext();
+  return <Redirect to={!!viewer ? profileURL(viewer.username) : "/404"} />;
+};
+
 export const ProfileViewController = (props: {
   getUserPosts: GetUserPostsFn;
   getUserByUsername: GetUserByUsernameFn;
@@ -100,21 +106,20 @@ export const ProfileViewController = (props: {
   const globalClasses = useGlobalStyles();
   const logger = log.getLogger("ProfileView");
 
-  const { getUserPosts, getUserByUsername, viewer } = props;
+  const { getUserPosts, getUserByUsername } = props;
   const { username } = useParams<ProfileViewParams>();
-  const profileViewUsername = username || viewer.username;
 
   const { user, posts } = useProfileState(
     getUserPosts,
     getUserByUsername,
-    profileViewUsername
+    username
   );
 
   const progressIndicator = (
     <CircularProgress className={globalClasses.loadingIndicator} />
   );
   const onUserNotFound = () => {
-    logger.info(`User ${profileViewUsername} not found`);
+    logger.info(`User ${username} not found`);
     return <Redirect to={"/404"} />;
   };
 
