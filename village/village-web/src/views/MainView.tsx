@@ -1,19 +1,36 @@
 import * as log from "loglevel";
-import React, { useContext } from "react";
-import { Container } from "@material-ui/core";
-import { AuthContext } from "../services/auth/Auth";
+import React from "react";
+import { Paper, makeStyles, Typography } from "@material-ui/core";
+import { Link } from "react-router-dom";
+import { useGlobalStyles } from "../styles/styles";
 
-function EmptyUserStatePlaceholder() {
-  return <div>"Welcome to Village!"</div>;
-}
+const useStyles = makeStyles(() => ({
+  infoBox: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translateX(-50%) translateY(-50%)",
+  },
+}));
 
 export default function MainView(props: any) {
   const logger = log.getLogger("MainView");
-  const authState = useContext(AuthContext);
+  const classes = useStyles();
+  const globalClasses = useGlobalStyles();
 
   return (
-    <Container maxWidth="md">
-      <EmptyUserStatePlaceholder />
-    </Container>
+    <Paper className={classes.infoBox} elevation={0}>
+      <Typography variant="body1">Empty post</Typography>
+      <Typography variant="body1">
+        Press ⌘+U to create or open a post
+      </Typography>
+      <Typography variant="body1">
+        Click{" "}
+        <Link className={globalClasses.link} to={"/profile"}>
+          here
+        </Link>{" "}
+        to go to your profile
+      </Typography>
+    </Paper>
   );
 }
