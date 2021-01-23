@@ -2,7 +2,7 @@ import { render } from "@testing-library/react";
 import { Logging } from "kmgmt-common";
 import * as log from "loglevel";
 import { MemoryRouter } from "react-router-dom";
-import { AppAuthContext } from "../services/auth/AppAuthContext";
+import { AppAuthContext } from "../services/auth/AppAuth";
 import { authProvider, posts0, u0 } from "../testing/Fixtures";
 import { ProfileView } from "./ProfileView";
 import { richTextStringPreview } from "./richtext/Utils";

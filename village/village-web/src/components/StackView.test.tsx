@@ -5,7 +5,7 @@ import { Logging } from "kmgmt-common";
 import { u0, p0, posts0, authProvider, userPosts0 } from "../testing/Fixtures";
 import { MemoryRouter } from "react-router-dom";
 import { richTextStringPreview } from "./richtext/Utils";
-import { AppAuthContext } from "../services/auth/AppAuthContext";
+import { AppAuthContext } from "../services/auth/AppAuth";
 
 Logging.configure(log);
 

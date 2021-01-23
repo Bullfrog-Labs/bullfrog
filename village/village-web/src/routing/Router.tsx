@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Switch, useLocation } from "react-router-dom";
 import AppContainer from "../components/AppContainer";
 import { ProfileViewController } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
-import { AppAuthContext } from "../services/auth/AppAuthContext";
+import { CurriedByUser } from "../services/auth/AppAuth";
 import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
 import {
@@ -16,11 +16,7 @@ import {
   RenamePostFn,
   SyncBodyFn,
 } from "../services/store/Posts";
-import {
-  GetUserByUsernameFn,
-  GetUserFn,
-  UserRecord,
-} from "../services/store/Users";
+import { GetUserByUsernameFn, GetUserFn } from "../services/store/Users";
 import MainView from "../views/MainView";
 import { PostViewController } from "../views/PostView";
 import PrivateRoute from "./PrivateRoute";
@@ -44,11 +40,11 @@ export type RouterProps = {
   getUser: GetUserFn;
   getUserByUsername: GetUserByUsernameFn;
   getPost: GetPostFn;
-  createPost: (user: UserRecord) => CreatePostFn;
-  renamePost: (user: UserRecord) => RenamePostFn;
-  syncBody: (user: UserRecord) => SyncBodyFn;
+  createPost: CurriedByUser<CreatePostFn>;
+  renamePost: CurriedByUser<RenamePostFn>;
+  syncBody: CurriedByUser<SyncBodyFn>;
   getGlobalMentions: GetAllPostsByTitlePrefixFn;
-  getSearchSuggestionsByTitlePrefix: SearchSuggestionFetchFn;
+  getSearchSuggestionsByTitlePrefix: CurriedByUser<SearchSuggestionFetchFn>;
   getMentionUserPosts: GetMentionUserPostsFn;
   fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
 };

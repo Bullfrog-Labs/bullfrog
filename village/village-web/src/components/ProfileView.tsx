@@ -96,7 +96,6 @@ const useProfileState = (
 export const ProfileViewController = (props: {
   getUserPosts: GetUserPostsFn;
   getUserByUsername: GetUserByUsernameFn;
-  viewer: UserRecord;
 }) => {
   const globalClasses = useGlobalStyles();
   const logger = log.getLogger("ProfileView");

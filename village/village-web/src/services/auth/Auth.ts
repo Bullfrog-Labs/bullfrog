@@ -1,5 +1,5 @@
 import * as log from "loglevel";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { UserId } from "../store/Users";
 
 export interface AuthProviderState {
@@ -32,24 +32,29 @@ export const useAuthState = (authProvider: AuthProvider): AuthState => {
     authProvider.getInitialAuthProviderState()
   );
 
-  authProvider.onAuthStateChanged = (authProviderState?: AuthProviderState) => {
-    logger.debug("Auth state changed, updating auth state.");
-    setAuthProviderState(authProviderState);
+  authProvider.onAuthStateChanged = useCallback(
+    (authProviderState?: AuthProviderState) => {
+      logger.debug("Auth state changed, updating auth state.");
+      setAuthProviderState(authProviderState);
 
-    if (!authProviderState) {
-      logger.debug("Empty auth state, not logged in. Done updating auth state");
-      setAuthCompleted(true);
-      return;
-    }
+      if (!authProviderState) {
+        logger.debug(
+          "Empty auth state, not logged in. Done updating auth state"
+        );
+        setAuthCompleted(true);
+        return;
+      }
 
-    if (!authProviderState.uid) {
-      throw new Error("Authed user uid should not be null");
-    }
+      if (!authProviderState.uid) {
+        throw new Error("Authed user uid should not be null");
+      }
 
-    logger.debug(
-      "Logged in with non-empty auth state. Done updating auth state."
-    );
-  };
+      logger.debug(
+        "Logged in with non-empty auth state. Done updating auth state."
+      );
+    },
+    [logger]
+  );
 
   return {
     authCompleted: [authCompleted, setAuthCompleted],

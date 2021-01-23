@@ -3,7 +3,7 @@ import { Logging } from "kmgmt-common";
 import * as log from "loglevel";
 import { useEffect, useState } from "react";
 import { Router } from "./routing/Router";
-import { AppAuthContext } from "./services/auth/AppAuthContext";
+import { AppAuthContext } from "./services/auth/AppAuth";
 import { useAuthState } from "./services/auth/Auth";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
 import { initializeFirebaseApp } from "./services/Firebase";
@@ -104,8 +104,7 @@ function App() {
             getGlobalMentions={getAllPostsByTitlePrefix(database)}
             getMentionUserPosts={getMentionUserPosts(database)}
             getSearchSuggestionsByTitlePrefix={getSearchSuggestionsByTitlePrefix(
-              database,
-              user!
+              database
             )}
             fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
           />

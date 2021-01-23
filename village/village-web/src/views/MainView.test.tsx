@@ -2,7 +2,7 @@ import { render } from "@testing-library/react";
 import { Logging } from "kmgmt-common";
 import * as log from "loglevel";
 import React from "react";
-import { AppAuthContext } from "../services/auth/AppAuthContext";
+import { AppAuthContext } from "../services/auth/AppAuth";
 import { AuthProvider } from "../services/auth/Auth";
 import MainView from "./MainView";
 

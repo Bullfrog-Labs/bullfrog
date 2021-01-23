@@ -5,7 +5,7 @@ import { StyledFirebaseAuth } from "react-firebaseui";
 import firebaseui from "firebaseui";
 import FirebaseAuthProvider from "../../services/auth/FirebaseAuthProvider";
 import { useHistory, useLocation, Redirect } from "react-router-dom";
-import { AppAuthContext } from "../../services/auth/AppAuthContext";
+import { AppAuthContext } from "../../services/auth/AppAuth";
 
 interface LocationState {
   from: {

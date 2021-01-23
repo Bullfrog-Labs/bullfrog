@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import { AppAuthContext } from "../services/auth/AppAuthContext";
+import { AppAuthContext } from "../services/auth/AppAuth";
 import { AuthProvider } from "../services/auth/Auth";
 import { Router, RouterProps } from "./Router";
 
