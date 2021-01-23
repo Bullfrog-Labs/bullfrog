@@ -4,6 +4,7 @@ import { render } from "@testing-library/react";
 import MainView from "./MainView";
 import { Logging } from "kmgmt-common";
 import { AuthProvider, AuthContext } from "../services/auth/Auth";
+import { MemoryRouter } from "react-router-dom";
 
 Logging.configure(log);
 
@@ -20,7 +21,9 @@ test("renders", () => {
   // Smoke test
   render(
     <AuthContext.Provider value={authProvider.getInitialAuthState()}>
-      <MainView />
+      <MemoryRouter initialEntries={["/"]} initialIndex={0}>
+        <MainView />
+      </MemoryRouter>
     </AuthContext.Provider>
   );
 });
