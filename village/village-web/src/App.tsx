@@ -27,6 +27,7 @@ import {
   syncBody,
   getMentionUserPosts,
   getAllPostsByTitlePrefix,
+  deletePost,
 } from "./services/store/Posts";
 import { useEffect } from "react";
 import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
@@ -127,6 +128,7 @@ function App() {
               user!
             )}
             fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
+            deletePost={deletePost(database)}
             user={user}
           />
         </AuthContext.Provider>
