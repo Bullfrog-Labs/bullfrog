@@ -2,6 +2,7 @@ import * as log from "loglevel";
 import React from "react";
 import { Paper, makeStyles, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
+import { useGlobalStyles } from "../styles/styles";
 
 const useStyles = makeStyles(() => ({
   infoBox: {
@@ -15,6 +16,7 @@ const useStyles = makeStyles(() => ({
 export default function MainView(props: any) {
   const logger = log.getLogger("MainView");
   const classes = useStyles();
+  const globalClasses = useGlobalStyles();
 
   return (
     <Paper className={classes.infoBox} elevation={0}>
@@ -23,7 +25,11 @@ export default function MainView(props: any) {
         Press ⌘+U to create or open a post
       </Typography>
       <Typography variant="body1">
-        Click <Link to={"/profile"}>here</Link> to go to your profile
+        Click{" "}
+        <Link className={globalClasses.link} to={"/profile"}>
+          here
+        </Link>{" "}
+        to go to your profile
       </Typography>
     </Paper>
   );
