@@ -17,6 +17,7 @@ import {
   GetMentionUserPostsFn,
   RenamePostFn,
   SyncBodyFn,
+  DeletePostFn,
 } from "../services/store/Posts";
 import {
   UserRecord,
@@ -53,6 +54,7 @@ export const Router = (props: {
   getMentionUserPosts: GetMentionUserPostsFn;
   fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
   user?: UserRecord;
+  deletePost: DeletePostFn;
 }) => {
   const {
     authProvider,
@@ -68,6 +70,7 @@ export const Router = (props: {
     getSearchSuggestionsByTitlePrefix,
     getMentionUserPosts,
     fetchTitleFromOpenGraph,
+    deletePost,
     user,
   } = props;
   const AppContainerWithProps: React.FC<{}> = (props) => (
@@ -135,6 +138,7 @@ export const Router = (props: {
                 getGlobalMentions={getGlobalMentions}
                 createPost={createPost(user)}
                 getMentionUserPosts={getMentionUserPosts}
+                deletePost={deletePost}
               />
             </AppContainerWithProps>
           </PrivateRoute>

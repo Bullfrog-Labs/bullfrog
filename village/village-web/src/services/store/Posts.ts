@@ -418,7 +418,8 @@ export const getMentionUserPosts = (database: Database) => async (
 
 export type GetMentionUserPostsFn = ReturnType<typeof getMentionUserPosts>;
 
-export const deletePost = (database: Database) => (userId: UserId) => async (
+export const deletePost = (database: Database) => async (
+  userId: UserId,
   postId: PostId
 ): Promise<void> => {
   const logger = log.getLogger("deletePost");

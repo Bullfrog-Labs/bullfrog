@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import * as log from "loglevel";
+import { Link, useHistory } from "react-router-dom";
 import { UserRecord } from "../services/store/Users";
 import { useGlobalStyles } from "../styles/styles";
 import {
@@ -17,6 +18,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import { DateTime } from "luxon";
 import { HashLink } from "react-router-hash-link";
 import { profileURL } from "../routing/URLs";
+import { DeletePostFn } from "../services/store/Posts";
 
 export type PostSubtitleRowProps = {
   viewer: UserRecord;
@@ -25,6 +27,7 @@ export type PostSubtitleRowProps = {
   postId: string;
   updatedAt: Date | undefined;
   numMentions: number;
+  deletePost: DeletePostFn;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -43,10 +46,22 @@ const useStyles = makeStyles((theme) => ({
 export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
   const globalClasses = useGlobalStyles();
   const classes = useStyles();
-  const dt = DateTime.fromJSDate(props.updatedAt || new Date());
-  const isLoggedIn = props.author.uid === props.viewer.uid;
-  const stackURLPath = `/stack/${encodeURIComponent(props.postTitle)}`;
-  const postHasMentions = props.numMentions;
+  const logger = log.getLogger("PostSubtitleRow");
+  const {
+    deletePost,
+    postId,
+    author,
+    updatedAt,
+    viewer,
+    postTitle,
+    numMentions,
+  } = props;
+  const dt = DateTime.fromJSDate(updatedAt || new Date());
+  const isLoggedIn = author.uid === viewer.uid;
+  const stackURLPath = `/stack/${encodeURIComponent(postTitle)}`;
+  const postHasMentions = numMentions;
+
+  const history = useHistory();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -54,6 +69,15 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
   };
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleDelete = async (
+    event: React.MouseEvent<HTMLLIElement, MouseEvent>
+  ) => {
+    handleClose();
+    await deletePost(author.uid, postId);
+    logger.debug(`Post ${postId} deleted!`);
+    history.push("/");
   };
 
   return (
@@ -64,11 +88,8 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
       component="div"
     >
       <div>
-        <Link
-          className={globalClasses.link}
-          to={profileURL(props.author.username)}
-        >
-          <em>{props.author.displayName}</em>
+        <Link className={globalClasses.link} to={profileURL(author.username)}>
+          <em>{author.displayName}</em>
         </Link>
         <span className={classes.subtitlePart}>{dt.toFormat("MMM d")}</span>
         <span className={classes.subtitlePart}>
@@ -107,7 +128,7 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem dense onClick={handleClose}>
+                <MenuItem dense onClick={handleDelete}>
                   <DeleteIcon
                     fontSize="small"
                     className={classes.subtitleMoreMenuItem}
