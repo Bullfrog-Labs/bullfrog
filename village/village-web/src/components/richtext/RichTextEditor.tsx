@@ -38,6 +38,8 @@ import theme from "../../styles/theme";
 
 export type Body = RichText;
 
+// TODO: How to make this work for readonly? Need to make it not require stuff
+// that isn't present when there's no user.
 export type RichTextEditorProps = {
   body: Body;
   enableToolbar?: boolean;
@@ -150,18 +152,20 @@ const RichTextEditor = forwardRef<
             : globalClasses.editableRichText
         }
       />
-      <MentionSelect
-        at={target}
-        valueIndex={index}
-        options={values}
-        onClickMention={onClickMention}
-        rowElementFn={mentionableElementFn}
-        styles={{
-          mentionItemSelected: {
-            backgroundColor: theme.palette.action.selected,
-          },
-        }}
-      />
+      {!props.readOnly && (
+        <MentionSelect
+          at={target}
+          valueIndex={index}
+          options={values}
+          onClickMention={onClickMention}
+          rowElementFn={mentionableElementFn}
+          styles={{
+            mentionItemSelected: {
+              backgroundColor: theme.palette.action.selected,
+            },
+          }}
+        />
+      )}
     </Slate>
   );
 });

@@ -63,6 +63,10 @@ import {
 } from "../hooks/useLoadableRecord";
 import { useQuery } from "../hooks/useQuery";
 import { postURL } from "../routing/URLs";
+import {
+  CurriedByUser,
+  useUserFromAppAuthContext,
+} from "../services/auth/AppAuth";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -144,6 +148,7 @@ const useEditablePostComponents: (
     />
   );
 
+  // TODO: How to make this work with read-only mode?
   const richTextEditor = (
     <RichTextEditor
       ref={richTextEditorRef}
@@ -170,7 +175,6 @@ const useEditablePostComponents: (
 };
 
 export type BasePostViewProps = {
-  readOnly: boolean;
   postView: React.ReactChild;
   mentions?: MentionInContext[];
 };
@@ -255,7 +259,6 @@ export type PostViewProps = {
   setBody: Dispatch<SetStateAction<PostBody>>;
   updatedAt: Date | undefined;
 
-  viewer: UserRecord;
   author: UserRecord;
   mentions: MentionInContext[];
 
@@ -269,10 +272,16 @@ export type PostViewProps = {
   mentionableElementFn: (option: MentionNodeData) => JSX.Element;
 };
 
+export interface ReadOnlyPostViewProps {}
+
+export interface EditablePostViewProps {}
+
 type PostViewImperativeHandle = {
   blurTitle: () => void;
   blurBody: () => void;
 };
+
+// TODO: Can PostView be decomposed into read-only and editable versions?
 
 // Changing title triggers a rename. Renames are not allowed if the title is
 // already being used.
@@ -462,25 +471,18 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
       blurBody: () => richTextEditorRef.current?.blurEditor(),
     }));
 
-    return (
-      <BasePostView
-        readOnly={props.readOnly}
-        postView={postView}
-        mentions={props.mentions}
-      />
-    );
+    return <BasePostView postView={postView} mentions={props.mentions} />;
   }
 );
 
 type PostViewControllerProps = {
-  viewer: UserRecord;
   getUser: GetUserFn;
   getUserByUsername: GetUserByUsernameFn;
   getPost: GetPostFn;
   getGlobalMentions: GetAllPostsByTitlePrefixFn;
-  renamePost: RenamePostFn;
-  syncBody: SyncBodyFn;
-  createPost: CreatePostFn;
+  renamePost: CurriedByUser<RenamePostFn>;
+  syncBody: CurriedByUser<SyncBodyFn>;
+  createPost: CurriedByUser<CreatePostFn>;
   getMentionUserPosts: GetMentionUserPostsFn;
 };
 
@@ -493,6 +495,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const logger = log.getLogger("PostViewController");
   const history = useHistory();
   const globalClasses = useGlobalStyles();
+
+  const viewer = useUserFromAppAuthContext();
 
   const { authorIdOrUsername, postId } = useParams<PostViewControllerParams>();
   const query = useQuery();
@@ -603,6 +607,9 @@ export const PostViewController = (props: PostViewControllerProps) => {
     };
   }, [getMentionUserPosts, postId, setMentionPosts]);
 
+  // TODO: Move this down in the component tree, because mentions should not be
+  // available in read-only posts. Especially does not make sense for
+  // unauthenticated users.
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     props.getGlobalMentions,
     props.createPost,
@@ -638,10 +645,10 @@ export const PostViewController = (props: PostViewControllerProps) => {
   };
 
   const authorId = authorRecord.get().uid;
-  const readOnly = props.viewer.uid !== authorId;
+  const readOnly = viewer?.uid !== authorId;
 
   const pageTitle = `${title!} by ${
-    authorId === props.viewer.uid ? "you" : authorRecord.get()?.username
+    authorId === viewer?.uid ? "you" : authorRecord.get()?.username
   }`;
 
   return (
@@ -651,7 +658,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
       </Helmet>
       <PostView
         ref={postViewRef}
-        viewer={props.viewer}
         author={authorRecord.get()}
         readOnly={readOnly}
         postId={postId}
