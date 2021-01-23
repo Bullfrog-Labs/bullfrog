@@ -8,7 +8,10 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { AppAuthedComponent, CurriedByUser } from "../services/auth/AppAuth";
+import {
+  CurriedByUser,
+  useUserFromAppAuthContext,
+} from "../services/auth/AppAuth";
 import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
 import { CreatePostFn } from "../services/store/Posts";
@@ -92,16 +95,12 @@ export interface AppContainerProps extends React.PropsWithChildren<{}> {
 }
 
 export const AppContainer = (props: AppContainerProps) => {
-  return (
-    <AppAuthedComponent
-      withUser={(user) =>
-        !!user ? (
-          <AuthedAppContainer user={user} {...props} />
-        ) : (
-          <UnauthedAppContainer {...props} />
-        )
-      }
-    />
+  const user = useUserFromAppAuthContext();
+
+  return !!user ? (
+    <AuthedAppContainer user={user} {...props} />
+  ) : (
+    <UnauthedAppContainer {...props} />
   );
 };
 
