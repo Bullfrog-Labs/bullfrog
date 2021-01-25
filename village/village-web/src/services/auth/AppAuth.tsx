@@ -21,6 +21,11 @@ export const useUserFromAppAuthContext = (): UserRecord | undefined => {
     : undefined;
 };
 
+export const useIsLoggedIn = (): boolean => {
+  const loggedInUser = useUserFromAppAuthContext();
+  return !!loggedInUser;
+};
+
 export const useLoggedInUserFromAppAuthContext = (): UserRecord => {
   const user = useUserFromAppAuthContext();
   if (!user) {
