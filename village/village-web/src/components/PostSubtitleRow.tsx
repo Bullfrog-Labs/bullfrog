@@ -19,9 +19,9 @@ import { DateTime } from "luxon";
 import { HashLink } from "react-router-hash-link";
 import { profileURL } from "../routing/URLs";
 import { DeletePostFn } from "../services/store/Posts";
+import { useUserFromAppAuthContext } from "../services/auth/AppAuth";
 
 export type PostSubtitleRowProps = {
-  viewer: UserRecord;
   author: UserRecord;
   postTitle: string;
   postId: string;
@@ -52,14 +52,15 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
     postId,
     author,
     updatedAt,
-    viewer,
     postTitle,
     numMentions,
   } = props;
   const dt = DateTime.fromJSDate(updatedAt || new Date());
-  const isLoggedIn = author.uid === viewer.uid;
   const stackURLPath = `/stack/${encodeURIComponent(postTitle)}`;
   const postHasMentions = numMentions;
+
+  const viewer = useUserFromAppAuthContext();
+  const isLoggedInAsAuthor = !!viewer ? author.uid === viewer.uid : false;
 
   const history = useHistory();
 
@@ -111,7 +112,7 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
               </IconButton>
             </HashLink>
           </Tooltip>
-          {isLoggedIn && (
+          {isLoggedInAsAuthor && (
             <React.Fragment>
               <Tooltip title="Delete, settings, and more...">
                 <IconButton
