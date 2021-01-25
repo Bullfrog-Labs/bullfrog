@@ -12,6 +12,7 @@ import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions
 import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
 import {
   createPost,
+  deletePost,
   getAllPostsByTitlePrefix,
   getMentionUserPosts,
   getPost,
@@ -107,6 +108,8 @@ function App() {
               database
             )}
             fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
+            deletePost={deletePost(database)}
+            user={user}
           />
         </AppAuthContext.Provider>
       ) : (

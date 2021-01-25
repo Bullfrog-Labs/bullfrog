@@ -18,6 +18,7 @@ import {
   GetUserPostsFn,
   RenamePostFn,
   SyncBodyFn,
+  DeletePostFn,
 } from "../services/store/Posts";
 import { GetUserByUsernameFn, GetUserFn } from "../services/store/Users";
 import MainView from "../views/MainView";
@@ -50,6 +51,7 @@ export type RouterProps = {
   getSearchSuggestionsByTitlePrefix: CurriedByUser<SearchSuggestionFetchFn>;
   getMentionUserPosts: GetMentionUserPostsFn;
   fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
+  deletePost: DeletePostFn;
 };
 
 export const Router = (props: RouterProps) => {
@@ -67,6 +69,7 @@ export const Router = (props: RouterProps) => {
     getSearchSuggestionsByTitlePrefix,
     getMentionUserPosts,
     fetchTitleFromOpenGraph,
+    deletePost,
   } = props;
 
   const AppContainerWithProps: React.FC<{}> = (props) => (
@@ -119,6 +122,7 @@ export const Router = (props: RouterProps) => {
               getGlobalMentions={getGlobalMentions}
               createPost={createPost}
               getMentionUserPosts={getMentionUserPosts}
+              deletePost={deletePost}
             />
           </AppContainerWithProps>
         </PrivateRoute>

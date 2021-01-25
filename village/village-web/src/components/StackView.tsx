@@ -1,39 +1,20 @@
 import * as log from "loglevel";
 import React, { useState, useEffect } from "react";
-import {
-  Avatar,
-  Container,
-  ListItemAvatar,
-  Typography,
-} from "@material-ui/core";
+import { Container, Typography } from "@material-ui/core";
 import Divider from "@material-ui/core/Divider";
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ImageIcon from "@material-ui/icons/Image";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { UserPost, GetStackPostsFn } from "../services/store/Posts";
-import { richTextStringPreview } from "./richtext/Utils";
 import { useGlobalStyles } from "../styles/styles";
-import { postURL } from "../routing/URLs";
 import { Helmet } from "react-helmet";
+import { StackPostCard } from "./StackPostCard";
 
 const useStyles = makeStyles(() => ({
   root: {},
-  inline: {
-    display: "inline",
-  },
   profileDivider: {
     margin: "10px 0 0 0",
-  },
-  postListItem: {
-    paddingLeft: "0px",
-    paddingRight: "0px",
-  },
-  username: {
-    fontWeight: 300,
-    color: "grey",
   },
 }));
 
@@ -70,11 +51,12 @@ export const StackViewController = (props: {
 }) => {
   const logger = log.getLogger("StackViewController");
   const { stackId } = useParams<StackViewParams>();
-  logger.debug(`loading stack for ${stackId}`);
+  const title = decodeURIComponent(stackId);
+  logger.debug(`loading stack for ${title}`);
   const { getStackPosts } = props;
-  const state = useStackState(getStackPosts, stackId);
+  const state = useStackState(getStackPosts, title);
 
-  return <StackView posts={state.posts} source={{ name: stackId }} />;
+  return <StackView posts={state.posts} source={{ name: title }} />;
 };
 
 export const StackView = (props: StackViewProps) => {
@@ -83,40 +65,13 @@ export const StackView = (props: StackViewProps) => {
   const globalClasses = useGlobalStyles();
 
   const listItems = posts.map((post) => {
-    const listItemPrimaryText = (
-      <>
-        <Typography variant="h6">
-          <Link
-            className={globalClasses.link}
-            to={postURL(post.user.username, post.post.id!)}
-          >
-            {post.post.title}
-          </Link>
-        </Typography>
-        <Typography variant="subtitle2" className={classes.username}>
-          <em>{post.user.displayName}</em>
-        </Typography>
-      </>
-    );
     return (
       <ListItem
         alignItems="flex-start"
         key={post.post.id}
-        className={classes.postListItem}
+        className={globalClasses.cardListItem}
       >
-        <ListItemAvatar>
-          <Avatar alt={post.user.displayName}>
-            <ImageIcon />
-          </Avatar>
-        </ListItemAvatar>
-        <ListItemText
-          primary={listItemPrimaryText}
-          secondary={
-            <React.Fragment>
-              {richTextStringPreview(post.post.body)}
-            </React.Fragment>
-          }
-        />
+        <StackPostCard userPost={post} />
       </ListItem>
     );
   });

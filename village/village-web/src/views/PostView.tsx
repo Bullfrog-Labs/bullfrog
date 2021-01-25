@@ -37,6 +37,7 @@ import {
   UserPost,
   GetMentionUserPostsFn,
   GetPostFn,
+  DeletePostFn,
 } from "../services/store/Posts";
 import {
   GetUserByUsernameFn,
@@ -266,6 +267,7 @@ export type PostViewProps = {
 
   renamePost: RenamePostFn;
   syncBody: SyncBodyFn;
+  deletePost: DeletePostFn;
   onMentionSearchChanged: (newSearch: string) => void;
   mentionables: MentionNodeData[];
   onMentionAdded: (option: MentionNodeData) => void;
@@ -414,6 +416,8 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
         postTitle={props.title}
         postId={props.postId}
         updatedAt={props.updatedAt}
+        numMentions={props.mentions.length}
+        deletePost={props.deletePost}
       />
     );
 
@@ -484,6 +488,7 @@ type PostViewControllerProps = {
   syncBody: CurriedByUser<SyncBodyFn>;
   createPost: CurriedByUser<CreatePostFn>;
   getMentionUserPosts: GetMentionUserPostsFn;
+  deletePost: DeletePostFn;
 };
 
 type PostViewControllerParams = {
@@ -674,6 +679,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
         onMentionAdded={onMentionAdded}
         mentionableElementFn={mentionableElementFn(authorId)}
         updatedAt={updatedAt}
+        deletePost={props.deletePost}
       />
     </>
   );
