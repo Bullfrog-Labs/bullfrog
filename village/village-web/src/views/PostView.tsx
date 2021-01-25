@@ -411,7 +411,6 @@ export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
 
     const authorLink = (
       <PostSubtitleRow
-        viewer={props.viewer}
         author={props.author}
         postTitle={props.title}
         postId={props.postId}
