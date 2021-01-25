@@ -109,7 +109,6 @@ function App() {
             )}
             fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
             deletePost={deletePost(database)}
-            user={user}
           />
         </AppAuthContext.Provider>
       ) : (

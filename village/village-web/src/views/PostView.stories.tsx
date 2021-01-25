@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 import { useMentions } from "../hooks/useMentions";
+import { AppAuthContext } from "../services/auth/AppAuth";
+import { AuthProvider } from "../services/auth/Auth";
 import {
   UserPost,
   PostTitle,
@@ -12,9 +14,35 @@ import {
 } from "../services/store/Posts";
 import { PostView, PostViewProps } from "./PostView";
 
+const viewerAppAuthContextDecorator = (Story: Story) => {
+  const viewer = {
+    uid: "456",
+    displayName: "baz",
+    username: "baz",
+  };
+
+  const authProvider: AuthProvider = {
+    onAuthStateChanged: (authState) => {},
+    getInitialAuthProviderState: () => viewer,
+  };
+
+  const appAuthState = {
+    authCompleted: true,
+    authProviderState: authProvider.getInitialAuthProviderState(),
+    authedUser: viewer,
+  };
+
+  return (
+    <AppAuthContext.Provider value={appAuthState}>
+      <Story />
+    </AppAuthContext.Provider>
+  );
+};
+
 export default {
   title: "PostView/PostView",
   component: PostView,
+  decorators: [viewerAppAuthContextDecorator],
 } as Meta;
 
 const Template: Story<PostViewProps> = (args) => {
@@ -69,11 +97,6 @@ BasicPostView.args = {
   postId: "456",
   title: "",
   body: EMPTY_RICH_TEXT,
-  viewer: {
-    uid: "456",
-    displayName: "baz",
-    username: "baz",
-  },
   author: {
     uid: "123",
     displayName: "qux",

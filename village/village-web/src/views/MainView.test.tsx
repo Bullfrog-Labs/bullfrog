@@ -16,6 +16,7 @@ test("renders", () => {
     uid: "123",
     username: "foo",
   };
+
   const authProvider: AuthProvider = {
     onAuthStateChanged: (authState) => {},
     getInitialAuthProviderState: () => user,
