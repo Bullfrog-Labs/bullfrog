@@ -1,6 +1,6 @@
 import React from "react";
 import { screen, render, waitFor } from "@testing-library/react";
-import { PostView, PostViewController } from "./PostView";
+import { EditablePostView, PostViewController } from "./PostView";
 import {
   EMPTY_RICH_TEXT,
   stringToSlateNode,
@@ -80,7 +80,7 @@ const TestPostView = (props: { mentions?: MentionInContext[] }) => {
 
   return (
     <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
-      <PostView {...postProps} />
+      <EditablePostView {...postProps} />
     </MemoryRouter>
   );
 };

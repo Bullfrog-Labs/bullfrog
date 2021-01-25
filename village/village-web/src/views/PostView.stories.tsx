@@ -12,7 +12,7 @@ import {
   SyncBodyFn,
   CreatePostFn,
 } from "../services/store/Posts";
-import { PostView, PostViewProps } from "./PostView";
+import { EditablePostView, EditablePostViewProps } from "./PostView";
 
 const viewerAppAuthContextDecorator = (Story: Story) => {
   const viewer = {
@@ -41,11 +41,11 @@ const viewerAppAuthContextDecorator = (Story: Story) => {
 
 export default {
   title: "PostView/PostView",
-  component: PostView,
+  component: EditablePostView,
   decorators: [viewerAppAuthContextDecorator],
 } as Meta;
 
-const Template: Story<PostViewProps> = (args) => {
+const Template: Story<EditablePostViewProps> = (args) => {
   const [title, setTitle] = useState(args.title);
   args.title = title;
   args.setTitle = setTitle;
@@ -69,7 +69,7 @@ const Template: Story<PostViewProps> = (args) => {
 
   return (
     <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
-      <PostView
+      <EditablePostView
         {...args}
         mentionables={mentionables}
         onMentionSearchChanged={onMentionSearchChanged(authorId)}
