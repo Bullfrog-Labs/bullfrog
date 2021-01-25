@@ -1,3 +1,12 @@
+import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
+import {
+  CircularProgress,
+  Divider,
+  Grid,
+  makeStyles,
+  Paper,
+} from "@material-ui/core";
+import * as log from "loglevel";
 import React, {
   Dispatch,
   forwardRef,
@@ -8,36 +17,48 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useGlobalStyles } from "../styles/styles";
+import { Helmet } from "react-helmet";
+import IdleTimer from "react-idle-timer";
+import { Redirect, useHistory, useParams } from "react-router-dom";
+import { MentionsSection } from "../components/mentions/MentionsSection";
+import { MentionSuggestionLine } from "../components/mentions/MentionSuggestionLine";
+import { PostSubtitleRow } from "../components/PostSubtitleRow";
+import { DocumentTitle } from "../components/richtext/DocumentTitle";
+import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 import RichTextEditor, {
   RichTextEditorImperativeHandle,
 } from "../components/richtext/RichTextEditor";
-import * as log from "loglevel";
-import { MentionsSection } from "../components/MentionsSection";
 import {
-  CircularProgress,
-  makeStyles,
-  Paper,
-  Grid,
-  Typography,
-  Divider,
-} from "@material-ui/core";
-import IdleTimer from "react-idle-timer";
+  EMPTY_RICH_TEXT,
+  findMentionsInPosts,
+  MentionInContext,
+} from "../components/richtext/Utils";
 import {
-  PostRecord,
+  coalesceMaybeToLoadableRecord,
+  useLoadableRecord,
+} from "../hooks/useLoadableRecord";
+import { useMentions } from "../hooks/useMentions";
+import { useQuery } from "../hooks/useQuery";
+import { postURL } from "../routing/URLs";
+import {
+  CurriedByUser,
+  useUserFromAppAuthContext,
+} from "../services/auth/AppAuth";
+import {
+  CreatePostFn,
+  DeletePostFn,
+  GetAllPostsByTitlePrefixFn,
+  GetMentionUserPostsFn,
+  GetPostFn,
+  PostBody,
   PostId,
+  PostRecord,
+  PostTitle,
   RenamePostFn,
   RenamePostResult,
   SyncBodyFn,
   SyncBodyResult,
-  CreatePostFn,
-  PostBody,
-  PostTitle,
-  GetAllPostsByTitlePrefixFn,
   UserPost,
-  GetMentionUserPostsFn,
-  GetPostFn,
-  DeletePostFn,
 } from "../services/store/Posts";
 import {
   GetUserByUsernameFn,
@@ -45,29 +66,8 @@ import {
   UserId,
   UserRecord,
 } from "../services/store/Users";
-import { useMentions } from "../hooks/useMentions";
-import { Redirect, useHistory, useParams } from "react-router-dom";
+import { useGlobalStyles } from "../styles/styles";
 import { assertNever } from "../utils";
-import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
-import { DocumentTitle } from "../components/richtext/DocumentTitle";
-import {
-  EMPTY_RICH_TEXT,
-  MentionInContext,
-  findMentionsInPosts,
-} from "../components/richtext/Utils";
-import { PostSubtitleRow } from "../components/PostSubtitleRow";
-import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
-import { Helmet } from "react-helmet";
-import {
-  coalesceMaybeToLoadableRecord,
-  useLoadableRecord,
-} from "../hooks/useLoadableRecord";
-import { useQuery } from "../hooks/useQuery";
-import { postURL } from "../routing/URLs";
-import {
-  CurriedByUser,
-  useUserFromAppAuthContext,
-} from "../services/auth/AppAuth";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -202,44 +202,6 @@ export const BasePostView = (props: BasePostViewProps) => {
       )}
     </Grid>
   );
-};
-
-const MentionSuggestionLine = (props: {
-  option: MentionNodeData;
-  uid: string;
-}) => {
-  const { option, uid } = props;
-  const globalClasses = useGlobalStyles();
-  if (!option.exists) {
-    return (
-      <Typography
-        variant="body1"
-        className={globalClasses.searchSuggestionLine}
-      >
-        <span className={globalClasses.searchPrefixPart}>New post: </span>{" "}
-        {option.value}
-      </Typography>
-    );
-  } else if (option.authorId === uid) {
-    return (
-      <Typography
-        variant="body1"
-        className={globalClasses.searchSuggestionLine}
-      >
-        {option.value}
-      </Typography>
-    );
-  } else {
-    return (
-      <Typography
-        variant="body1"
-        className={globalClasses.searchSuggestionLine}
-      >
-        {option.value}{" "}
-        <em style={{ fontWeight: 400 }}>by {option.authorUsername}</em>
-      </Typography>
-    );
-  }
 };
 
 const mentionableElementFn = (uid: UserId) => (
