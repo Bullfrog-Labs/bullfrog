@@ -27,7 +27,7 @@ export type PostSubtitleRowProps = {
   postId: string;
   updatedAt: Date | undefined;
   numMentions: number;
-  deletePost: DeletePostFn;
+  deletePost?: DeletePostFn;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -42,6 +42,8 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: theme.spacing(1),
   },
 }));
+
+// TODO: Make this work when user is not logged in (and therefore there is no deletePost function)
 
 export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
   const globalClasses = useGlobalStyles();
@@ -62,6 +64,10 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
   const viewer = useUserFromAppAuthContext();
   const isLoggedInAsAuthor = !!viewer ? author.uid === viewer.uid : false;
 
+  if (isLoggedInAsAuthor && !deletePost) {
+    throw new Error("Must provide deletePost when logged in as author");
+  }
+
   const history = useHistory();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -72,7 +78,7 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
     setAnchorEl(null);
   };
 
-  const handleDelete = async (
+  const handleDelete = (deletePost: DeletePostFn) => async (
     event: React.MouseEvent<HTMLLIElement, MouseEvent>
   ) => {
     handleClose();
@@ -129,7 +135,7 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem dense onClick={handleDelete}>
+                <MenuItem dense onClick={handleDelete(deletePost!)}>
                   <DeleteIcon
                     fontSize="small"
                     className={classes.subtitleMoreMenuItem}

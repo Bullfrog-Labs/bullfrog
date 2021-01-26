@@ -12,6 +12,7 @@ import React, {
 import { useGlobalStyles } from "../styles/styles";
 import RichTextEditor, {
   RichTextEditorImperativeHandle,
+  RichTextEditorMentionTypeaheadComponents,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
 import { MentionsSection } from "../components/mentions/MentionsSection";
@@ -116,12 +117,14 @@ export const BasePostView = (props: BasePostViewProps) => {
   );
 };
 
-type EditablePostInputs = {
+type OnIdleComponents = {
   idleTime?: number;
   buildOnIdle: (
     documentTitleRef: RefObject<EditableTypographyImperativeHandle>
   ) => (event: Event) => void;
+};
 
+type PostComponentInputs = {
   readOnly: boolean;
 
   title: PostTitle;
@@ -130,43 +133,46 @@ type EditablePostInputs = {
   onTitleChange: (newTitle: PostTitle) => void;
   onBodyChange: (newBody: PostBody) => void;
 
-  onMentionSearchChanged: (newSearch: string) => void;
-  mentionables: MentionNodeData[];
-  onMentionAdded: (option: MentionNodeData) => void;
-  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
+  onIdleComponents?: OnIdleComponents;
+  mentionableComponents?: RichTextEditorMentionTypeaheadComponents;
 };
 
-type EditablePostComponents = {
-  idleTimer: React.ReactChild;
+type PostComponents = {
+  idleTimer?: React.ReactChild;
   documentTitle: React.ReactChild;
   documentTitleRef: RefObject<EditableTypographyImperativeHandle>;
   richTextEditor: React.ReactChild;
   richTextEditorRef: RefObject<RichTextEditorImperativeHandle>;
 };
 
-const useEditablePostComponents: (
-  inputs: EditablePostInputs
-) => EditablePostComponents = ({
-  idleTime,
-  buildOnIdle,
+const usePostComponents: (inputs: PostComponentInputs) => PostComponents = ({
+  onIdleComponents,
   readOnly,
   title,
   body,
   onTitleChange,
   onBodyChange,
-  onMentionSearchChanged,
-  mentionables,
-  onMentionAdded,
-  mentionableElementFn,
+  mentionableComponents,
 }) => {
   const richTextEditorRef = useRef<RichTextEditorImperativeHandle>(null);
   const documentTitleRef = useRef<EditableTypographyImperativeHandle>(null);
 
-  const onIdle = buildOnIdle(documentTitleRef);
+  if (readOnly === !!onIdleComponents) {
+    throw new Error("Idle components should be present iff editable post");
+  }
 
-  const idleTimer = (
-    <IdleTimer timeout={idleTime ?? DEFAULT_IDLE_TIME} onIdle={onIdle} />
-  );
+  if (readOnly === !!mentionableComponents) {
+    throw new Error(
+      "Mentionable components should be present iff editable post"
+    );
+  }
+
+  const idleTimer = !!onIdleComponents ? (
+    <IdleTimer
+      timeout={onIdleComponents.idleTime ?? DEFAULT_IDLE_TIME}
+      onIdle={onIdleComponents.buildOnIdle(documentTitleRef)}
+    />
+  ) : undefined;
 
   const documentTitle = (
     <DocumentTitle
@@ -180,7 +186,6 @@ const useEditablePostComponents: (
     />
   );
 
-  // TODO: How to make this work with read-only mode?
   const richTextEditor = (
     <RichTextEditor
       ref={richTextEditorRef}
@@ -188,14 +193,11 @@ const useEditablePostComponents: (
       body={body}
       onChange={onBodyChange}
       enableToolbar={false}
-      mentionables={mentionables}
-      onMentionSearchChanged={onMentionSearchChanged}
-      onMentionAdded={onMentionAdded}
-      mentionableElementFn={mentionableElementFn}
+      mentionTypeaheadComponents={mentionableComponents}
     />
   );
 
-  const result: EditablePostComponents = {
+  const result: PostComponents = {
     idleTimer: idleTimer,
     documentTitle: documentTitle,
     documentTitleRef: documentTitleRef,
@@ -231,14 +233,122 @@ export type EditablePostViewProps = {
   editablePostCallbacks: EditablePostCallbacks;
 };
 
-export interface ReadOnlyPostViewProps {}
-
 type PostViewImperativeHandle = {
   blurTitle: () => void;
   blurBody: () => void;
 };
 
-// TODO: Can PostView be decomposed into read-only and editable versions?
+const useAssembledPostView = (
+  subtitleRow: React.ReactChild,
+  documentTitle: React.ReactChild,
+  richTextEditor: React.ReactChild,
+  idleTimer?: React.ReactChild
+) => {
+  const classes = useStyles();
+
+  const header = (
+    <Grid item>
+      <Grid
+        container
+        direction="column"
+        justify="flex-start"
+        alignItems="stretch"
+        spacing={1}
+      >
+        <Grid item>{documentTitle}</Grid>
+        <Grid item>{subtitleRow}</Grid>
+      </Grid>
+    </Grid>
+  );
+
+  const postDetails = (
+    <div className={classes.postDetails}>
+      <Grid
+        container
+        direction="column"
+        justify="flex-start"
+        alignItems="stretch"
+        spacing={4}
+      >
+        <Grid item>{header}</Grid>
+        <Grid item>
+          <div>{richTextEditor}</div>
+        </Grid>
+      </Grid>
+    </div>
+  );
+
+  const postView = (
+    <>
+      {!!idleTimer ?? idleTimer}
+      <Grid
+        container
+        direction="row"
+        justify="center"
+        alignItems="flex-start"
+        spacing={1}
+      >
+        <Grid item sm={12}>
+          {postDetails}
+        </Grid>
+      </Grid>
+    </>
+  );
+  return postView;
+};
+
+export type ReadOnlyPostViewProps = {
+  postId: PostId;
+  author: UserRecord;
+  updatedAt: Date | undefined;
+  mentions: MentionInContext[];
+
+  title: PostTitle;
+  body: PostBody;
+};
+
+export const ReadOnlyPostView = forwardRef<
+  PostViewImperativeHandle,
+  ReadOnlyPostViewProps
+>((props, ref) => {
+  const {
+    documentTitle,
+    documentTitleRef,
+    richTextEditor,
+    richTextEditorRef,
+  } = usePostComponents({
+    readOnly: true,
+
+    title: props.title,
+    body: props.body,
+
+    onTitleChange: () => {},
+    onBodyChange: () => {},
+  });
+
+  const subtitleRow = (
+    <PostSubtitleRow
+      author={props.author}
+      postTitle={props.title}
+      postId={props.postId}
+      updatedAt={props.updatedAt}
+      numMentions={props.mentions.length}
+    />
+  );
+
+  const postView = useAssembledPostView(
+    subtitleRow,
+    documentTitle,
+    richTextEditor
+  );
+
+  useImperativeHandle(ref, () => ({
+    blurTitle: () => documentTitleRef.current?.blurEditor(),
+    blurBody: () => richTextEditorRef.current?.blurEditor(),
+  }));
+
+  return <BasePostView postView={postView} mentions={props.mentions} />;
+});
 
 // Changing title triggers a rename. Renames are not allowed if the title is
 // already being used.
@@ -246,8 +356,7 @@ export const EditablePostView = forwardRef<
   PostViewImperativeHandle,
   EditablePostViewProps
 >((props, ref) => {
-  const classes = useStyles();
-  const logger = log.getLogger("PostView");
+  const logger = log.getLogger("EditablePostView");
 
   const viewer = useLoggedInUserFromAppAuthContext();
 
@@ -378,8 +487,7 @@ export const EditablePostView = forwardRef<
     documentTitleRef,
     richTextEditor,
     richTextEditorRef,
-  } = useEditablePostComponents({
-    buildOnIdle: buildOnIdle,
+  } = usePostComponents({
     readOnly: false,
 
     title: props.title,
@@ -388,13 +496,19 @@ export const EditablePostView = forwardRef<
     onTitleChange: onTitleChange,
     onBodyChange: onBodyChange,
 
-    onMentionSearchChanged: onMentionSearchChanged,
-    mentionables: mentionables,
-    onMentionAdded: onMentionAdded,
-    mentionableElementFn: mentionableElementFn(viewer.uid),
+    onIdleComponents: {
+      buildOnIdle: buildOnIdle,
+    },
+
+    mentionableComponents: {
+      onMentionSearchChanged: onMentionSearchChanged,
+      mentionables: mentionables,
+      onMentionAdded: onMentionAdded,
+      mentionableElementFn: mentionableElementFn(viewer.uid),
+    },
   });
 
-  const authorLink = (
+  const subtitleRow = (
     <PostSubtitleRow
       author={props.author}
       postTitle={props.title}
@@ -405,53 +519,11 @@ export const EditablePostView = forwardRef<
     />
   );
 
-  const header = (
-    <Grid item>
-      <Grid
-        container
-        direction="column"
-        justify="flex-start"
-        alignItems="stretch"
-        spacing={1}
-      >
-        <Grid item>{documentTitle}</Grid>
-        <Grid item>{authorLink}</Grid>
-      </Grid>
-    </Grid>
-  );
-
-  const postDetails = (
-    <div className={classes.postDetails}>
-      <Grid
-        container
-        direction="column"
-        justify="flex-start"
-        alignItems="stretch"
-        spacing={4}
-      >
-        <Grid item>{header}</Grid>
-        <Grid item>
-          <div>{richTextEditor}</div>
-        </Grid>
-      </Grid>
-    </div>
-  );
-
-  const postView = (
-    <>
-      {idleTimer}
-      <Grid
-        container
-        direction="row"
-        justify="center"
-        alignItems="flex-start"
-        spacing={1}
-      >
-        <Grid item sm={12}>
-          {postDetails}
-        </Grid>
-      </Grid>
-    </>
+  const postView = useAssembledPostView(
+    subtitleRow,
+    documentTitle,
+    richTextEditor,
+    idleTimer
   );
 
   useImperativeHandle(ref, () => ({
@@ -629,17 +701,24 @@ export const PostViewController = (props: PostViewControllerProps) => {
       postId={postId}
       author={authorRecord.get()}
       updatedAt={updatedAt}
-      mentions={mentions!}
       title={title!}
       setTitle={setTitle}
       body={body!}
       setBody={setBody}
       getPost={getPost}
+      mentions={mentions!}
       editablePostCallbacks={editablePostCallbacks}
     />
   ) : (
-    // readonly post view goes here
-    <></>
+    <ReadOnlyPostView
+      ref={postViewRef}
+      postId={postId}
+      author={authorRecord.get()}
+      updatedAt={updatedAt}
+      title={title!}
+      body={body!}
+      mentions={mentions!}
+    />
   );
 
   const pageTitle = `${title!} by ${

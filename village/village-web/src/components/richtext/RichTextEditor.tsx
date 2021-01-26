@@ -38,18 +38,20 @@ import theme from "../../styles/theme";
 
 export type Body = RichText;
 
-// TODO: How to make this work for readonly? Need to make it not require stuff
-// that isn't present when there's no user.
+export type RichTextEditorMentionTypeaheadComponents = {
+  mentionables: MentionNodeData[];
+  onMentionSearchChanged: (search: string) => void;
+  onMentionAdded: (option: MentionNodeData) => void;
+  mentionableElementFn?: (option: MentionNodeData) => JSX.Element;
+};
+
 export type RichTextEditorProps = {
   body: Body;
   enableToolbar?: boolean;
   readOnly?: boolean;
-  mentionables: MentionNodeData[];
   options?: Options;
   onChange: (newBody: Body) => void;
-  onMentionSearchChanged: (search: string) => void;
-  onMentionAdded: (option: MentionNodeData) => void;
-  mentionableElementFn?: (option: MentionNodeData) => JSX.Element;
+  mentionTypeaheadComponents?: RichTextEditorMentionTypeaheadComponents;
 };
 
 const didOpsAffectContent = (ops: Operation[]): boolean => {
@@ -73,18 +75,17 @@ const RichTextEditor = forwardRef<
   const editor = useMemo(() => pipe(createEditor(), decorator), [decorator]);
   const globalClasses = useGlobalStyles();
 
-  let onMentionAdded = props.onMentionAdded;
-  if (!onMentionAdded) {
-    onMentionAdded = (option: MentionNodeData) => {};
-  }
-  let onMentionSearchChanged = props.onMentionSearchChanged;
-  if (!onMentionSearchChanged) {
-    onMentionSearchChanged = (search: string) => {};
-  }
-  let mentionableElementFn = props.mentionableElementFn;
-  if (!mentionableElementFn) {
-    mentionableElementFn = (option) => <Typography>{option.value}</Typography>;
-  }
+  const {
+    mentionables,
+    onMentionAdded,
+    onMentionSearchChanged,
+    mentionableElementFn,
+  } = props.mentionTypeaheadComponents ?? {
+    mentionables: [],
+    onMentionAdded: (option: MentionNodeData) => {},
+    onMentionSearchChanged: (search: string) => {},
+    mentionableElementFn: (option) => <Typography>{option.value}</Typography>,
+  };
 
   useImperativeHandle(ref, () => ({
     focusEditor: () => ReactEditor.focus(editor),
@@ -99,7 +100,7 @@ const RichTextEditor = forwardRef<
     index,
     target,
     values,
-  } = useMention(props.mentionables, onMentionAdded, {
+  } = useMention(mentionables, onMentionAdded, {
     maxSuggestions: 10,
   });
 
@@ -176,11 +177,8 @@ export const RichTextCompactViewer = (props: { body: RichText }) => {
       readOnly={true}
       body={props.body}
       enableToolbar={false}
-      mentionables={[]}
       options={compactViewerOptions}
       onChange={(newBody: Body) => {}}
-      onMentionSearchChanged={(search: string) => {}}
-      onMentionAdded={(option: MentionNodeData) => {}}
     />
   );
 };
