@@ -62,7 +62,13 @@ export const createPlugins = (options: Options): PluginComponents => {
   const withPlugins = [
     withReact,
     withHistory,
-    withLink(link),
+    withLink(
+      Object.assign({}, link, {
+        rangeBeforeOptions: {
+          multiPaths: false,
+        },
+      })
+    ),
     withList(),
     withAutoformat(autoformat),
     withInlineVoid({ plugins }),
