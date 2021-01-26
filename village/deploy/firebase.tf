@@ -1,5 +1,5 @@
 provider "google-beta" {
-  project     = var.project
+  project     = local.project_id
   region      = var.region
   credentials = base64decode(google_service_account_key.firebase_key.private_key)
 }

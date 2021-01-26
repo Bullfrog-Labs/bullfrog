@@ -1,5 +1,10 @@
+locals {
+  project_id   = "${var.project}-${var.env}"
+  project_name = "Bullfrog Village - ${title(var.env)}"
+}
+
 provider "google" {
-  project = var.project
+  project = local.project_id
   region  = var.region
 }
 
@@ -7,10 +12,15 @@ data "google_billing_account" "account" {
   display_name = var.billing_account
 }
 
+data "google_organization" "org" {
+  domain = "blfrg.xyz"
+}
+
 resource "google_project" "project" {
-  name            = "Bullfrog Village"
-  project_id      = var.project
+  name            = local.project_name
+  project_id      = local.project_id
   billing_account = data.google_billing_account.account.id
+  org_id          = data.google_organization.org.org_id
 }
 
 resource "google_project_iam_member" "owner" {

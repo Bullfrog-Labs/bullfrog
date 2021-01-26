@@ -1,4 +1,5 @@
 load_envs:=source ./.env
+project_id:=$${TF_VAR_project}-$${TF_VAR_env}
 
 all: check init apply done
 
@@ -24,18 +25,18 @@ done:
 	@printf "\e[93mThe setup is almost done!\e[0m\n"
 	@echo
 	@printf "Now you need to enable \e[1man auth\e[0m provider in the Firebase console.\n"
-	@${load_envs} && echo "To do this, visit https://console.firebase.google.com/u/0/project/$$TF_VAR_project/authentication/providers"
+	@${load_envs} && echo "To do this, visit https://console.firebase.google.com/u/0/project/${project_id}/authentication/providers"
 	@echo
 	@printf "You can also downgrade the subscription plan to \e[1mSpark\e[0m (it's set to Blaze by default).\n"
 	@echo "The Spark plan is completely free and has all features needed for running this project."
 	@echo
-	@${load_envs} && printf "\e[92mCongratulations!\e[0m Your project should be available at: https://$$TF_VAR_project.web.app \n"
+	@${load_envs} && printf "\e[92mCongratulations!\e[0m Your project should be available at: https://${project_id}.web.app \n"
 	@echo
-	@${load_envs} && echo "If it's not, check if the build finished successfully: https://console.cloud.google.com/cloud-build/builds?project=$$TF_VAR_project"
+	@${load_envs} && echo "If it's not, check if the build finished successfully: https://console.cloud.google.com/cloud-build/builds?project=${project_id}"
 
 .PHONY: set_project
 set_project:
-	${load_envs} && gcloud config set project "$$TF_VAR_project"
+	${load_envs} && gcloud config set project "${project_id}"
 
 .PHONY: firestore
 firestore: set_project
@@ -47,4 +48,3 @@ destroy:
 	terraform state rm "google_project_service.container_registry"
 	terraform state rm "google_project_service.cloud_run"
 	${load_envs} && terraform destroy
-	git remote rm google

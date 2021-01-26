@@ -6,6 +6,6 @@ resource "null_resource" "enable_firestore" {
   depends_on = [google_firebase_project_location.default]
 }
 
-resource "google_firestore_index" "trainings_user_time" {
-  depends_on = [null_resource.enable_firestore]
-}
+#resource "google_firestore_index" "trainings_user_time" {
+#  depends_on = [null_resource.enable_firestore]
+#}
