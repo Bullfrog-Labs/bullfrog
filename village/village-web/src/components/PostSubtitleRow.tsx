@@ -21,15 +21,6 @@ import { DeletePostFn } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
 import { useGlobalStyles } from "../styles/styles";
 
-export type PostSubtitleRowProps = {
-  author: UserRecord;
-  postTitle: string;
-  postId: string;
-  updatedAt: Date | undefined;
-  numMentions: number;
-  deletePost?: DeletePostFn;
-};
-
 const useStyles = makeStyles((theme) => ({
   subtitlePart: {
     marginLeft: theme.spacing(1.5),
@@ -43,7 +34,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
+export type PostSubtitleRowProps = {
+  author: UserRecord;
+  postTitle: string;
+  postId: string;
+  updatedAt: Date | undefined;
+  numMentions: number;
+  deletePost?: DeletePostFn;
+};
+
+export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
   const globalClasses = useGlobalStyles();
   const classes = useStyles();
   const logger = log.getLogger("PostSubtitleRow");
@@ -149,4 +149,4 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
       </div>
     </Typography>
   );
-};
+});
