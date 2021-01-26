@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { createMemoryHistory } from "history";
 import React from "react";
 import { MemoryRouter, Route, Router } from "react-router-dom";
@@ -14,12 +14,12 @@ import {
   GetUserByUsernameFn,
   GetUserFn,
   UserId,
-  UserRecord,
 } from "../services/store/Users";
 import { AuthedTestUserContext } from "../testing/AuthedTestUserContext";
 import { userPosts0 } from "../testing/Fixtures";
 import {
   EditablePostView,
+  EditablePostViewProps,
   PostViewController,
   PostViewControllerProps,
   ReadOnlyPostView,
@@ -76,7 +76,7 @@ const TestPostView = (props: TestPostViewProps) => {
     postId: "foo",
     updatedAt: new Date(),
     author: author,
-    mentions: props.mentions || [],
+    mentions: props.mentions ?? [],
 
     title: "bar",
     body: EMPTY_RICH_TEXT,
@@ -85,14 +85,14 @@ const TestPostView = (props: TestPostViewProps) => {
   const loggedInAsAuthor = useIsLoggedInAsUser(author.uid);
 
   if (loggedInAsAuthor) {
-    const postProps = {
+    const postProps: EditablePostViewProps = {
       ...commonPostProps,
       setTitle: jest.fn(),
       setBody: jest.fn(),
       getPost: jest.fn(),
 
       editablePostCallbacks: {
-        getGlobalMentions: jest.fn(),
+        getGlobalMentions: jest.fn(async () => []),
         renamePost: jest.fn(),
         syncBody: jest.fn(),
         createPost: jest.fn(),
@@ -124,21 +124,25 @@ const testPostViewNoMentions = () => {
   expect(mentionsEl).toBeNull();
 };
 
-test("Renders PostView with no mentions for user logged in as author", () => {
-  render(
-    <AuthedTestUserContext user={author}>
-      <TestPostView />
-    </AuthedTestUserContext>
-  );
+test("Renders PostView with no mentions for user logged in as author", async () => {
+  await act(async () => {
+    render(
+      <AuthedTestUserContext user={author}>
+        <TestPostView />
+      </AuthedTestUserContext>
+    );
+  });
   testPostViewNoMentions();
 });
 
-test("Renders PostView with no mentions for user logged in not as author", () => {
-  render(
-    <AuthedTestUserContext user={viewer}>
-      <TestPostView />
-    </AuthedTestUserContext>
-  );
+test("Renders PostView with no mentions for user logged in not as author", async () => {
+  await act(async () => {
+    render(
+      <AuthedTestUserContext user={viewer}>
+        <TestPostView />
+      </AuthedTestUserContext>
+    );
+  });
   testPostViewNoMentions();
 });
 
@@ -157,8 +161,10 @@ const mentions0: MentionInContext[] = userPosts0.map((up) => {
   };
 });
 
-const testPostViewWithMentions = (element: JSX.Element) => {
-  render(element);
+const testPostViewWithMentions = async (element: JSX.Element) => {
+  await act(async () => {
+    render(element);
+  });
 
   const titleEl = screen.getByText("bar");
   expect(titleEl).toBeInTheDocument();
@@ -173,24 +179,24 @@ const testPostViewWithMentions = (element: JSX.Element) => {
   expect(mentionTitleEls.length).toEqual(2);
 };
 
-test("Renders PostView with mentions for user logged in as author", () => {
-  testPostViewWithMentions(
+test("Renders PostView with mentions for user logged in as author", async () => {
+  await testPostViewWithMentions(
     <AuthedTestUserContext user={author}>
       <TestPostView mentions={mentions0} />
     </AuthedTestUserContext>
   );
 });
 
-test("Renders PostView with mentions for user not logged in as author", () => {
-  testPostViewWithMentions(
+test("Renders PostView with mentions for user not logged in as author", async () => {
+  await testPostViewWithMentions(
     <AuthedTestUserContext user={viewer}>
       <TestPostView mentions={mentions0} />
     </AuthedTestUserContext>
   );
 });
 
-test("Renders PostView with mentions for logged-out user", () => {
-  testPostViewWithMentions(<TestPostView mentions={mentions0} />);
+test("Renders PostView with mentions for logged-out user", async () => {
+  await testPostViewWithMentions(<TestPostView mentions={mentions0} />);
 });
 
 const testPostViewToPostViewNavigation = async (
