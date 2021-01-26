@@ -475,16 +475,14 @@ export const EditablePostView = forwardRef<
     setBodyChanged(true);
   };
 
-  const mentionableElementFn = (uid: UserId) => (
-    option: MentionNodeData
-  ): JSX.Element => {
-    return <MentionSuggestionLine uid={uid} option={option} />;
+  const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
+    return <MentionSuggestionLine uid={viewer.uid} option={option} />;
   };
 
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     getGlobalMentions,
     createPost(viewer),
-    viewer.username || ""
+    viewer
   );
 
   const {
@@ -507,10 +505,10 @@ export const EditablePostView = forwardRef<
     },
 
     mentionableComponents: {
-      onMentionSearchChanged: onMentionSearchChanged(viewer.uid),
+      onMentionSearchChanged: onMentionSearchChanged,
       mentionables: mentionables,
       onMentionAdded: onMentionAdded,
-      mentionableElementFn: mentionableElementFn(viewer.uid),
+      mentionableElementFn: mentionableElementFn,
     },
   });
 
@@ -701,32 +699,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const authorId = authorRecord.get().uid;
   const loggedInAsAuthor = viewer?.uid === authorId;
 
-  const postView = loggedInAsAuthor ? (
-    <EditablePostView
-      ref={postViewRef}
-      postId={postId}
-      author={authorRecord.get()}
-      updatedAt={updatedAt}
-      title={title!}
-      setTitle={setTitle}
-      body={body!}
-      setBody={setBody}
-      getPost={getPost}
-      mentions={mentions!}
-      editablePostCallbacks={editablePostCallbacks}
-    />
-  ) : (
-    <ReadOnlyPostView
-      ref={postViewRef}
-      postId={postId}
-      author={authorRecord.get()}
-      updatedAt={updatedAt}
-      title={title!}
-      body={body!}
-      mentions={mentions!}
-    />
-  );
-
   const pageTitle = `${title!} by ${
     authorId === viewer?.uid ? "you" : authorRecord.get()?.username
   }`;
@@ -736,7 +708,31 @@ export const PostViewController = (props: PostViewControllerProps) => {
       <Helmet>
         <title>{pageTitle}</title>
       </Helmet>
-      {postView}
+      {loggedInAsAuthor ? (
+        <EditablePostView
+          ref={postViewRef}
+          postId={postId}
+          author={authorRecord.get()}
+          updatedAt={updatedAt}
+          title={title!}
+          setTitle={setTitle}
+          body={body!}
+          setBody={setBody}
+          getPost={getPost}
+          mentions={mentions!}
+          editablePostCallbacks={editablePostCallbacks}
+        />
+      ) : (
+        <ReadOnlyPostView
+          ref={postViewRef}
+          postId={postId}
+          author={authorRecord.get()}
+          updatedAt={updatedAt}
+          title={title!}
+          body={body!}
+          mentions={mentions!}
+        />
+      )}
     </>
   );
 };

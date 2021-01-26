@@ -7,9 +7,15 @@ import { userPosts0, userPosts1, u0 } from "../testing/Fixtures";
 
 Logging.configure(log);
 
+const author = {
+  uid: "79832475341985234",
+  username: "donkeyKong",
+  displayName: "donkeyKong",
+};
+
 test("fetches empty mentions", async () => {
   const { result } = renderHook(() =>
-    useMentions(getGlobalMentions0, createPost0, authorUsername)
+    useMentions(getGlobalMentions0, createPost0, author)
   );
 
   var [mentionables] = result.current;
@@ -19,13 +25,13 @@ test("fetches empty mentions", async () => {
 
 test("creates suggested mention when no own user match exists", async () => {
   const { waitForNextUpdate, result } = renderHook(() =>
-    useMentions(getGlobalMentions0, createPost0, authorUsername)
+    useMentions(getGlobalMentions0, createPost0, author)
   );
 
   var [mentionables, onMentionSearchChanged] = result.current;
 
   await act(async () => {
-    onMentionSearchChanged(authorId)("wabisabi");
+    onMentionSearchChanged("wabisabi");
     await waitForNextUpdate();
   });
 
@@ -37,13 +43,13 @@ test("creates suggested mention when no own user match exists", async () => {
 
 test("creates suggested mention when only other user match exists", async () => {
   const { waitForNextUpdate, result } = renderHook(() =>
-    useMentions(getGlobalMentions1, createPost0, u0.username)
+    useMentions(getGlobalMentions1, createPost0, u0)
   );
 
   var [mentionables, onMentionSearchChanged] = result.current;
 
   await act(async () => {
-    onMentionSearchChanged(authorId)("Artifice");
+    onMentionSearchChanged("Artifice");
     await waitForNextUpdate();
   });
 
@@ -55,13 +61,13 @@ test("creates suggested mention when only other user match exists", async () => 
 
 test("fetches non empty mentions", async () => {
   const { waitForNextUpdate, result } = renderHook(() =>
-    useMentions(getGlobalMentions0, createPost0, authorUsername)
+    useMentions(getGlobalMentions0, createPost0, author)
   );
 
   var [mentionables, onMentionSearchChanged] = result.current;
 
   await act(async () => {
-    onMentionSearchChanged(authorId)("Title");
+    onMentionSearchChanged("Title");
     await waitForNextUpdate();
   });
 
@@ -85,6 +91,3 @@ const getGlobalMentions1 = async (): Promise<UserPost[]> => {
 const createPost0: CreatePostFn = async () => {
   return { state: "success", postId: "hjkhj", postUrl: "" };
 };
-
-const authorId = "79832475341985234";
-const authorUsername = "donkeyKong";
