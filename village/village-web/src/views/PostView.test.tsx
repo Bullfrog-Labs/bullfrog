@@ -1,31 +1,34 @@
+import { render, screen, waitFor } from "@testing-library/react";
+import { createMemoryHistory } from "history";
 import React from "react";
-import { screen, render, waitFor } from "@testing-library/react";
-import { EditablePostView, PostViewController } from "./PostView";
+import { MemoryRouter, Route, Router } from "react-router-dom";
 import {
   EMPTY_RICH_TEXT,
-  stringToSlateNode,
   MentionInContext,
+  stringToSlateNode,
 } from "../components/richtext/Utils";
-import { MemoryRouter, Route, Router } from "react-router-dom";
-import { createMemoryHistory } from "history";
-import { PostId, UserPost, PostRecord } from "../services/store/Posts";
+import { postURL, postURLById } from "../routing/URLs";
+import { useIsLoggedInAsUser } from "../services/auth/AppAuth";
+import { PostId, PostRecord, UserPost } from "../services/store/Posts";
 import {
   GetUserByUsernameFn,
   GetUserFn,
   UserId,
   UserRecord,
 } from "../services/store/Users";
-import { userPosts0 } from "../testing/Fixtures";
-import { postURL, postURLById } from "../routing/URLs";
-import { AuthProviderState } from "../services/auth/Auth";
 import { AuthedTestUserContext } from "../testing/AuthedTestUserContext";
-import { useUserFromAppAuthContext } from "../services/auth/AppAuth";
+import { userPosts0 } from "../testing/Fixtures";
+import {
+  EditablePostView,
+  PostViewController,
+  ReadOnlyPostView,
+} from "./PostView";
 
 const getMentionUserPosts0 = async (): Promise<UserPost[]> => {
   return [];
 };
 
-const viewer: AppAuthState = {
+const viewer = {
   uid: "456",
   displayName: "baz",
   username: "baz",
@@ -59,39 +62,33 @@ type TestPostViewProps = {
 };
 
 const TestPostView = (props: TestPostViewProps) => {
-  // missing the following properties from type 'EditablePostViewProps': editablePostCallbacks
-
-  const postProps = {
+  const commonPostProps = {
     postId: "foo",
     updatedAt: new Date(),
-
-    title: "bar",
-    setTitle: jest.fn(),
-
-    body: EMPTY_RICH_TEXT,
-    setBody: jest.fn(),
-
-    getPost: jest.fn(),
-
     author: author,
     mentions: props.mentions || [],
 
-    getTitle: jest.fn(),
-    renamePost: jest.fn(),
-    syncBody: jest.fn(),
-
-    editablePostCallbacks: {
-      getGlobalMentions: jest.fn(),
-      renamePost: jest.fn(),
-      syncBody: jest.fn(),
-      createPost: jest.fn(),
-      deletePost: jest.fn(),
-    },
+    title: "bar",
+    body: EMPTY_RICH_TEXT,
   };
 
-  const viewer = useUserFromAppAuthContext();
+  const loggedInAsAuthor = useIsLoggedInAsUser(author.uid);
 
-  if (!!viewer) {
+  if (loggedInAsAuthor) {
+    const postProps = {
+      ...commonPostProps,
+      setTitle: jest.fn(),
+      setBody: jest.fn(),
+      getPost: jest.fn(),
+
+      editablePostCallbacks: {
+        getGlobalMentions: jest.fn(),
+        renamePost: jest.fn(),
+        syncBody: jest.fn(),
+        createPost: jest.fn(),
+        deletePost: jest.fn(),
+      },
+    };
     return (
       <AuthedTestUserContext user={viewer}>
         <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
@@ -100,7 +97,11 @@ const TestPostView = (props: TestPostViewProps) => {
       </AuthedTestUserContext>
     );
   } else {
-    throw new Error("readonly view not supported yet");
+    return (
+      <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
+        <ReadOnlyPostView {...commonPostProps} />
+      </MemoryRouter>
+    );
   }
 };
 
@@ -124,19 +125,19 @@ test("Renders PostView with no mentions for user logged in as author", () => {
   testPostViewNoMentions();
 });
 
-/*
 test("Renders PostView with no mentions for user logged in not as author", () => {
-  render(<TestPostView />);
+  render(
+    <AuthedTestUserContext user={viewer}>
+      <TestPostView />
+    </AuthedTestUserContext>
+  );
   testPostViewNoMentions();
 });
-
 
 test("Renders PostView with no mentions for logged-out user", () => {
   render(<TestPostView />);
   testPostViewNoMentions();
 });
-
-*/
 
 const mentions0: MentionInContext[] = userPosts0.map((up) => {
   return {
@@ -172,24 +173,22 @@ test("Renders PostView with mentions for user logged in as author", () => {
   );
 });
 
-/*
 test("Renders PostView with mentions for user not logged in as author", () => {
-  render(<TestPostView mentions={mentions0} />);
-  testPostViewWithMentions();
+  testPostViewWithMentions(
+    <AuthedTestUserContext user={viewer}>
+      <TestPostView mentions={mentions0} />
+    </AuthedTestUserContext>
+  );
 });
-
 
 test("Renders PostView with mentions for logged-out user", () => {
-  render(<TestPostView mentions={mentions0} />);
-  testPostViewWithMentions();
+  testPostViewWithMentions(<TestPostView mentions={mentions0} />);
 });
-*/
 
 // const testPostViewToPostViewNavigation = async (element: JSX.Element) => {
 
 // }
 
-/*
 test("PostView to PostView navigation works", async () => {
   const history = createMemoryHistory();
 
@@ -242,4 +241,3 @@ test("PostView to PostView navigation works", async () => {
     expect(screen.getByText("Bar")).toBeInTheDocument();
   });
 });
-*/
