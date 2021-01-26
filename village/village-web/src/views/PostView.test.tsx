@@ -21,6 +21,7 @@ import { userPosts0 } from "../testing/Fixtures";
 import {
   EditablePostView,
   PostViewController,
+  PostViewControllerProps,
   ReadOnlyPostView,
 } from "./PostView";
 
@@ -34,11 +35,13 @@ const viewer = {
   username: "baz",
 };
 
-const author: UserRecord = {
+const author = {
   uid: "123",
   displayName: "qux",
   username: "qux",
 };
+
+const users = [viewer, author];
 
 const posts: PostRecord[] = [
   {
@@ -53,6 +56,13 @@ const posts: PostRecord[] = [
     authorId: author.uid,
     body: stringToSlateNode("Non-empty"),
     title: "Bar",
+    mentions: [],
+  },
+  {
+    id: "ghi",
+    authorId: viewer.uid,
+    body: stringToSlateNode("Not the author"),
+    title: "Baz",
     mentions: [],
   },
 ];
@@ -185,20 +195,27 @@ test("Renders PostView with mentions for logged-out user", () => {
   testPostViewWithMentions(<TestPostView mentions={mentions0} />);
 });
 
-// const testPostViewToPostViewNavigation = async (element: JSX.Element) => {
-
-// }
-
-test("PostView to PostView navigation works", async () => {
+const testPostViewToPostViewNavigation = async (
+  propsToPostViewController: (
+    props: PostViewControllerProps
+  ) => React.ReactChild
+) => {
   const history = createMemoryHistory();
 
-  const postsMap = new Map(posts.map((post) => [post.id, post]));
+  const postsMap = new Map(
+    posts.map((post) => [`${post.authorId}/${post.id}`, post])
+  );
+  const getPost = jest.fn(async (uid: UserId, postId: PostId) =>
+    postsMap.get(`${uid}/${postId}`)
+  );
 
-  const getUser: GetUserFn = jest.fn(async () => author);
-  const getUserByUsername: GetUserByUsernameFn = jest.fn(async () => author);
-  const getPost = jest.fn(async (uid: UserId, postId: PostId) => {
-    return postsMap.get(postId);
-  });
+  const userIdToUser = new Map(users.map((user) => [user.uid, user]));
+  const getUser: GetUserFn = jest.fn(async (uid) => userIdToUser.get(uid));
+
+  const usernameToUser = new Map(users.map((user) => [user.username, user]));
+  const getUserByUsername: GetUserByUsernameFn = jest.fn(async (username) =>
+    usernameToUser.get(username)
+  );
 
   const props = {
     getUser: getUser,
@@ -221,7 +238,7 @@ test("PostView to PostView navigation works", async () => {
   render(
     <Router history={history}>
       <Route exact path="/post/:authorIdOrUsername/:postId">
-        <PostViewController {...props} />
+        {propsToPostViewController(props)}
       </Route>
     </Router>
   );
@@ -240,4 +257,23 @@ test("PostView to PostView navigation works", async () => {
   await waitFor(() => {
     expect(screen.getByText("Bar")).toBeInTheDocument();
   });
+
+  history.push(postURL(viewer.username, "ghi"));
+  await waitFor(() => {
+    expect(screen.getByText("Baz")).toBeInTheDocument();
+  });
+};
+
+test("PostView to PostView navigation works when logged in", async () => {
+  testPostViewToPostViewNavigation((props) => (
+    <AuthedTestUserContext user={author}>
+      <PostViewController {...props} />
+    </AuthedTestUserContext>
+  ));
+});
+
+test("PostView to PostView navigation works when logged out", async () => {
+  testPostViewToPostViewNavigation((props) => (
+    <PostViewController {...props} />
+  ));
 });

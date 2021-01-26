@@ -534,7 +534,7 @@ export const EditablePostView = forwardRef<
   return <BasePostView postView={postView} mentions={props.mentions} />;
 });
 
-type PostViewControllerProps = {
+export type PostViewControllerProps = {
   getUser: GetUserFn;
   getUserByUsername: GetUserByUsernameFn;
   getPost: GetPostFn;
