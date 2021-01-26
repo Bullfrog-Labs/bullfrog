@@ -1,31 +1,19 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
 import { MemoryRouter } from "react-router-dom";
-import { AppAuthContext } from "../services/auth/AppAuth";
-import { AuthProvider } from "../services/auth/Auth";
+import { AuthedTestUserContext } from "../testing/AuthedTestUserContext";
 import { PostSubtitleRow, PostSubtitleRowProps } from "./PostSubtitleRow";
 
+const viewer = {
+  uid: "123",
+  displayName: "foo",
+  username: "foo",
+};
+
 const viewerAppAuthContextDecorator = (Story: Story) => {
-  const viewer = {
-    uid: "456",
-    displayName: "baz",
-    username: "baz",
-  };
-
-  const authProvider: AuthProvider = {
-    onAuthStateChanged: (authState) => {},
-    getInitialAuthProviderState: () => viewer,
-  };
-
-  const appAuthState = {
-    authCompleted: true,
-    authProviderState: authProvider.getInitialAuthProviderState(),
-    authedUser: viewer,
-  };
-
   return (
-    <AppAuthContext.Provider value={appAuthState}>
+    <AuthedTestUserContext user={viewer}>
       <Story />
-    </AppAuthContext.Provider>
+    </AuthedTestUserContext>
   );
 };
 
@@ -46,17 +34,13 @@ const Template: Story<PostSubtitleRowProps> = (args) => (
   <PostSubtitleRow {...args} />
 );
 
-export const UserIsAuthor = Template.bind({});
-UserIsAuthor.args = {
-  author: {
-    uid: "123",
-    displayName: "foo",
-    username: "foo",
-  },
+export const AuthorIsViewer = Template.bind({});
+AuthorIsViewer.args = {
+  author: viewer,
 };
 
-export const UserIsNotAuthor = Template.bind({});
-UserIsNotAuthor.args = {
+export const AuthorIsNotViewer = Template.bind({});
+AuthorIsNotViewer.args = {
   author: {
     uid: "456",
     displayName: "bar",

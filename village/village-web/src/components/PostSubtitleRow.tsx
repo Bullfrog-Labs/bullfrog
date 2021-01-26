@@ -1,25 +1,25 @@
-import React, { useState } from "react";
-import * as log from "loglevel";
-import { Link, useHistory } from "react-router-dom";
-import { UserRecord } from "../services/store/Users";
-import { useGlobalStyles } from "../styles/styles";
 import {
-  makeStyles,
-  Typography,
   IconButton,
-  Tooltip,
+  makeStyles,
   Menu,
   MenuItem,
+  Tooltip,
+  Typography,
 } from "@material-ui/core";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import CallReceivedIcon from "@material-ui/icons/CallReceived";
-import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
 import DeleteIcon from "@material-ui/icons/Delete";
+import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
+import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import * as log from "loglevel";
 import { DateTime } from "luxon";
+import React, { useState } from "react";
+import { Link, useHistory } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { profileURL } from "../routing/URLs";
-import { DeletePostFn } from "../services/store/Posts";
 import { useUserFromAppAuthContext } from "../services/auth/AppAuth";
+import { DeletePostFn } from "../services/store/Posts";
+import { UserRecord } from "../services/store/Users";
+import { useGlobalStyles } from "../styles/styles";
 
 export type PostSubtitleRowProps = {
   author: UserRecord;
@@ -42,8 +42,6 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: theme.spacing(1),
   },
 }));
-
-// TODO: Make this work when user is not logged in (and therefore there is no deletePost function)
 
 export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
   const globalClasses = useGlobalStyles();
