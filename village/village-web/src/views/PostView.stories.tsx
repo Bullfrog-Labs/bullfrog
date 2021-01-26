@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
 import { useMentions } from "../hooks/useMentions";
-import { AppAuthContext } from "../services/auth/AppAuth";
+import { AppAuthContext, CurriedByUser } from "../services/auth/AppAuth";
 import { AuthProvider } from "../services/auth/Auth";
 import {
   UserPost,
@@ -12,6 +12,7 @@ import {
   SyncBodyFn,
   CreatePostFn,
 } from "../services/store/Posts";
+import { UserRecord } from "../services/store/Users";
 import { EditablePostView, EditablePostViewProps } from "./PostView";
 
 const viewerAppAuthContextDecorator = (Story: Story) => {
@@ -57,43 +58,39 @@ const Template: Story<EditablePostViewProps> = (args) => {
   const getGlobalMentions = async (): Promise<UserPost[]> => {
     return [];
   };
-  const createPost: CreatePostFn = async () => {
+  const createPost: CurriedByUser<CreatePostFn> = (user) => async (
+    newTitle,
+    postId
+  ) => {
     return { state: "success", postId: "hjkhj", postUrl: "" };
   };
-  const authorId = "79832475341985234";
-  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
-    getGlobalMentions,
-    createPost,
-    "l4stewar"
-  );
+  const renamePost: CurriedByUser<RenamePostFn> = (user) => async (
+    postId,
+    newTitle
+  ) => ({ state: "success" });
+  const syncBody: CurriedByUser<SyncBodyFn> = (user) => async (
+    postId,
+    newBody
+  ) => "success";
 
   return (
     <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
       <EditablePostView
         {...args}
-        mentionables={mentionables}
-        onMentionSearchChanged={onMentionSearchChanged(authorId)}
-        onMentionAdded={onMentionAdded}
+        editablePostCallbacks={{
+          getGlobalMentions: getGlobalMentions,
+          createPost: createPost,
+          deletePost: async (userId, postId) => {},
+          renamePost: renamePost,
+          syncBody: syncBody,
+        }}
       />
     </MemoryRouter>
   );
 };
 
-const getTitleHardcoded: () => Promise<PostTitle> = async () => {
-  return "Original title";
-};
-
-const renamePostAlwaysSuccessful: RenamePostFn = async () => {
-  return { state: "success" };
-};
-
-const syncBodyAlwaysSuccessful: SyncBodyFn = async () => {
-  return "success";
-};
-
 export const BasicPostView = Template.bind({});
 BasicPostView.args = {
-  readOnly: false,
   postId: "456",
   title: "",
   body: EMPTY_RICH_TEXT,
@@ -102,7 +99,4 @@ BasicPostView.args = {
     displayName: "qux",
     username: "qux",
   },
-  getTitle: getTitleHardcoded,
-  renamePost: renamePostAlwaysSuccessful,
-  syncBody: syncBodyAlwaysSuccessful,
 };
