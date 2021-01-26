@@ -100,11 +100,9 @@ const TestPostView = (props: TestPostViewProps) => {
       },
     };
     return (
-      <AuthedTestUserContext user={viewer}>
-        <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
-          <EditablePostView {...postProps} />
-        </MemoryRouter>
-      </AuthedTestUserContext>
+      <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
+        <EditablePostView {...postProps} />
+      </MemoryRouter>
     );
   } else {
     return (
