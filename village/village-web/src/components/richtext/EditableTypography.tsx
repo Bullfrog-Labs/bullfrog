@@ -59,13 +59,6 @@ export const EditableTypography = forwardRef<
     }
   };
 
-  // TOOD: I need to be able to create a reset function here. I also need to
-  // make it callable from the parent component. This can be done using ref
-  // forwarding, see https://reactjs.org/docs/forwarding-refs.html.
-  // See
-  // https://www.notion.so/Crash-due-to-Slate-cursor-being-in-invalid-position-when-post-rename-fails-due-to-post-name-taken-an-9904289b317d4fc68f6b918ef62ae780
-  // for why this is needed.
-
   const renderLeaf = useCallback(
     ({ children, attributes }) => (
       <Typography variant={props.variant} {...attributes}>
