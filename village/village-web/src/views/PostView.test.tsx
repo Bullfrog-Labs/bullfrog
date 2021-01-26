@@ -136,33 +136,60 @@ test("Renders PostView with no mentions for logged-out user", () => {
   testPostViewNoMentions();
 });
 
-test("Renders PostView with mentions", () => {
-  const mentions: MentionInContext[] = userPosts0.map((up) => {
-    return {
-      post: up,
-      text: stringToSlateNode("here i am, mr. mention!"),
-      path: [0],
-      truncatedStart: false,
-      truncatedEnd: false,
-    };
-  });
-  const { getByText, queryAllByText } = render(
-    <TestPostView mentions={mentions} />
-  );
+*/
 
-  const titleEl = getByText("bar");
-  expect(titleEl).toBeInTheDocument();
-
-  const authorEl = getByText("qux");
-  expect(authorEl).toBeInTheDocument();
-
-  const mentionsEl = getByText("Mentions");
-  expect(mentionsEl).toBeInTheDocument();
-
-  const mentionTitleEls = queryAllByText("Title mane");
-  expect(mentionTitleEls.length).toEqual(2);
+const mentions0: MentionInContext[] = userPosts0.map((up) => {
+  return {
+    post: up,
+    text: stringToSlateNode("here i am, mr. mention!"),
+    path: [0],
+    truncatedStart: false,
+    truncatedEnd: false,
+  };
 });
 
+const testPostViewWithMentions = (element: JSX.Element) => {
+  render(element);
+
+  const titleEl = screen.getByText("bar");
+  expect(titleEl).toBeInTheDocument();
+
+  const authorEl = screen.getByText("qux");
+  expect(authorEl).toBeInTheDocument();
+
+  const mentionsEl = screen.getByText("Mentions");
+  expect(mentionsEl).toBeInTheDocument();
+
+  const mentionTitleEls = screen.queryAllByText("Title mane");
+  expect(mentionTitleEls.length).toEqual(2);
+};
+
+test("Renders PostView with mentions for user logged in as author", () => {
+  testPostViewWithMentions(
+    <AuthedTestUserContext user={author}>
+      <TestPostView mentions={mentions0} />
+    </AuthedTestUserContext>
+  );
+});
+
+/*
+test("Renders PostView with mentions for user not logged in as author", () => {
+  render(<TestPostView mentions={mentions0} />);
+  testPostViewWithMentions();
+});
+
+
+test("Renders PostView with mentions for logged-out user", () => {
+  render(<TestPostView mentions={mentions0} />);
+  testPostViewWithMentions();
+});
+*/
+
+// const testPostViewToPostViewNavigation = async (element: JSX.Element) => {
+
+// }
+
+/*
 test("PostView to PostView navigation works", async () => {
   const history = createMemoryHistory();
 
