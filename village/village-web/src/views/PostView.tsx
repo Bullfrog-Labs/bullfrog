@@ -178,9 +178,9 @@ const usePostComponents: (inputs: PostComponentInputs) => PostComponents = ({
     <DocumentTitle
       ref={documentTitleRef}
       readOnly={readOnly}
-      handleEscape={() => {
+      handleEscape={useCallback(() => {
         richTextEditorRef.current?.focusEditor();
-      }}
+      }, [])}
       value={title}
       onChange={onTitleChange}
     />
@@ -358,7 +358,15 @@ export const EditablePostView = forwardRef<
 >((props, ref) => {
   const logger = log.getLogger("EditablePostView");
 
-  const { getPost, author, postId, editablePostCallbacks } = props;
+  const {
+    title,
+    setTitle,
+    setBody,
+    getPost,
+    author,
+    postId,
+    editablePostCallbacks,
+  } = props;
   const {
     getGlobalMentions,
     createPost,
@@ -462,18 +470,24 @@ export const EditablePostView = forwardRef<
     }
   };
 
-  const onTitleChange = (newTitle: PostTitle) => {
-    if (newTitle !== props.title) {
-      props.setTitle(newTitle);
-      setTitleChanged(true);
-    }
-  };
+  const onTitleChange = useCallback(
+    (newTitle: PostTitle) => {
+      if (newTitle !== title) {
+        setTitle(newTitle);
+        setTitleChanged(true);
+      }
+    },
+    [setTitle, title]
+  );
 
-  const onBodyChange = (newBody: PostBody) => {
-    // TODO: Only mark body as changed if it is actually different
-    props.setBody(newBody);
-    setBodyChanged(true);
-  };
+  const onBodyChange = useCallback(
+    (newBody: PostBody) => {
+      // TODO: Only mark body as changed if it is actually different
+      setBody(newBody);
+      setBodyChanged(true);
+    },
+    [setBody]
+  );
 
   const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
     return <MentionSuggestionLine uid={viewer.uid} option={option} />;

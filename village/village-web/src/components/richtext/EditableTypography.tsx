@@ -42,66 +42,68 @@ const handleExitEditable = (handleEscape?: KBEventHandler) => (
   }
 };
 
-export const EditableTypography = forwardRef<
-  EditableTypographyImperativeHandle,
-  EditableTypographyProps
->((props, ref) => {
-  const globalClasses = useGlobalStyles();
+export const EditableTypography = React.memo(
+  forwardRef<EditableTypographyImperativeHandle, EditableTypographyProps>(
+    (props, ref) => {
+      const globalClasses = useGlobalStyles();
 
-  const editor = useMemo(
-    () => withReact(withEditableTypographyLayout(withHistory(createEditor()))),
-    []
-  );
+      const editor = useMemo(
+        () =>
+          withReact(withEditableTypographyLayout(withHistory(createEditor()))),
+        []
+      );
 
-  const onChange = (newValue: RichText) => {
-    if (!!props.onChange) {
-      props.onChange(slateNodeToString(newValue));
-    }
-  };
-
-  const renderLeaf = useCallback(
-    ({ children, attributes }) => (
-      <Typography variant={props.variant} {...attributes}>
-        {children}
-      </Typography>
-    ),
-    [props.variant]
-  );
-
-  useImperativeHandle(ref, () => ({
-    blurEditor: () => ReactEditor.blur(editor),
-    deselect: () => Transforms.deselect(editor),
-    setSelectionToEnd: () => {
-      const textNode = Node.get(editor, EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH);
-      if (!Text.isText(textNode)) {
-        throw new Error("Got non-text node when expecting a text node");
-      }
-      const textEndOffset = textNode.text.length;
-      const endPoint = {
-        path: EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH,
-        offset: textEndOffset,
-      };
-      Transforms.select(editor, endPoint);
-    },
-  }));
-
-  return (
-    <Slate
-      editor={editor}
-      value={stringToSlateNode(props.value)}
-      onChange={onChange}
-    >
-      <Editable
-        readOnly={props.readOnly ?? false}
-        placeholder="Enter a title"
-        renderLeaf={renderLeaf}
-        onKeyDown={handleExitEditable(props.handleEscape)}
-        className={
-          props.readOnly
-            ? globalClasses.readOnlyRichText
-            : globalClasses.editableRichText
+      const onChange = (newValue: RichText) => {
+        if (!!props.onChange) {
+          props.onChange(slateNodeToString(newValue));
         }
-      />
-    </Slate>
-  );
-});
+      };
+
+      const renderLeaf = useCallback(
+        ({ children, attributes }) => (
+          <Typography variant={props.variant} {...attributes}>
+            {children}
+          </Typography>
+        ),
+        [props.variant]
+      );
+
+      useImperativeHandle(ref, () => ({
+        blurEditor: () => ReactEditor.blur(editor),
+        deselect: () => Transforms.deselect(editor),
+        setSelectionToEnd: () => {
+          const textNode = Node.get(editor, EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH);
+          if (!Text.isText(textNode)) {
+            throw new Error("Got non-text node when expecting a text node");
+          }
+          const textEndOffset = textNode.text.length;
+          const endPoint = {
+            path: EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH,
+            offset: textEndOffset,
+          };
+          Transforms.select(editor, endPoint);
+        },
+      }));
+
+      return (
+        <Slate
+          editor={editor}
+          value={stringToSlateNode(props.value)}
+          onChange={onChange}
+        >
+          <Editable
+            readOnly={props.readOnly ?? false}
+            placeholder="Enter a title"
+            renderLeaf={renderLeaf}
+            onKeyDown={handleExitEditable(props.handleEscape)}
+            className={
+              props.readOnly
+                ? globalClasses.readOnlyRichText
+                : globalClasses.editableRichText
+            }
+          />
+        </Slate>
+      );
+    }
+  )
+);
