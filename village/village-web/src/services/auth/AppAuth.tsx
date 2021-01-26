@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { UserRecord } from "../store/Users";
+import { UserId, UserRecord } from "../store/Users";
 import { AuthProviderState } from "./Auth";
 
 export type AppAuthState = {
@@ -24,6 +24,11 @@ export const useUserFromAppAuthContext = (): UserRecord | undefined => {
 export const useIsLoggedIn = (): boolean => {
   const loggedInUser = useUserFromAppAuthContext();
   return !!loggedInUser;
+};
+
+export const useIsLoggedInAsUser = (uid: UserId): boolean => {
+  const loggedInUser = useUserFromAppAuthContext();
+  return !!loggedInUser && loggedInUser.uid === uid;
 };
 
 export const useLoggedInUserFromAppAuthContext = (): UserRecord => {
