@@ -30,9 +30,14 @@ export default {
   ],
 } as Meta;
 
-const Template: Story<PostSubtitleRowProps> = (args) => (
-  <PostSubtitleRow {...args} />
-);
+const Template: Story<PostSubtitleRowProps> = (args) => {
+  return (
+    <PostSubtitleRow
+      {...args}
+      deletePost={args.deletePost ?? (async () => {})}
+    />
+  );
+};
 
 export const AuthorIsViewer = Template.bind({});
 AuthorIsViewer.args = {
