@@ -208,36 +208,6 @@ const usePostComponents: (inputs: PostComponentInputs) => PostComponents = ({
   return result;
 };
 
-export type EditablePostCallbacks = {
-  getGlobalMentions: GetAllPostsByTitlePrefixFn;
-  renamePost: CurriedByUser<RenamePostFn>;
-  syncBody: CurriedByUser<SyncBodyFn>;
-  createPost: CurriedByUser<CreatePostFn>;
-  deletePost: DeletePostFn;
-};
-
-export type EditablePostViewProps = {
-  postId: PostId;
-  author: UserRecord;
-  updatedAt: Date | undefined;
-  mentions: MentionInContext[];
-
-  title: PostTitle;
-  setTitle: Dispatch<SetStateAction<PostTitle>>;
-
-  body: PostBody;
-  setBody: Dispatch<SetStateAction<PostBody>>;
-
-  getPost: GetPostFn;
-
-  editablePostCallbacks: EditablePostCallbacks;
-};
-
-type PostViewImperativeHandle = {
-  blurTitle: () => void;
-  blurBody: () => void;
-};
-
 const useAssembledPostView = (
   subtitleRow: React.ReactChild,
   documentTitle: React.ReactChild,
@@ -297,6 +267,11 @@ const useAssembledPostView = (
   return postView;
 };
 
+type PostViewImperativeHandle = {
+  blurTitle: () => void;
+  blurBody: () => void;
+};
+
 export type ReadOnlyPostViewProps = {
   postId: PostId;
   author: UserRecord;
@@ -349,6 +324,31 @@ export const ReadOnlyPostView = forwardRef<
 
   return <BasePostView postView={postView} mentions={props.mentions} />;
 });
+
+export type EditablePostCallbacks = {
+  getGlobalMentions: GetAllPostsByTitlePrefixFn;
+  renamePost: CurriedByUser<RenamePostFn>;
+  syncBody: CurriedByUser<SyncBodyFn>;
+  createPost: CurriedByUser<CreatePostFn>;
+  deletePost: DeletePostFn;
+};
+
+export type EditablePostViewProps = {
+  postId: PostId;
+  author: UserRecord;
+  updatedAt: Date | undefined;
+  mentions: MentionInContext[];
+
+  title: PostTitle;
+  setTitle: Dispatch<SetStateAction<PostTitle>>;
+
+  body: PostBody;
+  setBody: Dispatch<SetStateAction<PostBody>>;
+
+  getPost: GetPostFn;
+
+  editablePostCallbacks: EditablePostCallbacks;
+};
 
 // Changing title triggers a rename. Renames are not allowed if the title is
 // already being used.
