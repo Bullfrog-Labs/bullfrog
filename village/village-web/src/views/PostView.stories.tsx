@@ -2,41 +2,27 @@ import { Meta, Story } from "@storybook/react/types-6-0";
 import React, { useState } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
-import { useMentions } from "../hooks/useMentions";
-import { AppAuthContext, CurriedByUser } from "../services/auth/AppAuth";
-import { AuthProvider } from "../services/auth/Auth";
+import { CurriedByUser } from "../services/auth/AppAuth";
 import {
-  UserPost,
-  PostTitle,
+  CreatePostFn,
   RenamePostFn,
   SyncBodyFn,
-  CreatePostFn,
+  UserPost,
 } from "../services/store/Posts";
-import { UserRecord } from "../services/store/Users";
+import { AuthedTestUserContext } from "../testing/AuthedTestUserContext";
 import { EditablePostView, EditablePostViewProps } from "./PostView";
 
+const viewer = {
+  uid: "456",
+  displayName: "baz",
+  username: "baz",
+};
+
 const viewerAppAuthContextDecorator = (Story: Story) => {
-  const viewer = {
-    uid: "456",
-    displayName: "baz",
-    username: "baz",
-  };
-
-  const authProvider: AuthProvider = {
-    onAuthStateChanged: (authState) => {},
-    getInitialAuthProviderState: () => viewer,
-  };
-
-  const appAuthState = {
-    authCompleted: true,
-    authProviderState: authProvider.getInitialAuthProviderState(),
-    authedUser: viewer,
-  };
-
   return (
-    <AppAuthContext.Provider value={appAuthState}>
+    <AuthedTestUserContext user={viewer}>
       <Story />
-    </AppAuthContext.Provider>
+    </AuthedTestUserContext>
   );
 };
 
@@ -56,7 +42,18 @@ const Template: Story<EditablePostViewProps> = (args) => {
   args.setBody = setBody;
 
   const getGlobalMentions = async (): Promise<UserPost[]> => {
-    return [];
+    return [
+      {
+        user: viewer,
+        post: {
+          id: "123",
+          authorId: viewer.uid,
+          body: EMPTY_RICH_TEXT,
+          title: "foo",
+          mentions: [],
+        },
+      },
+    ];
   };
   const createPost: CurriedByUser<CreatePostFn> = (user) => async (
     newTitle,
@@ -99,4 +96,5 @@ BasicPostView.args = {
     displayName: "qux",
     username: "qux",
   },
+  mentions: [],
 };

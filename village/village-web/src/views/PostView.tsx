@@ -280,7 +280,7 @@ const useAssembledPostView = (
 
   const postView = (
     <>
-      {!!idleTimer ?? idleTimer}
+      {!!idleTimer && idleTimer}
       <Grid
         container
         direction="row"
@@ -358,8 +358,6 @@ export const EditablePostView = forwardRef<
 >((props, ref) => {
   const logger = log.getLogger("EditablePostView");
 
-  const viewer = useLoggedInUserFromAppAuthContext();
-
   const { getPost, author, postId, editablePostCallbacks } = props;
   const {
     getGlobalMentions,
@@ -368,13 +366,15 @@ export const EditablePostView = forwardRef<
     syncBody,
     renamePost,
   } = editablePostCallbacks;
+
+  const viewer = useLoggedInUserFromAppAuthContext();
   const authorId = author.uid;
 
-  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
-    getGlobalMentions,
-    createPost(viewer),
-    author.username || ""
-  );
+  if (viewer.uid !== authorId) {
+    throw new Error(
+      "EditablePostView should have only be used if the viewer is the author"
+    );
+  }
 
   // Define helpers
   const getTitle: () => Promise<
@@ -481,6 +481,12 @@ export const EditablePostView = forwardRef<
     return <MentionSuggestionLine uid={uid} option={option} />;
   };
 
+  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
+    getGlobalMentions,
+    createPost(viewer),
+    viewer.username || ""
+  );
+
   const {
     idleTimer,
     documentTitle,
@@ -501,7 +507,7 @@ export const EditablePostView = forwardRef<
     },
 
     mentionableComponents: {
-      onMentionSearchChanged: onMentionSearchChanged,
+      onMentionSearchChanged: onMentionSearchChanged(viewer.uid),
       mentionables: mentionables,
       onMentionAdded: onMentionAdded,
       mentionableElementFn: mentionableElementFn(viewer.uid),
