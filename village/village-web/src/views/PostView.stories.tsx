@@ -91,10 +91,6 @@ BasicPostView.args = {
   postId: "456",
   title: "",
   body: EMPTY_RICH_TEXT,
-  author: {
-    uid: "123",
-    displayName: "qux",
-    username: "qux",
-  },
+  author: viewer,
   mentions: [],
 };
