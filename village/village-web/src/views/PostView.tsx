@@ -66,6 +66,7 @@ import { useQuery } from "../hooks/useQuery";
 import { postURL } from "../routing/URLs";
 import {
   CurriedByUser,
+  useLoggedInUserFromAppAuthContext,
   useUserFromAppAuthContext,
 } from "../services/auth/AppAuth";
 import { MentionSuggestionLine } from "../components/mentions/MentionSuggestionLine";
@@ -113,12 +114,6 @@ export const BasePostView = (props: BasePostViewProps) => {
       )}
     </Grid>
   );
-};
-
-const mentionableElementFn = (uid: UserId) => (
-  option: MentionNodeData
-): JSX.Element => {
-  return <MentionSuggestionLine uid={uid} option={option} />;
 };
 
 type EditablePostInputs = {
@@ -211,30 +206,29 @@ const useEditablePostComponents: (
   return result;
 };
 
-export type EditablePostViewProps = {
-  readOnly: boolean;
+export type EditablePostCallbacks = {
+  getGlobalMentions: GetAllPostsByTitlePrefixFn;
+  renamePost: CurriedByUser<RenamePostFn>;
+  syncBody: CurriedByUser<SyncBodyFn>;
+  createPost: CurriedByUser<CreatePostFn>;
+  deletePost: DeletePostFn;
+};
 
+export type EditablePostViewProps = {
   postId: PostId;
+  author: UserRecord;
+  updatedAt: Date | undefined;
+  mentions: MentionInContext[];
 
   title: PostTitle;
   setTitle: Dispatch<SetStateAction<PostTitle>>;
 
   body: PostBody;
   setBody: Dispatch<SetStateAction<PostBody>>;
-  updatedAt: Date | undefined;
-
-  author: UserRecord;
-  mentions: MentionInContext[];
 
   getPost: GetPostFn;
 
-  renamePost: RenamePostFn;
-  syncBody: SyncBodyFn;
-  deletePost: DeletePostFn;
-  onMentionSearchChanged: (newSearch: string) => void;
-  mentionables: MentionNodeData[];
-  onMentionAdded: (option: MentionNodeData) => void;
-  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
+  editablePostCallbacks: EditablePostCallbacks;
 };
 
 export interface ReadOnlyPostViewProps {}
@@ -255,12 +249,21 @@ export const EditablePostView = forwardRef<
   const classes = useStyles();
   const logger = log.getLogger("PostView");
 
-  const { getGlobalMentions, createPost, getPost, author, postId } = props;
+  const viewer = useLoggedInUserFromAppAuthContext();
+
+  const { getPost, author, postId, editablePostCallbacks } = props;
+  const {
+    getGlobalMentions,
+    createPost,
+    deletePost,
+    syncBody,
+    renamePost,
+  } = editablePostCallbacks;
   const authorId = author.uid;
 
   const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
     getGlobalMentions,
-    createPost,
+    createPost(viewer),
     author.username || ""
   );
 
@@ -270,7 +273,7 @@ export const EditablePostView = forwardRef<
   > = useCallback(async () => {
     const postRecord = await getPost(authorId, postId);
     return postRecord ? postRecord.title : undefined;
-  }, []);
+  }, [authorId, getPost, postId]);
 
   const [bodyChanged, setBodyChanged] = useState(false);
   const [titleChanged, setTitleChanged] = useState(false);
@@ -289,7 +292,7 @@ export const EditablePostView = forwardRef<
     // sync body first
     if (bodyChanged) {
       logger.debug("Body changed, syncing body");
-      const syncBodyResult: SyncBodyResult = await props.syncBody(
+      const syncBodyResult: SyncBodyResult = await syncBody(viewer)(
         props.postId,
         props.body
       );
@@ -308,7 +311,7 @@ export const EditablePostView = forwardRef<
     // rename post, if needed
     if (needsPostRename) {
       logger.debug("Title changed, renaming post");
-      const renamePostResult: RenamePostResult = await props.renamePost(
+      const renamePostResult: RenamePostResult = await renamePost(viewer)(
         props.postId,
         props.title
       );
@@ -363,6 +366,12 @@ export const EditablePostView = forwardRef<
     setBodyChanged(true);
   };
 
+  const mentionableElementFn = (uid: UserId) => (
+    option: MentionNodeData
+  ): JSX.Element => {
+    return <MentionSuggestionLine uid={uid} option={option} />;
+  };
+
   const {
     idleTimer,
     documentTitle,
@@ -371,7 +380,7 @@ export const EditablePostView = forwardRef<
     richTextEditorRef,
   } = useEditablePostComponents({
     buildOnIdle: buildOnIdle,
-    readOnly: props.readOnly,
+    readOnly: false,
 
     title: props.title,
     body: props.body,
@@ -379,10 +388,10 @@ export const EditablePostView = forwardRef<
     onTitleChange: onTitleChange,
     onBodyChange: onBodyChange,
 
-    onMentionSearchChanged: props.onMentionSearchChanged,
-    mentionables: props.mentionables,
-    onMentionAdded: props.onMentionAdded,
-    mentionableElementFn: props.mentionableElementFn,
+    onMentionSearchChanged: onMentionSearchChanged,
+    mentionables: mentionables,
+    onMentionAdded: onMentionAdded,
+    mentionableElementFn: mentionableElementFn(viewer.uid),
   });
 
   const authorLink = (
@@ -392,7 +401,7 @@ export const EditablePostView = forwardRef<
       postId={props.postId}
       updatedAt={props.updatedAt}
       numMentions={props.mentions.length}
-      deletePost={props.deletePost}
+      deletePost={deletePost}
     />
   );
 
@@ -457,12 +466,9 @@ type PostViewControllerProps = {
   getUser: GetUserFn;
   getUserByUsername: GetUserByUsernameFn;
   getPost: GetPostFn;
-  getGlobalMentions: GetAllPostsByTitlePrefixFn;
-  renamePost: CurriedByUser<RenamePostFn>;
-  syncBody: CurriedByUser<SyncBodyFn>;
-  createPost: CurriedByUser<CreatePostFn>;
   getMentionUserPosts: GetMentionUserPostsFn;
-  deletePost: DeletePostFn;
+
+  editablePostCallbacks: EditablePostCallbacks;
 };
 
 type PostViewControllerParams = {
@@ -487,7 +493,13 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
-  const { getUser, getUserByUsername, getPost, getMentionUserPosts } = props;
+  const {
+    getUser,
+    getUserByUsername,
+    getPost,
+    getMentionUserPosts,
+    editablePostCallbacks,
+  } = props;
 
   const [authorRecord, setAuthorRecord] = useLoadableRecord<UserRecord>();
   const [postRecord, setPostRecord] = useLoadableRecord<PostRecord>();
@@ -609,32 +621,25 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const mentions = findMentionsInPosts(mentionPosts.get(), postId);
 
   const authorId = authorRecord.get().uid;
-  const readOnly = viewer?.uid !== authorId;
+  const loggedInAsAuthor = viewer?.uid === authorId;
 
-  const postView = readOnly ? (
-    // readonly post view goes here
-    <></>
-  ) : (
+  const postView = loggedInAsAuthor ? (
     <EditablePostView
       ref={postViewRef}
-      author={authorRecord.get()}
-      readOnly={readOnly}
       postId={postId}
+      author={authorRecord.get()}
+      updatedAt={updatedAt}
+      mentions={mentions!}
       title={title!}
       setTitle={setTitle}
       body={body!}
-      mentions={mentions!}
       setBody={setBody}
-      getTitle={getTitle}
-      renamePost={props.renamePost}
-      syncBody={props.syncBody}
-      mentionables={mentionables}
-      onMentionSearchChanged={onMentionSearchChanged(authorId)}
-      onMentionAdded={onMentionAdded}
-      mentionableElementFn={mentionableElementFn(authorId)}
-      updatedAt={updatedAt}
-      deletePost={props.deletePost}
+      getPost={getPost}
+      editablePostCallbacks={editablePostCallbacks}
     />
+  ) : (
+    // readonly post view goes here
+    <></>
   );
 
   const pageTitle = `${title!} by ${

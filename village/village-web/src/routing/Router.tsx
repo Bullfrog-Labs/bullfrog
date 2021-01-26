@@ -117,12 +117,14 @@ export const Router = (props: RouterProps) => {
               getUserByUsername={getUserByUsername}
               getUser={getUser}
               getPost={getPost}
-              renamePost={renamePost}
-              syncBody={syncBody}
-              getGlobalMentions={getGlobalMentions}
-              createPost={createPost}
               getMentionUserPosts={getMentionUserPosts}
-              deletePost={deletePost}
+              editablePostCallbacks={{
+                renamePost: renamePost,
+                syncBody: syncBody,
+                getGlobalMentions: getGlobalMentions,
+                createPost: createPost,
+                deletePost: deletePost,
+              }}
             />
           </AppContainerWithProps>
         </PrivateRoute>
