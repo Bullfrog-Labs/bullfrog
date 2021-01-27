@@ -1,6 +1,6 @@
 locals {
   project_id   = "${var.project}-${var.env}"
-  project_name = "Bullfrog Village - ${title(var.env)}"
+  project_name = "Village - ${title(var.env)}"
 }
 
 provider "google" {

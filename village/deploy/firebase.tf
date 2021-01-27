@@ -41,7 +41,7 @@ resource "google_firebase_project_location" "default" {
   ]
 }
 
-resource "google_firebase_web_app" "wild_workouts" {
+resource "google_firebase_web_app" "village" {
   provider     = google-beta
   display_name = "Village"
 
