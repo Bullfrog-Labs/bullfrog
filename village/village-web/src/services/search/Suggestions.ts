@@ -49,9 +49,10 @@ export const matchesToSearchSuggestions = (
 };
 
 export const getSearchSuggestionsByTitlePrefix: (
-  database: Database,
-  user: UserRecord
-) => SearchSuggestionFetchFn = (database, user) => async (value) => {
+  database: Database
+) => (user: UserRecord) => SearchSuggestionFetchFn = (database) => (
+  user
+) => async (value) => {
   const allMatches = await getAllPostsByTitlePrefix(database)(value);
 
   return matchesToSearchSuggestions(allMatches, user, value);

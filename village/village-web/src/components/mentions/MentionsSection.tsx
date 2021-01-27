@@ -5,9 +5,9 @@ import {
   ListItem,
   makeStyles,
 } from "@material-ui/core";
-import { MentionPostCard } from "../components/MentionPostCard";
-import { MentionInContext } from "../components/richtext/Utils";
-import { useGlobalStyles } from "../styles/styles";
+import { MentionPostCard } from "./MentionPostCard";
+import { MentionInContext } from "../richtext/Utils";
+import { useGlobalStyles } from "../../styles/styles";
 
 const useStyles = makeStyles((theme) => ({
   postDetails: {

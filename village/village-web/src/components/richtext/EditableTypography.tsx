@@ -42,73 +42,68 @@ const handleExitEditable = (handleEscape?: KBEventHandler) => (
   }
 };
 
-export const EditableTypography = forwardRef<
-  EditableTypographyImperativeHandle,
-  EditableTypographyProps
->((props, ref) => {
-  const globalClasses = useGlobalStyles();
+export const EditableTypography = React.memo(
+  forwardRef<EditableTypographyImperativeHandle, EditableTypographyProps>(
+    (props, ref) => {
+      const globalClasses = useGlobalStyles();
 
-  const editor = useMemo(
-    () => withReact(withEditableTypographyLayout(withHistory(createEditor()))),
-    []
-  );
+      const editor = useMemo(
+        () =>
+          withReact(withEditableTypographyLayout(withHistory(createEditor()))),
+        []
+      );
 
-  const onChange = (newValue: RichText) => {
-    if (!!props.onChange) {
-      props.onChange(slateNodeToString(newValue));
-    }
-  };
-
-  // TOOD: I need to be able to create a reset function here. I also need to
-  // make it callable from the parent component. This can be done using ref
-  // forwarding, see https://reactjs.org/docs/forwarding-refs.html.
-  // See
-  // https://www.notion.so/Crash-due-to-Slate-cursor-being-in-invalid-position-when-post-rename-fails-due-to-post-name-taken-an-9904289b317d4fc68f6b918ef62ae780
-  // for why this is needed.
-
-  const renderLeaf = useCallback(
-    ({ children, attributes }) => (
-      <Typography variant={props.variant} {...attributes}>
-        {children}
-      </Typography>
-    ),
-    [props.variant]
-  );
-
-  useImperativeHandle(ref, () => ({
-    blurEditor: () => ReactEditor.blur(editor),
-    deselect: () => Transforms.deselect(editor),
-    setSelectionToEnd: () => {
-      const textNode = Node.get(editor, EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH);
-      if (!Text.isText(textNode)) {
-        throw new Error("Got non-text node when expecting a text node");
-      }
-      const textEndOffset = textNode.text.length;
-      const endPoint = {
-        path: EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH,
-        offset: textEndOffset,
-      };
-      Transforms.select(editor, endPoint);
-    },
-  }));
-
-  return (
-    <Slate
-      editor={editor}
-      value={stringToSlateNode(props.value)}
-      onChange={onChange}
-    >
-      <Editable
-        readOnly={props.readOnly ?? false}
-        placeholder="Enter a title"
-        renderLeaf={renderLeaf}
-        onKeyDown={handleExitEditable(props.handleEscape)}
-        className={
-          props.readOnly
-            ? globalClasses.readOnlyRichText
-            : globalClasses.editableRichText
+      const onChange = (newValue: RichText) => {
+        if (!!props.onChange) {
+          props.onChange(slateNodeToString(newValue));
         }
-      />
-    </Slate>
-  );
-});
+      };
+
+      const renderLeaf = useCallback(
+        ({ children, attributes }) => (
+          <Typography variant={props.variant} {...attributes}>
+            {children}
+          </Typography>
+        ),
+        [props.variant]
+      );
+
+      useImperativeHandle(ref, () => ({
+        blurEditor: () => ReactEditor.blur(editor),
+        deselect: () => Transforms.deselect(editor),
+        setSelectionToEnd: () => {
+          const textNode = Node.get(editor, EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH);
+          if (!Text.isText(textNode)) {
+            throw new Error("Got non-text node when expecting a text node");
+          }
+          const textEndOffset = textNode.text.length;
+          const endPoint = {
+            path: EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH,
+            offset: textEndOffset,
+          };
+          Transforms.select(editor, endPoint);
+        },
+      }));
+
+      return (
+        <Slate
+          editor={editor}
+          value={stringToSlateNode(props.value)}
+          onChange={onChange}
+        >
+          <Editable
+            readOnly={props.readOnly ?? false}
+            placeholder="Enter a title"
+            renderLeaf={renderLeaf}
+            onKeyDown={handleExitEditable(props.handleEscape)}
+            className={
+              props.readOnly
+                ? globalClasses.readOnlyRichText
+                : globalClasses.editableRichText
+            }
+          />
+        </Slate>
+      );
+    }
+  )
+);

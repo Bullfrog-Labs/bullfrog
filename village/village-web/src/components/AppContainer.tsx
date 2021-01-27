@@ -1,23 +1,26 @@
-import React from "react";
 import {
-  MuiThemeProvider,
   Container,
   CssBaseline,
   Divider,
   Drawer,
+  MuiThemeProvider,
 } from "@material-ui/core";
-import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
 import { makeStyles } from "@material-ui/core/styles";
-import theme from "../styles/theme";
-
+import React from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { UserRecord } from "../services/store/Users";
-import { CreatePostFn } from "../services/store/Posts";
-import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
 import {
-  useAutocompleteSearchBoxDialog,
-  AUTOCOMPLETE_SEARCH_BOX_HOTKEY,
+  CurriedByUser,
+  useUserFromAppAuthContext,
+} from "../services/auth/AppAuth";
+import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
+import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
+import { CreatePostFn } from "../services/store/Posts";
+import { UserRecord } from "../services/store/Users";
+import theme from "../styles/theme";
+import {
   AUTOCOMPLETE_SEARCH_BOX_ESCKEY,
+  AUTOCOMPLETE_SEARCH_BOX_HOTKEY,
+  useAutocompleteSearchBoxDialog,
 } from "./search/AutocompleteSearchBox";
 
 const useStyles = makeStyles((theme) => ({
@@ -51,11 +54,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type BaseAppContainerProps = {
+interface BaseAppContainerProps extends React.PropsWithChildren<{}> {
   autocompleteSearchBoxDialog?: React.ReactChild;
-};
+}
 
-const BaseAppContainer: React.FC<BaseAppContainerProps> = (props) => {
+const BaseAppContainer = (props: BaseAppContainerProps) => {
   const classes = useStyles();
 
   return (
@@ -86,37 +89,38 @@ const BaseAppContainer: React.FC<BaseAppContainerProps> = (props) => {
 };
 
 export interface AppContainerProps extends React.PropsWithChildren<{}> {
-  user?: UserRecord;
-  createPost?: CreatePostFn;
-  getSearchBoxSuggestions: SearchSuggestionFetchFn;
+  createPost: CurriedByUser<CreatePostFn>;
+  getSearchBoxSuggestions: CurriedByUser<SearchSuggestionFetchFn>;
   fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
 }
 
-export const AppContainer: React.FC<AppContainerProps> = (props) =>
-  !!props.user ? (
-    <AuthedAppContainer {...props} />
+export const AppContainer = (props: AppContainerProps) => {
+  const user = useUserFromAppAuthContext();
+
+  return !!user ? (
+    <AuthedAppContainer user={user} {...props} />
   ) : (
     <UnauthedAppContainer {...props} />
   );
+};
 
-const AuthedAppContainer = (props: AppContainerProps) => {
-  if (!props.user) {
-    throw new Error(
-      "AuthedAppContainer should be called with valid authenticated user."
-    );
-  }
+export interface AuthedAppContainerProps extends AppContainerProps {
+  user: UserRecord;
+}
 
-  if (!props.createPost) {
-    throw new Error(
-      "AuthedAppContainer should be called with a valid createPost"
-    );
-  }
+const AuthedAppContainer = (props: AuthedAppContainerProps) => {
+  const {
+    user,
+    createPost,
+    getSearchBoxSuggestions,
+    fetchTitleFromOpenGraph,
+  } = props;
 
   const autocompleteSearchBox = useAutocompleteSearchBoxDialog(
-    props.user,
-    props.createPost!,
-    props.getSearchBoxSuggestions,
-    props.fetchTitleFromOpenGraph
+    user,
+    createPost(user),
+    getSearchBoxSuggestions(user),
+    fetchTitleFromOpenGraph
   );
 
   useHotkeys(AUTOCOMPLETE_SEARCH_BOX_HOTKEY, (event) => {

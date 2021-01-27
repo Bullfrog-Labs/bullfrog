@@ -1,43 +1,47 @@
+import { act, render, screen, waitFor } from "@testing-library/react";
+import { createMemoryHistory } from "history";
 import React from "react";
-import { screen, render, waitFor } from "@testing-library/react";
-import { PostView, PostViewController } from "./PostView";
+import { MemoryRouter, Route, Router } from "react-router-dom";
 import {
   EMPTY_RICH_TEXT,
-  stringToSlateNode,
   MentionInContext,
+  stringToSlateNode,
 } from "../components/richtext/Utils";
-import { MemoryRouter, Route, Router } from "react-router-dom";
-import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
-import { createMemoryHistory } from "history";
-import { PostId, UserPost, PostRecord } from "../services/store/Posts";
+import { postURL, postURLById } from "../routing/URLs";
+import { useIsLoggedInAsUser } from "../services/auth/AppAuth";
+import { PostId, PostRecord, UserPost } from "../services/store/Posts";
 import {
   GetUserByUsernameFn,
   GetUserFn,
   UserId,
-  UserRecord,
 } from "../services/store/Users";
+import { AuthedTestUserContext } from "../testing/AuthedTestUserContext";
 import { userPosts0 } from "../testing/Fixtures";
-import { postURL, postURLById } from "../routing/URLs";
+import {
+  EditablePostView,
+  EditablePostViewProps,
+  PostViewController,
+  PostViewControllerProps,
+  ReadOnlyPostView,
+} from "./PostView";
 
-const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
-  return <React.Fragment>option.value</React.Fragment>;
-};
-
-const getMentionUserPosts0 = async (postId: PostId): Promise<UserPost[]> => {
+const getMentionUserPosts0 = async (): Promise<UserPost[]> => {
   return [];
 };
 
-const viewer: UserRecord = {
+const viewer = {
   uid: "456",
   displayName: "baz",
   username: "baz",
 };
 
-const author: UserRecord = {
+const author = {
   uid: "123",
   displayName: "qux",
   username: "qux",
 };
+
+const users = [viewer, author];
 
 const posts: PostRecord[] = [
   {
@@ -54,106 +58,191 @@ const posts: PostRecord[] = [
     title: "Bar",
     mentions: [],
   },
+  {
+    id: "ghi",
+    authorId: viewer.uid,
+    body: stringToSlateNode("Not the author"),
+    title: "Baz",
+    mentions: [],
+  },
 ];
 
-const TestPostView = (props: { mentions?: MentionInContext[] }) => {
-  const postProps = {
-    readOnly: false,
-    postId: "foo",
-    title: "bar",
-    setTitle: jest.fn(),
-    body: EMPTY_RICH_TEXT,
-    setBody: jest.fn(),
-    viewer: viewer,
-    author: author,
-    mentions: props.mentions || [],
-
-    getTitle: jest.fn(),
-    renamePost: jest.fn(),
-    syncBody: jest.fn(),
-
-    onMentionSearchChanged: jest.fn(),
-    mentionables: [],
-    onMentionAdded: jest.fn(),
-    mentionableElementFn: mentionableElementFn,
-  };
-
-  return (
-    <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
-      <PostView {...postProps} />
-    </MemoryRouter>
-  );
+type TestPostViewProps = {
+  mentions?: MentionInContext[];
 };
 
-test("Renders PostView with no mentions", () => {
-  const { getByText, queryByText } = render(<TestPostView />);
+const TestPostView = (props: TestPostViewProps) => {
+  const commonPostProps = {
+    postId: "foo",
+    updatedAt: new Date(),
+    author: author,
+    mentions: props.mentions ?? [],
 
-  const titleEl = getByText("bar");
+    title: "bar",
+    body: EMPTY_RICH_TEXT,
+  };
+
+  const loggedInAsAuthor = useIsLoggedInAsUser(author.uid);
+
+  if (loggedInAsAuthor) {
+    const postProps: EditablePostViewProps = {
+      ...commonPostProps,
+      setTitle: jest.fn(),
+      setBody: jest.fn(),
+      getPost: jest.fn(),
+
+      editablePostCallbacks: {
+        getGlobalMentions: jest.fn(async () => []),
+        renamePost: jest.fn(),
+        syncBody: jest.fn(),
+        createPost: jest.fn(),
+        deletePost: jest.fn(),
+      },
+    };
+    return (
+      <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
+        <EditablePostView {...postProps} />
+      </MemoryRouter>
+    );
+  } else {
+    return (
+      <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
+        <ReadOnlyPostView {...commonPostProps} />
+      </MemoryRouter>
+    );
+  }
+};
+
+const testPostViewNoMentions = () => {
+  const titleEl = screen.getByText("bar");
   expect(titleEl).toBeInTheDocument();
 
-  const authorEl = getByText("qux");
+  const authorEl = screen.getByText("qux");
   expect(authorEl).toBeInTheDocument();
 
-  const mentionsEl = queryByText("Mentions");
+  const mentionsEl = screen.queryByText("Mentions");
   expect(mentionsEl).toBeNull();
+};
+
+test("Renders PostView with no mentions for user logged in as author", async () => {
+  await act(async () => {
+    render(
+      <AuthedTestUserContext user={author}>
+        <TestPostView />
+      </AuthedTestUserContext>
+    );
+  });
+  testPostViewNoMentions();
 });
 
-test("Renders PostView with mentions", () => {
-  const mentions = userPosts0.map((up) => {
-    return {
-      post: up,
-      text: stringToSlateNode("here i am, mr. mention!"),
-      path: [0],
-    };
+test("Renders PostView with no mentions for user logged in not as author", async () => {
+  await act(async () => {
+    render(
+      <AuthedTestUserContext user={viewer}>
+        <TestPostView />
+      </AuthedTestUserContext>
+    );
   });
-  const { getByText, queryAllByText } = render(
-    <TestPostView mentions={mentions} />
-  );
+  testPostViewNoMentions();
+});
 
-  const titleEl = getByText("bar");
+test("Renders PostView with no mentions for logged-out user", () => {
+  render(<TestPostView />);
+  testPostViewNoMentions();
+});
+
+const mentions0: MentionInContext[] = userPosts0.map((up) => {
+  return {
+    post: up,
+    text: stringToSlateNode("here i am, mr. mention!"),
+    path: [0],
+    truncatedStart: false,
+    truncatedEnd: false,
+  };
+});
+
+const testPostViewWithMentions = async (element: JSX.Element) => {
+  await act(async () => {
+    render(element);
+  });
+
+  const titleEl = screen.getByText("bar");
   expect(titleEl).toBeInTheDocument();
 
-  const authorEl = getByText("qux");
+  const authorEl = screen.getByText("qux");
   expect(authorEl).toBeInTheDocument();
 
-  const mentionsEl = getByText("Mentions");
+  const mentionsEl = screen.getByText("Mentions");
   expect(mentionsEl).toBeInTheDocument();
 
-  const mentionTitleEls = queryAllByText("Title mane");
+  const mentionTitleEls = screen.queryAllByText("Title mane");
   expect(mentionTitleEls.length).toEqual(2);
+};
+
+test("Renders PostView with mentions for user logged in as author", async () => {
+  await testPostViewWithMentions(
+    <AuthedTestUserContext user={author}>
+      <TestPostView mentions={mentions0} />
+    </AuthedTestUserContext>
+  );
 });
 
-test("PostView to PostView navigation works", async () => {
+test("Renders PostView with mentions for user not logged in as author", async () => {
+  await testPostViewWithMentions(
+    <AuthedTestUserContext user={viewer}>
+      <TestPostView mentions={mentions0} />
+    </AuthedTestUserContext>
+  );
+});
+
+test("Renders PostView with mentions for logged-out user", async () => {
+  await testPostViewWithMentions(<TestPostView mentions={mentions0} />);
+});
+
+const testPostViewToPostViewNavigation = async (
+  propsToPostViewController: (
+    props: PostViewControllerProps
+  ) => React.ReactChild
+) => {
   const history = createMemoryHistory();
 
-  const postsMap = new Map(posts.map((post) => [post.id, post]));
+  const postsMap = new Map(
+    posts.map((post) => [`${post.authorId}/${post.id}`, post])
+  );
+  const getPost = jest.fn(async (uid: UserId, postId: PostId) =>
+    postsMap.get(`${uid}/${postId}`)
+  );
 
-  const getUser: GetUserFn = jest.fn(async () => author);
-  const getUserByUsername: GetUserByUsernameFn = jest.fn(async () => author);
-  const getPost = jest.fn(async (uid: UserId, postId: PostId) => {
-    return postsMap.get(postId);
-  });
+  const userIdToUser = new Map(users.map((user) => [user.uid, user]));
+  const getUser: GetUserFn = jest.fn(async (uid) => userIdToUser.get(uid));
 
-  const getGlobalMentions = jest.fn(async (titlePrefix: string) => {
-    return [];
-  });
+  const usernameToUser = new Map(users.map((user) => [user.username, user]));
+  const getUserByUsername: GetUserByUsernameFn = jest.fn(async (username) =>
+    usernameToUser.get(username)
+  );
 
   const props = {
-    viewer: viewer,
     getUser: getUser,
     getUserByUsername: getUserByUsername,
     getPost: getPost,
-    getGlobalMentions: getGlobalMentions,
-    renamePost: jest.fn(),
-    syncBody: jest.fn(),
-    createPost: jest.fn(),
+
     getMentionUserPosts: getMentionUserPosts0,
+
+    editablePostCallbacks: {
+      getGlobalMentions: jest.fn(async () => {
+        return [];
+      }),
+      renamePost: jest.fn(),
+      syncBody: jest.fn(),
+      createPost: jest.fn(),
+      deletePost: jest.fn(),
+    },
   };
 
   render(
     <Router history={history}>
       <Route exact path="/post/:authorIdOrUsername/:postId">
-        <PostViewController {...props} />
+        {propsToPostViewController(props)}
       </Route>
     </Router>
   );
@@ -172,4 +261,23 @@ test("PostView to PostView navigation works", async () => {
   await waitFor(() => {
     expect(screen.getByText("Bar")).toBeInTheDocument();
   });
+
+  history.push(postURL(viewer.username, "ghi"));
+  await waitFor(() => {
+    expect(screen.getByText("Baz")).toBeInTheDocument();
+  });
+};
+
+test("PostView to PostView navigation works when logged in", async () => {
+  testPostViewToPostViewNavigation((props) => (
+    <AuthedTestUserContext user={author}>
+      <PostViewController {...props} />
+    </AuthedTestUserContext>
+  ));
+});
+
+test("PostView to PostView navigation works when logged out", async () => {
+  testPostViewToPostViewNavigation((props) => (
+    <PostViewController {...props} />
+  ));
 });

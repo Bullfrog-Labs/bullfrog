@@ -3,6 +3,7 @@ import React, {
   forwardRef,
   RefObject,
   SetStateAction,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -11,15 +12,15 @@ import React, {
 import { useGlobalStyles } from "../styles/styles";
 import RichTextEditor, {
   RichTextEditorImperativeHandle,
+  RichTextEditorMentionTypeaheadComponents,
 } from "../components/richtext/RichTextEditor";
 import * as log from "loglevel";
-import { MentionsSection } from "../components/MentionsSection";
+import { MentionsSection } from "../components/mentions/MentionsSection";
 import {
   CircularProgress,
   makeStyles,
   Paper,
   Grid,
-  Typography,
   Divider,
 } from "@material-ui/core";
 import IdleTimer from "react-idle-timer";
@@ -64,6 +65,12 @@ import {
 } from "../hooks/useLoadableRecord";
 import { useQuery } from "../hooks/useQuery";
 import { postURL } from "../routing/URLs";
+import {
+  CurriedByUser,
+  useLoggedInUserFromAppAuthContext,
+  useUserFromAppAuthContext,
+} from "../services/auth/AppAuth";
+import { MentionSuggestionLine } from "../components/mentions/MentionSuggestionLine";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -81,97 +88,7 @@ const useStyles = makeStyles((theme) => ({
 
 const DEFAULT_IDLE_TIME = 1 * 1000;
 
-type EditablePostInputs = {
-  idleTime?: number;
-  buildOnIdle: (
-    documentTitleRef: RefObject<EditableTypographyImperativeHandle>
-  ) => (event: Event) => void;
-
-  readOnly: boolean;
-
-  title: PostTitle;
-  body: PostBody;
-
-  onTitleChange: (newTitle: PostTitle) => void;
-  onBodyChange: (newBody: PostBody) => void;
-
-  onMentionSearchChanged: (newSearch: string) => void;
-  mentionables: MentionNodeData[];
-  onMentionAdded: (option: MentionNodeData) => void;
-  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
-};
-
-type EditablePostComponents = {
-  idleTimer: React.ReactChild;
-  documentTitle: React.ReactChild;
-  documentTitleRef: RefObject<EditableTypographyImperativeHandle>;
-  richTextEditor: React.ReactChild;
-  richTextEditorRef: RefObject<RichTextEditorImperativeHandle>;
-};
-
-const useEditablePostComponents: (
-  inputs: EditablePostInputs
-) => EditablePostComponents = ({
-  idleTime,
-  buildOnIdle,
-  readOnly,
-  title,
-  body,
-  onTitleChange,
-  onBodyChange,
-  onMentionSearchChanged,
-  mentionables,
-  onMentionAdded,
-  mentionableElementFn,
-}) => {
-  const richTextEditorRef = useRef<RichTextEditorImperativeHandle>(null);
-  const documentTitleRef = useRef<EditableTypographyImperativeHandle>(null);
-
-  const onIdle = buildOnIdle(documentTitleRef);
-
-  const idleTimer = (
-    <IdleTimer timeout={idleTime ?? DEFAULT_IDLE_TIME} onIdle={onIdle} />
-  );
-
-  const documentTitle = (
-    <DocumentTitle
-      ref={documentTitleRef}
-      readOnly={readOnly}
-      handleEscape={() => {
-        richTextEditorRef.current?.focusEditor();
-      }}
-      value={title}
-      onChange={onTitleChange}
-    />
-  );
-
-  const richTextEditor = (
-    <RichTextEditor
-      ref={richTextEditorRef}
-      readOnly={readOnly}
-      body={body}
-      onChange={onBodyChange}
-      enableToolbar={false}
-      mentionables={mentionables}
-      onMentionSearchChanged={onMentionSearchChanged}
-      onMentionAdded={onMentionAdded}
-      mentionableElementFn={mentionableElementFn}
-    />
-  );
-
-  const result: EditablePostComponents = {
-    idleTimer: idleTimer,
-    documentTitle: documentTitle,
-    documentTitleRef: documentTitleRef,
-    richTextEditor: richTextEditor,
-    richTextEditorRef: richTextEditorRef,
-  };
-
-  return result;
-};
-
 export type BasePostViewProps = {
-  readOnly: boolean;
   postView: React.ReactChild;
   mentions?: MentionInContext[];
 };
@@ -200,75 +117,154 @@ export const BasePostView = (props: BasePostViewProps) => {
   );
 };
 
-const MentionSuggestionLine = (props: {
-  option: MentionNodeData;
-  uid: string;
-}) => {
-  const { option, uid } = props;
-  const globalClasses = useGlobalStyles();
-  if (!option.exists) {
-    return (
-      <Typography
-        variant="body1"
-        className={globalClasses.searchSuggestionLine}
-      >
-        <span className={globalClasses.searchPrefixPart}>New post: </span>{" "}
-        {option.value}
-      </Typography>
-    );
-  } else if (option.authorId === uid) {
-    return (
-      <Typography
-        variant="body1"
-        className={globalClasses.searchSuggestionLine}
-      >
-        {option.value}
-      </Typography>
-    );
-  } else {
-    return (
-      <Typography
-        variant="body1"
-        className={globalClasses.searchSuggestionLine}
-      >
-        {option.value}{" "}
-        <em style={{ fontWeight: 400 }}>by {option.authorUsername}</em>
-      </Typography>
-    );
-  }
+type OnIdleComponents = {
+  idleTime?: number;
+  buildOnIdle: (
+    documentTitleRef: RefObject<EditableTypographyImperativeHandle>
+  ) => (event: Event) => void;
 };
 
-const mentionableElementFn = (uid: UserId) => (
-  option: MentionNodeData
-): JSX.Element => {
-  return <MentionSuggestionLine uid={uid} option={option} />;
-};
-
-export type PostViewProps = {
+type PostComponentInputs = {
   readOnly: boolean;
 
-  postId: PostId;
-
   title: PostTitle;
-  setTitle: Dispatch<SetStateAction<PostTitle>>;
-
   body: PostBody;
-  setBody: Dispatch<SetStateAction<PostBody>>;
-  updatedAt: Date | undefined;
 
-  viewer: UserRecord;
-  author: UserRecord;
-  mentions: MentionInContext[];
+  onTitleChange: (newTitle: PostTitle) => void;
+  onBodyChange: (newBody: PostBody) => void;
 
-  getTitle: () => Promise<PostTitle | undefined>;
+  onIdleComponents?: OnIdleComponents;
+  mentionableComponents?: RichTextEditorMentionTypeaheadComponents;
+};
 
-  renamePost: RenamePostFn;
-  syncBody: SyncBodyFn;
-  deletePost: DeletePostFn;
-  onMentionSearchChanged: (newSearch: string) => void;
-  mentionables: MentionNodeData[];
-  onMentionAdded: (option: MentionNodeData) => void;
-  mentionableElementFn: (option: MentionNodeData) => JSX.Element;
+type PostComponents = {
+  idleTimer?: React.ReactChild;
+  documentTitle: React.ReactChild;
+  documentTitleRef: RefObject<EditableTypographyImperativeHandle>;
+  richTextEditor: React.ReactChild;
+  richTextEditorRef: RefObject<RichTextEditorImperativeHandle>;
+};
+
+const usePostComponents: (inputs: PostComponentInputs) => PostComponents = ({
+  onIdleComponents,
+  readOnly,
+  title,
+  body,
+  onTitleChange,
+  onBodyChange,
+  mentionableComponents,
+}) => {
+  const richTextEditorRef = useRef<RichTextEditorImperativeHandle>(null);
+  const documentTitleRef = useRef<EditableTypographyImperativeHandle>(null);
+
+  if (readOnly === !!onIdleComponents) {
+    throw new Error("Idle components should be present iff editable post");
+  }
+
+  if (readOnly === !!mentionableComponents) {
+    throw new Error(
+      "Mentionable components should be present iff editable post"
+    );
+  }
+
+  const idleTimer = !!onIdleComponents ? (
+    <IdleTimer
+      timeout={onIdleComponents.idleTime ?? DEFAULT_IDLE_TIME}
+      onIdle={onIdleComponents.buildOnIdle(documentTitleRef)}
+    />
+  ) : undefined;
+
+  const documentTitle = (
+    <DocumentTitle
+      ref={documentTitleRef}
+      readOnly={readOnly}
+      handleEscape={useCallback(() => {
+        richTextEditorRef.current?.focusEditor();
+      }, [])}
+      value={title}
+      onChange={onTitleChange}
+    />
+  );
+
+  const richTextEditor = (
+    <RichTextEditor
+      ref={richTextEditorRef}
+      readOnly={readOnly}
+      body={body}
+      onChange={onBodyChange}
+      enableToolbar={false}
+      mentionTypeaheadComponents={mentionableComponents}
+    />
+  );
+
+  const result: PostComponents = {
+    idleTimer: idleTimer,
+    documentTitle: documentTitle,
+    documentTitleRef: documentTitleRef,
+    richTextEditor: richTextEditor,
+    richTextEditorRef: richTextEditorRef,
+  };
+
+  return result;
+};
+
+const useAssembledPostView = (
+  subtitleRow: React.ReactChild,
+  documentTitle: React.ReactChild,
+  richTextEditor: React.ReactChild,
+  idleTimer?: React.ReactChild
+) => {
+  const classes = useStyles();
+
+  const header = (
+    <Grid item>
+      <Grid
+        container
+        direction="column"
+        justify="flex-start"
+        alignItems="stretch"
+        spacing={1}
+      >
+        <Grid item>{documentTitle}</Grid>
+        <Grid item>{subtitleRow}</Grid>
+      </Grid>
+    </Grid>
+  );
+
+  const postDetails = (
+    <div className={classes.postDetails}>
+      <Grid
+        container
+        direction="column"
+        justify="flex-start"
+        alignItems="stretch"
+        spacing={4}
+      >
+        <Grid item>{header}</Grid>
+        <Grid item>
+          <div>{richTextEditor}</div>
+        </Grid>
+      </Grid>
+    </div>
+  );
+
+  const postView = (
+    <>
+      {!!idleTimer && idleTimer}
+      <Grid
+        container
+        direction="row"
+        justify="center"
+        alignItems="flex-start"
+        spacing={1}
+      >
+        <Grid item sm={12}>
+          {postDetails}
+        </Grid>
+      </Grid>
+    </>
+  );
+  return postView;
 };
 
 type PostViewImperativeHandle = {
@@ -276,217 +272,293 @@ type PostViewImperativeHandle = {
   blurBody: () => void;
 };
 
+export type ReadOnlyPostViewProps = {
+  postId: PostId;
+  author: UserRecord;
+  updatedAt: Date | undefined;
+  mentions: MentionInContext[];
+
+  title: PostTitle;
+  body: PostBody;
+};
+
+export const ReadOnlyPostView = forwardRef<
+  PostViewImperativeHandle,
+  ReadOnlyPostViewProps
+>((props, ref) => {
+  const {
+    documentTitle,
+    documentTitleRef,
+    richTextEditor,
+    richTextEditorRef,
+  } = usePostComponents({
+    readOnly: true,
+
+    title: props.title,
+    body: props.body,
+
+    onTitleChange: () => {},
+    onBodyChange: () => {},
+  });
+
+  const subtitleRow = (
+    <PostSubtitleRow
+      author={props.author}
+      postTitle={props.title}
+      postId={props.postId}
+      updatedAt={props.updatedAt}
+      numMentions={props.mentions.length}
+    />
+  );
+
+  const postView = useAssembledPostView(
+    subtitleRow,
+    documentTitle,
+    richTextEditor
+  );
+
+  useImperativeHandle(ref, () => ({
+    blurTitle: () => documentTitleRef.current?.blurEditor(),
+    blurBody: () => richTextEditorRef.current?.blurEditor(),
+  }));
+
+  return <BasePostView postView={postView} mentions={props.mentions} />;
+});
+
+export type EditablePostCallbacks = {
+  getGlobalMentions: GetAllPostsByTitlePrefixFn;
+  renamePost: CurriedByUser<RenamePostFn>;
+  syncBody: CurriedByUser<SyncBodyFn>;
+  createPost: CurriedByUser<CreatePostFn>;
+  deletePost: DeletePostFn;
+};
+
+export type EditablePostViewProps = {
+  postId: PostId;
+  author: UserRecord;
+  updatedAt: Date | undefined;
+  mentions: MentionInContext[];
+
+  title: PostTitle;
+  setTitle: Dispatch<SetStateAction<PostTitle>>;
+
+  body: PostBody;
+  setBody: Dispatch<SetStateAction<PostBody>>;
+
+  getPost: GetPostFn;
+
+  editablePostCallbacks: EditablePostCallbacks;
+};
+
 // Changing title triggers a rename. Renames are not allowed if the title is
 // already being used.
-export const PostView = forwardRef<PostViewImperativeHandle, PostViewProps>(
-  (props, ref) => {
-    const classes = useStyles();
-    const logger = log.getLogger("PostView");
+export const EditablePostView = forwardRef<
+  PostViewImperativeHandle,
+  EditablePostViewProps
+>((props, ref) => {
+  const logger = log.getLogger("EditablePostView");
 
-    if (props.readOnly) {
-      logger.info(`rendering read-only view for ${props.title}`);
-    }
+  const {
+    title,
+    setTitle,
+    setBody,
+    getPost,
+    author,
+    postId,
+    editablePostCallbacks,
+  } = props;
+  const {
+    getGlobalMentions,
+    createPost,
+    deletePost,
+    syncBody,
+    renamePost,
+  } = editablePostCallbacks;
 
-    const [bodyChanged, setBodyChanged] = useState(false);
-    const [titleChanged, setTitleChanged] = useState(false);
+  const viewer = useLoggedInUserFromAppAuthContext();
+  const authorId = author.uid;
 
-    const buildOnIdle = (
-      documentTitleRef: RefObject<EditableTypographyImperativeHandle>
-    ) => async () => {
-      // TODO: Post should only be renamed if the user is idle and focus is not on
-      // the title itself.
-      // TODO: If the title is set to empty or blank, the title is reset back to the
-      // original title. If the original title is shorter than the title, a crash
-      // occurs because of the cursor position. Need to set the cursor to the
-      // beginning of the title.
-      const needsPostRename = titleChanged;
-
-      // sync body first
-      if (bodyChanged) {
-        logger.debug("Body changed, syncing body");
-        const syncBodyResult: SyncBodyResult = await props.syncBody(
-          props.postId,
-          props.body
-        );
-
-        if (syncBodyResult === "success") {
-          logger.debug("Body synced");
-          setBodyChanged(false);
-        } else {
-          logger.error("sync body failed, will try in next onIdle");
-          needsPostRename &&
-            logger.error("skipping post rename due to sync body failure");
-          return;
-        }
-      }
-
-      // rename post, if needed
-      if (needsPostRename) {
-        logger.debug("Title changed, renaming post");
-        const renamePostResult: RenamePostResult = await props.renamePost(
-          props.postId,
-          props.title
-        );
-
-        switch (renamePostResult.state) {
-          case "success":
-            // TODO: Display something to show the user that the rename succeeded
-            logger.info(`Post renamed to ${props.title}`);
-            setTitleChanged(false);
-            props.setTitle(props.title);
-            documentTitleRef.current?.setSelectionToEnd();
-            break;
-          case "post-name-taken":
-            const savedTitle = await props.getTitle();
-            if (!savedTitle) {
-              // No post was found, even though it was just being edited.
-              // TODO: This should be handled properly at some point, e.g. attempt to
-              // create the post again, or show an error message saying that the
-              // note has been deleted.
-              // For now it will just be logged, since this is a corner case.
-              logger.info(
-                "Post rename failed, post deleted while being renamed to already-taken post name"
-              );
-              return;
-            }
-            logger.info(
-              `Post rename failed, ${props.title} already taken. Reverting to saved title ${savedTitle}`
-            );
-
-            documentTitleRef.current?.deselect();
-            props.setTitle(savedTitle);
-            setTitleChanged(false);
-            documentTitleRef.current?.setSelectionToEnd();
-
-            break;
-          default:
-            assertNever(renamePostResult);
-        }
-      }
-    };
-
-    const onTitleChange = (newTitle: PostTitle) => {
-      if (newTitle !== props.title) {
-        props.setTitle(newTitle);
-        setTitleChanged(true);
-      }
-    };
-
-    const onBodyChange = (newBody: PostBody) => {
-      // TODO: Only mark body as changed if it is actually different
-      props.setBody(newBody);
-      setBodyChanged(true);
-    };
-
-    const {
-      idleTimer,
-      documentTitle,
-      documentTitleRef,
-      richTextEditor,
-      richTextEditorRef,
-    } = useEditablePostComponents({
-      buildOnIdle: buildOnIdle,
-      readOnly: props.readOnly,
-
-      title: props.title,
-      body: props.body,
-
-      onTitleChange: onTitleChange,
-      onBodyChange: onBodyChange,
-
-      onMentionSearchChanged: props.onMentionSearchChanged,
-      mentionables: props.mentionables,
-      onMentionAdded: props.onMentionAdded,
-      mentionableElementFn: props.mentionableElementFn,
-    });
-
-    const authorLink = (
-      <PostSubtitleRow
-        viewer={props.viewer}
-        author={props.author}
-        postTitle={props.title}
-        postId={props.postId}
-        updatedAt={props.updatedAt}
-        numMentions={props.mentions.length}
-        deletePost={props.deletePost}
-      />
-    );
-
-    const header = (
-      <Grid item>
-        <Grid
-          container
-          direction="column"
-          justify="flex-start"
-          alignItems="stretch"
-          spacing={1}
-        >
-          <Grid item>{documentTitle}</Grid>
-          <Grid item>{authorLink}</Grid>
-        </Grid>
-      </Grid>
-    );
-
-    const postDetails = (
-      <div className={classes.postDetails}>
-        <Grid
-          container
-          direction="column"
-          justify="flex-start"
-          alignItems="stretch"
-          spacing={4}
-        >
-          <Grid item>{header}</Grid>
-          <Grid item>
-            <div>{richTextEditor}</div>
-          </Grid>
-        </Grid>
-      </div>
-    );
-
-    const postView = (
-      <>
-        {idleTimer}
-        <Grid
-          container
-          direction="row"
-          justify="center"
-          alignItems="flex-start"
-          spacing={1}
-        >
-          <Grid item sm={12}>
-            {postDetails}
-          </Grid>
-        </Grid>
-      </>
-    );
-
-    useImperativeHandle(ref, () => ({
-      blurTitle: () => documentTitleRef.current?.blurEditor(),
-      blurBody: () => richTextEditorRef.current?.blurEditor(),
-    }));
-
-    return (
-      <BasePostView
-        readOnly={props.readOnly}
-        postView={postView}
-        mentions={props.mentions}
-      />
+  if (viewer.uid !== authorId) {
+    throw new Error(
+      "EditablePostView should have only be used if the viewer is the author"
     );
   }
-);
 
-type PostViewControllerProps = {
-  viewer: UserRecord;
+  // Define helpers
+  const getTitle: () => Promise<
+    PostTitle | undefined
+  > = useCallback(async () => {
+    const postRecord = await getPost(authorId, postId);
+    return postRecord ? postRecord.title : undefined;
+  }, [authorId, getPost, postId]);
+
+  const [bodyChanged, setBodyChanged] = useState(false);
+  const [titleChanged, setTitleChanged] = useState(false);
+
+  const buildOnIdle = (
+    documentTitleRef: RefObject<EditableTypographyImperativeHandle>
+  ) => async () => {
+    // TODO: Post should only be renamed if the user is idle and focus is not on
+    // the title itself.
+    // TODO: If the title is set to empty or blank, the title is reset back to the
+    // original title. If the original title is shorter than the title, a crash
+    // occurs because of the cursor position. Need to set the cursor to the
+    // beginning of the title.
+    const needsPostRename = titleChanged;
+
+    // sync body first
+    if (bodyChanged) {
+      logger.debug("Body changed, syncing body");
+      const syncBodyResult: SyncBodyResult = await syncBody(viewer)(
+        props.postId,
+        props.body
+      );
+
+      if (syncBodyResult === "success") {
+        logger.debug("Body synced");
+        setBodyChanged(false);
+      } else {
+        logger.error("sync body failed, will try in next onIdle");
+        needsPostRename &&
+          logger.error("skipping post rename due to sync body failure");
+        return;
+      }
+    }
+
+    // rename post, if needed
+    if (needsPostRename) {
+      logger.debug("Title changed, renaming post");
+      const renamePostResult: RenamePostResult = await renamePost(viewer)(
+        props.postId,
+        props.title
+      );
+
+      switch (renamePostResult.state) {
+        case "success":
+          // TODO: Display something to show the user that the rename succeeded
+          logger.info(`Post renamed to ${props.title}`);
+          setTitleChanged(false);
+          props.setTitle(props.title);
+          documentTitleRef.current?.setSelectionToEnd();
+          break;
+        case "post-name-taken":
+          const savedTitle = await getTitle();
+          if (!savedTitle) {
+            // No post was found, even though it was just being edited.
+            // TODO: This should be handled properly at some point, e.g. attempt to
+            // create the post again, or show an error message saying that the
+            // note has been deleted.
+            // For now it will just be logged, since this is a corner case.
+            logger.info(
+              "Post rename failed, post deleted while being renamed to already-taken post name"
+            );
+            return;
+          }
+          logger.info(
+            `Post rename failed, ${props.title} already taken. Reverting to saved title ${savedTitle}`
+          );
+
+          documentTitleRef.current?.deselect();
+          props.setTitle(savedTitle);
+          setTitleChanged(false);
+          documentTitleRef.current?.setSelectionToEnd();
+
+          break;
+        default:
+          assertNever(renamePostResult);
+      }
+    }
+  };
+
+  const onTitleChange = useCallback(
+    (newTitle: PostTitle) => {
+      if (newTitle !== title) {
+        setTitle(newTitle);
+        setTitleChanged(true);
+      }
+    },
+    [setTitle, title]
+  );
+
+  const onBodyChange = useCallback(
+    (newBody: PostBody) => {
+      // TODO: Only mark body as changed if it is actually different
+      setBody(newBody);
+      setBodyChanged(true);
+    },
+    [setBody]
+  );
+
+  const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
+    return <MentionSuggestionLine uid={viewer.uid} option={option} />;
+  };
+
+  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
+    getGlobalMentions,
+    createPost(viewer),
+    viewer
+  );
+
+  const {
+    idleTimer,
+    documentTitle,
+    documentTitleRef,
+    richTextEditor,
+    richTextEditorRef,
+  } = usePostComponents({
+    readOnly: false,
+
+    title: props.title,
+    body: props.body,
+
+    onTitleChange: onTitleChange,
+    onBodyChange: onBodyChange,
+
+    onIdleComponents: {
+      buildOnIdle: buildOnIdle,
+    },
+
+    mentionableComponents: {
+      onMentionSearchChanged: onMentionSearchChanged,
+      mentionables: mentionables,
+      onMentionAdded: onMentionAdded,
+      mentionableElementFn: mentionableElementFn,
+    },
+  });
+
+  const subtitleRow = (
+    <PostSubtitleRow
+      author={props.author}
+      postTitle={props.title}
+      postId={props.postId}
+      updatedAt={props.updatedAt}
+      numMentions={props.mentions.length}
+      deletePost={deletePost}
+    />
+  );
+
+  const postView = useAssembledPostView(
+    subtitleRow,
+    documentTitle,
+    richTextEditor,
+    idleTimer
+  );
+
+  useImperativeHandle(ref, () => ({
+    blurTitle: () => documentTitleRef.current?.blurEditor(),
+    blurBody: () => richTextEditorRef.current?.blurEditor(),
+  }));
+
+  return <BasePostView postView={postView} mentions={props.mentions} />;
+});
+
+export type PostViewControllerProps = {
   getUser: GetUserFn;
   getUserByUsername: GetUserByUsernameFn;
   getPost: GetPostFn;
-  getGlobalMentions: GetAllPostsByTitlePrefixFn;
-  renamePost: RenamePostFn;
-  syncBody: SyncBodyFn;
-  createPost: CreatePostFn;
   getMentionUserPosts: GetMentionUserPostsFn;
-  deletePost: DeletePostFn;
+
+  editablePostCallbacks: EditablePostCallbacks;
 };
 
 type PostViewControllerParams = {
@@ -499,6 +571,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const history = useHistory();
   const globalClasses = useGlobalStyles();
 
+  const viewer = useUserFromAppAuthContext();
+
   const { authorIdOrUsername, postId } = useParams<PostViewControllerParams>();
   const query = useQuery();
   const authorById = !!query.get("byId");
@@ -509,7 +583,13 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
-  const { getUser, getUserByUsername, getPost, getMentionUserPosts } = props;
+  const {
+    getUser,
+    getUserByUsername,
+    getPost,
+    getMentionUserPosts,
+    editablePostCallbacks,
+  } = props;
 
   const [authorRecord, setAuthorRecord] = useLoadableRecord<UserRecord>();
   const [postRecord, setPostRecord] = useLoadableRecord<PostRecord>();
@@ -608,12 +688,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
     };
   }, [getMentionUserPosts, postId, setMentionPosts]);
 
-  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
-    props.getGlobalMentions,
-    props.createPost,
-    authorRecord.state.record?.username || ""
-  );
-
   const progressIndicator = (
     <CircularProgress className={globalClasses.loadingIndicator} />
   );
@@ -636,17 +710,11 @@ export const PostViewController = (props: PostViewControllerProps) => {
 
   const mentions = findMentionsInPosts(mentionPosts.get(), postId);
 
-  // Define helpers
-  const getTitle: () => Promise<PostTitle | undefined> = async () => {
-    const postRecord = await props.getPost(authorId, postId);
-    return postRecord ? postRecord.title : undefined;
-  };
-
   const authorId = authorRecord.get().uid;
-  const readOnly = props.viewer.uid !== authorId;
+  const loggedInAsAuthor = viewer?.uid === authorId;
 
   const pageTitle = `${title!} by ${
-    authorId === props.viewer.uid ? "you" : authorRecord.get()?.username
+    authorId === viewer?.uid ? "you" : authorRecord.get()?.username
   }`;
 
   return (
@@ -654,27 +722,31 @@ export const PostViewController = (props: PostViewControllerProps) => {
       <Helmet>
         <title>{pageTitle}</title>
       </Helmet>
-      <PostView
-        ref={postViewRef}
-        viewer={props.viewer}
-        author={authorRecord.get()}
-        readOnly={readOnly}
-        postId={postId}
-        title={title!}
-        setTitle={setTitle}
-        body={body!}
-        mentions={mentions!}
-        setBody={setBody}
-        getTitle={getTitle}
-        renamePost={props.renamePost}
-        syncBody={props.syncBody}
-        mentionables={mentionables}
-        onMentionSearchChanged={onMentionSearchChanged(authorId)}
-        onMentionAdded={onMentionAdded}
-        mentionableElementFn={mentionableElementFn(authorId)}
-        updatedAt={updatedAt}
-        deletePost={props.deletePost}
-      />
+      {loggedInAsAuthor ? (
+        <EditablePostView
+          ref={postViewRef}
+          postId={postId}
+          author={authorRecord.get()}
+          updatedAt={updatedAt}
+          title={title!}
+          setTitle={setTitle}
+          body={body!}
+          setBody={setBody}
+          getPost={getPost}
+          mentions={mentions!}
+          editablePostCallbacks={editablePostCallbacks}
+        />
+      ) : (
+        <ReadOnlyPostView
+          ref={postViewRef}
+          postId={postId}
+          author={authorRecord.get()}
+          updatedAt={updatedAt}
+          title={title!}
+          body={body!}
+          mentions={mentions!}
+        />
+      )}
     </>
   );
 };

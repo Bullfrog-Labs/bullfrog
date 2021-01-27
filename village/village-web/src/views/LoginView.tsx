@@ -1,20 +1,16 @@
-import React, { FunctionComponent } from "react";
-import { AuthProvider } from "../services/auth/Auth";
+import React from "react";
 import { FirebaseAuthComponent } from "../components/auth/FirebaseAuthComponent";
+import { AuthProvider } from "../services/auth/Auth";
 import FirebaseAuthProvider from "../services/auth/FirebaseAuthProvider";
 
 export type LoginViewProps = {
   authProvider: AuthProvider;
 };
 
-export const LoginView: FunctionComponent<LoginViewProps> = ({
-  authProvider,
-}) => {
-  if (authProvider instanceof FirebaseAuthProvider) {
-    let fbAuthProvider = authProvider as FirebaseAuthProvider;
-    return <FirebaseAuthComponent authProvider={fbAuthProvider} />;
+export const LoginView = (props: LoginViewProps) => {
+  if (props.authProvider instanceof FirebaseAuthProvider) {
+    return <FirebaseAuthComponent authProvider={props.authProvider} />;
   } else {
-    // TODO: This should return an error.
-    return <div>Unsupported auth provider</div>;
+    throw new Error("Unsupported auth provider");
   }
 };
