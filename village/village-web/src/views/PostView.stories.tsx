@@ -2,22 +2,37 @@ import { Meta, Story } from "@storybook/react/types-6-0";
 import React, { useState } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
-import { useMentions } from "../hooks/useMentions";
+import { CurriedByUser } from "../services/auth/AppAuth";
 import {
-  UserPost,
-  PostTitle,
+  CreatePostFn,
   RenamePostFn,
   SyncBodyFn,
-  CreatePostFn,
+  UserPost,
 } from "../services/store/Posts";
-import { PostView, PostViewProps } from "./PostView";
+import { AuthedTestUserContext } from "../testing/AuthedTestUserContext";
+import { EditablePostView, EditablePostViewProps } from "./PostView";
+
+const viewer = {
+  uid: "456",
+  displayName: "baz",
+  username: "baz",
+};
+
+const viewerAppAuthContextDecorator = (Story: Story) => {
+  return (
+    <AuthedTestUserContext user={viewer}>
+      <Story />
+    </AuthedTestUserContext>
+  );
+};
 
 export default {
   title: "PostView/PostView",
-  component: PostView,
+  component: EditablePostView,
+  decorators: [viewerAppAuthContextDecorator],
 } as Meta;
 
-const Template: Story<PostViewProps> = (args) => {
+const Template: Story<EditablePostViewProps> = (args) => {
   const [title, setTitle] = useState(args.title);
   args.title = title;
   args.setTitle = setTitle;
@@ -27,59 +42,55 @@ const Template: Story<PostViewProps> = (args) => {
   args.setBody = setBody;
 
   const getGlobalMentions = async (): Promise<UserPost[]> => {
-    return [];
+    return [
+      {
+        user: viewer,
+        post: {
+          id: "123",
+          authorId: viewer.uid,
+          body: EMPTY_RICH_TEXT,
+          title: "foo",
+          mentions: [],
+        },
+      },
+    ];
   };
-  const createPost: CreatePostFn = async () => {
+  const createPost: CurriedByUser<CreatePostFn> = (user) => async (
+    newTitle,
+    postId
+  ) => {
     return { state: "success", postId: "hjkhj", postUrl: "" };
   };
-  const authorId = "79832475341985234";
-  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
-    getGlobalMentions,
-    createPost,
-    "l4stewar"
-  );
+  const renamePost: CurriedByUser<RenamePostFn> = (user) => async (
+    postId,
+    newTitle
+  ) => ({ state: "success" });
+  const syncBody: CurriedByUser<SyncBodyFn> = (user) => async (
+    postId,
+    newBody
+  ) => "success";
 
   return (
     <MemoryRouter initialEntries={["/post/foo"]} initialIndex={0}>
-      <PostView
+      <EditablePostView
         {...args}
-        mentionables={mentionables}
-        onMentionSearchChanged={onMentionSearchChanged(authorId)}
-        onMentionAdded={onMentionAdded}
+        editablePostCallbacks={{
+          getGlobalMentions: getGlobalMentions,
+          createPost: createPost,
+          deletePost: async (userId, postId) => {},
+          renamePost: renamePost,
+          syncBody: syncBody,
+        }}
       />
     </MemoryRouter>
   );
 };
 
-const getTitleHardcoded: () => Promise<PostTitle> = async () => {
-  return "Original title";
-};
-
-const renamePostAlwaysSuccessful: RenamePostFn = async () => {
-  return { state: "success" };
-};
-
-const syncBodyAlwaysSuccessful: SyncBodyFn = async () => {
-  return "success";
-};
-
 export const BasicPostView = Template.bind({});
 BasicPostView.args = {
-  readOnly: false,
   postId: "456",
   title: "",
   body: EMPTY_RICH_TEXT,
-  viewer: {
-    uid: "456",
-    displayName: "baz",
-    username: "baz",
-  },
-  author: {
-    uid: "123",
-    displayName: "qux",
-    username: "qux",
-  },
-  getTitle: getTitleHardcoded,
-  renamePost: renamePostAlwaysSuccessful,
-  syncBody: syncBodyAlwaysSuccessful,
+  author: viewer,
+  mentions: [],
 };

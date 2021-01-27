@@ -1,5 +1,5 @@
 import { RichText } from "./Types";
-import { createEditor, Editor, Node, Path, Text, Element } from "slate";
+import { createEditor, Editor, Node, Path } from "slate";
 import { UserPost, PostId } from "../../services/store/Posts";
 import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
 import * as log from "loglevel";
@@ -50,7 +50,7 @@ export const richTextStringPreview = (
     return undefined;
   }
 
-  return Array.from(Node.texts(richText[0]), ([text, path]) => text.text)
+  return Array.from(Node.texts(richText[0]), ([text]) => text.text)
     .slice(0, 3)
     .join("\n");
 };

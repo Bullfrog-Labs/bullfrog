@@ -48,9 +48,11 @@ const RichTextEditorStateWrapper: FunctionComponent<RichTextEditorProps> = (
         onChange={setBody}
         enableToolbar={props.enableToolbar}
         readOnly={props.readOnly}
-        onMentionSearchChanged={onMentionSearchChanged}
-        mentionables={mentionables}
-        onMentionAdded={(mention: MentionNodeData) => {}}
+        mentionTypeaheadComponents={{
+          mentionables: mentionables,
+          onMentionSearchChanged: onMentionSearchChanged,
+          onMentionAdded: (mention: MentionNodeData) => {},
+        }}
       />
     </MemoryRouter>
   );

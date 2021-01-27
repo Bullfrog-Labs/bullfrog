@@ -24,6 +24,7 @@ EditableFilledInH1.args = {
 export const EditableBlankH2 = Template.bind({});
 EditableBlankH2.args = {
   readOnly: false,
+  value: "",
   variant: "h2",
 };
 

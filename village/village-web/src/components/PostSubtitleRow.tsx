@@ -1,34 +1,25 @@
-import React, { useState } from "react";
-import * as log from "loglevel";
-import { Link, useHistory } from "react-router-dom";
-import { UserRecord } from "../services/store/Users";
-import { useGlobalStyles } from "../styles/styles";
 import {
-  makeStyles,
-  Typography,
   IconButton,
-  Tooltip,
+  makeStyles,
   Menu,
   MenuItem,
+  Tooltip,
+  Typography,
 } from "@material-ui/core";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import CallReceivedIcon from "@material-ui/icons/CallReceived";
-import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
 import DeleteIcon from "@material-ui/icons/Delete";
+import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
+import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import * as log from "loglevel";
 import { DateTime } from "luxon";
+import React, { useState } from "react";
+import { Link, useHistory } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { profileURL } from "../routing/URLs";
+import { useUserFromAppAuthContext } from "../services/auth/AppAuth";
 import { DeletePostFn } from "../services/store/Posts";
-
-export type PostSubtitleRowProps = {
-  viewer: UserRecord;
-  author: UserRecord;
-  postTitle: string;
-  postId: string;
-  updatedAt: Date | undefined;
-  numMentions: number;
-  deletePost: DeletePostFn;
-};
+import { UserRecord } from "../services/store/Users";
+import { useGlobalStyles } from "../styles/styles";
 
 const useStyles = makeStyles((theme) => ({
   subtitlePart: {
@@ -43,7 +34,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
+export type PostSubtitleRowProps = {
+  author: UserRecord;
+  postTitle: string;
+  postId: string;
+  updatedAt: Date | undefined;
+  numMentions: number;
+  deletePost?: DeletePostFn;
+};
+
+export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
   const globalClasses = useGlobalStyles();
   const classes = useStyles();
   const logger = log.getLogger("PostSubtitleRow");
@@ -52,14 +52,19 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
     postId,
     author,
     updatedAt,
-    viewer,
     postTitle,
     numMentions,
   } = props;
   const dt = DateTime.fromJSDate(updatedAt || new Date());
-  const isLoggedIn = author.uid === viewer.uid;
   const stackURLPath = `/stack/${encodeURIComponent(postTitle)}`;
   const postHasMentions = numMentions;
+
+  const viewer = useUserFromAppAuthContext();
+  const isLoggedInAsAuthor = !!viewer ? author.uid === viewer.uid : false;
+
+  if (isLoggedInAsAuthor && !deletePost) {
+    throw new Error("Must provide deletePost when logged in as author");
+  }
 
   const history = useHistory();
 
@@ -71,7 +76,7 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
     setAnchorEl(null);
   };
 
-  const handleDelete = async (
+  const handleDelete = (deletePost: DeletePostFn) => async (
     event: React.MouseEvent<HTMLLIElement, MouseEvent>
   ) => {
     handleClose();
@@ -111,7 +116,7 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
               </IconButton>
             </HashLink>
           </Tooltip>
-          {isLoggedIn && (
+          {isLoggedInAsAuthor && (
             <React.Fragment>
               <Tooltip title="Delete, settings, and more...">
                 <IconButton
@@ -128,7 +133,7 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem dense onClick={handleDelete}>
+                <MenuItem dense onClick={handleDelete(deletePost!)}>
                   <DeleteIcon
                     fontSize="small"
                     className={classes.subtitleMoreMenuItem}
@@ -144,4 +149,4 @@ export const PostSubtitleRow = (props: PostSubtitleRowProps) => {
       </div>
     </Typography>
   );
-};
+});

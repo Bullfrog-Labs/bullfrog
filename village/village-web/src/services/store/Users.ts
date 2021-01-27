@@ -1,6 +1,7 @@
-import * as log from "loglevel";
-import { Database } from "./Database";
 import firebase from "firebase";
+import * as log from "loglevel";
+import { AuthProviderState } from "../auth/Auth";
+import { Database } from "./Database";
 
 export type UserId = string;
 
@@ -104,34 +105,34 @@ export const checkIfUserExists = async (
   return !!user;
 };
 
-const authedUserToNewUserRecord = (authedUser: firebase.User): UserRecord => {
-  if (!authedUser.displayName) {
+const authProviderStateToNewUserRecord = (
+  authProviderState: AuthProviderState
+): UserRecord => {
+  if (!authProviderState.displayName) {
     throw new Error("Authed user display name should not be missing");
   }
 
   return {
-    uid: authedUser.uid,
-    displayName: authedUser.displayName,
-    username: "",
+    uid: authProviderState.uid,
+    displayName: authProviderState.displayName,
+    username: authProviderState.username,
   };
 };
 
 export const createNewUserRecord = async (
   database: Database,
-  authedUser: firebase.User
+  authProviderState: AuthProviderState
 ): Promise<void> => {
   const logger = log.getLogger("createNewUserRecord");
 
-  logger.debug(
-    `creating new user record for user ${authedUser.uid}: ${authedUser.email} `
-  );
+  logger.debug(`creating new user record for user ${authProviderState.uid}`);
   const doc = database
     .getHandle()
     .collection(USERS_COLLECTION)
     .withConverter(USER_RECORD_CONVERTER)
-    .doc(authedUser.uid);
-  await doc.set(authedUserToNewUserRecord(authedUser));
+    .doc(authProviderState.uid);
+  await doc.set(authProviderStateToNewUserRecord(authProviderState));
   logger.debug(
-    `done creating new user record for user ${authedUser.uid}: ${authedUser.email} `
+    `done creating new user record for user ${authProviderState.uid}`
   );
 };

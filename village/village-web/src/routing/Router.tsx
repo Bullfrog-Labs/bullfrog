@@ -1,31 +1,29 @@
 import React from "react";
-import { Switch, Route, BrowserRouter, useLocation } from "react-router-dom";
-import { AuthProvider } from "../services/auth/Auth";
+import { BrowserRouter, Route, Switch, useLocation } from "react-router-dom";
 import AppContainer from "../components/AppContainer";
-import { LoginView } from "../views/LoginView";
-import PrivateRoute from "./PrivateRoute";
-import MainView from "../views/MainView";
-import { ProfileViewController } from "../components/ProfileView";
+import {
+  DefaultProfileViewController,
+  ProfileViewController,
+} from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
+import { CurriedByUser } from "../services/auth/AppAuth";
 import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
+import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
 import {
   CreatePostFn,
   GetAllPostsByTitlePrefixFn,
+  GetMentionUserPostsFn,
   GetPostFn,
   GetStackPostsFn,
   GetUserPostsFn,
-  GetMentionUserPostsFn,
   RenamePostFn,
   SyncBodyFn,
   DeletePostFn,
 } from "../services/store/Posts";
-import {
-  UserRecord,
-  GetUserByUsernameFn,
-  GetUserFn,
-} from "../services/store/Users";
+import { GetUserByUsernameFn, GetUserFn } from "../services/store/Users";
+import MainView from "../views/MainView";
 import { PostViewController } from "../views/PostView";
-import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
+import PrivateRoute from "./PrivateRoute";
 
 const Sad404 = () => {
   let location = useLocation();
@@ -39,25 +37,26 @@ const Sad404 = () => {
   );
 };
 
-export const Router = (props: {
-  authProvider: AuthProvider;
+export type RouterProps = {
+  loginView: React.ReactChild;
   getUserPosts: GetUserPostsFn;
   getStackPosts: GetStackPostsFn;
   getUser: GetUserFn;
   getUserByUsername: GetUserByUsernameFn;
   getPost: GetPostFn;
-  createPost: (user: UserRecord) => CreatePostFn;
-  renamePost: (user: UserRecord) => RenamePostFn;
-  syncBody: (user: UserRecord) => SyncBodyFn;
+  createPost: CurriedByUser<CreatePostFn>;
+  renamePost: CurriedByUser<RenamePostFn>;
+  syncBody: CurriedByUser<SyncBodyFn>;
   getGlobalMentions: GetAllPostsByTitlePrefixFn;
-  getSearchSuggestionsByTitlePrefix: SearchSuggestionFetchFn;
+  getSearchSuggestionsByTitlePrefix: CurriedByUser<SearchSuggestionFetchFn>;
   getMentionUserPosts: GetMentionUserPostsFn;
   fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
-  user?: UserRecord;
   deletePost: DeletePostFn;
-}) => {
+};
+
+export const Router = (props: RouterProps) => {
   const {
-    authProvider,
+    loginView,
     getUserPosts,
     getStackPosts,
     getUser,
@@ -71,82 +70,68 @@ export const Router = (props: {
     getMentionUserPosts,
     fetchTitleFromOpenGraph,
     deletePost,
-    user,
   } = props;
+
   const AppContainerWithProps: React.FC<{}> = (props) => (
     <AppContainer
-      user={user}
-      createPost={user ? createPost(user) : undefined}
+      createPost={createPost}
       getSearchBoxSuggestions={getSearchSuggestionsByTitlePrefix}
       fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
     >
       {props.children}
     </AppContainer>
   );
-  if (!user) {
-    return (
-      <BrowserRouter>
-        <Switch>
-          <Route path="/login">
-            <AppContainerWithProps>
-              <LoginView authProvider={authProvider} />
-            </AppContainerWithProps>
-          </Route>
-          <Route path="*">
-            <Sad404 />
-          </Route>
-        </Switch>
-      </BrowserRouter>
-    );
-  } else {
-    return (
-      <BrowserRouter>
-        <Switch>
-          <Route path="/login">
-            <AppContainerWithProps>
-              <LoginView authProvider={authProvider} />
-            </AppContainerWithProps>
-          </Route>
-          <PrivateRoute exact path="/">
-            <AppContainerWithProps>
-              <MainView />
-            </AppContainerWithProps>
-          </PrivateRoute>
-          <PrivateRoute exact path="/profile/:username?">
-            <AppContainerWithProps>
-              <ProfileViewController
-                getUserPosts={getUserPosts}
-                getUserByUsername={getUserByUsername}
-                viewer={user}
-              />
-            </AppContainerWithProps>
-          </PrivateRoute>
-          <PrivateRoute exact path="/stack/:stackId">
-            <AppContainerWithProps>
-              <StackViewController getStackPosts={getStackPosts} />
-            </AppContainerWithProps>
-          </PrivateRoute>
-          <PrivateRoute exact path="/post/:authorIdOrUsername/:postId">
-            <AppContainerWithProps>
-              <PostViewController
-                viewer={user}
-                getUserByUsername={getUserByUsername}
-                getUser={getUser}
-                getPost={getPost}
-                renamePost={renamePost(user)}
-                syncBody={syncBody(user)}
-                getGlobalMentions={getGlobalMentions}
-                createPost={createPost(user)}
-                getMentionUserPosts={getMentionUserPosts}
-                deletePost={deletePost}
-              />
-            </AppContainerWithProps>
-          </PrivateRoute>
-          <Route path="*">
-            <Sad404 />
-          </Route>
-        </Switch>
-      </BrowserRouter>
-    );
-  }
+
+  return (
+    <BrowserRouter>
+      <Switch>
+        <Route path="/login">
+          <AppContainerWithProps>{loginView}</AppContainerWithProps>
+        </Route>
+        <PrivateRoute exact path="/">
+          <AppContainerWithProps>
+            <MainView />
+          </AppContainerWithProps>
+        </PrivateRoute>
+        <PrivateRoute exact path="/profile/:username">
+          <AppContainerWithProps>
+            <ProfileViewController
+              getUserPosts={getUserPosts}
+              getUserByUsername={getUserByUsername}
+            />
+          </AppContainerWithProps>
+        </PrivateRoute>
+        <PrivateRoute exact path="/profile">
+          <AppContainerWithProps>
+            <DefaultProfileViewController />
+          </AppContainerWithProps>
+        </PrivateRoute>
+        <PrivateRoute exact path="/stack/:stackId">
+          <AppContainerWithProps>
+            <StackViewController getStackPosts={getStackPosts} />
+          </AppContainerWithProps>
+        </PrivateRoute>
+        <PrivateRoute exact path="/post/:authorIdOrUsername/:postId">
+          <AppContainerWithProps>
+            <PostViewController
+              getUserByUsername={getUserByUsername}
+              getUser={getUser}
+              getPost={getPost}
+              getMentionUserPosts={getMentionUserPosts}
+              editablePostCallbacks={{
+                renamePost: renamePost,
+                syncBody: syncBody,
+                getGlobalMentions: getGlobalMentions,
+                createPost: createPost,
+                deletePost: deletePost,
+              }}
+            />
+          </AppContainerWithProps>
+        </PrivateRoute>
+        <Route path="*">
+          <Sad404 />
+        </Route>
+      </Switch>
+    </BrowserRouter>
+  );
 };
