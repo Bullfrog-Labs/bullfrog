@@ -1,7 +1,10 @@
 import { makeStyles } from "@material-ui/core/styles";
 
 export const useGlobalStyles = makeStyles((theme) => {
-  const link = {
+  const baseLink = {
+    borderRadius: "4px",
+    padding: "2px 1px",
+
     color: theme.palette.secondary.dark,
     textDecoration: "none",
     verticalAlign: "baseline",
@@ -11,9 +14,11 @@ export const useGlobalStyles = makeStyles((theme) => {
   };
 
   return {
-    link: link,
+    link: {
+      ...baseLink,
+    },
     activeSelectedLink: {
-      ...link,
+      ...baseLink,
       background: theme.palette.secondary.main,
       color: theme.palette.secondary.contrastText,
     },
