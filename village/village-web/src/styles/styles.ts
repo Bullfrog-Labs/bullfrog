@@ -5,7 +5,6 @@ export const useGlobalStyles = makeStyles((theme) => {
     color: theme.palette.secondary.dark,
     textDecoration: "none",
     verticalAlign: "baseline",
-    display: "inline-block",
     "&:hover": {
       color: theme.palette.secondary.light,
     },
