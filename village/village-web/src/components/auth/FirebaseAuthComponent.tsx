@@ -5,9 +5,10 @@ import { StyledFirebaseAuth } from "react-firebaseui";
 import firebaseui from "firebaseui";
 import FirebaseAuthProvider from "../../services/auth/FirebaseAuthProvider";
 import { useHistory, useLocation, Redirect } from "react-router-dom";
-import { AppAuthContext } from "../../services/auth/AppAuth";
+import { AppAuthContext, useIsLoggedIn } from "../../services/auth/AppAuth";
 
 interface LocationState {
+  isPrivate: boolean;
   from: {
     pathname: string;
   };
@@ -29,16 +30,23 @@ export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps
   // directed to the login page from a particular URL, they will be redirected
   // back there. If not, they will be redirected back to the default URL.
   const DEFAULT_POST_LOGIN_URL = "/";
-  const redirectTo = (location.state && location.state.from) || {
-    pathname: DEFAULT_POST_LOGIN_URL,
+  const postLoginRedirect = location.state ?? {
+    isPrivate: false,
+    from: {
+      pathname: DEFAULT_POST_LOGIN_URL,
+    },
   };
 
-  const authProviderState = useContext(AppAuthContext).authProviderState;
+  const authCompleted = useContext(AppAuthContext).authCompleted;
+  const redirectIsPrivate = postLoginRedirect.isPrivate;
+  const userIsLoggedIn = useIsLoggedIn();
+  const userCanAccessRedirect = redirectIsPrivate === userIsLoggedIn;
 
-  if (!!authProviderState) {
+  if (authCompleted && userCanAccessRedirect) {
     // short-circuit because authState has been populated and there is no
     // need to get the user to authenticate manually via the auth component.
-    return <Redirect to={redirectTo.pathname} />;
+    logger.debug(`redirecting to ${postLoginRedirect.from.pathname}`);
+    return <Redirect to={postLoginRedirect.from.pathname} />;
   } else {
     const config: firebaseui.auth.Config = {
       signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
@@ -57,13 +65,13 @@ export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps
           logger.debug(
             `successful signin, got user ${authResult.user.uid} : ${authResult.user.displayName}, ${authResult.user.email}`
           );
-          logger.debug(`redirecting to ${redirectTo.pathname}`);
+          logger.debug(`redirecting to ${postLoginRedirect.from.pathname}`);
 
-          history.replace(redirectTo);
+          history.replace(postLoginRedirect.from);
           return false;
         },
       },
-      signInSuccessUrl: redirectTo.pathname,
+      signInSuccessUrl: postLoginRedirect.from.pathname,
     };
 
     return (
