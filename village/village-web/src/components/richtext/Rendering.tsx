@@ -5,6 +5,7 @@ import * as log from "loglevel";
 import { Blockquote } from "../Blockquote";
 import { postURL } from "../../routing/URLs";
 import { useGlobalStyles } from "../../styles/styles";
+import { useFocused, useSelected } from "slate-react";
 
 export const MentionElement = ({
   attributes,
@@ -18,6 +19,9 @@ export const MentionElement = ({
   const authorId = element["authorId"];
   const authorUsername = element["authorUsername"];
   const title = element.value;
+  const selected = useSelected();
+  const focused = useFocused();
+
   if (!postId || !authorId || !authorUsername || !element.value) {
     logger.warn(
       `Invalid MentionNodeData; postId=${postId}, authorId=${authorId}, ` +
@@ -25,21 +29,23 @@ export const MentionElement = ({
     );
   }
   return (
-    <React.Fragment>
-      <Tooltip title={authorUsername}>
-        <Link
-          {...attributes}
-          className={globalClasses.link}
-          data-slate-value={title}
-          to={postURL(authorUsername, postId)}
-          contentEditable={false}
-          {...htmlAttributes}
-        >
-          {element.value}
-          {children}
-        </Link>
-      </Tooltip>
-    </React.Fragment>
+    <Tooltip title={authorUsername}>
+      <Link
+        {...attributes}
+        className={
+          focused && selected
+            ? globalClasses.activeSelectedLink
+            : globalClasses.link
+        }
+        data-slate-value={title}
+        to={postURL(authorUsername, postId)}
+        contentEditable={false}
+        {...htmlAttributes}
+      >
+        {element.value}
+        {children}
+      </Link>
+    </Tooltip>
   );
 };
 
