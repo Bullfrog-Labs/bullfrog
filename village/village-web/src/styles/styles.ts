@@ -14,7 +14,8 @@ export const useGlobalStyles = makeStyles((theme) => {
     link: link,
     activeSelectedLink: {
       ...link,
-      boxShadow: "0 0 0 2px #B4D5FF",
+      background: theme.palette.secondary.main,
+      color: theme.palette.secondary.contrastText,
     },
     stackLink: {
       color: "black",
