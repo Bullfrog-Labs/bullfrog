@@ -49,7 +49,10 @@ export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps
     return <Redirect to={postLoginRedirect.from.pathname} />;
   } else {
     const config: firebaseui.auth.Config = {
-      signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
+      signInOptions: [
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+      ],
       signInFlow: "popup",
       callbacks: {
         signInSuccessWithAuthResult: (
