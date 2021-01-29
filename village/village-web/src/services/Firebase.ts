@@ -32,7 +32,7 @@ export const initializeFirebaseApp = (
 
     // TODO: Enable Auth emulator once available
     const DEFAULT_AUTH_EMULATOR_URL = "http://localhost:9099/";
-    const AUTH_EMULATOR_ENABLED = false; // see https://linear.app/bullfrog/issue/BUL-48#comment-7c0452cf
+    const AUTH_EMULATOR_ENABLED = true; // see https://linear.app/bullfrog/issue/BUL-48#comment-7c0452cf
     if (AUTH_EMULATOR_ENABLED && !!useEmulator) {
       logger.debug(`using auth emulator at ${DEFAULT_AUTH_EMULATOR_URL}`);
       auth.useEmulator(DEFAULT_AUTH_EMULATOR_URL);

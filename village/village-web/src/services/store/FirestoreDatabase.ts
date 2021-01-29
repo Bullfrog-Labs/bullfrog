@@ -10,15 +10,14 @@ export class FirestoreDatabase implements Database {
     this.firestore = firestore;
     this.logger.debug("created FirestoreDatabase");
 
-    // TODO: Enable Firestore emulator once available.
     const STORE_EMULATOR_HOSTNAME = "localhost";
-    const STORE_EMULATOR_PORT = "8080";
-    const STORE_EMULATOR_ENABLED = false; // see https://linear.app/bullfrog/issue/BUL-48#comment-7c0452cf
+    const STORE_EMULATOR_PORT = 8080;
+    const STORE_EMULATOR_ENABLED = true;
     if (STORE_EMULATOR_ENABLED && !!useEmulator) {
       this.logger.debug(
         `using store emulator at ${STORE_EMULATOR_HOSTNAME}:${STORE_EMULATOR_PORT}`
       );
-      // firestore.useEmulator(STORE_EMULATOR_HOSTNAME, STORE_EMULATOR_PORT); // only availble in firebase>=8.0.0
+      firestore.useEmulator(STORE_EMULATOR_HOSTNAME, STORE_EMULATOR_PORT);
     }
   }
 

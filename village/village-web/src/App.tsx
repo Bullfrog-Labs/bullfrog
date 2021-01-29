@@ -33,9 +33,11 @@ import { LoginView } from "./views/LoginView";
 
 Logging.configure(log);
 
-const [app, auth] = initializeFirebaseApp();
+const USE_EMULATOR = true;
+
+const [app, auth] = initializeFirebaseApp(USE_EMULATOR);
 const authProvider = FirebaseAuthProvider.create(app, auth);
-const database = FirestoreDatabase.fromApp(app);
+const database = FirestoreDatabase.fromApp(app, USE_EMULATOR);
 
 function App() {
   const globalClasses = useGlobalStyles();
