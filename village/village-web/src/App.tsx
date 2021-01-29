@@ -64,6 +64,7 @@ function App() {
         const user = await getUser(database)(authProviderState.uid);
         if (user != null) {
           logger.debug(`setting user ${user.displayName}`);
+          app.analytics().setUserId(user.uid);
           setUser(user);
         }
         setAuthCompleted(true);
@@ -109,6 +110,7 @@ function App() {
             )}
             fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
             deletePost={deletePost(database)}
+            app={app}
           />
         </AppAuthContext.Provider>
       ) : (
