@@ -22,6 +22,11 @@ beforeEach(async () => {
   await firebase.clearFirestoreData({ projectId: PROJECT_ID });
 });
 
+afterEach(async () => {
+  // Clear the database between tests
+  await firebase.clearFirestoreData({ projectId: PROJECT_ID });
+});
+
 beforeAll(async () => {
   // Load the rules file before the tests begin
   const rules = fs.readFileSync(FIRESTORE_RULES_LOCATION, "utf8");
@@ -72,11 +77,48 @@ test("Logged-in users can write to their own user object", async () => {
   firebase.assertSucceeds(createNewUserRecord(db, authProviderState));
 });
 
-test("Logged-in users cannot write to others' posts", () => {});
+test("Logged-in users cannot write to others' posts", async () => {
+  const u0 = {
+    uid: "123",
+    displayName: "foo",
+    username: "foo",
+  };
+  const post0 = {
+    title: "Baz",
+    id: "baz",
+  };
+
+  const u0DB = FirestoreDatabase.fromApp(getAuthedFirebaseApp({ uid: u0.uid }));
+  const setup = async () => {
+    await createNewUserRecord(u0DB, u0);
+    await createPost(u0DB)(u0)(post0.title, post0.id);
+  };
+  await setup();
+
+  const u1 = {
+    uid: "456",
+    displayName: "bar",
+    username: "bar",
+  };
+  const u1DB = FirestoreDatabase.fromApp(getAuthedFirebaseApp({ uid: u1.uid }));
+  firebase.assertSucceeds(createPost(u1DB)(u1)(post0.title, post0.id));
+});
 
 test("Logged-in users can write to their own posts", async () => {
-  const adminDB = FirestoreDatabase.fromApp(getAdminAuthedFirebaseApp());
-  createPost(adminDB);
+  const user = {
+    uid: "123",
+    displayName: "foo",
+    username: "foo",
+  };
 
-  const db = FirestoreDatabase.fromApp(getAuthedFirebaseApp({ uid: "123" }));
+  // const adminDB = FirestoreDatabase.fromApp(getAdminAuthedFirebaseApp());
+
+  const db = FirestoreDatabase.fromApp(getAuthedFirebaseApp({ uid: user.uid }));
+  const setup = async () => {
+    await createNewUserRecord(db, user);
+  };
+  await setup();
+
+  const title = "Bar";
+  firebase.assertSucceeds(createPost(db)(user)(title));
 });
