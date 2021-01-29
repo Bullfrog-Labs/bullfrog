@@ -1,6 +1,7 @@
 import * as log from "loglevel";
 
 import firebase from "firebase";
+import "firebase/analytics";
 
 // See https://support.google.com/firebase/answer/7015592 for instructions on
 // retrieving this config object.
@@ -29,6 +30,7 @@ export const initializeFirebaseApp = (
     logger.debug("done initializing Firebase app");
 
     auth = app.auth();
+    app.analytics();
 
     // TODO: Enable Auth emulator once available
     const DEFAULT_AUTH_EMULATOR_URL = "http://localhost:9099/";
