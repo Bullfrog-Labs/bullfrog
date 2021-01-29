@@ -70,6 +70,7 @@ export const StackView = (props: StackViewProps) => {
         alignItems="flex-start"
         key={post.post.id}
         className={globalClasses.cardListItem}
+        disableGutters
       >
         <StackPostCard userPost={post} />
       </ListItem>

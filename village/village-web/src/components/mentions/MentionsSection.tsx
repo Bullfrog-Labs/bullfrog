@@ -31,6 +31,7 @@ export const MentionsSection = (props: { mentions: MentionInContext[] }) => {
         alignItems="flex-start"
         key={mentionKey}
         className={globalClasses.cardListItem}
+        disableGutters
       >
         <MentionPostCard mention={mention} />
       </ListItem>
