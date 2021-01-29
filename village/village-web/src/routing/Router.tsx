@@ -1,7 +1,6 @@
 import React from "react";
 import { BrowserRouter, Route, Switch, useLocation } from "react-router-dom";
 import AppContainer from "../components/AppContainer";
-import { TwitterCredMergeAuthComponent } from "../components/auth/TwitterCredMergeAuthComponent";
 import {
   DefaultProfileViewController,
   ProfileViewController,
@@ -89,11 +88,6 @@ export const Router = (props: RouterProps) => {
         <Route path="/login">
           <AppContainerWithProps>{loginView}</AppContainerWithProps>
         </Route>
-        <PrivateRoute path="/addTwitterCredsToUser">
-          <AppContainerWithProps>
-            <TwitterCredMergeAuthComponent />
-          </AppContainerWithProps>
-        </PrivateRoute>
         <PrivateRoute exact path="/">
           <AppContainerWithProps>
             <MainView />
