@@ -1,21 +1,15 @@
 import * as firebase from "@firebase/rules-unit-testing";
-import { TokenOptions } from "@firebase/rules-unit-testing/dist/src/api";
 import fs from "fs";
 import http from "http";
-import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
-import { createPost } from "./services/store/Posts";
-import { createNewUserRecord } from "./services/store/Users";
+import { FirestoreDatabase } from "../../services/store/FirestoreDatabase";
+import { createPost } from "../../services/store/Posts";
+import { createNewUserRecord } from "../../services/store/Users";
+import { PROJECT_ID, getAuthedFirebaseApp } from "./utils";
 
 // Heavily based on https://github.com/firebase/quickstart-testing/blob/master/unit-test-security-rules/test/firestore.spec.js.
 
-const PROJECT_ID = "village";
 const COVERAGE_URL = `http://${process.env.FIRESTORE_EMULATOR_HOST}/emulator/v1/projects/${PROJECT_ID}:ruleCoverage.html`;
 const FIRESTORE_RULES_LOCATION = "../firestore.rules";
-
-const getAuthedFirebaseApp = (auth: TokenOptions | undefined) =>
-  firebase.initializeTestApp({ projectId: PROJECT_ID, auth });
-
-const getAdminAuthedFirebaseApp = () => getAuthedFirebaseApp({ uid: "owner" });
 
 beforeEach(async () => {
   // Clear the database between tests
