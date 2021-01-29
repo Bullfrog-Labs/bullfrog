@@ -4,8 +4,20 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "village/build",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+    "public": "village-web/build",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "headers": [
+      {
+        "source": "/service-worker.js",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   },
   "emulators": {
     "auth": {
