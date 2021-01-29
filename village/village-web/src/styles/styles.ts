@@ -17,10 +17,14 @@ export const useGlobalStyles = makeStyles((theme) => {
     link: {
       ...baseLink,
     },
-    activeSelectedLink: {
+    focusedSelectedLink: {
       ...baseLink,
-      background: theme.palette.secondary.main,
       color: theme.palette.secondary.contrastText,
+      background: theme.palette.secondary.light,
+      "&:hover": {
+        color: theme.palette.getContrastText(theme.palette.secondary.dark),
+        background: theme.palette.secondary.dark,
+      },
     },
     stackLink: {
       color: "black",

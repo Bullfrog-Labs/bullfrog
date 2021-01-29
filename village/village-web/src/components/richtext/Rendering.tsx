@@ -34,7 +34,7 @@ export const MentionElement = ({
         {...attributes}
         className={
           focused && selected
-            ? globalClasses.activeSelectedLink
+            ? globalClasses.focusedSelectedLink
             : globalClasses.link
         }
         data-slate-value={title}
