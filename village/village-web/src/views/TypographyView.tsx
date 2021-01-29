@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography, Container, Link, Divider, Paper } from "@material-ui/core";
 import { Blockquote } from "../components/Blockquote";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core";
 import { useGlobalStyles } from "../styles/styles";
 
 const useStyles = makeStyles((theme) => ({
