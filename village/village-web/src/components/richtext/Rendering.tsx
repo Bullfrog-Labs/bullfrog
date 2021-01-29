@@ -1,11 +1,11 @@
-import React from "react";
-import { Typography, Tooltip } from "@material-ui/core";
-import { Link } from "react-router-dom";
+import { Tooltip, Typography } from "@material-ui/core";
 import * as log from "loglevel";
-import { Blockquote } from "../Blockquote";
-import { postURL } from "../../routing/URLs";
-import { useGlobalStyles } from "../../styles/styles";
+import React from "react";
+import { Link } from "react-router-dom";
 import { useFocused, useSelected } from "slate-react";
+import { postURLById } from "../../routing/URLs";
+import { useGlobalStyles } from "../../styles/styles";
+import { Blockquote } from "../Blockquote";
 
 export const MentionElement = ({
   attributes,
@@ -38,7 +38,7 @@ export const MentionElement = ({
             : globalClasses.link
         }
         data-slate-value={title}
-        to={postURL(authorUsername, postId)}
+        to={postURLById(authorId, postId)}
         contentEditable={false}
         {...htmlAttributes}
       >
