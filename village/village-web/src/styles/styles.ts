@@ -26,15 +26,6 @@ export const useGlobalStyles = makeStyles((theme) => {
         background: theme.palette.secondary.dark,
       },
     },
-    stackLink: {
-      color: "black",
-      textDecoration: "none",
-      verticalAlign: "baseline",
-      display: "inline-block",
-      "&:hover": {
-        color: "black",
-      },
-    },
     compactParagraph: {
       marginTop: "0px",
       marginBottom: "0px",
