@@ -1,7 +1,11 @@
-import { CircularProgress, Divider, Typography } from "@material-ui/core";
+import {
+  CircularProgress,
+  Divider,
+  Typography,
+  makeStyles,
+} from "@material-ui/core";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import { makeStyles } from "@material-ui/core/styles";
 import * as log from "loglevel";
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
@@ -147,6 +151,7 @@ export const ProfileView = (props: ProfileViewProps) => {
         alignItems="flex-start"
         key={listKeyForPost(post)}
         className={globalClasses.cardListItem}
+        disableGutters
       >
         <ProfilePostCard post={post} />
       </ListItem>
