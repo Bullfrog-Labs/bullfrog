@@ -147,6 +147,7 @@ export const ProfileView = (props: ProfileViewProps) => {
         alignItems="flex-start"
         key={listKeyForPost(post)}
         className={globalClasses.cardListItem}
+        disableGutters
       >
         <ProfilePostCard post={post} />
       </ListItem>
