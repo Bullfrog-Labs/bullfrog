@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import firebase from "firebase";
 import {
   BrowserRouter,
   Route,
@@ -7,7 +8,6 @@ import {
   useHistory,
 } from "react-router-dom";
 import * as log from "loglevel";
-import ReactGA from "react-ga";
 import AppContainer from "../components/AppContainer";
 import {
   DefaultProfileViewController,
@@ -60,6 +60,7 @@ export type RouterProps = {
   getMentionUserPosts: GetMentionUserPostsFn;
   fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
   deletePost: DeletePostFn;
+  app: firebase.app.App;
 };
 
 export const Router = (props: RouterProps) => {
@@ -78,6 +79,7 @@ export const Router = (props: RouterProps) => {
     getMentionUserPosts,
     fetchTitleFromOpenGraph,
     deletePost,
+    app,
   } = props;
 
   const logger = log.getLogger("Router");
@@ -97,9 +99,9 @@ export const Router = (props: RouterProps) => {
     useEffect(() => {
       const unlisten = history.listen((location) => {
         const page = location.pathname + location.search;
-        logger.debug("analytics logging location " + page);
-        ReactGA.set({ page: page });
-        ReactGA.pageview(page);
+        logger.debug("analytics: logging location " + page);
+        app.analytics().setCurrentScreen(page);
+        app.analytics().logEvent("page_view", { page });
       });
       return unlisten;
     });
