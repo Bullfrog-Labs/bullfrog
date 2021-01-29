@@ -1,5 +1,13 @@
-import React from "react";
-import { BrowserRouter, Route, Switch, useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import {
+  BrowserRouter,
+  Route,
+  Switch,
+  useLocation,
+  useHistory,
+} from "react-router-dom";
+import * as log from "loglevel";
+import ReactGA from "react-ga";
 import AppContainer from "../components/AppContainer";
 import {
   DefaultProfileViewController,
@@ -72,6 +80,8 @@ export const Router = (props: RouterProps) => {
     deletePost,
   } = props;
 
+  const logger = log.getLogger("Router");
+
   const AppContainerWithProps: React.FC<{}> = (props) => (
     <AppContainer
       createPost={createPost}
@@ -82,8 +92,19 @@ export const Router = (props: RouterProps) => {
     </AppContainer>
   );
 
-  return (
-    <BrowserRouter>
+  const Routes = () => {
+    const history = useHistory();
+    useEffect(() => {
+      const unlisten = history.listen((location) => {
+        const page = location.pathname + location.search;
+        logger.debug("analytics logging location " + page);
+        ReactGA.set({ page: page });
+        ReactGA.pageview(page);
+      });
+      return unlisten;
+    });
+
+    return (
       <Switch>
         <Route path="/login">
           <AppContainerWithProps>{loginView}</AppContainerWithProps>
@@ -132,6 +153,12 @@ export const Router = (props: RouterProps) => {
           <Sad404 />
         </Route>
       </Switch>
+    );
+  };
+
+  return (
+    <BrowserRouter>
+      <Routes />
     </BrowserRouter>
   );
 };

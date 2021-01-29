@@ -5,8 +5,9 @@ import { useEffect, useState } from "react";
 import { Router } from "./routing/Router";
 import { AppAuthContext } from "./services/auth/AppAuth";
 import { useAuthState } from "./services/auth/Auth";
+import ReactGA from "react-ga";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
-import { initializeFirebaseApp } from "./services/Firebase";
+import { initializeFirebaseApp, firebaseConfig } from "./services/Firebase";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
 import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
 import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
@@ -36,6 +37,10 @@ Logging.configure(log);
 const [app, auth] = initializeFirebaseApp();
 const authProvider = FirebaseAuthProvider.create(app, auth);
 const database = FirestoreDatabase.fromApp(app);
+
+ReactGA.initialize(firebaseConfig.measurementId, {
+  gaOptions: { siteSpeedSampleRate: 100 },
+});
 
 function App() {
   const globalClasses = useGlobalStyles();
