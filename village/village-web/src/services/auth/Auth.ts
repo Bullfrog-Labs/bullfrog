@@ -2,10 +2,20 @@ import * as log from "loglevel";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { UserId } from "../store/Users";
 
+export interface FederatedAuthProviderData {
+  providerType: "federated";
+  providerId: string;
+  displayName: string | undefined;
+  photoURL: string | undefined;
+  uid: string;
+}
+
+export type DownstreamAuthProviderState = FederatedAuthProviderData;
+
 export interface AuthProviderState {
   uid: UserId;
   displayName: string;
-  username: string;
+  providerData: DownstreamAuthProviderState[];
 }
 
 export type OnAuthStateChangedHandle = (

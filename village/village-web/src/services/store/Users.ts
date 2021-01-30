@@ -1,6 +1,7 @@
 import firebase from "firebase";
 import * as log from "loglevel";
 import { AuthProviderState } from "../auth/Auth";
+import { lookupTwitterUserById } from "../Twitter";
 import { Database } from "./Database";
 
 export type UserId = string;
@@ -105,17 +106,31 @@ export const checkIfUserExists = async (
   return !!user;
 };
 
-const authProviderStateToNewUserRecord = (
+const authProviderStateToNewUserRecord = async (
   authProviderState: AuthProviderState
-): UserRecord => {
+) => {
   if (!authProviderState.displayName) {
     throw new Error("Authed user display name should not be missing");
+  }
+
+  // get the username here
+  const twitterUserId = authProviderState.providerData.find(
+    (x) => x.providerId === firebase.auth.TwitterAuthProvider.PROVIDER_ID
+  )?.uid;
+  if (!twitterUserId) {
+    throw new Error("Could not find Twitter user corresponding to user");
+  }
+
+  const twitterUser = await lookupTwitterUserById(twitterUserId!);
+
+  if (!twitterUser) {
+    throw new Error("Twitter user lookup failed");
   }
 
   return {
     uid: authProviderState.uid,
     displayName: authProviderState.displayName,
-    username: authProviderState.username,
+    username: twitterUser!.username,
   };
 };
 
@@ -124,14 +139,18 @@ export const createNewUserRecord = async (
   authProviderState: AuthProviderState
 ): Promise<void> => {
   const logger = log.getLogger("createNewUserRecord");
-
   logger.debug(`creating new user record for user ${authProviderState.uid}`);
+
+  const newUserRecord = await authProviderStateToNewUserRecord(
+    authProviderState
+  );
+
   const doc = database
     .getHandle()
     .collection(USERS_COLLECTION)
     .withConverter(USER_RECORD_CONVERTER)
     .doc(authProviderState.uid);
-  await doc.set(authProviderStateToNewUserRecord(authProviderState));
+  await doc.set(newUserRecord);
   logger.debug(
     `done creating new user record for user ${authProviderState.uid}`
   );

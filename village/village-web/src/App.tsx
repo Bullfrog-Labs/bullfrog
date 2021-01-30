@@ -75,7 +75,7 @@ function App() {
 
   if (!!authProviderState) {
     logger.debug(
-      `Logged in as user ${authProviderState.uid} with ${authProviderState.displayName} / ${authProviderState.username}`
+      `Logged in as user ${authProviderState.uid} with ${authProviderState.displayName}`
     );
   } else {
     logger.info(`Not logged in`);
