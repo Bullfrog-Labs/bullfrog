@@ -5,11 +5,15 @@
     "noUnusedLocals": true,
     "outDir": "lib",
     "sourceMap": true,
+    "allowJs": true,
     "strict": true,
-    "target": "es2017"
+    "target": "es5",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true
   },
   "compileOnSave": true,
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
