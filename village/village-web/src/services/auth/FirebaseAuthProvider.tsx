@@ -23,9 +23,6 @@ const firebaseProviderDataToFederatedProviderData = (
 export const userToAuthProviderState = (
   apUser: firebase.User
 ): AuthProviderState => {
-  console.log(apUser);
-  console.log(apUser.providerData);
-
   const providerData: DownstreamAuthProviderState[] = apUser.providerData
     .filter((x) => !!x)
     .map((x) => firebaseProviderDataToFederatedProviderData(x!));
