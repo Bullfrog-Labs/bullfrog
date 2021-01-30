@@ -12,6 +12,12 @@ import {
 import { AuthedTestUserContext } from "../testing/AuthedTestUserContext";
 import { EditablePostView, EditablePostViewProps } from "./PostView";
 
+const viewerAPS = {
+  uid: "456",
+  displayName: "baz",
+  providerData: [],
+};
+
 const viewer = {
   uid: "456",
   displayName: "baz",
@@ -20,7 +26,7 @@ const viewer = {
 
 const viewerAppAuthContextDecorator = (Story: Story) => {
   return (
-    <AuthedTestUserContext user={viewer}>
+    <AuthedTestUserContext user={viewerAPS}>
       <Story />
     </AuthedTestUserContext>
   );

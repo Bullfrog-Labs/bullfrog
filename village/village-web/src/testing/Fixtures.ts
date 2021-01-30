@@ -225,6 +225,6 @@ export const authProvider: AuthProvider = {
   getInitialAuthProviderState: () => ({
     uid: "123",
     displayName: "Test user",
-    username: "foo",
+    providerData: [],
   }),
 };

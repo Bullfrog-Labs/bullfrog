@@ -1,7 +1,14 @@
 import { Meta, Story } from "@storybook/react/types-6-0";
 import { MemoryRouter } from "react-router-dom";
+import { AuthProviderState } from "../services/auth/Auth";
 import { AuthedTestUserContext } from "../testing/AuthedTestUserContext";
 import { PostSubtitleRow, PostSubtitleRowProps } from "./PostSubtitleRow";
+
+const viewerAPS: AuthProviderState = {
+  uid: "123",
+  displayName: "foo",
+  providerData: [],
+};
 
 const viewer = {
   uid: "123",
@@ -11,7 +18,7 @@ const viewer = {
 
 const viewerAppAuthContextDecorator = (Story: Story) => {
   return (
-    <AuthedTestUserContext user={viewer}>
+    <AuthedTestUserContext user={viewerAPS}>
       <Story />
     </AuthedTestUserContext>
   );

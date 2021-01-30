@@ -16,7 +16,11 @@ export const AuthedTestUserContext = (props: AuthedTestUserContextProps) => {
   const appAuthState = {
     authCompleted: true,
     authProviderState: authProvider.getInitialAuthProviderState(),
-    authedUser: user,
+    authedUser: {
+      uid: user.uid,
+      displayName: user.displayName,
+      username: user.displayName, // this is done because the auth provider state does not have a user name
+    },
   };
 
   return (
