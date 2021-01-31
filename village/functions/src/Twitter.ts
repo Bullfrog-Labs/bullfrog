@@ -1,3 +1,4 @@
+import * as functions from "firebase-functions";
 import axios from "axios";
 
 export type TwitterUser = {
@@ -24,26 +25,35 @@ export const lookupTwitterUserById = async (
   uid: string
 ): Promise<TwitterUserLookupResult> => {
   try {
-    const rep = await axios.get(`https://api.twitter.com/2/users/${uid}`, {
-      headers: { Authorization: `Bearer ${process.env.BRR_TOKEN}` },
+    const response = await axios.get(`https://api.twitter.com/2/users/${uid}`, {
+      headers: {
+        Authorization: `Bearer ${functions.config().twitter.bearer_token}`,
+      },
     });
-    if (rep.status === 200) {
-      return {
-        state: "found",
-        user: {
-          id: rep.data.id,
-          name: rep.data.name,
-          username: rep.data.username,
-        },
-      };
-      // TODO: How to handle not found?
-    } else {
-      throw new Error(
-        `Request failed; status=${rep.status}, msg=${rep.statusText}`
-      );
+    switch (response.status) {
+      case 200:
+        functions.logger.log(response.data);
+        const errors = response.data.errors;
+        if (!!errors) {
+          if (errors)  
+        } else {
+          const user = response.data.data;
+          return {
+            state: "found",
+            user: user,
+          };
+        }
+      default:
+        functions.logger.log(response);
+        throw new Error(
+          `Request returned unexpected 2xx status; status=${response.status}, msg=${response.statusText}`
+        );
     }
   } catch (e) {
-    throw new Error(`Error in fetch ${e}`);
+    const message = !!e.response
+      ? `Error in fetch, status: ${e.response.status}, data: ${e.response.data}`
+      : `Error in fetch: ${e}`;
+    throw new Error(message);
   }
 };
 
