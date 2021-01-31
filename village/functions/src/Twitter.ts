@@ -1,5 +1,12 @@
 import * as functions from "firebase-functions";
-import axios from "axios";
+import Twitter from "twitter-v2";
+
+const credentials = {
+  consumer_key: functions.config().twitter.key,
+  consumer_secret: functions.config().twitter.secret,
+  bearer_token: functions.config().twitter.bearer_token,
+};
+const client = new Twitter(credentials);
 
 export type TwitterUser = {
   id: string;
@@ -16,7 +23,19 @@ export type TwitterUserNotFound = {
   state: "not-found";
 };
 
-// TODO need to read API keys from configuration
+const RESOURCE_NOT_FOUND_ERROR_TYPE =
+  "https://api.twitter.com/2/problems/resource-not-found";
+
+type TwitterError = {
+  detail: string;
+  title: string;
+  type: string;
+};
+
+type TwitterResponse = {
+  data?: TwitterUser;
+  errors?: TwitterError[];
+};
 
 export type TwitterUserLookupResult = TwitterUserFound | TwitterUserNotFound;
 
@@ -25,35 +44,25 @@ export const lookupTwitterUserById = async (
   uid: string
 ): Promise<TwitterUserLookupResult> => {
   try {
-    const response = await axios.get(`https://api.twitter.com/2/users/${uid}`, {
-      headers: {
-        Authorization: `Bearer ${functions.config().twitter.bearer_token}`,
-      },
-    });
-    switch (response.status) {
-      case 200:
-        functions.logger.log(response.data);
-        const errors = response.data.errors;
-        if (!!errors) {
-          if (errors)  
-        } else {
-          const user = response.data.data;
-          return {
-            state: "found",
-            user: user,
-          };
-        }
-      default:
-        functions.logger.log(response);
-        throw new Error(
-          `Request returned unexpected 2xx status; status=${response.status}, msg=${response.statusText}`
-        );
+    const response: TwitterResponse = await client.get(`users/${uid}`);
+    if (!!response.data) {
+      return {
+        state: "found",
+        user: response.data,
+      };
+    } else if (
+      !!response.errors &&
+      response.errors.length === 1 &&
+      response.errors[0].type === RESOURCE_NOT_FOUND_ERROR_TYPE
+    ) {
+      return {
+        state: "not-found",
+      };
+    } else {
+      throw new Error(`API errors in fetch: ${response.errors} `);
     }
   } catch (e) {
-    const message = !!e.response
-      ? `Error in fetch, status: ${e.response.status}, data: ${e.response.data}`
-      : `Error in fetch: ${e}`;
-    throw new Error(message);
+    throw new Error(`Error in fetch: ${e}`);
   }
 };
 
