@@ -46,6 +46,9 @@ export const initializeFirebaseApp = (
   }
 
   const functions = firebase.functions();
+  if (useEmulator) {
+    functions.useEmulator("localhost", 5001);
+  }
 
   return [app, auth, functions];
 };

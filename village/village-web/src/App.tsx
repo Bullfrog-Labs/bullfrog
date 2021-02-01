@@ -34,9 +34,11 @@ import { LoginView } from "./views/LoginView";
 
 Logging.configure(log);
 
-const [app, auth, functions] = initializeFirebaseApp();
+const useEmulator = window.location.hostname === "localhost";
+
+const [app, auth, functions] = initializeFirebaseApp(useEmulator);
 const authProvider = FirebaseAuthProvider.create(app, auth);
-const database = FirestoreDatabase.fromApp(app);
+const database = FirestoreDatabase.fromApp(app, useEmulator);
 
 const lookupTwitterUser = buildLookupTwitterUser(functions);
 
