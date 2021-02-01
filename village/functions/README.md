@@ -17,3 +17,14 @@ https://firebase.google.com/docs/functions/local-emulator#set_up_functions_confi
 firebase functions:config:get > .runtimeconfig.json
 firebase functions:shell
 ```
+
+# Starting emulator
+
+1. Run `yarn build` to compile Typescript.
+2. Run `firebase emulators:start` to start all relevant emulators, or
+   `firebase emulators:start --only functions` to only start the Functions
+   emulator.
+
+# Deploying functions to production
+
+Use instructions under `village/deploy` to deploy functions.
