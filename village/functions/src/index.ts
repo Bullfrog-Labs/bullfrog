@@ -1,16 +1,19 @@
 import * as functions from "firebase-functions";
 import { lookupTwitterUserById } from "./Twitter";
 
-export const lookupTwitterUser = functions.https.onRequest(
-  async (
-    request: functions.https.Request,
-    response: functions.Response<any>
-  ) => {
-    const uid = request.query.id as string | undefined;
-    if (!uid) {
-      throw new Error("uid not provided in query");
+export const lookupTwitterUser = functions.https.onCall(
+  async (data, context) => {
+    const id = data.id as string;
+
+    if (!id) {
+      throw new Error("id not provided in query");
     }
-    const result = await lookupTwitterUserById(uid!);
-    response.json(result);
+
+    if (!context.auth) {
+      throw new Error("auth should not be null");
+    }
+
+    const result = await lookupTwitterUserById(id!);
+    return result;
   }
 );

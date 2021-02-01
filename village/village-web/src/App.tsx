@@ -28,14 +28,17 @@ import {
   getUserByUsername,
   UserRecord,
 } from "./services/store/Users";
+import { buildLookupTwitterUser } from "./services/Twitter";
 import { useGlobalStyles } from "./styles/styles";
 import { LoginView } from "./views/LoginView";
 
 Logging.configure(log);
 
-const [app, auth] = initializeFirebaseApp();
+const [app, auth, functions] = initializeFirebaseApp();
 const authProvider = FirebaseAuthProvider.create(app, auth);
 const database = FirestoreDatabase.fromApp(app);
+
+const lookupTwitterUser = buildLookupTwitterUser(functions);
 
 function App() {
   const globalClasses = useGlobalStyles();
@@ -58,7 +61,11 @@ function App() {
           logger.debug(
             `User document does not exist for user ${authProviderState.uid}, creating new one.`
           );
-          await createNewUserRecord(database, authProviderState);
+          await createNewUserRecord(
+            database,
+            lookupTwitterUser,
+            authProviderState
+          );
         }
 
         const user = await getUser(database)(authProviderState.uid);

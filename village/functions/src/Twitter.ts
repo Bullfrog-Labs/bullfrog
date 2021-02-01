@@ -1,4 +1,5 @@
 import * as functions from "firebase-functions";
+import { HttpsError } from "firebase-functions/lib/providers/https";
 import Twitter from "twitter-v2";
 
 const credentials = {
@@ -7,21 +8,6 @@ const credentials = {
   bearer_token: functions.config().twitter.bearer_token,
 };
 const client = new Twitter(credentials);
-
-export type TwitterUser = {
-  id: string;
-  name: string;
-  username: string;
-};
-
-export type TwitterUserFound = {
-  state: "found";
-  user: TwitterUser;
-};
-
-export type TwitterUserNotFound = {
-  state: "not-found";
-};
 
 const RESOURCE_NOT_FOUND_ERROR_TYPE =
   "https://api.twitter.com/2/problems/resource-not-found";
@@ -37,32 +23,34 @@ type TwitterResponse = {
   errors?: TwitterError[];
 };
 
-export type TwitterUserLookupResult = TwitterUserFound | TwitterUserNotFound;
+// TODO: Eventually, once this package is part of yarn workspaces, this
+// definition should be shared between functions and village-web.
+
+export type TwitterUser = {
+  id: string;
+  name: string;
+  username: string;
+};
 
 // see https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-id
 export const lookupTwitterUserById = async (
   uid: string
-): Promise<TwitterUserLookupResult> => {
+): Promise<TwitterUser> => {
   try {
     const response: TwitterResponse = await client.get(`users/${uid}`);
     if (!!response.data) {
-      return {
-        state: "found",
-        user: response.data,
-      };
+      return response.data!;
     } else if (
       !!response.errors &&
       response.errors.length === 1 &&
       response.errors[0].type === RESOURCE_NOT_FOUND_ERROR_TYPE
     ) {
-      return {
-        state: "not-found",
-      };
+      throw new HttpsError("not-found", "User was not found");
     } else {
-      throw new Error(`API errors in fetch: ${response.errors} `);
+      throw new HttpsError("unknown", `API errors in fetch`, response.errors);
     }
   } catch (e) {
-    throw new Error(`Error in fetch: ${e}`);
+    throw new HttpsError("unknown", `Unknown error in fetch`);
   }
 };
 
