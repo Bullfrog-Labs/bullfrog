@@ -111,28 +111,36 @@ const authProviderStateToNewUserRecord = async (
   authProviderState: AuthProviderState,
   lookupTwitterUser: LookupTwitterUserFn
 ) => {
+  const logger = log.getLogger("authProviderStateToNewUserRecord");
+
   if (!authProviderState.displayName) {
     throw new Error("Authed user display name should not be missing");
   }
 
   // get the username here
+  logger.info("Determining username from Twitter user id");
   const twitterUserId = authProviderState.providerData.find(
     (x) => x.providerId === firebase.auth.TwitterAuthProvider.PROVIDER_ID
   )?.uid;
   if (!twitterUserId) {
     throw new Error("Could not find Twitter user corresponding to user");
   }
+  logger.info(`Found Twitter user id ${twitterUserId}`);
 
+  logger.info(`Attempting to lookup Twitter user by id ${twitterUserId}`);
   const twitterUserLookupResult = await lookupTwitterUser(twitterUserId!);
 
   switch (twitterUserLookupResult.state) {
     case "found":
+      const username = twitterUserLookupResult.user.username;
+      logger.info(`Found username ${username} for id ${twitterUserId}`);
       return {
         uid: authProviderState.uid,
         displayName: authProviderState.displayName,
-        username: twitterUserLookupResult.user.username,
+        username: username,
       };
     case "not-found":
+      logger.error(`Cound not find username for id ${twitterUserId}`);
       throw new Error("Unable to resolve Twitter user: user not found for id");
     default:
       assertNever(twitterUserLookupResult);
