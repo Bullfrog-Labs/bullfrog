@@ -4,7 +4,7 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "predeploy": ["pushd \"$RESOUCE_DIR\"; yarn build; popd"],
+    "predeploy": ["pushd \"$RESOURCE_DIR\"; yarn build; popd"],
     "postdeploy": ["$PROJECT_DIR/deploy/bin/notify \"village-web deployed\""],
     "public": "village-web/build",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
@@ -41,7 +41,7 @@
     }
   },
   "functions": {
-    "predeploy": ["pushd \"$RESOUCE_DIR\"; yarn build; popd"],
+    "predeploy": ["pushd \"$RESOURCE_DIR\"; yarn build; popd"],
     "postdeploy": [
       "$PROJECT_DIR/deploy/bin/notify \"functions for village deployed\""
     ]
