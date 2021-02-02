@@ -1,0 +1,5 @@
+#!/bin/sh
+
+curl -X POST -H 'Content-type: application/json' \
+    --data "{\"text\":\"$1\"}" \
+    https://hooks.slack.com/services/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

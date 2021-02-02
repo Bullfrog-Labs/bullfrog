@@ -28,14 +28,19 @@ import {
   getUserByUsername,
   UserRecord,
 } from "./services/store/Users";
+import { buildLookupTwitterUser } from "./services/Twitter";
 import { useGlobalStyles } from "./styles/styles";
 import { LoginView } from "./views/LoginView";
 
 Logging.configure(log);
 
-const [app, auth] = initializeFirebaseApp();
+const useEmulator = window.location.hostname === "localhost";
+
+const [app, auth, functions] = initializeFirebaseApp(useEmulator);
 const authProvider = FirebaseAuthProvider.create(app, auth);
-const database = FirestoreDatabase.fromApp(app);
+const database = FirestoreDatabase.fromApp(app, useEmulator);
+
+const lookupTwitterUser = buildLookupTwitterUser(functions);
 
 function App() {
   const globalClasses = useGlobalStyles();
@@ -58,7 +63,11 @@ function App() {
           logger.debug(
             `User document does not exist for user ${authProviderState.uid}, creating new one.`
           );
-          await createNewUserRecord(database, authProviderState);
+          await createNewUserRecord(
+            database,
+            lookupTwitterUser,
+            authProviderState
+          );
         }
 
         const user = await getUser(database)(authProviderState.uid);
@@ -75,7 +84,7 @@ function App() {
 
   if (!!authProviderState) {
     logger.debug(
-      `Logged in as user ${authProviderState.uid} with ${authProviderState.displayName} / ${authProviderState.username}`
+      `Logged in as user ${authProviderState.uid} with ${authProviderState.displayName}`
     );
   } else {
     logger.info(`Not logged in`);

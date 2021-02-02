@@ -4,12 +4,19 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
+    "predeploy": ["pushd \"$RESOURCE_DIR\"; yarn build; popd"],
+    "postdeploy": ["$PROJECT_DIR/deploy/bin/notify \"village-web deployed\""],
     "public": "village-web/build",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "headers": [
       {
         "source": "/service-worker.js",
-        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
       }
     ],
     "rewrites": [
@@ -32,5 +39,11 @@
     "ui": {
       "enabled": true
     }
+  },
+  "functions": {
+    "predeploy": ["pushd \"$RESOURCE_DIR\"; yarn build; popd"],
+    "postdeploy": [
+      "$PROJECT_DIR/deploy/bin/notify \"functions for village deployed\""
+    ]
   }
 }

@@ -1,15 +1,4 @@
 #!/bin/sh
 BF_ROOT=$(git rev-parse --show-toplevel)
 
-# Notify slack
-notify() {
-  curl -X POST -H 'Content-type: application/json' \
-    --data '{"text":"Deploying Village"}' \
-    https://hooks.slack.com/services/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
-}
-
-cd $BF_ROOT/village/village-web &&
-  yarn build &&
-  cd $BF_ROOT/village &&
-  firebase deploy &&
-  notify
+pushd $BF_ROOT/village && firebase deploy && popd

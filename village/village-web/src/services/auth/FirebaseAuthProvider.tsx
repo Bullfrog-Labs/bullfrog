@@ -3,16 +3,36 @@ import * as log from "loglevel";
 import {
   AuthProvider,
   AuthProviderState,
+  DownstreamAuthProviderState,
+  FederatedAuthProviderData,
   OnAuthStateChangedHandle,
 } from "./Auth";
 
+const firebaseProviderDataToFederatedProviderData = (
+  providerData: firebase.UserInfo
+): FederatedAuthProviderData => {
+  return {
+    providerType: "federated",
+    providerId: providerData.providerId,
+    displayName: providerData.displayName ?? undefined,
+    photoURL: providerData.photoURL ?? undefined,
+    uid: providerData.uid,
+  };
+};
+
 export const userToAuthProviderState = (
   apUser: firebase.User
-): AuthProviderState => ({
-  uid: apUser.uid,
-  displayName: apUser.displayName ?? "",
-  username: apUser.providerData[0]?.displayName ?? "",
-});
+): AuthProviderState => {
+  const providerData: DownstreamAuthProviderState[] = apUser.providerData
+    .filter((x) => !!x)
+    .map((x) => firebaseProviderDataToFederatedProviderData(x!));
+
+  return {
+    uid: apUser.uid,
+    displayName: apUser.displayName ?? "",
+    providerData,
+  };
+};
 
 export default class FirebaseAuthProvider implements AuthProvider {
   logger = log.getLogger("FirebaseAuth");

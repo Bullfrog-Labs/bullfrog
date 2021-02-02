@@ -21,7 +21,7 @@ let auth: firebase.auth.Auth | undefined = undefined;
 
 export const initializeFirebaseApp = (
   useEmulator?: boolean
-): [firebase.app.App, firebase.auth.Auth] => {
+): [firebase.app.App, firebase.auth.Auth, firebase.functions.Functions] => {
   if (!app) {
     const logger = log.getLogger("Firebase");
 
@@ -45,5 +45,10 @@ export const initializeFirebaseApp = (
     throw new Error("logic error");
   }
 
-  return [app, auth];
+  const functions = firebase.functions();
+  if (useEmulator) {
+    functions.useEmulator("localhost", 5001);
+  }
+
+  return [app, auth, functions];
 };
