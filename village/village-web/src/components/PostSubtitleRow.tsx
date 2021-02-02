@@ -16,7 +16,7 @@ import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { profileURL } from "../routing/URLs";
-import { useUserFromAppAuthContext } from "../services/auth/AppAuth";
+import { useWhitelistedUserFromAppAuthContext } from "../services/auth/AppAuth";
 import { DeletePostFn } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
 import { useGlobalStyles } from "../styles/styles";
@@ -59,8 +59,10 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
   const stackURLPath = `/stack/${encodeURIComponent(postTitle)}`;
   const postHasMentions = numMentions;
 
-  const viewer = useUserFromAppAuthContext();
-  const isLoggedInAsAuthor = !!viewer ? author.uid === viewer.uid : false;
+  const whitelistedUser = useWhitelistedUserFromAppAuthContext();
+  const isLoggedInAsAuthor = !!whitelistedUser
+    ? author.uid === whitelistedUser.uid
+    : false;
 
   if (isLoggedInAsAuthor && !deletePost) {
     throw new Error("Must provide deletePost when logged in as author");

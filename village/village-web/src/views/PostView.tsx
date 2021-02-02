@@ -68,7 +68,7 @@ import { postURL } from "../routing/URLs";
 import {
   CurriedByUser,
   useLoggedInUserFromAppAuthContext,
-  useUserFromAppAuthContext,
+  useWhitelistedUserFromAppAuthContext,
 } from "../services/auth/AppAuth";
 import { MentionSuggestionLine } from "../components/mentions/MentionSuggestionLine";
 
@@ -571,7 +571,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const history = useHistory();
   const globalClasses = useGlobalStyles();
 
-  const viewer = useUserFromAppAuthContext();
+  const viewer = useWhitelistedUserFromAppAuthContext();
 
   const { authorIdOrUsername, postId } = useParams<PostViewControllerParams>();
   const query = useQuery();

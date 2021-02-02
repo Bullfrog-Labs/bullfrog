@@ -34,6 +34,7 @@ export interface AuthState {
     AuthProviderState | undefined,
     Dispatch<SetStateAction<AuthProviderState | undefined>>
   ];
+  whitelisted: [boolean, Dispatch<SetStateAction<boolean>>];
 }
 
 export const useAuthState = (authProvider: AuthProvider): AuthState => {
@@ -42,23 +43,26 @@ export const useAuthState = (authProvider: AuthProvider): AuthState => {
   const [authProviderState, setAuthProviderState] = useState(
     authProvider.getInitialAuthProviderState()
   );
+  const [whitelisted, setWhitelisted] = useState<boolean>(false);
 
   authProvider.onAuthStateChanged = useCallback(
     (authProviderState?: AuthProviderState) => {
       logger.debug("Auth state changed, updating auth state.");
-      setAuthProviderState(authProviderState);
 
       if (!authProviderState) {
         logger.debug(
           "Empty auth state, not logged in. Done updating auth state"
         );
         setAuthCompleted(true);
+        setWhitelisted(false);
         return;
       }
 
       if (!authProviderState.uid) {
         throw new Error("Authed user uid should not be null");
       }
+
+      setAuthProviderState(authProviderState);
 
       logger.debug(
         "Logged in with non-empty auth state. Done updating auth state."
@@ -70,6 +74,7 @@ export const useAuthState = (authProvider: AuthProvider): AuthState => {
   return {
     authCompleted: [authCompleted, setAuthCompleted],
     authProviderState: [authProviderState, setAuthProviderState],
+    whitelisted: [whitelisted, setWhitelisted],
   };
 };
 

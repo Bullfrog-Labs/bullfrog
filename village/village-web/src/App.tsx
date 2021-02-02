@@ -2,7 +2,6 @@ import { CircularProgress } from "@material-ui/core";
 import { Logging } from "kmgmt-common";
 import * as log from "loglevel";
 import { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
 import { Router } from "./routing/Router";
 import { AppAuthContext } from "./services/auth/AppAuth";
 import { getTwitterUserId, useAuthState } from "./services/auth/Auth";
@@ -48,11 +47,11 @@ const isUserWhitelisted = buildIsUserWhitelisted(database);
 function App() {
   const logger = log.getLogger("App");
   const globalClasses = useGlobalStyles();
-  const history = useHistory();
 
   const authState = useAuthState(authProvider);
   const [authCompleted, setAuthCompleted] = authState.authCompleted;
   const [authProviderState] = authState.authProviderState;
+  const [whitelisted, setWhitelisted] = authState.whitelisted;
 
   const [user, setUser] = useState<UserRecord>();
 
@@ -63,16 +62,18 @@ function App() {
           database,
           authProviderState.uid
         );
+
         if (!userExists) {
           logger.debug(
             `User record does not exist for user ${authProviderState.uid}, checking whitelist.`
           );
 
-          const userIsWhitelisted = await isUserWhitelisted(
+          const isWhitelisted = await isUserWhitelisted(
             getTwitterUserId(authProviderState)
           );
+          setWhitelisted(isWhitelisted);
 
-          if (userIsWhitelisted) {
+          if (isWhitelisted) {
             logger.debug(
               `User ${authProviderState.uid} is whitelisted, creating new user record`
             );
@@ -82,10 +83,9 @@ function App() {
               authProviderState
             );
           } else {
-            logger.debug(
-              `User ${authProviderState.uid} is not whitelisted, redirecting`
-            );
-            history.push("/signup");
+            logger.debug(`User ${authProviderState.uid} is not whitelisted`);
+            setAuthCompleted(true);
+            return;
           }
         }
 
@@ -94,29 +94,24 @@ function App() {
           logger.debug(`setting user ${user.displayName}`);
           app.analytics().setUserId(user.uid);
           setUser(user);
+          setWhitelisted(true); // only possible to have user record if whitelisted
         }
         setAuthCompleted(true);
       }
     };
     fetchUser();
-  }, [authProviderState, history, logger, setAuthCompleted]);
-
-  if (!!authProviderState) {
-    logger.debug(
-      `Logged in as user ${authProviderState.uid} with ${authProviderState.displayName}`
-    );
-  } else {
-    logger.info(`Not logged in`);
-  }
+  }, [authProviderState, logger, setAuthCompleted, setWhitelisted]);
 
   const appAuthState = {
     authCompleted: authCompleted,
     authProviderState: authProviderState,
     authedUser: user,
+    whitelisted: whitelisted,
   };
 
-  const loginView = <LoginView authProvider={authProvider} />;
+  logger.debug(`appAuthState: ${JSON.stringify(appAuthState)}`);
 
+  const loginView = <LoginView authProvider={authProvider} />;
   return (
     <>
       {authCompleted ? (

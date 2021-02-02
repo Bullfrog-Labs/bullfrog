@@ -5,7 +5,8 @@ import * as log from "loglevel";
 import { DateTime } from "luxon";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
-import { AuthedTestUserContext } from "../testing/AuthedTestUserContext";
+import { AppAuthContext } from "../services/auth/AppAuth";
+import { userToAppAuthState } from "../testing/AppAuthTestUtils";
 import { p0, u0 } from "../testing/Fixtures";
 import { PostSubtitleRow } from "./PostSubtitleRow";
 
@@ -15,7 +16,7 @@ const nopDeletePost = jest.fn();
 
 test("displays basic subtitle info", () => {
   const { getByText } = render(
-    <AuthedTestUserContext user={u0}>
+    <AppAuthContext.Provider value={userToAppAuthState(u0)}>
       <MemoryRouter initialEntries={["/"]} initialIndex={0}>
         <PostSubtitleRow
           author={u0}
@@ -30,7 +31,7 @@ test("displays basic subtitle info", () => {
           deletePost={nopDeletePost}
         />
       </MemoryRouter>
-    </AuthedTestUserContext>
+    </AppAuthContext.Provider>
   );
 
   expect(getByText(u0.displayName)).toBeInTheDocument();
@@ -41,7 +42,7 @@ test("handle delete post", () => {
   const mockDeletePost = jest.fn();
 
   const { getByText, getByTitle } = render(
-    <AuthedTestUserContext user={u0}>
+    <AppAuthContext.Provider value={userToAppAuthState(u0)}>
       <MemoryRouter initialEntries={["/"]} initialIndex={0}>
         <PostSubtitleRow
           author={u0}
@@ -56,7 +57,7 @@ test("handle delete post", () => {
           deletePost={mockDeletePost}
         />
       </MemoryRouter>
-    </AuthedTestUserContext>
+    </AppAuthContext.Provider>
   );
 
   const menuElement = getByTitle("Delete, settings, and more...");
