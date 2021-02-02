@@ -63,7 +63,7 @@ export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps
           }
 
           logger.debug(
-            `successful signin, got user ${authResult.user.uid} : ${authResult.user.displayName}, ${authResult.user.email}`
+            `successful signin, got user ${authResult.user.uid} : ${authResult.user.displayName}`
           );
           logger.debug(`redirecting to ${postLoginRedirect.from.pathname}`);
 
