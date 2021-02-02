@@ -32,7 +32,12 @@ export interface UserPost {
 
 const POST_RECORD_CONVERTER = {
   toFirestore: (record: PostRecord): firebase.firestore.DocumentData => {
-    return record;
+    const firestoreRecord: firebase.firestore.DocumentData = Object.assign(
+      {},
+      record
+    );
+    firestoreRecord.caseInsensitiveTitle = firestoreRecord.title.toLowerCase();
+    return firestoreRecord;
   },
   fromFirestore: (
     snapshot: firebase.firestore.QueryDocumentSnapshot,
@@ -58,6 +63,25 @@ const getPostCollectionForUserRef = (database: Database, uid: UserId) =>
     .collection(USERS_COLLECTION)
     .doc(uid)
     .collection(POSTS_COLLECTION);
+
+const getPostsForTitleAndUser = async (
+  database: Database,
+  uid: UserId,
+  title: PostTitle
+) => {
+  const logger = log.getLogger("getPostForTitleAndUser");
+
+  const postDoc = await getPostCollectionForUserRef(database, uid)
+    .where("title", "==", title)
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  if (postDoc.size > 1) {
+    logger.warn("More than one post found with the same title");
+  }
+
+  return postDoc;
+};
 
 export type CreatePostResultSuccess = {
   state: "success";
@@ -85,21 +109,11 @@ export const createPost: (
   newTitle,
   postId?: string
 ) => {
-  const logger = log.getLogger("createPost");
-
   // Check whether a post with the title exists, and create a new post only if
   // there is not already an existing one.
-
-  const postDoc = await getPostCollectionForUserRef(database, user.uid)
-    .where("title", "==", newTitle)
-    .withConverter(POST_RECORD_CONVERTER)
-    .get();
-
-  if (!postDoc.empty) {
-    if (postDoc.size > 1) {
-      logger.warn("More than one post found with the same title");
-    }
-    const postId = postDoc.docs[0].id;
+  const matches = await getPostsForTitleAndUser(database, user.uid, newTitle);
+  if (!matches.empty) {
+    const postId = matches.docs[0].id;
     return {
       state: "post-name-taken",
       postId: postId,
@@ -118,11 +132,12 @@ export const createPost: (
   if (postId) {
     await getPostCollectionForUserRef(database, user.uid)
       .doc(postId)
+      .withConverter(POST_RECORD_CONVERTER)
       .set(newPostRecord);
   } else {
-    newPostDoc = await getPostCollectionForUserRef(database, user.uid).add(
-      newPostRecord
-    );
+    newPostDoc = await getPostCollectionForUserRef(database, user.uid)
+      .withConverter(POST_RECORD_CONVERTER)
+      .add(newPostRecord);
     newPostId = newPostDoc.id;
   }
 
@@ -161,28 +176,23 @@ export const renamePost: (
   postId,
   newTitle
 ) => {
-  const logger = log.getLogger("renamePost");
-
-  const postDoc = await getPostCollectionForUserRef(database, user.uid)
-    .where("title", "==", newTitle)
-    .withConverter(POST_RECORD_CONVERTER)
-    .get();
-
-  if (!postDoc.empty) {
-    if (postDoc.size > 1) {
-      logger.warn("More than one post found with the same title");
-    }
-    const postRecord = postDoc.docs[0].data();
+  // Check whether a post with the title exists, and create a new post only if
+  // there is not already an existing one.
+  const matches = await getPostsForTitleAndUser(database, user.uid, newTitle);
+  if (!matches.empty) {
+    const postId = matches.docs[0].id;
     return {
       state: "post-name-taken",
-      postId: postRecord.id!,
+      postId: postId,
     };
   }
 
   // TODO: Figure out how to check for failures
-  await getPostCollectionForUserRef(database, user.uid)
-    .doc(postId)
-    .update({ title: newTitle, updatedAt: new Date() });
+  await getPostCollectionForUserRef(database, user.uid).doc(postId).update({
+    title: newTitle,
+    caseInsensitiveTitle: newTitle.toLowerCase(),
+    updatedAt: new Date(),
+  });
 
   return {
     state: "success",
