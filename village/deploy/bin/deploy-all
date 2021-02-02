@@ -1,0 +1,4 @@
+#!/bin/sh
+BF_ROOT=$(git rev-parse --show-toplevel)
+
+pushd $BF_ROOT/village && firebase deploy && popd

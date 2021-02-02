@@ -1,10 +1,11 @@
 import * as log from "loglevel";
 
 import firebase from "firebase";
+import "firebase/analytics";
 
 // See https://support.google.com/firebase/answer/7015592 for instructions on
 // retrieving this config object.
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyBEFkGDQBec7AABTZh9ONrW46AvHY9Od84",
   authDomain: "village-b4647.firebaseapp.com",
   databaseURL: "https://village-b4647.firebaseio.com",
@@ -20,7 +21,7 @@ let auth: firebase.auth.Auth | undefined = undefined;
 
 export const initializeFirebaseApp = (
   useEmulator?: boolean
-): [firebase.app.App, firebase.auth.Auth] => {
+): [firebase.app.App, firebase.auth.Auth, firebase.functions.Functions] => {
   if (!app) {
     const logger = log.getLogger("Firebase");
 
@@ -29,6 +30,7 @@ export const initializeFirebaseApp = (
     logger.debug("done initializing Firebase app");
 
     auth = app.auth();
+    app.analytics();
 
     // TODO: Enable Auth emulator once available
     const DEFAULT_AUTH_EMULATOR_URL = "http://localhost:9099/";
@@ -43,5 +45,10 @@ export const initializeFirebaseApp = (
     throw new Error("logic error");
   }
 
-  return [app, auth];
+  const functions = firebase.functions();
+  if (useEmulator) {
+    functions.useEmulator("localhost", 5001);
+  }
+
+  return [app, auth, functions];
 };

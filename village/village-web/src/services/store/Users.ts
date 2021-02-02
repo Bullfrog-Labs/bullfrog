@@ -1,6 +1,8 @@
 import firebase from "firebase";
 import * as log from "loglevel";
+import { assertNever } from "../../utils";
 import { AuthProviderState } from "../auth/Auth";
+import { LookupTwitterUserFn } from "../Twitter";
 import { Database } from "./Database";
 
 export type UserId = string;
@@ -105,33 +107,65 @@ export const checkIfUserExists = async (
   return !!user;
 };
 
-const authProviderStateToNewUserRecord = (
-  authProviderState: AuthProviderState
-): UserRecord => {
+const authProviderStateToNewUserRecord = async (
+  authProviderState: AuthProviderState,
+  lookupTwitterUser: LookupTwitterUserFn
+) => {
+  const logger = log.getLogger("authProviderStateToNewUserRecord");
+
   if (!authProviderState.displayName) {
     throw new Error("Authed user display name should not be missing");
   }
 
-  return {
-    uid: authProviderState.uid,
-    displayName: authProviderState.displayName,
-    username: authProviderState.username,
-  };
+  // get the username here
+  logger.info("Determining username from Twitter user id");
+  const twitterUserId = authProviderState.providerData.find(
+    (x) => x.providerId === firebase.auth.TwitterAuthProvider.PROVIDER_ID
+  )?.uid;
+  if (!twitterUserId) {
+    throw new Error("Could not find Twitter user corresponding to user");
+  }
+  logger.info(`Found Twitter user id ${twitterUserId}`);
+
+  logger.info(`Attempting to lookup Twitter user by id ${twitterUserId}`);
+  const twitterUserLookupResult = await lookupTwitterUser(twitterUserId!);
+
+  switch (twitterUserLookupResult.state) {
+    case "found":
+      const username = twitterUserLookupResult.user.username;
+      logger.info(`Found username ${username} for id ${twitterUserId}`);
+      return {
+        uid: authProviderState.uid,
+        displayName: authProviderState.displayName,
+        username: username,
+      };
+    case "not-found":
+      logger.error(`Cound not find username for id ${twitterUserId}`);
+      throw new Error("Unable to resolve Twitter user: user not found for id");
+    default:
+      assertNever(twitterUserLookupResult);
+  }
 };
 
 export const createNewUserRecord = async (
   database: Database,
+  lookupTwitterUser: LookupTwitterUserFn,
   authProviderState: AuthProviderState
 ): Promise<void> => {
   const logger = log.getLogger("createNewUserRecord");
-
   logger.debug(`creating new user record for user ${authProviderState.uid}`);
+
+  const newUserRecord = await authProviderStateToNewUserRecord(
+    authProviderState,
+    lookupTwitterUser
+  );
+
   const doc = database
     .getHandle()
     .collection(USERS_COLLECTION)
     .withConverter(USER_RECORD_CONVERTER)
     .doc(authProviderState.uid);
-  await doc.set(authProviderStateToNewUserRecord(authProviderState));
+  await doc.set(newUserRecord);
   logger.debug(
     `done creating new user record for user ${authProviderState.uid}`
   );

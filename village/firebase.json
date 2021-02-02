@@ -4,8 +4,27 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "village/build",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+    "predeploy": ["pushd \"$RESOURCE_DIR\"; yarn build; popd"],
+    "postdeploy": ["$PROJECT_DIR/deploy/bin/notify \"village-web deployed\""],
+    "public": "village-web/build",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "headers": [
+      {
+        "source": "/service-worker.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   },
   "emulators": {
     "auth": {
@@ -20,5 +39,11 @@
     "ui": {
       "enabled": true
     }
+  },
+  "functions": {
+    "predeploy": ["pushd \"$RESOURCE_DIR\"; yarn build; popd"],
+    "postdeploy": [
+      "$PROJECT_DIR/deploy/bin/notify \"functions for village deployed\""
+    ]
   }
 }
