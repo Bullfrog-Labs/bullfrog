@@ -1,7 +1,7 @@
 import firebase from "firebase";
 import * as log from "loglevel";
 import { assertNever } from "../../utils";
-import { AuthProviderState } from "../auth/Auth";
+import { AuthProviderState, getTwitterUserId } from "../auth/Auth";
 import { LookupTwitterUserFn } from "../Twitter";
 import { Database } from "./Database";
 
@@ -119,14 +119,8 @@ const authProviderStateToNewUserRecord = async (
 
   // get the username here
   logger.info("Determining username from Twitter user id");
-  const twitterUserId = authProviderState.providerData.find(
-    (x) => x.providerId === firebase.auth.TwitterAuthProvider.PROVIDER_ID
-  )?.uid;
-  if (!twitterUserId) {
-    throw new Error("Could not find Twitter user corresponding to user");
-  }
+  const twitterUserId = getTwitterUserId(authProviderState);
   logger.info(`Found Twitter user id ${twitterUserId}`);
-
   logger.info(`Attempting to lookup Twitter user by id ${twitterUserId}`);
   const twitterUserLookupResult = await lookupTwitterUser(twitterUserId!);
 

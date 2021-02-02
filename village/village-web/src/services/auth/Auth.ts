@@ -1,3 +1,4 @@
+import firebase from "firebase";
 import * as log from "loglevel";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { UserId } from "../store/Users";
@@ -70,4 +71,20 @@ export const useAuthState = (authProvider: AuthProvider): AuthState => {
     authCompleted: [authCompleted, setAuthCompleted],
     authProviderState: [authProviderState, setAuthProviderState],
   };
+};
+
+export const getTwitterUserId = (
+  authProviderState: AuthProviderState
+): string => {
+  const twitterUserId = authProviderState.providerData.find(
+    (x) => x.providerId === firebase.auth.TwitterAuthProvider.PROVIDER_ID
+  )?.uid;
+
+  if (!twitterUserId) {
+    throw new Error(
+      `Could not find Twitter user id for auth provider state for user ${authProviderState.uid}`
+    );
+  }
+
+  return twitterUserId;
 };
