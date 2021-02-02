@@ -64,11 +64,6 @@ const getPostCollectionForUserRef = (database: Database, uid: UserId) =>
     .doc(uid)
     .collection(POSTS_COLLECTION);
 
-// This function is used to check for titles using exact match and
-// case-insensitive match. It is needed to prevent the creation of multiple
-// posts for a user that only differ in case-sensitivity. We cannot simply do a
-// case-insensitive check because not all posts have the case-insensitive title
-// recorded (i.e. from before this change.)
 const getPostsForTitleAndUser = async (
   database: Database,
   uid: UserId,
