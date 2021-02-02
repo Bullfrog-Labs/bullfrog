@@ -1,6 +1,11 @@
 import firebase from "firebase";
 import * as log from "loglevel";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import {
+  LoadableRecord,
+  LoadableRecordSetter,
+  useLoadableRecord,
+} from "../../hooks/useLoadableRecord";
 import { UserId } from "../store/Users";
 
 export interface FederatedAuthProviderData {
@@ -34,7 +39,7 @@ export interface AuthState {
     AuthProviderState | undefined,
     Dispatch<SetStateAction<AuthProviderState | undefined>>
   ];
-  whitelisted: [boolean, Dispatch<SetStateAction<boolean>>];
+  whitelisted: [LoadableRecord<boolean>, LoadableRecordSetter<boolean>];
 }
 
 export const useAuthState = (authProvider: AuthProvider): AuthState => {
@@ -43,26 +48,24 @@ export const useAuthState = (authProvider: AuthProvider): AuthState => {
   const [authProviderState, setAuthProviderState] = useState(
     authProvider.getInitialAuthProviderState()
   );
-  const [whitelisted, setWhitelisted] = useState<boolean>(false);
+  const [whitelisted, setWhitelisted] = useLoadableRecord<boolean>();
 
   authProvider.onAuthStateChanged = useCallback(
     (authProviderState?: AuthProviderState) => {
       logger.debug("Auth state changed, updating auth state.");
+      setAuthProviderState(authProviderState);
 
       if (!authProviderState) {
         logger.debug(
           "Empty auth state, not logged in. Done updating auth state"
         );
         setAuthCompleted(true);
-        setWhitelisted(false);
         return;
       }
 
       if (!authProviderState.uid) {
         throw new Error("Authed user uid should not be null");
       }
-
-      setAuthProviderState(authProviderState);
 
       logger.debug(
         "Logged in with non-empty auth state. Done updating auth state."

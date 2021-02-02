@@ -36,7 +36,11 @@ export type AppAuthStatus =
 
 export const useAppAuthStatusFromAppAuthContext = (): AppAuthStatus => {
   const appAuthState = useContext(AppAuthContext);
-  if (!appAuthState.authCompleted || !appAuthState.authProviderState) {
+  if (
+    !appAuthState.authCompleted ||
+    !appAuthState.authProviderState ||
+    appAuthState.whitelisted === undefined
+  ) {
     return { state: "not-logged-in" };
   }
 

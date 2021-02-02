@@ -1,11 +1,15 @@
-import React, { FunctionComponent, useContext } from "react";
-import * as log from "loglevel";
 import firebase from "firebase/app";
-import { StyledFirebaseAuth } from "react-firebaseui";
 import firebaseui from "firebaseui";
+import * as log from "loglevel";
+import React, { FunctionComponent, useContext } from "react";
+import { StyledFirebaseAuth } from "react-firebaseui";
+import { Redirect, useHistory, useLocation } from "react-router-dom";
+import {
+  AppAuthContext,
+  useAppAuthStatusFromAppAuthContext,
+  useIsLoggedIn,
+} from "../../services/auth/AppAuth";
 import FirebaseAuthProvider from "../../services/auth/FirebaseAuthProvider";
-import { useHistory, useLocation, Redirect } from "react-router-dom";
-import { AppAuthContext, useIsLoggedIn } from "../../services/auth/AppAuth";
 
 interface LocationState {
   isPrivate: boolean;
@@ -37,16 +41,24 @@ export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps
     },
   };
 
-  const authCompleted = useContext(AppAuthContext).authCompleted;
+  const appAuthState = useAppAuthStatusFromAppAuthContext();
   const redirectIsPrivate = postLoginRedirect.isPrivate;
+
   const userIsLoggedIn = useIsLoggedIn();
   const userCanAccessRedirect = redirectIsPrivate === userIsLoggedIn;
 
+  const shouldRedirectToSignup =
+    appAuthState.state === "not-whitelisted" && redirectIsPrivate;
+
+  const authCompleted = useContext(AppAuthContext).authCompleted;
   if (authCompleted && userCanAccessRedirect) {
     // short-circuit because authState has been populated and there is no
     // need to get the user to authenticate manually via the auth component.
     logger.debug(`redirecting to ${postLoginRedirect.from.pathname}`);
     return <Redirect to={postLoginRedirect.from.pathname} />;
+  } else if (authCompleted && shouldRedirectToSignup) {
+    logger.debug(`redirecting to /signup because user is not whitelisted`);
+    return <Redirect to={"/signup"} />;
   } else {
     const config: firebaseui.auth.Config = {
       signInOptions: [firebase.auth.TwitterAuthProvider.PROVIDER_ID],
@@ -65,9 +77,7 @@ export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps
           logger.debug(
             `successful signin, got user ${authResult.user.uid} : ${authResult.user.displayName}`
           );
-          logger.debug(`redirecting to ${postLoginRedirect.from.pathname}`);
 
-          history.replace(postLoginRedirect.from);
           return false;
         },
       },

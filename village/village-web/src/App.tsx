@@ -71,7 +71,7 @@ function App() {
           const isWhitelisted = await isUserWhitelisted(
             getTwitterUserId(authProviderState)
           );
-          setWhitelisted(isWhitelisted);
+          setWhitelisted(isWhitelisted, "exists");
 
           if (isWhitelisted) {
             logger.debug(
@@ -94,7 +94,9 @@ function App() {
           logger.debug(`setting user ${user.displayName}`);
           app.analytics().setUserId(user.uid);
           setUser(user);
-          setWhitelisted(true); // only possible to have user record if whitelisted
+          setWhitelisted(true, "exists"); // only possible to have user record if whitelisted
+        } else {
+          throw new Error("Could not find user record");
         }
         setAuthCompleted(true);
       }
@@ -106,7 +108,7 @@ function App() {
     authCompleted: authCompleted,
     authProviderState: authProviderState,
     authedUser: user,
-    whitelisted: whitelisted,
+    whitelisted: whitelisted.loaded() ? whitelisted.get() : undefined,
   };
 
   logger.debug(`appAuthState: ${JSON.stringify(appAuthState)}`);
