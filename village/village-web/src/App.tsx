@@ -58,6 +58,20 @@ function App() {
   useEffect(() => {
     const fetchUser = async () => {
       if (!!authProviderState) {
+        logger.debug(`Checking whitelist for ${authProviderState.uid}`);
+        const isWhitelisted = await isUserWhitelisted(
+          getTwitterUserId(authProviderState)
+        );
+        setWhitelisted(isWhitelisted, "exists");
+
+        if (!isWhitelisted) {
+          logger.debug(`User ${authProviderState.uid} is not whitelisted`);
+          setAuthCompleted(true);
+          return;
+        } else {
+          logger.debug(`User ${authProviderState.uid} is whitelisted`);
+        }
+
         const userExists = await checkIfUserExists(
           database,
           authProviderState.uid
@@ -65,28 +79,14 @@ function App() {
 
         if (!userExists) {
           logger.debug(
-            `User record does not exist for user ${authProviderState.uid}, checking whitelist.`
+            `User record does not exist for user ${authProviderState.uid}`
           );
 
-          const isWhitelisted = await isUserWhitelisted(
-            getTwitterUserId(authProviderState)
+          await createNewUserRecord(
+            database,
+            lookupTwitterUser,
+            authProviderState
           );
-          setWhitelisted(isWhitelisted, "exists");
-
-          if (isWhitelisted) {
-            logger.debug(
-              `User ${authProviderState.uid} is whitelisted, creating new user record`
-            );
-            await createNewUserRecord(
-              database,
-              lookupTwitterUser,
-              authProviderState
-            );
-          } else {
-            logger.debug(`User ${authProviderState.uid} is not whitelisted`);
-            setAuthCompleted(true);
-            return;
-          }
         }
 
         const user = await getUser(database)(authProviderState.uid);
