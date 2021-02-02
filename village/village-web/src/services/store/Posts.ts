@@ -32,7 +32,12 @@ export interface UserPost {
 
 const POST_RECORD_CONVERTER = {
   toFirestore: (record: PostRecord): firebase.firestore.DocumentData => {
-    return record;
+    const firestoreRecord: firebase.firestore.DocumentData = Object.assign(
+      {},
+      record
+    );
+    firestoreRecord.caseInsensitiveTitle = firestoreRecord.title.toLowerCase();
+    return firestoreRecord;
   },
   fromFirestore: (
     snapshot: firebase.firestore.QueryDocumentSnapshot,
@@ -58,6 +63,40 @@ const getPostCollectionForUserRef = (database: Database, uid: UserId) =>
     .collection(USERS_COLLECTION)
     .doc(uid)
     .collection(POSTS_COLLECTION);
+
+// This function is used to check for titles using exact match and
+// case-insensitive match. It is needed to prevent the creation of multiple
+// posts for a user that only differ in case-sensitivity. We cannot simply do a
+// case-insensitive check because not all posts have the case-insensitive title
+// recorded (i.e. from before this change.)
+const getPostsForTitleAndUser = async (
+  database: Database,
+  uid: UserId,
+  title: PostTitle
+) => {
+  const logger = log.getLogger("getPostForTitleAndUser");
+
+  const postDoc = getPostCollectionForUserRef(database, uid)
+    .where("title", "==", title)
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  const postDocCaseInsensitive = getPostCollectionForUserRef(database, uid)
+    .where("caseInsensitiveTitle", "==", title.toLowerCase())
+    .withConverter(POST_RECORD_CONVERTER)
+    .get();
+
+  const [matches, caseInsensitiveMatches] = await Promise.all([
+    postDoc,
+    postDocCaseInsensitive,
+  ]);
+
+  if (matches.size > 1 || caseInsensitiveMatches.size > 1) {
+    logger.warn("More than one post found with the same title");
+  }
+
+  return [matches.docs, caseInsensitiveMatches.docs].flat();
+};
 
 export type CreatePostResultSuccess = {
   state: "success";
@@ -85,21 +124,11 @@ export const createPost: (
   newTitle,
   postId?: string
 ) => {
-  const logger = log.getLogger("createPost");
-
   // Check whether a post with the title exists, and create a new post only if
   // there is not already an existing one.
-
-  const postDoc = await getPostCollectionForUserRef(database, user.uid)
-    .where("title", "==", newTitle)
-    .withConverter(POST_RECORD_CONVERTER)
-    .get();
-
-  if (!postDoc.empty) {
-    if (postDoc.size > 1) {
-      logger.warn("More than one post found with the same title");
-    }
-    const postId = postDoc.docs[0].id;
+  const matches = await getPostsForTitleAndUser(database, user.uid, newTitle);
+  if (matches.length > 0) {
+    const postId = matches[0].id;
     return {
       state: "post-name-taken",
       postId: postId,
@@ -118,11 +147,12 @@ export const createPost: (
   if (postId) {
     await getPostCollectionForUserRef(database, user.uid)
       .doc(postId)
+      .withConverter(POST_RECORD_CONVERTER)
       .set(newPostRecord);
   } else {
-    newPostDoc = await getPostCollectionForUserRef(database, user.uid).add(
-      newPostRecord
-    );
+    newPostDoc = await getPostCollectionForUserRef(database, user.uid)
+      .withConverter(POST_RECORD_CONVERTER)
+      .add(newPostRecord);
     newPostId = newPostDoc.id;
   }
 
@@ -161,21 +191,14 @@ export const renamePost: (
   postId,
   newTitle
 ) => {
-  const logger = log.getLogger("renamePost");
-
-  const postDoc = await getPostCollectionForUserRef(database, user.uid)
-    .where("title", "==", newTitle)
-    .withConverter(POST_RECORD_CONVERTER)
-    .get();
-
-  if (!postDoc.empty) {
-    if (postDoc.size > 1) {
-      logger.warn("More than one post found with the same title");
-    }
-    const postRecord = postDoc.docs[0].data();
+  // Check whether a post with the title exists, and create a new post only if
+  // there is not already an existing one.
+  const matches = await getPostsForTitleAndUser(database, user.uid, newTitle);
+  if (matches.length > 0) {
+    const postId = matches[0].id;
     return {
       state: "post-name-taken",
-      postId: postRecord.id!,
+      postId: postId,
     };
   }
 
