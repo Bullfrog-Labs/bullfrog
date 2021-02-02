@@ -36,6 +36,7 @@ export type TwitterUser = {
 export const lookupTwitterUserById = async (
   uid: string
 ): Promise<TwitterUser> => {
+  const logger = functions.logger;
   try {
     const response: TwitterResponse = await client.get(`users/${uid}`);
     if (!!response.data) {
@@ -45,11 +46,14 @@ export const lookupTwitterUserById = async (
       response.errors.length === 1 &&
       response.errors[0].type === RESOURCE_NOT_FOUND_ERROR_TYPE
     ) {
+      logger.warn(`User was not found for id: ${uid}`);
       throw new HttpsError("not-found", "User was not found");
     } else {
+      logger.error(`API errors in fetch, ${response.errors}`);
       throw new HttpsError("unknown", `API errors in fetch`, response.errors);
     }
-  } catch (e) {
+  } catch (error) {
+    logger.error(`Unknown error in fetch, ${error}`);
     throw new HttpsError("unknown", `Unknown error in fetch`);
   }
 };
