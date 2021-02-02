@@ -1,9 +1,11 @@
 import * as firebase from "@firebase/rules-unit-testing";
 import fs from "fs";
 import http from "http";
+import { FederatedAuthProviderData } from "../../services/auth/Auth";
 import { FirestoreDatabase } from "../../services/store/FirestoreDatabase";
 import { createPost } from "../../services/store/Posts";
 import { createNewUserRecord } from "../../services/store/Users";
+import { LookupTwitterUserFn, TwitterUserFound } from "../../services/Twitter";
 import { PROJECT_ID, getAuthedFirebaseApp } from "./utils";
 
 // Heavily based on https://github.com/firebase/quickstart-testing/blob/master/unit-test-security-rules/test/firestore.spec.js.
@@ -47,34 +49,58 @@ afterAll(async () => {
   console.log(`View firestore rule coverage information at ${coverageFile}\n`);
 });
 
-test("Logged-out users cannot write a new user object", async () => {
-  const db = FirestoreDatabase.fromApp(getAuthedFirebaseApp(undefined));
-  const authProviderState = {
-    uid: "123",
-    displayName: "foo",
-    username: "bar",
-  };
+const mockLookupTwitterUser: LookupTwitterUserFn = async () => {
+  return {
+    state: "found",
+    user: { id: "432", name: "Bob", username: "twitterUsername" },
+  } as TwitterUserFound;
+};
 
-  firebase.assertFails(createNewUserRecord(db, authProviderState));
+const mockAuthProviderState = () => ({
+  uid: "123",
+  displayName: "foo",
+  providerData: [
+    {
+      providerType: "federated",
+      displayName: undefined,
+      photoURL: undefined,
+      providerId: "twitter.com",
+      uid: "432",
+    } as FederatedAuthProviderData,
+  ],
 });
 
-test("Logged-out users cannot write to a post", () => {});
+test("Logged-out users cannot write a new user object", async () => {
+  const db = FirestoreDatabase.fromApp(getAuthedFirebaseApp(undefined));
+  firebase.assertFails(
+    createNewUserRecord(db, mockLookupTwitterUser, mockAuthProviderState())
+  );
+});
+
+test("Logged-out users cannot write to a post", async () => {
+  const fakeUR = {
+    uid: "123",
+    displayName: "foo",
+    username: "foo",
+  };
+  const db = FirestoreDatabase.fromApp(getAuthedFirebaseApp(undefined));
+  firebase.assertFails(createPost(db)(fakeUR)("blah"));
+});
 
 test("Logged-in users can write to their own user object", async () => {
   const db = FirestoreDatabase.fromApp(getAuthedFirebaseApp({ uid: "123" }));
-  const authProviderState = {
-    uid: "123",
-    displayName: "foo",
-    username: "bar",
-  };
-
-  firebase.assertSucceeds(createNewUserRecord(db, authProviderState));
+  mockLookupTwitterUser("blah");
+  firebase.assertSucceeds(
+    createNewUserRecord(db, mockLookupTwitterUser, mockAuthProviderState())
+  );
 });
 
+/*
 test("Logged-in users cannot write to others' posts", async () => {
+  const aps0 = mockAuthProviderState();
   const u0 = {
-    uid: "123",
-    displayName: "foo",
+    uid: aps0.uid,
+    displayName: aps0.displayName,
     username: "foo",
   };
   const post0 = {
@@ -84,7 +110,7 @@ test("Logged-in users cannot write to others' posts", async () => {
 
   const u0DB = FirestoreDatabase.fromApp(getAuthedFirebaseApp({ uid: u0.uid }));
   const setup = async () => {
-    await createNewUserRecord(u0DB, u0);
+    await createNewUserRecord(u0DB, mockLookupTwitterUser, aps0);
     await createPost(u0DB)(u0)(post0.title, post0.id);
   };
   await setup();
@@ -99,9 +125,10 @@ test("Logged-in users cannot write to others' posts", async () => {
 });
 
 test("Logged-in users can write to their own posts", async () => {
+  const aps = mockAuthProviderState();
   const user = {
-    uid: "123",
-    displayName: "foo",
+    uid: aps.uid,
+    displayName: aps.displayName,
     username: "foo",
   };
 
@@ -109,10 +136,11 @@ test("Logged-in users can write to their own posts", async () => {
 
   const db = FirestoreDatabase.fromApp(getAuthedFirebaseApp({ uid: user.uid }));
   const setup = async () => {
-    await createNewUserRecord(db, user);
+    await createNewUserRecord(db, mockLookupTwitterUser, aps);
   };
   await setup();
 
   const title = "Bar";
   firebase.assertSucceeds(createPost(db)(user)(title));
 });
+*/
