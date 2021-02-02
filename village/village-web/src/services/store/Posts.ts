@@ -76,26 +76,16 @@ const getPostsForTitleAndUser = async (
 ) => {
   const logger = log.getLogger("getPostForTitleAndUser");
 
-  const postDoc = getPostCollectionForUserRef(database, uid)
+  const postDoc = await getPostCollectionForUserRef(database, uid)
     .where("title", "==", title)
     .withConverter(POST_RECORD_CONVERTER)
     .get();
 
-  const postDocCaseInsensitive = getPostCollectionForUserRef(database, uid)
-    .where("caseInsensitiveTitle", "==", title.toLowerCase())
-    .withConverter(POST_RECORD_CONVERTER)
-    .get();
-
-  const [matches, caseInsensitiveMatches] = await Promise.all([
-    postDoc,
-    postDocCaseInsensitive,
-  ]);
-
-  if (matches.size > 1 || caseInsensitiveMatches.size > 1) {
+  if (postDoc.size > 1) {
     logger.warn("More than one post found with the same title");
   }
 
-  return [matches.docs, caseInsensitiveMatches.docs].flat();
+  return postDoc;
 };
 
 export type CreatePostResultSuccess = {
@@ -127,8 +117,8 @@ export const createPost: (
   // Check whether a post with the title exists, and create a new post only if
   // there is not already an existing one.
   const matches = await getPostsForTitleAndUser(database, user.uid, newTitle);
-  if (matches.length > 0) {
-    const postId = matches[0].id;
+  if (!matches.empty) {
+    const postId = matches.docs[0].id;
     return {
       state: "post-name-taken",
       postId: postId,
@@ -194,8 +184,8 @@ export const renamePost: (
   // Check whether a post with the title exists, and create a new post only if
   // there is not already an existing one.
   const matches = await getPostsForTitleAndUser(database, user.uid, newTitle);
-  if (matches.length > 0) {
-    const postId = matches[0].id;
+  if (!matches.empty) {
+    const postId = matches.docs[0].id;
     return {
       state: "post-name-taken",
       postId: postId,
