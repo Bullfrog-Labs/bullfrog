@@ -2,21 +2,15 @@ import { Meta, Story } from "@storybook/react/types-6-0";
 import React, { useState } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { EMPTY_RICH_TEXT } from "../components/richtext/Utils";
-import { CurriedByUser } from "../services/auth/AppAuth";
+import { AppAuthContext, CurriedByUser } from "../services/auth/AppAuth";
 import {
   CreatePostFn,
   RenamePostFn,
   SyncBodyFn,
   UserPost,
 } from "../services/store/Posts";
-import { AuthedTestUserContext } from "../testing/AuthedTestUserContext";
+import { userToAppAuthState } from "../testing/AppAuthTestUtils";
 import { EditablePostView, EditablePostViewProps } from "./PostView";
-
-const viewerAPS = {
-  uid: "456",
-  displayName: "baz",
-  providerData: [],
-};
 
 const viewer = {
   uid: "456",
@@ -26,9 +20,9 @@ const viewer = {
 
 const viewerAppAuthContextDecorator = (Story: Story) => {
   return (
-    <AuthedTestUserContext user={viewerAPS}>
+    <AppAuthContext.Provider value={userToAppAuthState(viewer)}>
       <Story />
-    </AuthedTestUserContext>
+    </AppAuthContext.Provider>
   );
 };
 

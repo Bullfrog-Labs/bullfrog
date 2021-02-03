@@ -4,7 +4,7 @@ import * as log from "loglevel";
 import { useEffect, useState } from "react";
 import { Router } from "./routing/Router";
 import { AppAuthContext } from "./services/auth/AppAuth";
-import { useAuthState } from "./services/auth/Auth";
+import { getTwitterUserId, useAuthState } from "./services/auth/Auth";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
 import { initializeFirebaseApp } from "./services/Firebase";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
@@ -28,6 +28,7 @@ import {
   getUserByUsername,
   UserRecord,
 } from "./services/store/Users";
+import { buildIsUserWhitelisted } from "./services/store/Whitelist";
 import { buildLookupTwitterUser } from "./services/Twitter";
 import { useGlobalStyles } from "./styles/styles";
 import { LoginView } from "./views/LoginView";
@@ -41,28 +42,46 @@ const authProvider = FirebaseAuthProvider.create(app, auth);
 const database = FirestoreDatabase.fromApp(app, useEmulator);
 
 const lookupTwitterUser = buildLookupTwitterUser(functions);
+const isUserWhitelisted = buildIsUserWhitelisted(database);
 
 function App() {
-  const globalClasses = useGlobalStyles();
   const logger = log.getLogger("App");
+  const globalClasses = useGlobalStyles();
 
   const authState = useAuthState(authProvider);
   const [authCompleted, setAuthCompleted] = authState.authCompleted;
   const [authProviderState] = authState.authProviderState;
+  const [whitelisted, setWhitelisted] = authState.whitelisted;
 
   const [user, setUser] = useState<UserRecord>();
 
   useEffect(() => {
     const fetchUser = async () => {
       if (!!authProviderState) {
+        logger.debug(`Checking whitelist for ${authProviderState.uid}`);
+        const isWhitelisted = await isUserWhitelisted(
+          getTwitterUserId(authProviderState)
+        );
+        setWhitelisted(isWhitelisted, "exists");
+
+        if (!isWhitelisted) {
+          logger.debug(`User ${authProviderState.uid} is not whitelisted`);
+          setAuthCompleted(true);
+          return;
+        } else {
+          logger.debug(`User ${authProviderState.uid} is whitelisted`);
+        }
+
         const userExists = await checkIfUserExists(
           database,
           authProviderState.uid
         );
+
         if (!userExists) {
           logger.debug(
-            `User document does not exist for user ${authProviderState.uid}, creating new one.`
+            `User record does not exist for user ${authProviderState.uid}`
           );
+
           await createNewUserRecord(
             database,
             lookupTwitterUser,
@@ -75,29 +94,26 @@ function App() {
           logger.debug(`setting user ${user.displayName}`);
           app.analytics().setUserId(user.uid);
           setUser(user);
+          setWhitelisted(true, "exists"); // only possible to have user record if whitelisted
+        } else {
+          throw new Error("Could not find user record");
         }
         setAuthCompleted(true);
       }
     };
     fetchUser();
-  }, [authProviderState, logger, setAuthCompleted]);
-
-  if (!!authProviderState) {
-    logger.debug(
-      `Logged in as user ${authProviderState.uid} with ${authProviderState.displayName}`
-    );
-  } else {
-    logger.info(`Not logged in`);
-  }
+  }, [authProviderState, logger, setAuthCompleted, setWhitelisted]);
 
   const appAuthState = {
     authCompleted: authCompleted,
     authProviderState: authProviderState,
     authedUser: user,
+    whitelisted: whitelisted.loaded() ? whitelisted.get() : undefined,
   };
 
-  const loginView = <LoginView authProvider={authProvider} />;
+  logger.debug(`appAuthState: ${JSON.stringify(appAuthState)}`);
 
+  const loginView = <LoginView authProvider={authProvider} />;
   return (
     <>
       {authCompleted ? (

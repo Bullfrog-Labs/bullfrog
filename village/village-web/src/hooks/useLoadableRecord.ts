@@ -22,7 +22,7 @@ export const coalesceMaybeToLoadableRecord = <R extends unknown>(
   }
 };
 
-type LoadableRecordSetter<R> = (
+export type LoadableRecordSetter<R> = (
   record: R | null,
   existence: RecordExistence
 ) => void;

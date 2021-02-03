@@ -15,7 +15,7 @@ import {
   useLoadableRecord,
 } from "../hooks/useLoadableRecord";
 import { profileURL } from "../routing/URLs";
-import { useUserFromAppAuthContext } from "../services/auth/AppAuth";
+import { useWhitelistedUserFromAppAuthContext } from "../services/auth/AppAuth";
 import { GetUserPostsFn, PostRecord } from "../services/store/Posts";
 import { GetUserByUsernameFn, UserRecord } from "../services/store/Users";
 import { useGlobalStyles } from "../styles/styles";
@@ -99,7 +99,7 @@ const useProfileState = (
 };
 
 export const DefaultProfileViewController = (props: {}) => {
-  const viewer = useUserFromAppAuthContext();
+  const viewer = useWhitelistedUserFromAppAuthContext();
   return <Redirect to={!!viewer ? profileURL(viewer.username) : "/404"} />;
 };
 

@@ -10,7 +10,7 @@ import React from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import {
   CurriedByUser,
-  useUserFromAppAuthContext,
+  useWhitelistedUserFromAppAuthContext,
 } from "../services/auth/AppAuth";
 import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
@@ -95,7 +95,7 @@ export interface AppContainerProps extends React.PropsWithChildren<{}> {
 }
 
 export const AppContainer = (props: AppContainerProps) => {
-  const user = useUserFromAppAuthContext();
+  const user = useWhitelistedUserFromAppAuthContext();
 
   return !!user ? (
     <AuthedAppContainer user={user} {...props} />

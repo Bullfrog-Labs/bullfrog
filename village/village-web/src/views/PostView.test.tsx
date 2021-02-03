@@ -8,14 +8,14 @@ import {
   stringToSlateNode,
 } from "../components/richtext/Utils";
 import { postURL, postURLById } from "../routing/URLs";
-import { useIsLoggedInAsUser } from "../services/auth/AppAuth";
+import { AppAuthContext, useIsLoggedInAsUser } from "../services/auth/AppAuth";
 import { PostId, PostRecord, UserPost } from "../services/store/Posts";
 import {
   GetUserByUsernameFn,
   GetUserFn,
   UserId,
 } from "../services/store/Users";
-import { AuthedTestUserContext } from "../testing/AuthedTestUserContext";
+import { userToAppAuthState } from "../testing/AppAuthTestUtils";
 import { userPosts0 } from "../testing/Fixtures";
 import {
   EditablePostView,
@@ -127,9 +127,9 @@ const testPostViewNoMentions = () => {
 test("Renders PostView with no mentions for user logged in as author", async () => {
   await act(async () => {
     render(
-      <AuthedTestUserContext user={author}>
+      <AppAuthContext.Provider value={userToAppAuthState(author)}>
         <TestPostView />
-      </AuthedTestUserContext>
+      </AppAuthContext.Provider>
     );
   });
   testPostViewNoMentions();
@@ -138,9 +138,9 @@ test("Renders PostView with no mentions for user logged in as author", async () 
 test("Renders PostView with no mentions for user logged in not as author", async () => {
   await act(async () => {
     render(
-      <AuthedTestUserContext user={viewer}>
+      <AppAuthContext.Provider value={userToAppAuthState(viewer)}>
         <TestPostView />
-      </AuthedTestUserContext>
+      </AppAuthContext.Provider>
     );
   });
   testPostViewNoMentions();
@@ -181,17 +181,17 @@ const testPostViewWithMentions = async (element: JSX.Element) => {
 
 test("Renders PostView with mentions for user logged in as author", async () => {
   await testPostViewWithMentions(
-    <AuthedTestUserContext user={author}>
+    <AppAuthContext.Provider value={userToAppAuthState(author)}>
       <TestPostView mentions={mentions0} />
-    </AuthedTestUserContext>
+    </AppAuthContext.Provider>
   );
 });
 
 test("Renders PostView with mentions for user not logged in as author", async () => {
   await testPostViewWithMentions(
-    <AuthedTestUserContext user={viewer}>
+    <AppAuthContext.Provider value={userToAppAuthState(viewer)}>
       <TestPostView mentions={mentions0} />
-    </AuthedTestUserContext>
+    </AppAuthContext.Provider>
   );
 });
 
@@ -270,9 +270,9 @@ const testPostViewToPostViewNavigation = async (
 
 test("PostView to PostView navigation works when logged in", async () => {
   testPostViewToPostViewNavigation((props) => (
-    <AuthedTestUserContext user={author}>
+    <AppAuthContext.Provider value={userToAppAuthState(author)}>
       <PostViewController {...props} />
-    </AuthedTestUserContext>
+    </AppAuthContext.Provider>
   ));
 });
 
