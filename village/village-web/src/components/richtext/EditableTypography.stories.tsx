@@ -6,7 +6,7 @@ import {
 } from "./EditableTypography";
 
 export default {
-  title: "Editing/EditableTypography",
+  title: "RichText/EditableTypography",
   component: EditableTypography,
 } as Meta;
 
