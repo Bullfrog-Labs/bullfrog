@@ -7,7 +7,7 @@ import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import delay from "delay";
 
 export default {
-  title: "Editing/RichTextEditor",
+  title: "RichText/RichTextEditor",
   component: RichTextEditor,
 } as Meta;
 
