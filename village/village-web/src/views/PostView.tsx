@@ -1,3 +1,12 @@
+import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
+import {
+  CircularProgress,
+  Divider,
+  Grid,
+  makeStyles,
+  Paper,
+} from "@material-ui/core";
+import * as log from "loglevel";
 import React, {
   Dispatch,
   forwardRef,
@@ -9,60 +18,32 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useGlobalStyles } from "../styles/styles";
+import { Helmet } from "react-helmet";
+import IdleTimer from "react-idle-timer";
+import { Redirect, useHistory, useParams } from "react-router-dom";
+import {
+  SaveIndicator,
+  useSaveIndicatorState,
+} from "../components/editor/SaveIndicator";
+import { MentionsSection } from "../components/mentions/MentionsSection";
+import { MentionSuggestionLine } from "../components/mentions/MentionSuggestionLine";
+import { PostSubtitleRow } from "../components/PostSubtitleRow";
+import { DocumentTitle } from "../components/richtext/DocumentTitle";
+import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
 import RichTextEditor, {
   RichTextEditorImperativeHandle,
   RichTextEditorMentionTypeaheadComponents,
 } from "../components/richtext/RichTextEditor";
-import * as log from "loglevel";
-import { MentionsSection } from "../components/mentions/MentionsSection";
-import {
-  CircularProgress,
-  makeStyles,
-  Paper,
-  Grid,
-  Divider,
-} from "@material-ui/core";
-import IdleTimer from "react-idle-timer";
-import {
-  PostRecord,
-  PostId,
-  RenamePostFn,
-  RenamePostResult,
-  SyncBodyFn,
-  SyncBodyResult,
-  CreatePostFn,
-  PostBody,
-  PostTitle,
-  GetAllPostsByTitlePrefixFn,
-  UserPost,
-  GetMentionUserPostsFn,
-  GetPostFn,
-  DeletePostFn,
-} from "../services/store/Posts";
-import {
-  GetUserByUsernameFn,
-  GetUserFn,
-  UserId,
-  UserRecord,
-} from "../services/store/Users";
-import { useMentions } from "../hooks/useMentions";
-import { Redirect, useHistory, useParams } from "react-router-dom";
-import { assertNever } from "../utils";
-import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
-import { DocumentTitle } from "../components/richtext/DocumentTitle";
 import {
   EMPTY_RICH_TEXT,
-  MentionInContext,
   findMentionsInPosts,
+  MentionInContext,
 } from "../components/richtext/Utils";
-import { PostSubtitleRow } from "../components/PostSubtitleRow";
-import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
-import { Helmet } from "react-helmet";
 import {
   coalesceMaybeToLoadableRecord,
   useLoadableRecord,
 } from "../hooks/useLoadableRecord";
+import { useMentions } from "../hooks/useMentions";
 import { useQuery } from "../hooks/useQuery";
 import { postURL } from "../routing/URLs";
 import {
@@ -70,7 +51,30 @@ import {
   useLoggedInUserFromAppAuthContext,
   useWhitelistedUserFromAppAuthContext,
 } from "../services/auth/AppAuth";
-import { MentionSuggestionLine } from "../components/mentions/MentionSuggestionLine";
+import {
+  CreatePostFn,
+  DeletePostFn,
+  GetAllPostsByTitlePrefixFn,
+  GetMentionUserPostsFn,
+  GetPostFn,
+  PostBody,
+  PostId,
+  PostRecord,
+  PostTitle,
+  RenamePostFn,
+  RenamePostResult,
+  SyncBodyFn,
+  SyncBodyResult,
+  UserPost,
+} from "../services/store/Posts";
+import {
+  GetUserByUsernameFn,
+  GetUserFn,
+  UserId,
+  UserRecord,
+} from "../services/store/Users";
+import { useGlobalStyles } from "../styles/styles";
+import { assertNever } from "../utils";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -212,7 +216,8 @@ const useAssembledPostView = (
   subtitleRow: React.ReactChild,
   documentTitle: React.ReactChild,
   richTextEditor: React.ReactChild,
-  idleTimer?: React.ReactChild
+  idleTimer?: React.ReactChild,
+  saveIndicator?: React.ReactChild
 ) => {
   const classes = useStyles();
 
@@ -251,6 +256,7 @@ const useAssembledPostView = (
   const postView = (
     <>
       {!!idleTimer && idleTimer}
+      {!!saveIndicator && saveIndicator}
       <Grid
         container
         direction="row"
@@ -395,6 +401,10 @@ export const EditablePostView = forwardRef<
   const [bodyChanged, setBodyChanged] = useState(false);
   const [titleChanged, setTitleChanged] = useState(false);
 
+  const saveIndicatorState = useSaveIndicatorState();
+  const [saveStatus, setSaveStatus] = saveIndicatorState.saveStatus;
+  const [saveIndicatorOpen, setSaveIndicatorOpen] = saveIndicatorState.open;
+
   const buildOnIdle = (
     documentTitleRef: RefObject<EditableTypographyImperativeHandle>
   ) => async () => {
@@ -409,6 +419,7 @@ export const EditablePostView = forwardRef<
     // sync body first
     if (bodyChanged) {
       logger.debug("Body changed, syncing body");
+      setSaveStatus("saving-changes");
       const syncBodyResult: SyncBodyResult = await syncBody(viewer)(
         props.postId,
         props.body
@@ -428,6 +439,7 @@ export const EditablePostView = forwardRef<
     // rename post, if needed
     if (needsPostRename) {
       logger.debug("Title changed, renaming post");
+      setSaveStatus("saving-changes");
       const renamePostResult: RenamePostResult = await renamePost(viewer)(
         props.postId,
         props.title
@@ -468,6 +480,8 @@ export const EditablePostView = forwardRef<
           assertNever(renamePostResult);
       }
     }
+
+    setSaveStatus("all-changes-saved");
   };
 
   const onTitleChange = useCallback(
@@ -475,9 +489,10 @@ export const EditablePostView = forwardRef<
       if (newTitle !== title) {
         setTitle(newTitle);
         setTitleChanged(true);
+        setSaveStatus("changes-unsaved");
       }
     },
-    [setTitle, title]
+    [setSaveStatus, setTitle, title]
   );
 
   const onBodyChange = useCallback(
@@ -485,8 +500,9 @@ export const EditablePostView = forwardRef<
       // TODO: Only mark body as changed if it is actually different
       setBody(newBody);
       setBodyChanged(true);
+      setSaveStatus("changes-unsaved");
     },
-    [setBody]
+    [setBody, setSaveStatus]
   );
 
   const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
@@ -537,11 +553,20 @@ export const EditablePostView = forwardRef<
     />
   );
 
+  const saveIndicator = (
+    <SaveIndicator
+      open={saveIndicatorOpen}
+      setOpen={setSaveIndicatorOpen}
+      state={saveStatus}
+    />
+  );
+
   const postView = useAssembledPostView(
     subtitleRow,
     documentTitle,
     richTextEditor,
-    idleTimer
+    idleTimer,
+    saveIndicator
   );
 
   useImperativeHandle(ref, () => ({
