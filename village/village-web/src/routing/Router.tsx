@@ -32,6 +32,7 @@ import { GetUserByUsernameFn, GetUserFn } from "../services/store/Users";
 import MainView from "../views/MainView";
 import { PostViewController } from "../views/PostView";
 import PrivateRoute from "./PrivateRoute";
+import { TypeformView } from "../views/TypeformView";
 
 const Sad404 = () => {
   let location = useLocation();
@@ -49,6 +50,7 @@ export type RouterProps = {
   loginView: React.ReactChild;
   getUserPosts: GetUserPostsFn;
   getStackPosts: GetStackPostsFn;
+
   getUser: GetUserFn;
   getUserByUsername: GetUserByUsernameFn;
   getPost: GetPostFn;
@@ -112,7 +114,7 @@ export const Router = (props: RouterProps) => {
           <AppContainerWithProps>{loginView}</AppContainerWithProps>
         </Route>
         <Route path="/signup">
-          <AppContainerWithProps>Sign up!</AppContainerWithProps>
+          <TypeformView />
         </Route>
         <PrivateRoute exact path="/">
           <AppContainerWithProps>
