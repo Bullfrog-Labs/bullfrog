@@ -17,6 +17,7 @@ const firebaseProviderDataToFederatedProviderData = (
     displayName: providerData.displayName ?? undefined,
     photoURL: providerData.photoURL ?? undefined,
     uid: providerData.uid,
+    email: providerData.email ?? undefined,
   };
 };
 
