@@ -88,11 +88,19 @@ export const getTwitterUserId = (
     (x) => x.providerId === firebase.auth.TwitterAuthProvider.PROVIDER_ID
   )?.uid;
 
-  if (!twitterUserId) {
-    throw new Error(
-      `Could not find Twitter user id for auth provider state for user ${authProviderState.uid}`
-    );
+  if (twitterUserId) {
+    return twitterUserId;
   }
 
-  return twitterUserId;
+  const googleUserId = authProviderState.providerData.find(
+    (x) => x.providerId === firebase.auth.GoogleAuthProvider.PROVIDER_ID
+  )?.uid;
+
+  if (googleUserId) {
+    return googleUserId;
+  }
+
+  throw new Error(
+    `Could not find user id for auth provider state for user ${authProviderState.uid}`
+  );
 };

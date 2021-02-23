@@ -61,7 +61,10 @@ export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps
     return <Redirect to={"/signup"} />;
   } else {
     const config: firebaseui.auth.Config = {
-      signInOptions: [firebase.auth.TwitterAuthProvider.PROVIDER_ID],
+      signInOptions: [
+        firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      ],
       signInFlow: "popup",
       callbacks: {
         signInSuccessWithAuthResult: (
