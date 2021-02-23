@@ -1,7 +1,7 @@
 import firebase from "firebase";
 import * as log from "loglevel";
 import { assertNever } from "../../utils";
-import { AuthProviderState, getTwitterUserId } from "../auth/Auth";
+import { AuthProviderState, getUserId, getGoogleEmail } from "../auth/Auth";
 import { LookupTwitterUserFn } from "../Twitter";
 import { Database } from "./Database";
 
@@ -119,9 +119,19 @@ const authProviderStateToNewUserRecord = async (
 
   // get the username here
   logger.info("Determining username from Twitter user id");
-  const twitterUserId = getTwitterUserId(authProviderState);
+  const twitterUserId = getUserId(authProviderState);
   logger.info(`Found Twitter user id ${twitterUserId}`);
   logger.info(`Attempting to lookup Twitter user by id ${twitterUserId}`);
+  const googleEmail = getGoogleEmail(authProviderState);
+  console.log(`email in lookup ${googleEmail}`);
+  if (googleEmail) {
+    return {
+      uid: authProviderState.uid,
+      displayName: authProviderState.displayName,
+      username: googleEmail,
+    };
+  }
+
   const twitterUserLookupResult = await lookupTwitterUser(twitterUserId!);
 
   switch (twitterUserLookupResult.state) {
