@@ -82,9 +82,7 @@ export const useAuthState = (authProvider: AuthProvider): AuthState => {
   };
 };
 
-export const getTwitterUserId = (
-  authProviderState: AuthProviderState
-): string => {
+export const getUserId = (authProviderState: AuthProviderState): string => {
   const twitterUserId = authProviderState.providerData.find(
     (x) => x.providerId === firebase.auth.TwitterAuthProvider.PROVIDER_ID
   )?.uid;
@@ -106,36 +104,12 @@ export const getTwitterUserId = (
   );
 };
 
-export const getUserId = (authProviderState: AuthProviderState): string => {
-  const twitterUserId = authProviderState.providerData.find(
-    (x) => x.providerId === firebase.auth.TwitterAuthProvider.PROVIDER_ID
-  )?.uid;
-
-  if (twitterUserId) {
-    return twitterUserId;
-  }
-
-  const googleUserId = authProviderState.providerData.find(
-    (x) => x.providerId === firebase.auth.GoogleAuthProvider.PROVIDER_ID
-  )?.uid;
-
-  if (googleUserId) {
-    return googleUserId;
-  }
-
-  throw new Error(
-    `Could not find Twitter user id for auth provider state for user ${authProviderState.uid}`
-  );
-};
-
 export const getGoogleEmail = (
   authProviderState: AuthProviderState
 ): string | undefined => {
   const email = authProviderState.providerData.find(
     (x) => x.providerId === firebase.auth.GoogleAuthProvider.PROVIDER_ID
   )?.email;
-
-  console.log(`email in lookup ${email}`);
 
   return email;
 };
