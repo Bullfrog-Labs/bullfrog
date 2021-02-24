@@ -29,7 +29,13 @@ export const EmbeddedTypeform: React.FunctionComponent<EmbeddedTypeformProps> = 
   return (
     <div
       ref={elementRef}
-      style={{ margin: "0", height: "100%", overflow: "hidden" }}
+      style={{
+        margin: "0",
+        height: "100%",
+        width: "100%",
+        overflow: "hidden",
+        position: "fixed",
+      }}
     />
   );
 };
