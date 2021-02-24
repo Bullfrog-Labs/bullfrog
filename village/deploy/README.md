@@ -10,13 +10,21 @@
 
 ## Create a new project and web app
 
-    PROJECT_ID=<project id> # ex. village-staging
-    DISPLAY_NAME=<project display name> # ex. "Village Staging"
-    firebase projects:create --display-name $DISPLAY_NAME --organization 479783666121 $PROJECT_ID
+    # Ex. village-staging
+    PROJECT_ID=<project id>
+
+    # Ex. "Village Staging"
+    DISPLAY_NAME=<project display name>
+
+    # This is the org id for blfrg.xyz
+    ORG_ID=479783666121
+
+    # Create the project
+    firebase projects:create --display-name $DISPLAY_NAME --organization $ORG_ID $PROJECT_ID
 
     # Use the new app
     firebase use $PROJECT_ID
-    firebase apps:create WEB $DISPLAY_NAME
+    firebase apps:create WEB "village-web"
 
 ## Create a village-web config file
 
@@ -30,6 +38,7 @@ Copy an existing .env file - ex. `.env.prod.local` - and fill in the appropriate
 
 To use the appropriate config, copy it to replace the existing `.env`:
 
+    cd village-web
     cp .env.staging.local .env
 
 React will automatically load these values when you run locally.
