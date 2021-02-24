@@ -113,7 +113,12 @@ function App() {
 
   logger.debug(`appAuthState: ${JSON.stringify(appAuthState)}`);
 
-  const loginView = <LoginView authProvider={authProvider} />;
+  const loginView = (
+    <LoginView
+      authProvider={authProvider}
+      googleAuthEnabled={process.env.REACT_APP_GOOGLE_AUTH_ENABLED === "true"}
+    />
+  );
   return (
     <>
       {authCompleted ? (

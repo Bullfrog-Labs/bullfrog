@@ -20,14 +20,14 @@ interface LocationState {
 
 export type FirebaseAuthComponentProps = {
   authProvider: FirebaseAuthProvider;
+  googleAuthEnabled: boolean;
 };
 
 export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps> = ({
   authProvider,
+  googleAuthEnabled,
 }) => {
   const logger = log.getLogger("FirebaseAuthComponent");
-
-  const history = useHistory();
   const location = useLocation<LocationState>();
 
   // Determine where the user should be redirected after login. If the user was
@@ -60,11 +60,12 @@ export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps
     logger.debug(`redirecting to /signup because user is not whitelisted`);
     return <Redirect to={"/signup"} />;
   } else {
+    const signInOptions = [firebase.auth.TwitterAuthProvider.PROVIDER_ID];
+    if (googleAuthEnabled) {
+      signInOptions.push(firebase.auth.GoogleAuthProvider.PROVIDER_ID);
+    }
     const config: firebaseui.auth.Config = {
-      signInOptions: [
-        firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      ],
+      signInOptions: signInOptions,
       signInFlow: "popup",
       callbacks: {
         signInSuccessWithAuthResult: (

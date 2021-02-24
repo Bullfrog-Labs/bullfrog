@@ -5,11 +5,17 @@ import FirebaseAuthProvider from "../services/auth/FirebaseAuthProvider";
 
 export type LoginViewProps = {
   authProvider: AuthProvider;
+  googleAuthEnabled: boolean;
 };
 
 export const LoginView = (props: LoginViewProps) => {
   if (props.authProvider instanceof FirebaseAuthProvider) {
-    return <FirebaseAuthComponent authProvider={props.authProvider} />;
+    return (
+      <FirebaseAuthComponent
+        authProvider={props.authProvider}
+        googleAuthEnabled={props.googleAuthEnabled}
+      />
+    );
   } else {
     throw new Error("Unsupported auth provider");
   }
