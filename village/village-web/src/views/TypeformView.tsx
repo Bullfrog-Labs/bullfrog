@@ -44,6 +44,6 @@ interface TypeformViewProps {}
 
 export const TypeformView: React.FunctionComponent<TypeformViewProps> = ({}) => {
   return (
-    <EmbeddedTypeform link="https://c4u762321zs.typeform.com/to/ZCup330f" />
+    <EmbeddedTypeform link="https://dc3bmofqf55.typeform.com/to/e1eq0RAB" />
   );
 };
