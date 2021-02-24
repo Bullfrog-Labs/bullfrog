@@ -57,6 +57,18 @@ Enable Twitter auth in the auth section in the firebase console (can't be done p
 
 Enable Google auth in the auth section in the firebase console (can't be done programmatically). You can use help@blfrg.xyz as the help email.
 
+Clone the twitter auth config since the function will still need to run on deploy (??):
+
+    firebase functions:config:clone --from village-b4647
+
+## Manually add the project to a billing account
+
+Visit the billing page in GCP console for the new project. Link the to the blfrg.xyz billing account from there.
+
+## Manually enable firestore in the firestore console
+
+Visit the Firestore page in firebase console to create a database.
+
 ## Deploy firebase
 
 Make sure latest typescript is installed, else you may hit an error in building functions.
