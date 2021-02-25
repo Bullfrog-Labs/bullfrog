@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   node: circleci/node@4.1.0
-  python: circleci/python@1.2.1
+  python: circleci/python@1.3.2
 
 jobs:
   run-ingest-gcf-type-checks:
@@ -11,6 +11,9 @@ jobs:
       tag: 3.9-node
     steps:
       - checkout
+      - run:
+          name: Dump python version
+          command: python -V
       - python/install-packages:
           app-dir: bfr/ingest-gcf
           args: "--dev"
@@ -49,6 +52,9 @@ workflows:
           test-tool: pytest
           version: 3.9-node
           setup:
+            - run:
+                name: Dump python version
+                command: python -V
             - run:
                 name: Install OpenJDK
                 command: |
