@@ -12,8 +12,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: verz
-          command: python -V && python3 -V
+          name: Dump python version
+          command: python -V
       - python/install-packages:
           app-dir: bfr/ingest-gcf
           args: "--dev"
@@ -53,8 +53,8 @@ workflows:
           version: 3.9-node
           setup:
             - run:
-                name: verz
-                command: python -V && python3 -V
+                name: Dump python version
+                command: python -V
             - run:
                 name: Install OpenJDK
                 command: |
