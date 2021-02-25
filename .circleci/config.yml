@@ -11,6 +11,9 @@ jobs:
       tag: 3.9-node
     steps:
       - checkout
+      - run:
+          name: Install pyright
+          command: python -V && python3 -V
       - python/install-packages:
           app-dir: bfr/ingest-gcf
           args: "--dev"
