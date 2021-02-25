@@ -1,7 +1,7 @@
 import firebase from "firebase";
 import * as log from "loglevel";
 import { assertNever } from "../../utils";
-import { AuthProviderState, getTwitterUserId } from "../auth/Auth";
+import { AuthProviderState, getUserId, getGoogleEmail } from "../auth/Auth";
 import { LookupTwitterUserFn } from "../Twitter";
 import { Database } from "./Database";
 
@@ -119,22 +119,31 @@ const authProviderStateToNewUserRecord = async (
 
   // get the username here
   logger.info("Determining username from Twitter user id");
-  const twitterUserId = getTwitterUserId(authProviderState);
-  logger.info(`Found Twitter user id ${twitterUserId}`);
-  logger.info(`Attempting to lookup Twitter user by id ${twitterUserId}`);
-  const twitterUserLookupResult = await lookupTwitterUser(twitterUserId!);
+  const userId = getUserId(authProviderState);
+  logger.info(`Found user id ${userId}`);
 
+  const googleEmail = getGoogleEmail(authProviderState);
+  if (googleEmail) {
+    logger.info(`Found google email ${googleEmail}, using that for username`);
+    return {
+      uid: authProviderState.uid,
+      displayName: authProviderState.displayName,
+      username: googleEmail,
+    };
+  }
+
+  const twitterUserLookupResult = await lookupTwitterUser(userId!);
   switch (twitterUserLookupResult.state) {
     case "found":
       const username = twitterUserLookupResult.user.username;
-      logger.info(`Found username ${username} for id ${twitterUserId}`);
+      logger.info(`Found username ${username} for id ${userId}`);
       return {
         uid: authProviderState.uid,
         displayName: authProviderState.displayName,
         username: username,
       };
     case "not-found":
-      logger.error(`Cound not find username for id ${twitterUserId}`);
+      logger.error(`Cound not find username for id ${userId}`);
       throw new Error("Unable to resolve Twitter user: user not found for id");
     default:
       assertNever(twitterUserLookupResult);

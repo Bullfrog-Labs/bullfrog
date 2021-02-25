@@ -5,7 +5,9 @@
   },
   "hosting": {
     "predeploy": ["pushd \"$RESOURCE_DIR\"; yarn build; popd"],
-    "postdeploy": ["$PROJECT_DIR/deploy/bin/notify \"village-web deployed\""],
+    "postdeploy": [
+      "$PROJECT_DIR/deploy/bin/notify \"village-web $GCLOUD_PROJECT deployed\""
+    ],
     "public": "village-web/build",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "headers": [

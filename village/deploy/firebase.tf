@@ -47,3 +47,9 @@ resource "google_firebase_web_app" "village" {
 
   depends_on = [google_firebase_project.default]
 }
+
+data "google_firebase_web_app_config" "village_config" {
+  provider = google-beta
+
+  web_app_id = google_firebase_web_app.village.app_id
+}

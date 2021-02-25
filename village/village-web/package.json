@@ -22,6 +22,7 @@
     "@types/uuid": "^8.3.0",
     "axios": "^0.21.1",
     "delay": "^4.4.0",
+    "dotenv": "^8.2.0",
     "firebase": "^8.2.1",
     "react": "^17.0.1",
     "react-autosuggest": "^10.0.4",

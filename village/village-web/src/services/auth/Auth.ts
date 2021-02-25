@@ -14,6 +14,7 @@ export interface FederatedAuthProviderData {
   displayName: string | undefined;
   photoURL: string | undefined;
   uid: string;
+  email: string | undefined;
 }
 
 export type DownstreamAuthProviderState = FederatedAuthProviderData;
@@ -81,18 +82,34 @@ export const useAuthState = (authProvider: AuthProvider): AuthState => {
   };
 };
 
-export const getTwitterUserId = (
-  authProviderState: AuthProviderState
-): string => {
+export const getUserId = (authProviderState: AuthProviderState): string => {
   const twitterUserId = authProviderState.providerData.find(
     (x) => x.providerId === firebase.auth.TwitterAuthProvider.PROVIDER_ID
   )?.uid;
 
-  if (!twitterUserId) {
-    throw new Error(
-      `Could not find Twitter user id for auth provider state for user ${authProviderState.uid}`
-    );
+  if (twitterUserId) {
+    return twitterUserId;
   }
 
-  return twitterUserId;
+  const googleUserId = authProviderState.providerData.find(
+    (x) => x.providerId === firebase.auth.GoogleAuthProvider.PROVIDER_ID
+  )?.uid;
+
+  if (googleUserId) {
+    return googleUserId;
+  }
+
+  throw new Error(
+    `Could not find user id for auth provider state for user ${authProviderState.uid}`
+  );
+};
+
+export const getGoogleEmail = (
+  authProviderState: AuthProviderState
+): string | undefined => {
+  const email = authProviderState.providerData.find(
+    (x) => x.providerId === firebase.auth.GoogleAuthProvider.PROVIDER_ID
+  )?.email;
+
+  return email;
 };

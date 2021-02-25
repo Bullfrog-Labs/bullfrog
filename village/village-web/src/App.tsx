@@ -4,7 +4,7 @@ import * as log from "loglevel";
 import { useEffect, useState } from "react";
 import { Router } from "./routing/Router";
 import { AppAuthContext } from "./services/auth/AppAuth";
-import { getTwitterUserId, useAuthState } from "./services/auth/Auth";
+import { getUserId, useAuthState } from "./services/auth/Auth";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
 import { initializeFirebaseApp } from "./services/Firebase";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
@@ -60,7 +60,7 @@ function App() {
       if (!!authProviderState) {
         logger.debug(`Checking whitelist for ${authProviderState.uid}`);
         const isWhitelisted = await isUserWhitelisted(
-          getTwitterUserId(authProviderState)
+          getUserId(authProviderState)
         );
         setWhitelisted(isWhitelisted, "exists");
 
@@ -113,7 +113,12 @@ function App() {
 
   logger.debug(`appAuthState: ${JSON.stringify(appAuthState)}`);
 
-  const loginView = <LoginView authProvider={authProvider} />;
+  const loginView = (
+    <LoginView
+      authProvider={authProvider}
+      googleAuthEnabled={process.env.REACT_APP_GOOGLE_AUTH_ENABLED === "true"}
+    />
+  );
   return (
     <>
       {authCompleted ? (
