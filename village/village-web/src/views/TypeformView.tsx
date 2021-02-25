@@ -1,4 +1,4 @@
-import * as typeformEmbed from "@typeform/embed";
+//import * as typeformEmbed from "@typeform/embed";
 import React, { useEffect, useRef } from "react";
 
 interface EmbeddedTypeformProps {
@@ -17,13 +17,18 @@ export const EmbeddedTypeform: React.FunctionComponent<EmbeddedTypeformProps> = 
   const elementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (elementRef.current) {
-      typeformEmbed.makeWidget(elementRef.current, link, {
-        hideFooter,
-        hideHeaders,
-        opacity,
-      });
-    }
+    const renderForm = async () => {
+      // Weird syntax is a workaround for https://github.com/Typeform/embed/issues/161
+      const typeformEmbed = await import("@typeform/embed");
+      if (elementRef.current) {
+        typeformEmbed.makeWidget(elementRef.current, link, {
+          hideFooter,
+          hideHeaders,
+          opacity,
+        });
+      }
+    };
+    renderForm();
   }, [link, hideFooter, hideHeaders, opacity, elementRef]);
 
   return (
