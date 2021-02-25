@@ -2,7 +2,19 @@
 
 ## Available Scripts
 
-In the project directory, you can run:
+In the project directory, you can run the commands below.
+
+**_Note: before you run any of the commands below, make sure your environment is initialized properly._**
+
+### Initializing your environment
+
+Most of the time (at the time of writing) you will want to use the prod environment. To use the prod environment settings, run the commands below:
+
+    # use the prod env settings
+    cp .env.prod.local .env
+
+    # use the prod firebase context
+    firebase use village-b4647
 
 ### `yarn start`
 

@@ -3,17 +3,16 @@ import * as log from "loglevel";
 import firebase from "firebase";
 import "firebase/analytics";
 
-// See https://support.google.com/firebase/answer/7015592 for instructions on
-// retrieving this config object.
 export const firebaseConfig = {
-  apiKey: "AIzaSyBEFkGDQBec7AABTZh9ONrW46AvHY9Od84",
-  authDomain: "village-b4647.firebaseapp.com",
-  databaseURL: "https://village-b4647.firebaseio.com",
-  projectId: "village-b4647",
-  storageBucket: "village-b4647.appspot.com",
-  messagingSenderId: "379717164586",
-  appId: "1:379717164586:web:a70a9c2efa69d1a563ed53",
-  measurementId: "G-BD5S72L4C2",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  locationId: process.env.REACT_APP_FIREBASE_LOCATION_ID,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
 
 let app: firebase.app.App | undefined = undefined;
