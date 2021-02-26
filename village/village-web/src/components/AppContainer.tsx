@@ -1,9 +1,11 @@
 import {
+  AppBar,
   Container,
   CssBaseline,
   Divider,
   Drawer,
   MuiThemeProvider,
+  Toolbar,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core";
 import React from "react";
@@ -52,6 +54,10 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
   },
+  appBar: {
+    top: "auto",
+    bottom: 0,
+  },
 }));
 
 interface BaseAppContainerProps extends React.PropsWithChildren<{}> {
@@ -83,6 +89,9 @@ const BaseAppContainer = (props: BaseAppContainerProps) => {
             {props.children}
           </Container>
         </main>
+        <AppBar position="fixed" color="primary" className={classes.appBar}>
+          <Toolbar>Sign up</Toolbar>
+        </AppBar>
       </div>
     </MuiThemeProvider>
   );
