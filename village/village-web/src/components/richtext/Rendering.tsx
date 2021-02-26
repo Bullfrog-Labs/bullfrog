@@ -28,15 +28,17 @@ export const MentionElement = ({
         `authorUsername=${authorUsername}, title=${title}`
     );
   }
+
+  const linkClassName =
+    focused && selected
+      ? globalClasses.focusedSelectedLink
+      : globalClasses.link;
+
   return (
     <Tooltip title={authorUsername}>
       <Link
         {...attributes}
-        className={
-          focused && selected
-            ? globalClasses.focusedSelectedLink
-            : globalClasses.link
-        }
+        className={`${linkClassName} ${globalClasses.alwaysBreakWord}`}
         data-slate-value={title}
         to={postURLById(authorId, postId)}
         contentEditable={false}
@@ -60,7 +62,7 @@ export const LinkElement = ({
     <a
       {...attributes}
       data-slate-value={element.url}
-      className={globalClasses.link}
+      className={`${globalClasses.link} ${globalClasses.alwaysBreakWord}`}
       href={element.url}
       contentEditable={false}
       {...htmlAttributes}
@@ -92,8 +94,13 @@ export const CompactBlockquoteElement = ({
 };
 
 export const ParagraphElement = (props: any) => {
+  const globalClasses = useGlobalStyles();
   return (
-    <Typography paragraph={true} variant="body1">
+    <Typography
+      className={`${globalClasses.alwaysBreakWord}`}
+      paragraph={true}
+      variant="body1"
+    >
       {props.children}
     </Typography>
   );
@@ -105,7 +112,7 @@ export const CompactParagraphElement = (props: any) => {
     <Typography
       paragraph={true}
       variant="body1"
-      className={globalClasses.compactParagraph}
+      className={`${globalClasses.compactParagraph} ${globalClasses.alwaysBreakWord}`}
     >
       {props.children}
     </Typography>
@@ -113,24 +120,44 @@ export const CompactParagraphElement = (props: any) => {
 };
 
 export const H2Element = (props: any) => {
-  return <Typography variant="h2">{props.children}</Typography>;
+  const globalClasses = useGlobalStyles();
+  return (
+    <Typography variant="h2" className={`${globalClasses.alwaysBreakWord}`}>
+      {props.children}
+    </Typography>
+  );
 };
 
 export const CompactH2Element = (props: any) => {
+  const globalClasses = useGlobalStyles();
   return (
-    <Typography style={{ fontWeight: 500 }} variant="body1">
+    <Typography
+      style={{ fontWeight: 500 }}
+      className={`${globalClasses.alwaysBreakWord}`}
+      variant="body1"
+    >
       {props.children}
     </Typography>
   );
 };
 
 export const H3Element = (props: any) => {
-  return <Typography variant="h3">{props.children}</Typography>;
+  const globalClasses = useGlobalStyles();
+  return (
+    <Typography variant="h3" className={`${globalClasses.alwaysBreakWord}`}>
+      {props.children}
+    </Typography>
+  );
 };
 
 export const CompactH3Element = (props: any) => {
+  const globalClasses = useGlobalStyles();
   return (
-    <Typography style={{ fontWeight: 400 }} variant="body1">
+    <Typography
+      style={{ fontWeight: 400 }}
+      variant="body1"
+      className={`${globalClasses.alwaysBreakWord}`}
+    >
       {props.children}
     </Typography>
   );
