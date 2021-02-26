@@ -61,7 +61,11 @@ export const EditableTypography = React.memo(
 
       const renderLeaf = useCallback(
         ({ children, attributes }) => (
-          <Typography variant={props.variant} {...attributes}>
+          <Typography
+            className={globalClasses.alwaysBreakWord}
+            variant={props.variant}
+            {...attributes}
+          >
             {children}
           </Typography>
         ),
