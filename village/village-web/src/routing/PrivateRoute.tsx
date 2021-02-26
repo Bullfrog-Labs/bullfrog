@@ -29,12 +29,12 @@ export default function PrivateRoute(props: RouteProps) {
             );
           case "not-logged-in":
             logger.debug(
-              `User not authenticated for private route ${props.path}, redirecting to login`
+              `User not authenticated for private route ${props.path}, redirecting to signup`
             );
             return (
               <Redirect
                 to={{
-                  pathname: "/login",
+                  pathname: "/signup",
                   state: { from: location, isPrivate: true },
                 }}
               />

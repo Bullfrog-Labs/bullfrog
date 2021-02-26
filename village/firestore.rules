@@ -12,14 +12,14 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId && userIsWhitelisted(); 
     }
     match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId && userIsWhitelisted(); 
+      allow read, write: if request.auth != null && request.auth.uid == userId && userIsWhitelisted();
     }
     // not something we'd want to allow in a real app, since it would let people count users
-    match /users/{user} {
-      allow read: if request.auth != null && userIsWhitelisted();
+    match /{path=**}/posts/{postId} {
+      allow read: if true; 
     }
-    match /{path=**}/posts/{post} {
-      allow read: if request.auth != null && userIsWhitelisted(); 
+    match /users/{userId} {
+      allow read: if true;
     }
     match /whitelist/{userId} {
       allow read: if request.auth.token.firebase.identities["twitter.com"][0] == userId || request.auth.token.firebase.identities["google.com"][0] == userId;

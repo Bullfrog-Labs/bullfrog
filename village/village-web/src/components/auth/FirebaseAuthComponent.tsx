@@ -51,7 +51,13 @@ export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps
     appAuthState.state === "not-whitelisted" && redirectIsPrivate;
 
   const authCompleted = useContext(AppAuthContext).authCompleted;
-  if (authCompleted && userCanAccessRedirect) {
+
+  if (
+    authCompleted &&
+    userCanAccessRedirect &&
+    // If the user is trying to login for the first time, we should not redirect.
+    !(appAuthState.state === "not-logged-in")
+  ) {
     // short-circuit because authState has been populated and there is no
     // need to get the user to authenticate manually via the auth component.
     logger.debug(`redirecting to ${postLoginRedirect.from.pathname}`);
