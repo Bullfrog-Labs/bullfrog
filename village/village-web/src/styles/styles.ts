@@ -100,5 +100,10 @@ export const useGlobalStyles = makeStyles((theme) => {
       fontWeight: 700,
       color: theme.palette.secondary.light,
     },
+    alwaysBreakWord: {
+      overflowWrap: "break-word",
+      wordWrap: "break-word",
+      wordBreak: "break-word",
+    },
   };
 });

@@ -406,6 +406,7 @@ export const getMentionPosts = (database: Database) => async (
     .getHandle()
     .collectionGroup(POSTS_COLLECTION)
     .where("mentions", "array-contains", postId)
+    .orderBy("updatedAt", "desc")
     .withConverter(POST_RECORD_CONVERTER)
     .get();
 

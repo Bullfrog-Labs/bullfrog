@@ -12,5 +12,9 @@ export const Blockquote = (props: {
     className = props.className;
   }
 
-  return <blockquote className={className}>{props.children}</blockquote>;
+  return (
+    <blockquote className={`${className} ${classes.alwaysBreakWord}`}>
+      {props.children}
+    </blockquote>
+  );
 };
