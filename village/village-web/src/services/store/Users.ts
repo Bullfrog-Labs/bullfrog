@@ -4,6 +4,7 @@ import { assertNever } from "../../utils";
 import { AuthProviderState, getUserId, getGoogleEmail } from "../auth/Auth";
 import { LookupTwitterUserFn } from "../Twitter";
 import { Database } from "./Database";
+import * as _ from "lodash";
 
 export type UserId = string;
 
@@ -82,7 +83,7 @@ export const getUsersForIds = async (
   const userDoc = await database
     .getHandle()
     .collection(USERS_COLLECTION)
-    .where("uid", "in", userIds)
+    .where("uid", "in", _.uniq(userIds))
     .withConverter(USER_RECORD_CONVERTER)
     .get();
 
