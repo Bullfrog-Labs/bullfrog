@@ -32,7 +32,7 @@ import { GetUserByUsernameFn, GetUserFn } from "../services/store/Users";
 import MainView from "../views/MainView";
 import { PostViewController } from "../views/PostView";
 import PrivateRoute from "./PrivateRoute";
-import { TypeformView } from "../views/TypeformView";
+import { SignupView } from "../views/SignupView";
 
 const Sad404 = () => {
   let location = useLocation();
@@ -114,7 +114,9 @@ export const Router = (props: RouterProps) => {
           <AppContainerWithProps>{loginView}</AppContainerWithProps>
         </Route>
         <Route path="/signup">
-          <TypeformView />
+          <AppContainerWithProps>
+            <SignupView />
+          </AppContainerWithProps>
         </Route>
         <PrivateRoute exact path="/">
           <AppContainerWithProps>
