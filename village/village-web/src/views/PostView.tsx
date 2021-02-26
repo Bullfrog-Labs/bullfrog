@@ -46,6 +46,7 @@ import {
 import { useMentions } from "../hooks/useMentions";
 import { useQuery } from "../hooks/useQuery";
 import { postURL } from "../routing/URLs";
+import { LogEventFn } from "../services/Analytics";
 import {
   CurriedByUser,
   useLoggedInUserFromAppAuthContext,
@@ -286,6 +287,8 @@ export type ReadOnlyPostViewProps = {
 
   title: PostTitle;
   body: PostBody;
+
+  logEvent: LogEventFn;
 };
 
 export const ReadOnlyPostView = forwardRef<
@@ -314,6 +317,7 @@ export const ReadOnlyPostView = forwardRef<
       postId={props.postId}
       updatedAt={props.updatedAt}
       numMentions={props.mentions.length}
+      logEvent={props.logEvent}
     />
   );
 
@@ -354,6 +358,8 @@ export type EditablePostViewProps = {
   getPost: GetPostFn;
 
   editablePostCallbacks: EditablePostCallbacks;
+
+  logEvent: LogEventFn;
 };
 
 // Changing title triggers a rename. Renames are not allowed if the title is
@@ -550,6 +556,7 @@ export const EditablePostView = forwardRef<
       updatedAt={props.updatedAt}
       numMentions={props.mentions.length}
       deletePost={deletePost}
+      logEvent={props.logEvent}
     />
   );
 
@@ -584,6 +591,8 @@ export type PostViewControllerProps = {
   getMentionUserPosts: GetMentionUserPostsFn;
 
   editablePostCallbacks: EditablePostCallbacks;
+
+  logEvent: LogEventFn;
 };
 
 type PostViewControllerParams = {
@@ -614,6 +623,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
     getPost,
     getMentionUserPosts,
     editablePostCallbacks,
+    logEvent,
   } = props;
 
   const [authorRecord, setAuthorRecord] = useLoadableRecord<UserRecord>();
@@ -760,6 +770,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
           getPost={getPost}
           mentions={mentions!}
           editablePostCallbacks={editablePostCallbacks}
+          logEvent={logEvent}
         />
       ) : (
         <ReadOnlyPostView
@@ -770,6 +781,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
           title={title!}
           body={body!}
           mentions={mentions!}
+          logEvent={logEvent}
         />
       )}
     </>
