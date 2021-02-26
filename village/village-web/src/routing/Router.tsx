@@ -114,9 +114,7 @@ export const Router = (props: RouterProps) => {
           <AppContainerWithProps>{loginView}</AppContainerWithProps>
         </Route>
         <Route path="/signup">
-          <AppContainerWithProps>
-            <SignupView />
-          </AppContainerWithProps>
+          <SignupView />
         </Route>
         <PrivateRoute exact path="/">
           <AppContainerWithProps>
