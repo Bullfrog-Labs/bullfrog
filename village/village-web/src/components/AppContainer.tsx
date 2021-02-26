@@ -1,9 +1,10 @@
 import {
+  AppBar,
   Container,
   CssBaseline,
-  Divider,
-  Drawer,
   MuiThemeProvider,
+  Toolbar,
+  Typography,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core";
 import React from "react";
@@ -52,6 +53,14 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
   },
+  appBar: {
+    top: "auto",
+    bottom: 0,
+    backgroundColor: theme.palette.secondary.dark,
+  },
+  ctaText: {
+    color: theme.palette.common.white,
+  },
 }));
 
 interface BaseAppContainerProps extends React.PropsWithChildren<{}> {
@@ -66,23 +75,22 @@ const BaseAppContainer = (props: BaseAppContainerProps) => {
       <CssBaseline />
       {!!props.autocompleteSearchBoxDialog && props.autocompleteSearchBoxDialog}
       <div className={classes.root}>
-        <Drawer
-          className={classes.drawer}
-          variant="permanent"
-          classes={{
-            paper: classes.drawerPaper,
-          }}
-          anchor="left"
-        >
-          <div className={classes.toolbar} />
-          <Divider />
-        </Drawer>
         <main className={classes.content}>
           <Container maxWidth="sm">
             <div />
             {props.children}
           </Container>
         </main>
+        <AppBar position="fixed" className={classes.appBar}>
+          <Toolbar>
+            <Container maxWidth="sm">
+              <div />
+              <Typography variant="h6" className={classes.ctaText}>
+                Sign up for early access
+              </Typography>
+            </Container>
+          </Toolbar>
+        </AppBar>
       </div>
     </MuiThemeProvider>
   );
