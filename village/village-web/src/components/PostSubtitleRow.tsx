@@ -100,14 +100,14 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
         </Link>
         <span className={classes.subtitlePart}>{dt.toFormat("MMM d")}</span>
         <span className={classes.subtitlePart}>
-          <Tooltip title="View stack">
+          <Tooltip title="See what others are saying about this topic">
             <Link className={globalClasses.link} to={stackURLPath}>
               <IconButton size="small" style={{ marginLeft: "-3px" }}>
                 <LibraryBooksIcon fontSize={"inherit"} />
               </IconButton>
             </Link>
           </Tooltip>
-          <Tooltip title="View mentions">
+          <Tooltip title="Jump to mentions">
             <HashLink smooth className={globalClasses.link} to={`#mentions`}>
               <IconButton
                 size="small"
