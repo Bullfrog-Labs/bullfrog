@@ -1,10 +1,11 @@
-import { Container } from "@material-ui/core";
 import React from "react";
 import { Helmet } from "react-helmet";
 
 interface SignupViewProps {}
 
-export const SignupView: React.FunctionComponent<SignupViewProps> = ({}) => {
+export const SignupView: React.FunctionComponent<SignupViewProps> = (
+  props = {}
+) => {
   return (
     <>
       <Helmet>
@@ -17,7 +18,7 @@ export const SignupView: React.FunctionComponent<SignupViewProps> = ({}) => {
           rel="opengraph"
           href="https://villageink.lpages.co/village-signup/"
         />
-        <script src="https://villageink.lpages.co/_/js/village-signup/"></script>
+        <script src="//villageink.lpages.co/_/js/village-signup/"></script>
       </Helmet>
     </>
   );
