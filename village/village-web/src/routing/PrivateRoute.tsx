@@ -34,7 +34,7 @@ export default function PrivateRoute(props: RouteProps) {
             return (
               <Redirect
                 to={{
-                  pathname: "/login",
+                  pathname: "/signup",
                   state: { from: location, isPrivate: true },
                 }}
               />
