@@ -1,13 +1,15 @@
 import {
   Button,
+  CircularProgress,
   Container,
   CssBaseline,
   Divider,
   Drawer,
+  Grid,
   MuiThemeProvider,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core";
-import React from "react";
+import React, { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { usePopupTypeform } from "../hooks/typeform/usePopupTypeform";
 import {
@@ -24,6 +26,7 @@ import {
   AUTOCOMPLETE_SEARCH_BOX_HOTKEY,
   useAutocompleteSearchBoxDialog,
 } from "./search/AutocompleteSearchBox";
+import { SignupCTAButton } from "./signup/SignupCTAButton";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -144,12 +147,33 @@ const AuthedAppContainer = (props: AuthedAppContainerProps) => {
 };
 
 const UnauthedAppContainer = (props: AppContainerProps) => {
-  const { openPopup } = usePopupTypeform(
-    "https://getvillageink.typeform.com/to/gkXw5EXu"
-  );
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [popupOpening, setPopupOpening] = useState(false);
+
+  const { openPopup } = usePopupTypeform({
+    link: "https://getvillageink.typeform.com/to/gkXw5EXu",
+    onReady: () => {
+      setPopupOpen(true);
+      setPopupOpening(false);
+    },
+    onSubmit: () => {},
+    onClose: () => {
+      setPopupOpen(false);
+    },
+  });
+
   return (
     <>
-      <BaseAppContainer>{props.children}</BaseAppContainer>
+      <BaseAppContainer>
+        <SignupCTAButton
+          typeformPopupOpening={popupOpening}
+          openTypeformPopup={() => {
+            setPopupOpening(true);
+            openPopup();
+          }}
+        />
+        {props.children}
+      </BaseAppContainer>
     </>
   );
 };

@@ -1,8 +1,19 @@
-//import * as typeformEmbed from "@typeform/embed";
-import React, { useCallback, useEffect, useRef, useState } from "react";
 import { PopupInstance } from "@typeform/embed";
+import { useCallback, useEffect, useRef } from "react";
 
-export const usePopupTypeform = (link: string) => {
+export type PopupTypeformConfig = {
+  link: string;
+  onReady: () => void;
+  onSubmit: () => void;
+  onClose: () => void;
+};
+
+export const usePopupTypeform = ({
+  link,
+  onReady,
+  onSubmit,
+  onClose,
+}: PopupTypeformConfig) => {
   const popupRef = useRef<PopupInstance | null>(null);
 
   useEffect(() => {
@@ -15,22 +26,16 @@ export const usePopupTypeform = (link: string) => {
         openValue: 30,
         autoClose: 3,
         hideScrollbars: true,
-        onSubmit: function () {
-          console.log("Typeform successfully submitted");
-        },
-        onReady: function () {
-          console.log("Typeform is ready");
-        },
-        onClose: function () {
-          console.log("Typeform is closed");
-        },
+        onSubmit: onSubmit,
+        onReady: onReady,
+
+        onClose: onClose,
       });
 
-      popupRef.current?.open();
       console.log("done loading");
     };
     renderForm();
-  }, [link]);
+  }, [link, onClose, onReady, onSubmit]);
 
   const openPopup = useCallback(() => {
     popupRef.current?.open();
