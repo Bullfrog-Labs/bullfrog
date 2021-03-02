@@ -1,3 +1,4 @@
+import { Typography } from "@material-ui/core";
 import React, { ReactNode } from "react";
 import { useGlobalStyles } from "../styles/styles";
 
@@ -14,7 +15,7 @@ export const Blockquote = (props: {
 
   return (
     <blockquote className={`${className} ${classes.alwaysBreakWord}`}>
-      {props.children}
+      <Typography variant="body2">{props.children}</Typography>
     </blockquote>
   );
 };
