@@ -33,6 +33,7 @@ import MainView from "../views/MainView";
 import { PostViewController } from "../views/PostView";
 import PrivateRoute from "./PrivateRoute";
 import { TypeformView } from "../views/TypeformView";
+import { LogEventFn, SetCurrentScreenFn } from "../services/Analytics";
 
 const Sad404 = () => {
   let location = useLocation();
@@ -62,7 +63,9 @@ export type RouterProps = {
   getMentionUserPosts: GetMentionUserPostsFn;
   fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
   deletePost: DeletePostFn;
-  app: firebase.app.App;
+
+  logEvent: LogEventFn;
+  setCurrentScreen: SetCurrentScreenFn;
 };
 
 export const Router = (props: RouterProps) => {
@@ -81,7 +84,8 @@ export const Router = (props: RouterProps) => {
     getMentionUserPosts,
     fetchTitleFromOpenGraph,
     deletePost,
-    app,
+    logEvent,
+    setCurrentScreen,
   } = props;
 
   const logger = log.getLogger("Router");
@@ -102,8 +106,8 @@ export const Router = (props: RouterProps) => {
       const unlisten = history.listen((location) => {
         const page = location.pathname + location.search;
         logger.debug("analytics: logging location " + page);
-        app.analytics().setCurrentScreen(page);
-        app.analytics().logEvent("page_view", { page });
+        setCurrentScreen(page);
+        logEvent("page_view", { page });
       });
       return unlisten;
     });
@@ -153,6 +157,7 @@ export const Router = (props: RouterProps) => {
                 createPost: createPost,
                 deletePost: deletePost,
               }}
+              logEvent={logEvent}
             />
           </AppContainerWithProps>
         </Route>

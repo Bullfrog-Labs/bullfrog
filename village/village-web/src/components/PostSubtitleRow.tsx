@@ -19,6 +19,7 @@ import { profileURL } from "../routing/URLs";
 import { useWhitelistedUserFromAppAuthContext } from "../services/auth/AppAuth";
 import { DeletePostFn } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
+import { LogEventFn } from "../services/Analytics";
 import { useGlobalStyles } from "../styles/styles";
 
 const useStyles = makeStyles((theme) => ({
@@ -41,6 +42,7 @@ export type PostSubtitleRowProps = {
   updatedAt: Date | undefined;
   numMentions: number;
   deletePost?: DeletePostFn;
+  logEvent?: LogEventFn;
 };
 
 export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
@@ -54,6 +56,7 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
     updatedAt,
     postTitle,
     numMentions,
+    logEvent = (eventName: string, parameters?: Object) => {},
   } = props;
   const dt = DateTime.fromJSDate(updatedAt || new Date());
   const stackURLPath = `/stack/${encodeURIComponent(postTitle)}`;
@@ -84,6 +87,10 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
     handleClose();
     await deletePost(author.uid, postId);
     logger.debug(`Post ${postId} deleted!`);
+    logEvent("delete_post", {
+      title: postTitle,
+      author: author,
+    });
     history.push("/");
   };
 
@@ -95,20 +102,48 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
       component="div"
     >
       <div>
-        <Link className={globalClasses.link} to={profileURL(author.username)}>
+        <Link
+          className={globalClasses.link}
+          to={profileURL(author.username)}
+          onClick={() =>
+            logEvent("open_profile_from_post", {
+              title: postTitle,
+              author: author,
+            })
+          }
+        >
           <em>{author.displayName}</em>
         </Link>
         <span className={classes.subtitlePart}>{dt.toFormat("MMM d")}</span>
         <span className={classes.subtitlePart}>
           <Tooltip title="See what others are saying about this topic">
-            <Link className={globalClasses.link} to={stackURLPath}>
+            <Link
+              className={globalClasses.link}
+              to={stackURLPath}
+              onClick={() =>
+                logEvent("open_stack_from_post", {
+                  title: postTitle,
+                  author: author,
+                })
+              }
+            >
               <IconButton size="small" style={{ marginLeft: "-3px" }}>
                 <LibraryBooksIcon fontSize={"inherit"} />
               </IconButton>
             </Link>
           </Tooltip>
           <Tooltip title="Jump to mentions">
-            <HashLink smooth className={globalClasses.link} to={`#mentions`}>
+            <HashLink
+              smooth
+              className={globalClasses.link}
+              to={`#mentions`}
+              onClick={() =>
+                logEvent("jump_to_mentions", {
+                  title: postTitle,
+                  author: author,
+                })
+              }
+            >
               <IconButton
                 size="small"
                 style={{ marginLeft: "-3px" }}
