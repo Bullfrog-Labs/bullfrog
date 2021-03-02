@@ -140,6 +140,8 @@ type PostComponentInputs = {
 
   onIdleComponents?: OnIdleComponents;
   mentionableComponents?: RichTextEditorMentionTypeaheadComponents;
+
+  logEvent: LogEventFn;
 };
 
 type PostComponents = {
@@ -158,6 +160,7 @@ const usePostComponents: (inputs: PostComponentInputs) => PostComponents = ({
   onTitleChange,
   onBodyChange,
   mentionableComponents,
+  logEvent,
 }) => {
   const richTextEditorRef = useRef<RichTextEditorImperativeHandle>(null);
   const documentTitleRef = useRef<EditableTypographyImperativeHandle>(null);
@@ -199,6 +202,7 @@ const usePostComponents: (inputs: PostComponentInputs) => PostComponents = ({
       onChange={onBodyChange}
       enableToolbar={false}
       mentionTypeaheadComponents={mentionableComponents}
+      logEvent={logEvent}
     />
   );
 
@@ -308,6 +312,8 @@ export const ReadOnlyPostView = forwardRef<
 
     onTitleChange: () => {},
     onBodyChange: () => {},
+
+    logEvent: props.logEvent,
   });
 
   const subtitleRow = (
@@ -546,6 +552,8 @@ export const EditablePostView = forwardRef<
       onMentionAdded: onMentionAdded,
       mentionableElementFn: mentionableElementFn,
     },
+
+    logEvent: props.logEvent,
   });
 
   const subtitleRow = (

@@ -115,6 +115,9 @@ export const linkOptions: LinkPluginOptions = {
 export const mentionOptions: MentionPluginOptions = {
   mention: {
     component: MentionElement,
+    rootProps: {
+      onClick: () => {},
+    },
   },
 };
 

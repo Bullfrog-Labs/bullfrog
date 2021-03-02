@@ -29,6 +29,7 @@ import {
 } from "./EditorOptions";
 import { useGlobalStyles } from "../../styles/styles";
 import theme from "../../styles/theme";
+import { LogEventFn } from "../../services/Analytics";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -52,6 +53,7 @@ export type RichTextEditorProps = {
   options?: Options;
   onChange: (newBody: Body) => void;
   mentionTypeaheadComponents?: RichTextEditorMentionTypeaheadComponents;
+  logEvent?: LogEventFn;
 };
 
 const didOpsAffectContent = (ops: Operation[]): boolean => {
@@ -63,14 +65,47 @@ export type RichTextEditorImperativeHandle = {
   blurEditor: () => void;
 };
 
+const addMentionsClickHandler = (options: Options, logEvent: LogEventFn) => {
+  if (!options.mentions) {
+    options.mentions = {};
+  }
+  if (!options.mentions.mention) {
+    options.mentions.mention = {};
+  }
+  if (!options.mentions.mention.rootProps) {
+    options.mentions.mention.rootProps = {};
+  }
+  options.mentions.mention.rootProps.onClick = ({
+    value,
+  }: {
+    value: string;
+  }) => {
+    logEvent("click_inline_mention", { value });
+  };
+};
+
 const RichTextEditor = forwardRef<
   RichTextEditorImperativeHandle,
   RichTextEditorProps
 >((props, ref) => {
   const logger = log.getLogger("RichTextEditor");
+  const {
+    logEvent = (name, params) => {},
+    options,
+    mentionTypeaheadComponents,
+    onChange,
+    body,
+    readOnly,
+    enableToolbar,
+  } = props;
+  const editorOptions = options || postEditorOptions;
+
+  // A little hacky, but fine.
+  addMentionsClickHandler(editorOptions, logEvent);
+
   const [plugins, decorator] = useMemo(
-    () => EditorPlugins.createPlugins(props.options || postEditorOptions),
-    [props.options]
+    () => EditorPlugins.createPlugins(editorOptions),
+    [editorOptions]
   );
   const editor = useMemo(() => pipe(createEditor(), decorator), [decorator]);
   const globalClasses = useGlobalStyles();
@@ -80,7 +115,7 @@ const RichTextEditor = forwardRef<
     onMentionAdded,
     onMentionSearchChanged,
     mentionableElementFn,
-  } = props.mentionTypeaheadComponents ?? {
+  } = mentionTypeaheadComponents ?? {
     mentionables: [],
     onMentionAdded: (option: MentionNodeData) => {},
     onMentionSearchChanged: (search: string) => {},
@@ -108,9 +143,9 @@ const RichTextEditor = forwardRef<
     onMentionSearchChanged(search);
   }, [search, onMentionSearchChanged]);
 
-  const onChange = (newBody: Body) => {
+  const handleChange = (newBody: Body) => {
     if (didOpsAffectContent(editor.operations)) {
-      props.onChange(newBody);
+      onChange(newBody);
     }
   };
 
@@ -132,28 +167,28 @@ const RichTextEditor = forwardRef<
   return (
     <Slate
       editor={editor}
-      value={props.body}
+      value={body}
       onChange={(newValue) => {
-        onChange(newValue);
+        handleChange(newValue);
         onChangeMention(editor);
       }}
     >
-      {!!props.enableToolbar && toolbar}
+      {!!enableToolbar && toolbar}
       <EditablePlugins
         plugins={plugins}
-        readOnly={props.readOnly ?? false}
-        placeholder={props.readOnly ? "Nothing here yet" : "Enter some text"}
+        readOnly={readOnly ?? false}
+        placeholder={readOnly ? "Nothing here yet" : "Enter some text"}
         autoFocus
         spellCheck={false}
         onKeyDown={[onKeyDownMention]}
         onKeyDownDeps={[index, search, target, values]}
         className={
-          props.readOnly
+          readOnly
             ? globalClasses.readOnlyRichText
             : globalClasses.editableRichText
         }
       />
-      {!props.readOnly && (
+      {!readOnly && (
         <MentionSelect
           at={target}
           valueIndex={index}
