@@ -10,6 +10,7 @@ import { initializeFirebaseApp } from "./services/Firebase";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
 import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
 import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
+import { logEvent, setCurrentScreen } from "./services/Analytics";
 import {
   createPost,
   deletePost,
@@ -140,7 +141,8 @@ function App() {
             )}
             fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
             deletePost={deletePost(database)}
-            app={app}
+            logEvent={logEvent(app.analytics())}
+            setCurrentScreen={setCurrentScreen(app.analytics())}
           />
         </AppAuthContext.Provider>
       ) : (

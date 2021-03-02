@@ -31,6 +31,7 @@ test("renders AppContainer", async () => {
     getSearchSuggestionsByTitlePrefix: jest.fn(),
     getMentionUserPosts: jest.fn(),
     fetchTitleFromOpenGraph: jest.fn(),
+    logEvent: jest.fn(),
   };
 
   const appAuthState = {

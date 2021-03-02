@@ -6,18 +6,20 @@ import { useFocused, useSelected } from "slate-react";
 import { postURLById } from "../../routing/URLs";
 import { useGlobalStyles } from "../../styles/styles";
 import { Blockquote } from "../Blockquote";
+import { MentionElementProps } from "@blfrg.xyz/slate-plugins";
 
 export const MentionElement = ({
   attributes,
   children,
   element,
   htmlAttributes,
-}: any) => {
+  onClick,
+}: MentionElementProps) => {
   const globalClasses = useGlobalStyles();
   const logger = log.getLogger("MentionElement");
-  const postId = element["postId"];
-  const authorId = element["authorId"];
-  const authorUsername = element["authorUsername"];
+  const postId = element["postId"] as string;
+  const authorId = element["authorId"] as string;
+  const authorUsername = element["authorUsername"] as string;
   const title = element.value;
   const selected = useSelected();
   const focused = useFocused();
@@ -28,6 +30,12 @@ export const MentionElement = ({
         `authorUsername=${authorUsername}, title=${title}`
     );
   }
+
+  const handleClick = (event: any) => {
+    if (onClick) {
+      onClick({ value: title });
+    }
+  };
 
   const linkClassName =
     focused && selected
@@ -42,6 +50,7 @@ export const MentionElement = ({
         data-slate-value={title}
         to={postURLById(authorId, postId)}
         contentEditable={false}
+        onClick={handleClick}
         {...htmlAttributes}
       >
         {element.value}
