@@ -1,14 +1,11 @@
 import {
-  Button,
-  CircularProgress,
   Container,
   CssBaseline,
   Divider,
   Drawer,
-  Grid,
+  makeStyles,
   MuiThemeProvider,
 } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core";
 import React, { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { usePopupTypeform } from "../hooks/typeform/usePopupTypeform";
@@ -157,19 +154,15 @@ const AuthedAppContainer = (props: AuthedAppContainerProps) => {
 const UnauthedAppContainer = (props: AppContainerProps) => {
   const classes = useStyles();
 
-  const [popupOpen, setPopupOpen] = useState(false);
   const [popupOpening, setPopupOpening] = useState(false);
 
   const { openPopup } = usePopupTypeform({
     link: "https://getvillageink.typeform.com/to/dwelA7tK",
     onReady: () => {
-      setPopupOpen(true);
       setPopupOpening(false);
     },
     onSubmit: () => {},
-    onClose: () => {
-      setPopupOpen(false);
-    },
+    onClose: () => {},
   });
 
   return (

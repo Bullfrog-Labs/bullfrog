@@ -11,8 +11,8 @@ const Template: Story<SignupCTAButtonProps> = (args) => (
   <SignupCTAButton {...args} />
 );
 
-export const Main = Template.bind({});
-Main.args = {
+export const AtRest = Template.bind({});
+AtRest.args = {
   typeformPopupOpening: false,
 };
 

@@ -28,11 +28,8 @@ export const usePopupTypeform = ({
         hideScrollbars: true,
         onSubmit: onSubmit,
         onReady: onReady,
-
         onClose: onClose,
       });
-
-      console.log("done loading");
     };
     renderForm();
   }, [link, onClose, onReady, onSubmit]);
