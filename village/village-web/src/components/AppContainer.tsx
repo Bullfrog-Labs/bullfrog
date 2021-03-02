@@ -161,7 +161,7 @@ const UnauthedAppContainer = (props: AppContainerProps) => {
   const [popupOpening, setPopupOpening] = useState(false);
 
   const { openPopup } = usePopupTypeform({
-    link: "https://getvillageink.typeform.com/to/gkXw5EXu",
+    link: "https://getvillageink.typeform.com/to/dwelA7tK",
     onReady: () => {
       setPopupOpen(true);
       setPopupOpening(false);
