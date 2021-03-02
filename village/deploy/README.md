@@ -6,7 +6,7 @@
 
     village/deploy/bin/deploy-all
 
-# Deploy the non-default site
+# Deploy a non-active site
 
 1. "Change the active site" (see below).
 
