@@ -146,7 +146,7 @@ export const TypographyView = ({}: TypographyViewProps) => {
   );
 
   return (
-    <Container maxWidth="sm">
+    <>
       <div className={classes.root}>
         <Typography variant="h1" gutterBottom>
           h1. Heading
@@ -254,6 +254,6 @@ export const TypographyView = ({}: TypographyViewProps) => {
         {v2}
         {v2}
       </div>
-    </Container>
+    </>
   );
 };
