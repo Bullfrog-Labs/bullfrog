@@ -82,11 +82,9 @@ export const StackView = (props: StackViewProps) => {
       <Helmet>
         <title>Stack for {source.name}</title>
       </Helmet>
-      <Container maxWidth="sm">
-        <Typography variant="h1">{source.name}</Typography>
-        <Divider className={classes.profileDivider} />
-        <List className={classes.root}>{listItems}</List>
-      </Container>
+      <Typography variant="h1">{source.name}</Typography>
+      <Divider className={classes.profileDivider} />
+      <List className={classes.root}>{listItems}</List>
     </>
   );
 };

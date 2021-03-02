@@ -62,10 +62,7 @@ const useStyles = makeStyles((theme) => ({
     transform: "rotate(-90deg)",
     transformOrigin: "bottom right",
   },
-  container: {
-    paddingLeft: "140px",
-    paddingRight: "140px",
-  },
+  container: {},
 }));
 
 interface BaseAppContainerProps extends React.PropsWithChildren<{}> {
@@ -92,7 +89,7 @@ const BaseAppContainer = (props: BaseAppContainerProps) => {
           <Divider />
         </Drawer>
         <main className={classes.content}>
-          <Container maxWidth="md" className={classes.container}>
+          <Container maxWidth="sm" className={classes.container}>
             <div />
             {props.children}
           </Container>
