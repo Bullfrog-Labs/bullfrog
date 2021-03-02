@@ -57,6 +57,14 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
   },
+  signupCTAButton: {
+    position: "fixed",
+    top: "calc(50% - 250px)",
+    right: "0px",
+
+    transform: "rotate(-90deg)",
+    transformOrigin: "bottom right",
+  },
 }));
 
 interface BaseAppContainerProps extends React.PropsWithChildren<{}> {
@@ -147,6 +155,8 @@ const AuthedAppContainer = (props: AuthedAppContainerProps) => {
 };
 
 const UnauthedAppContainer = (props: AppContainerProps) => {
+  const classes = useStyles();
+
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupOpening, setPopupOpening] = useState(false);
 
@@ -165,13 +175,15 @@ const UnauthedAppContainer = (props: AppContainerProps) => {
   return (
     <>
       <BaseAppContainer>
-        <SignupCTAButton
-          typeformPopupOpening={popupOpening}
-          openTypeformPopup={() => {
-            setPopupOpening(true);
-            openPopup();
-          }}
-        />
+        <div className={classes.signupCTAButton}>
+          <SignupCTAButton
+            typeformPopupOpening={popupOpening}
+            openTypeformPopup={() => {
+              setPopupOpening(true);
+              openPopup();
+            }}
+          />
+        </div>
         {props.children}
       </BaseAppContainer>
     </>

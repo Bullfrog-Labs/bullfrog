@@ -21,7 +21,7 @@ export const usePopupTypeform = ({
       // Weird syntax is a workaround for https://github.com/Typeform/embed/issues/161
       const typeformEmbed = await import("@typeform/embed");
       popupRef.current = typeformEmbed.makePopup(link, {
-        mode: "popover",
+        mode: "drawer_right",
         open: "scroll",
         openValue: 30,
         autoClose: 3,
