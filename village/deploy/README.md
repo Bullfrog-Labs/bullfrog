@@ -105,3 +105,7 @@ From village:
 Find the uid, UID, by looking for it in the console logs when you try to sign in.
 
 Create a collection in Firestore called `whitelist` and add a record with $UID as the id of the record.
+
+## (Optional) If you want to do backups, manually create a bucket for them
+
+Visit the GCP GSC page in the console, and create a new bucket named `bf_backups_$PROJECTID`.
