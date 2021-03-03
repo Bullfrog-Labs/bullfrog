@@ -32,7 +32,7 @@ import { GetUserByUsernameFn, GetUserFn } from "../services/store/Users";
 import MainView from "../views/MainView";
 import { PostViewController } from "../views/PostView";
 import PrivateRoute from "./PrivateRoute";
-import { TypeformView } from "../views/TypeformView";
+import { SignupView } from "../views/SignupView";
 import { LogEventFn, SetCurrentScreenFn } from "../services/Analytics";
 
 const Sad404 = () => {
@@ -118,7 +118,7 @@ export const Router = (props: RouterProps) => {
           <AppContainerWithProps>{loginView}</AppContainerWithProps>
         </Route>
         <Route path="/signup">
-          <TypeformView />
+          <SignupView />
         </Route>
         <PrivateRoute exact path="/">
           <AppContainerWithProps>

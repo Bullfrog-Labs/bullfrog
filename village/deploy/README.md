@@ -1,10 +1,33 @@
 # Guides
 
-# Deploying the site
-
 **_Note: Terraform is not in use yet, so please ignore it for now._**
 
+# Deploying the active site
+
     village/deploy/bin/deploy-all
+
+# Deploy a non-active site
+
+1. "Change the active site" (see below).
+
+2. "Deploy the default site" (see above).
+
+# Change the active site
+
+Each site (village public, village private) is associated with a different firebase project.
+
+You must change the active site context to deploy and work locally on that site.
+
+## Change the react env locally
+
+    # ex. village-b4647
+    PROJECT_ID=<project id>
+    cd village-web
+    cp .env.${PROJECT_ID}.local .env
+
+## Change the active firebase project
+
+    firebase use $PROJECT_ID
 
 # Create a new site instance
 
@@ -82,3 +105,7 @@ From village:
 Find the uid, UID, by looking for it in the console logs when you try to sign in.
 
 Create a collection in Firestore called `whitelist` and add a record with $UID as the id of the record.
+
+## (Optional) If you want to do backups, manually create a bucket for them
+
+Visit the GCP GSC page in the console, and create a new bucket named `bf_backups_$PROJECTID`.

@@ -3,11 +3,12 @@ import {
   CssBaseline,
   Divider,
   Drawer,
+  makeStyles,
   MuiThemeProvider,
 } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core";
-import React from "react";
+import React, { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { usePopupTypeform } from "../hooks/typeform/usePopupTypeform";
 import {
   CurriedByUser,
   useWhitelistedUserFromAppAuthContext,
@@ -22,6 +23,7 @@ import {
   AUTOCOMPLETE_SEARCH_BOX_HOTKEY,
   useAutocompleteSearchBoxDialog,
 } from "./search/AutocompleteSearchBox";
+import { SignupCTAButton } from "./signup/SignupCTAButton";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -52,6 +54,15 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
   },
+  signupCTAButton: {
+    position: "fixed",
+    top: "calc(50% - 250px)",
+    right: "0px",
+
+    transform: "rotate(-90deg)",
+    transformOrigin: "bottom right",
+  },
+  container: {},
 }));
 
 interface BaseAppContainerProps extends React.PropsWithChildren<{}> {
@@ -78,7 +89,7 @@ const BaseAppContainer = (props: BaseAppContainerProps) => {
           <Divider />
         </Drawer>
         <main className={classes.content}>
-          <Container maxWidth="sm">
+          <Container maxWidth="sm" className={classes.container}>
             <div />
             {props.children}
           </Container>
@@ -141,8 +152,36 @@ const AuthedAppContainer = (props: AuthedAppContainerProps) => {
   );
 };
 
-const UnauthedAppContainer = (props: AppContainerProps) => (
-  <BaseAppContainer>{props.children}</BaseAppContainer>
-);
+const UnauthedAppContainer = (props: AppContainerProps) => {
+  const classes = useStyles();
+
+  const [popupOpening, setPopupOpening] = useState(false);
+
+  const { openPopup } = usePopupTypeform({
+    link: "https://getvillageink.typeform.com/to/dwelA7tK",
+    onReady: () => {
+      setPopupOpening(false);
+    },
+    onSubmit: () => {},
+    onClose: () => {},
+  });
+
+  return (
+    <>
+      <BaseAppContainer>
+        <div className={classes.signupCTAButton}>
+          <SignupCTAButton
+            typeformPopupOpening={popupOpening}
+            openTypeformPopup={() => {
+              setPopupOpening(true);
+              openPopup();
+            }}
+          />
+        </div>
+        {props.children}
+      </BaseAppContainer>
+    </>
+  );
+};
 
 export default AppContainer;
