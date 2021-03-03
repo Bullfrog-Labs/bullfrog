@@ -66,6 +66,8 @@ export type RouterProps = {
 
   logEvent: LogEventFn;
   setCurrentScreen: SetCurrentScreenFn;
+
+  isSitePublic: boolean;
 };
 
 export const Router = (props: RouterProps) => {
@@ -86,6 +88,7 @@ export const Router = (props: RouterProps) => {
     deletePost,
     logEvent,
     setCurrentScreen,
+    isSitePublic,
   } = props;
 
   const logger = log.getLogger("Router");
@@ -99,6 +102,8 @@ export const Router = (props: RouterProps) => {
       {props.children}
     </AppContainer>
   );
+
+  const MaybePrivateRoute = isSitePublic ? Route : PrivateRoute;
 
   const Routes = () => {
     const history = useHistory();
@@ -143,7 +148,7 @@ export const Router = (props: RouterProps) => {
             <StackViewController getStackPosts={getStackPosts} />
           </AppContainerWithProps>
         </PrivateRoute>
-        <Route exact path="/post/:authorIdOrUsername/:postId">
+        <MaybePrivateRoute exact path="/post/:authorIdOrUsername/:postId">
           <AppContainerWithProps>
             <PostViewController
               getUserByUsername={getUserByUsername}
@@ -160,7 +165,7 @@ export const Router = (props: RouterProps) => {
               logEvent={logEvent}
             />
           </AppContainerWithProps>
-        </Route>
+        </MaybePrivateRoute>
         <Route path="*">
           <Sad404 />
         </Route>

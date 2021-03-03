@@ -114,6 +114,8 @@ function App() {
 
   logger.debug(`appAuthState: ${JSON.stringify(appAuthState)}`);
 
+  const isSitePublic = process.env.REACT_APP_IS_PUBLIC === "true";
+
   const loginView = (
     <LoginView
       authProvider={authProvider}
@@ -143,6 +145,7 @@ function App() {
             deletePost={deletePost(database)}
             logEvent={logEvent(app.analytics())}
             setCurrentScreen={setCurrentScreen(app.analytics())}
+            isSitePublic={isSitePublic}
           />
         </AppAuthContext.Provider>
       ) : (
