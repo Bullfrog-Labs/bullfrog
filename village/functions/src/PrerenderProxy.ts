@@ -2,8 +2,15 @@ import * as functions from "firebase-functions";
 import express from "express";
 import axios from "axios";
 
+const prerenderToken = functions.config().prerender.token;
+
+// It is very important that this location be the SAME location you are
+// serving the SPA from. The other support files - js chunks etc. - must
+// have been generated as part of the same build for the app may crash.
+const indexHtmlLocation = functions.config().prerender.index_html_location;
+
 const prerender = require("prerender-node");
-prerender.set("prerenderToken", "Jn7KZQLHcmqfEkDMvY0l");
+prerender.set("prerenderToken", prerenderToken);
 
 const logger = functions.logger;
 
@@ -12,7 +19,7 @@ const fetchIndexHtml = async () => {
 
   const startTimeMs = Date.now();
   try {
-    const rep = await axios.get(`http://village.ink/index.html`);
+    const rep = await axios.get(indexHtmlLocation);
     if (rep.status !== 200) {
       logger.debug(`Error fetching index.html; status=${rep.status}`);
       indexHtml = undefined;
