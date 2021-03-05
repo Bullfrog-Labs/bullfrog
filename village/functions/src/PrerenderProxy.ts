@@ -38,12 +38,12 @@ const fetchIndexHtml = async () => {
 export const buildPrerenderProxyApp = () => {
   const app = express();
   app.use((req: any, res: any, next: any) => {
-    console.log(`Before prerender`);
+    logger.debug(`Before prerender`);
     next();
   });
   app.use(prerender);
   app.use((req: any, res: any, next: any) => {
-    console.log(`After prerender`);
+    logger.debug(`After prerender`);
     next();
   });
   app.get("*", async (req, res) => {
