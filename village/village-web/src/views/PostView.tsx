@@ -764,6 +764,13 @@ export const PostViewController = (props: PostViewControllerProps) => {
     <>
       <Helmet>
         <title>{pageTitle}</title>
+        <meta name="twitter:card" content="summary"></meta>
+        <meta name="twitter:site" content="getvillageink"></meta>
+        <meta
+          name="twitter:creator"
+          content={authorRecord.get().username}
+        ></meta>
+        <meta property="og:title" content={title} />
       </Helmet>
       {loggedInAsAuthor ? (
         <EditablePostView
