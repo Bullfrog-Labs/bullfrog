@@ -10,5 +10,7 @@ firebase-debug.log
 ui-debug.log
 .firebase/
 
+.runtimeconfig.json
+
 **/node_modules
 village-web/build/static/js

@@ -23,6 +23,10 @@
     ],
     "rewrites": [
       {
+        "source": "/post/l4stewar/**",
+        "function": "proxy"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

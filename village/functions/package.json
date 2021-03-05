@@ -2,7 +2,7 @@
   "name": "functions",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
-    "build": "tsc",
+    "build": "tsc && cp -rf www lib/",
     "serve": "yarn build && firebase emulators:start --only functions",
     "shell": "yarn build && firebase functions:shell",
     "start": "yarn shell",
@@ -14,8 +14,10 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "express": "^4.17.1",
     "firebase-admin": "^9.2.0",
     "firebase-functions": "^3.13.2",
+    "prerender-node": "^3.2.5",
     "twitter-v2": "^1.0.2"
   },
   "devDependencies": {
