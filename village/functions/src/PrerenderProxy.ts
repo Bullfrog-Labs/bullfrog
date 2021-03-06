@@ -11,6 +11,9 @@ const indexHtmlLocation = functions.config().prerender.index_html_location;
 
 const prerender = require("prerender-node");
 prerender.set("prerenderToken", prerenderToken);
+prerender.set("afterRender", function (err: any, req: any, prerenderRes: any) {
+  logger.debug(`Prerender completed`);
+});
 
 const logger = functions.logger;
 
@@ -37,6 +40,15 @@ const fetchIndexHtml = async () => {
 
 export const buildPrerenderProxyApp = () => {
   const app = express();
+  app.use(function (req, res, next) {
+    res.on("finish", function () {
+      logger.debug("finish event fired");
+    });
+    res.on("end", function () {
+      logger.debug("end event fired");
+    });
+    next();
+  });
   app.use((req: any, res: any, next: any) => {
     logger.debug(`Before prerender`);
     next();
