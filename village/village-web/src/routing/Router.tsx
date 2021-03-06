@@ -34,6 +34,7 @@ import { PostViewController } from "../views/PostView";
 import PrivateRoute from "./PrivateRoute";
 import { SignupView } from "../views/SignupView";
 import { LogEventFn, SetCurrentScreenFn } from "../services/Analytics";
+import { SignupClickRegisterView } from "../views/SignupClickRegisterView";
 
 const Sad404 = () => {
   let location = useLocation();
@@ -119,6 +120,9 @@ export const Router = (props: RouterProps) => {
         </Route>
         <Route path="/signup">
           <SignupView />
+        </Route>
+        <Route path="/signup-click">
+          <SignupClickRegisterView />
         </Route>
         <PrivateRoute exact path="/">
           <AppContainerWithProps>
