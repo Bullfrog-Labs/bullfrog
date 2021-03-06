@@ -15,6 +15,7 @@ import Autosuggest, {
 } from "react-autosuggest";
 import { assertNever } from "../../utils";
 import {
+  CreateNewPostFromResolvedLinkSuggestion,
   CreateNewPostSuggestion,
   SearchSuggestion,
   SearchSuggestionFetchFn,
@@ -26,6 +27,7 @@ import { postURL as makePostUrl } from "../../routing/URLs";
 import { CreatePostFn } from "../../services/store/Posts";
 import { FetchTitleFromOpenGraphFn } from "../../services/OpenGraph";
 import { CreateNewPostSearchResult } from "./CreateNewPostSearchResult";
+import { stringToSlateNode } from "../richtext/Utils";
 
 const AUTOCOMPLETE_SEARCH_BOX_KEY = "u";
 const AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER = "command";
@@ -109,9 +111,10 @@ export const useAutocompleteState = (
         logger.debug(
           `Og request complete, updating suggestions; title=${title}`
         );
-        const suggestion: CreateNewPostSuggestion = {
+        const suggestion: CreateNewPostFromResolvedLinkSuggestion = {
           title: title,
-          action: "createNewPost",
+          link: value,
+          action: "createNewPostFromResolvedLink",
         };
         setSuggestions((prevState) => {
           return Object.assign({}, prevState, { link: [suggestion] });
@@ -206,6 +209,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   const renderSuggestion = (suggestion: SearchSuggestion) => {
     switch (suggestion.action) {
       case "createNewPost":
+      case "createNewPostFromResolvedLink":
         return <CreateNewPostSearchResult title={suggestion.title} />;
       case "navigateToPost":
         return (
@@ -227,8 +231,18 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   ) => {
     switch (data.suggestion.action) {
       case "createNewPost":
+      case "createNewPostFromResolvedLink":
         props.setShowProgress(true);
-        const createPostResult = await props.createPost(data.suggestion.title);
+
+        const newBody =
+          data.suggestion.action === "createNewPostFromResolvedLink"
+            ? stringToSlateNode(data.suggestion.link)
+            : undefined;
+
+        const createPostResult = await props.createPost(
+          data.suggestion.title,
+          newBody
+        );
         const { postId } = createPostResult;
 
         switch (createPostResult.state) {
