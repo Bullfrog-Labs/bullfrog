@@ -1,33 +1,32 @@
-import * as log from "loglevel";
 import {
   CircularProgress,
   Dialog,
   Divider,
   Grid,
   makeStyles,
+  TextField,
 } from "@material-ui/core";
+import * as log from "loglevel";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { TextField } from "@material-ui/core";
 import Autosuggest, {
   ChangeEvent,
   OnSuggestionSelected,
   SuggestionsFetchRequested,
 } from "react-autosuggest";
-import { assertNever } from "../../utils";
+import { useHistory } from "react-router-dom";
+import { postURL as makePostUrl } from "../../routing/URLs";
+import { FetchTitleFromOpenGraphFn } from "../../services/OpenGraph";
 import {
   CreateNewPostFromResolvedLinkSuggestion,
-  CreateNewPostSuggestion,
   SearchSuggestion,
   SearchSuggestionFetchFn,
 } from "../../services/search/Suggestions";
-import { UserRecord } from "../../services/store/Users";
-import { NavigateToPostSearchResult } from "./NavigateToPostSearchResult";
-import { useHistory } from "react-router-dom";
-import { postURL as makePostUrl } from "../../routing/URLs";
 import { CreatePostFn } from "../../services/store/Posts";
-import { FetchTitleFromOpenGraphFn } from "../../services/OpenGraph";
+import { UserRecord } from "../../services/store/Users";
+import { assertNever } from "../../utils";
+import { createLink, wrapInRichText } from "../richtext/Utils";
 import { CreateNewPostSearchResult } from "./CreateNewPostSearchResult";
-import { stringToSlateNode } from "../richtext/Utils";
+import { NavigateToPostSearchResult } from "./NavigateToPostSearchResult";
 
 const AUTOCOMPLETE_SEARCH_BOX_KEY = "u";
 const AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER = "command";
@@ -236,7 +235,9 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
 
         const newBody =
           data.suggestion.action === "createNewPostFromResolvedLink"
-            ? stringToSlateNode(data.suggestion.link)
+            ? wrapInRichText([
+                createLink(data.suggestion.link, data.suggestion.link),
+              ])
             : undefined;
 
         const createPostResult = await props.createPost(

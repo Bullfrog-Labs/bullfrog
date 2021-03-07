@@ -1,9 +1,9 @@
-import { RichText } from "./Types";
-import { createEditor, Editor, Node, Path } from "slate";
-import { UserPost, PostId } from "../../services/store/Posts";
 import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
-import * as log from "loglevel";
 import * as _ from "lodash";
+import * as log from "loglevel";
+import { createEditor, Editor, Node, Path } from "slate";
+import { PostId, UserPost } from "../../services/store/Posts";
+import { RichText, RichTextNode } from "./Types";
 
 export type MentionInContext = {
   post: UserPost;
@@ -24,16 +24,25 @@ export const EMPTY_RICH_TEXT: RichText = [
   },
 ];
 
-export const stringToSlateNode = (s: string): RichText => [
+export const createLink = (s: string, url: string): RichTextNode => ({
+  type: "a",
+  url: url,
+  children: [{ text: s }],
+});
+
+export const stringToParagraph = (s: string): RichTextNode => ({
+  type: "p",
+  children: [{ text: s }],
+});
+
+export const wrapInRichText = (richTextNodes: RichTextNode[]) => [
   {
-    children: [
-      {
-        type: "p",
-        children: [{ text: s }],
-      },
-    ],
+    children: richTextNodes,
   },
 ];
+
+export const stringToSlateNode = (s: string): RichText =>
+  wrapInRichText([stringToParagraph(s)]);
 
 export const slateNodeToString = (text: RichText): string =>
   Node.string(text[0]);
