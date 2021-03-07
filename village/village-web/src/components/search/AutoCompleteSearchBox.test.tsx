@@ -1,16 +1,19 @@
-import React, { forwardRef, useImperativeHandle } from "react";
-import { act as actHook, renderHook } from "@testing-library/react-hooks";
-import * as log from "loglevel";
-import { FetchTitleFromOpenGraphFn } from "../../services/OpenGraph";
-import { Logging } from "kmgmt-common";
 import { act, render, screen, waitFor } from "@testing-library/react";
+import { act as actHook, renderHook } from "@testing-library/react-hooks";
 import userEvent from "@testing-library/user-event";
+import { createMemoryHistory } from "history";
+import { Logging } from "kmgmt-common";
+import * as log from "loglevel";
+import React, { forwardRef, useImperativeHandle } from "react";
+import { Router } from "react-router-dom";
+import { postURL } from "../../routing/URLs";
+import { FetchTitleFromOpenGraphFn } from "../../services/OpenGraph";
 import {
+  CreateNewPostFromResolvedLinkSuggestion,
   matchesToSearchSuggestions,
-  CreateNewPostSuggestion,
-  SearchSuggestionFetchFn,
   NavigateToPostSuggestion,
   SearchSuggestion,
+  SearchSuggestionFetchFn,
 } from "../../services/search/Suggestions";
 import {
   CreatePostFn,
@@ -19,16 +22,13 @@ import {
   UserPost,
 } from "../../services/store/Posts";
 import { UserRecord } from "../../services/store/Users";
+import { EMPTY_RICH_TEXT } from "../richtext/Utils";
 import {
   AutocompleteSearchBox,
-  useAutocompleteState,
   AUTOCOMPLETE_SEARCH_BOX_PROMPT,
   useAutocompleteSearchBoxDialog,
+  useAutocompleteState,
 } from "./AutocompleteSearchBox";
-import { createMemoryHistory } from "history";
-import { Router } from "react-router-dom";
-import { postURL } from "../../routing/URLs";
-import { EMPTY_RICH_TEXT } from "../richtext/Utils";
 
 Logging.configure(log);
 
@@ -45,9 +45,10 @@ const ss1: NavigateToPostSuggestion = {
   authorUsername: "leighland",
   action: "navigateToPost",
 };
-const ss2: CreateNewPostSuggestion = {
+const ss2: CreateNewPostFromResolvedLinkSuggestion = {
   title: "Title mane",
-  action: "createNewPost",
+  action: "createNewPostFromResolvedLink",
+  link: "http://wabisabi.com",
 };
 const getSuggestions: SearchSuggestionFetchFn = async (value: string) => {
   return [ss1];
@@ -419,8 +420,10 @@ describe("useAutocompleteState hook", () => {
       startSuggestionsRequest("http://wabisabi.com");
     });
 
+    const URL_TO_RESOLVE = "http://wabisabi.co.uk";
+
     await actHook(async () => {
-      startSuggestionsRequest("http://wabisabi.co.uk");
+      startSuggestionsRequest(URL_TO_RESOLVE);
       expect(resolveFetchFunctions).toBeDefined();
       await waitForNextUpdate();
     });
@@ -435,7 +438,8 @@ describe("useAutocompleteState hook", () => {
       title: "Title fool! - 2",
     };
     const expSs2 = {
-      action: "createNewPost",
+      action: "createNewPostFromResolvedLink",
+      link: URL_TO_RESOLVE,
       title: "2",
     };
     expect(suggestions).toEqual([expSs2, expSs1]);
