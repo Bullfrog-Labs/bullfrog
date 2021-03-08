@@ -100,6 +100,7 @@ export type CreatePostResult =
 
 export type CreatePostFn = (
   newTitle: PostTitle,
+  newBody?: PostBody,
   postId?: string
 ) => Promise<CreatePostResult>;
 
@@ -107,7 +108,8 @@ export const createPost: (
   database: Database
 ) => (user: UserRecord) => CreatePostFn = (database) => (user) => async (
   newTitle,
-  postId?: string
+  newBody,
+  postId
 ) => {
   // Check whether a post with the title exists, and create a new post only if
   // there is not already an existing one.
@@ -123,7 +125,7 @@ export const createPost: (
   const newPostRecord: PostRecord = {
     authorId: user.uid,
     title: newTitle,
-    body: EMPTY_RICH_TEXT,
+    body: newBody ?? EMPTY_RICH_TEXT,
     mentions: [],
     updatedAt: new Date(),
   };

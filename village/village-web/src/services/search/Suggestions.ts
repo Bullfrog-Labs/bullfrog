@@ -8,6 +8,12 @@ export type CreateNewPostSuggestion = {
   action: "createNewPost";
 };
 
+export type CreateNewPostFromResolvedLinkSuggestion = {
+  title: string;
+  link: string;
+  action: "createNewPostFromResolvedLink";
+};
+
 export type NavigateToPostSuggestion = {
   title: string;
   postId: PostId;
@@ -18,6 +24,7 @@ export type NavigateToPostSuggestion = {
 
 export type SearchSuggestion =
   | CreateNewPostSuggestion
+  | CreateNewPostFromResolvedLinkSuggestion
   | NavigateToPostSuggestion;
 
 export type SearchSuggestionFetchFn = (

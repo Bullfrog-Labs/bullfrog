@@ -1,31 +1,32 @@
-import * as log from "loglevel";
 import {
   CircularProgress,
   Dialog,
   Divider,
   Grid,
   makeStyles,
+  TextField,
 } from "@material-ui/core";
+import * as log from "loglevel";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { TextField } from "@material-ui/core";
 import Autosuggest, {
   ChangeEvent,
   OnSuggestionSelected,
   SuggestionsFetchRequested,
 } from "react-autosuggest";
-import { assertNever } from "../../utils";
+import { useHistory } from "react-router-dom";
+import { postURL as makePostUrl } from "../../routing/URLs";
+import { FetchTitleFromOpenGraphFn } from "../../services/OpenGraph";
 import {
-  CreateNewPostSuggestion,
+  CreateNewPostFromResolvedLinkSuggestion,
   SearchSuggestion,
   SearchSuggestionFetchFn,
 } from "../../services/search/Suggestions";
-import { UserRecord } from "../../services/store/Users";
-import { NavigateToPostSearchResult } from "./NavigateToPostSearchResult";
-import { useHistory } from "react-router-dom";
-import { postURL as makePostUrl } from "../../routing/URLs";
 import { CreatePostFn } from "../../services/store/Posts";
-import { FetchTitleFromOpenGraphFn } from "../../services/OpenGraph";
+import { UserRecord } from "../../services/store/Users";
+import { assertNever } from "../../utils";
+import { createLink, wrapInRichText } from "../richtext/Utils";
 import { CreateNewPostSearchResult } from "./CreateNewPostSearchResult";
+import { NavigateToPostSearchResult } from "./NavigateToPostSearchResult";
 
 const AUTOCOMPLETE_SEARCH_BOX_KEY = "u";
 const AUTOCOMPLETE_SEARCH_BOX_KEYMODIFIER = "command";
@@ -109,9 +110,10 @@ export const useAutocompleteState = (
         logger.debug(
           `Og request complete, updating suggestions; title=${title}`
         );
-        const suggestion: CreateNewPostSuggestion = {
+        const suggestion: CreateNewPostFromResolvedLinkSuggestion = {
           title: title,
-          action: "createNewPost",
+          link: value,
+          action: "createNewPostFromResolvedLink",
         };
         setSuggestions((prevState) => {
           return Object.assign({}, prevState, { link: [suggestion] });
@@ -206,6 +208,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   const renderSuggestion = (suggestion: SearchSuggestion) => {
     switch (suggestion.action) {
       case "createNewPost":
+      case "createNewPostFromResolvedLink":
         return <CreateNewPostSearchResult title={suggestion.title} />;
       case "navigateToPost":
         return (
@@ -227,8 +230,20 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   ) => {
     switch (data.suggestion.action) {
       case "createNewPost":
+      case "createNewPostFromResolvedLink":
         props.setShowProgress(true);
-        const createPostResult = await props.createPost(data.suggestion.title);
+
+        const newBody =
+          data.suggestion.action === "createNewPostFromResolvedLink"
+            ? wrapInRichText([
+                createLink(data.suggestion.link, data.suggestion.link),
+              ])
+            : undefined;
+
+        const createPostResult = await props.createPost(
+          data.suggestion.title,
+          newBody
+        );
         const { postId } = createPostResult;
 
         switch (createPostResult.state) {
