@@ -17,6 +17,7 @@ import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
 import { CreatePostFn } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
+import { SIGNUP_TYPEFORM_URL } from "../services/Typeform";
 import theme from "../styles/theme";
 import {
   AUTOCOMPLETE_SEARCH_BOX_ESCKEY,
@@ -158,7 +159,7 @@ const UnauthedAppContainer = (props: AppContainerProps) => {
   const [popupOpening, setPopupOpening] = useState(false);
 
   const { openPopup } = usePopupTypeform({
-    link: "https://getvillageink.typeform.com/to/dwelA7tK",
+    link: SIGNUP_TYPEFORM_URL,
     onReady: () => {
       setPopupOpening(false);
     },
