@@ -7,19 +7,34 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/whitelist/$(twitterId)) || exists(/databases/$(database)/documents/whitelist/$(googleId));
     }
 
+    function userIsAuthd() {
+      return request.auth != null;
+    }
+
+    function userIdMatches(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function userIsAuthdAndWhitelisted() {
+      return userIsAuthd() && userIsWhitelisted();
+    }
+
+    function siteIsPublic() {
+      return exists(/databases/$(database)/documents/settings/is_public);
+    }
+
     // from https://firebase.google.com/docs/firestore/security/rules-conditions#authentication
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId && userIsWhitelisted(); 
+      allow read, write: if userIsAuthdAndWhitelisted() && userIdMatches(userId);
     }
     match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId && userIsWhitelisted();
+      allow read, write: if userIsAuthdAndWhitelisted() && userIdMatches(userId);
     }
-    // not something we'd want to allow in a real app, since it would let people count users
     match /{path=**}/posts/{postId} {
-      allow read: if true; 
+      allow read: if userIsAuthdAndWhitelisted() || siteIsPublic();
     }
     match /users/{userId} {
-      allow read: if true;
+      allow read: if userIsAuthdAndWhitelisted() || siteIsPublic();
     }
     match /whitelist/{userId} {
       allow read: if request.auth.token.firebase.identities["twitter.com"][0] == userId || request.auth.token.firebase.identities["google.com"][0] == userId;

@@ -24,6 +24,7 @@ export class FirestoreDatabase implements Database {
 
   static fromApp(app: firebase.app.App, useEmulator?: boolean): Database {
     const firestore = firebase.firestore(app);
+    firestore.settings({ experimentalForceLongPolling: true });
     return new FirestoreDatabase(firestore, useEmulator);
   }
 
