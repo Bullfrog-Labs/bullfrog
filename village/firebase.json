@@ -23,7 +23,7 @@
     ],
     "rewrites": [
       {
-        "source": "https://village.ink/post/l4stewar/6JgYwlNNQY7KykfGEbCa",
+        "source": "/post/l4stewar/6JgYwlNNQY7KykfGEbCa",
         "function": "prerenderProxy"
       },
       {
