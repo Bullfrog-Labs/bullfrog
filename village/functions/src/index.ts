@@ -1,5 +1,6 @@
 import * as functions from "firebase-functions";
 import { lookupTwitterUserById } from "./Twitter";
+import { buildPrerenderProxyApp } from "./PrerenderProxy";
 
 export const lookupTwitterUser = functions.https.onCall(
   async (data, context) => {
@@ -16,4 +17,8 @@ export const lookupTwitterUser = functions.https.onCall(
     const result = await lookupTwitterUserById(id!);
     return result;
   }
+);
+
+export const prerenderProxy = functions.https.onRequest(
+  buildPrerenderProxyApp()
 );

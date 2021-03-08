@@ -66,6 +66,11 @@ To use the appropriate config, copy it to replace the existing `.env`:
 
 React will automatically load these values when you run locally.
 
+## Set prerender proxy configs
+
+    firebase functions:config:set prerender.token=<token from prerender.io>
+    firebase functions:config:set prerender.index_html_location=<full url to index.html>
+
 ## If you're planning to support twitter auth
 
 Set the twitter username lookup configs (find these values in the twitter developer team account).

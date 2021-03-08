@@ -1,6 +1,10 @@
 # Compiled JavaScript files
 lib/**/*.js
 lib/**/*.js.map
+lib/**
+www/**
+
+yarn-error.log
 
 # TypeScript v1 declaration files
 typings/
