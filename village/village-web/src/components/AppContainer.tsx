@@ -3,6 +3,7 @@ import {
   CssBaseline,
   Divider,
   Drawer,
+  Fab,
   makeStyles,
   MuiThemeProvider,
 } from "@material-ui/core";
@@ -25,6 +26,7 @@ import {
   useAutocompleteSearchBoxDialog,
 } from "./search/AutocompleteSearchBox";
 import { SignupCTAButton } from "./signup/SignupCTAButton";
+import CreateIcon from "@material-ui/icons/Create";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -64,6 +66,14 @@ const useStyles = makeStyles((theme) => ({
     transformOrigin: "bottom right",
   },
   container: {},
+  fab: {
+    position: "absolute",
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
+  },
+  fabExtendedIcon: {
+    marginRight: theme.spacing(1),
+  },
 }));
 
 interface BaseAppContainerProps extends React.PropsWithChildren<{}> {
@@ -121,6 +131,8 @@ export interface AuthedAppContainerProps extends AppContainerProps {
 }
 
 const AuthedAppContainer = (props: AuthedAppContainerProps) => {
+  const classes = useStyles();
+
   const {
     user,
     createPost,
@@ -144,10 +156,22 @@ const AuthedAppContainer = (props: AuthedAppContainerProps) => {
     autocompleteSearchBox.setDialogOpen(false);
   });
 
+  const SEARCH_OR_CREATE_FAB_LABEL = "Search or create";
+
   return (
     <BaseAppContainer
       autocompleteSearchBoxDialog={autocompleteSearchBox.dialog}
     >
+      <Fab
+        className={classes.fab}
+        color="secondary"
+        aria-label={SEARCH_OR_CREATE_FAB_LABEL}
+        variant="extended"
+        onClick={() => autocompleteSearchBox.setDialogOpen(true)}
+      >
+        <CreateIcon className={classes.fabExtendedIcon} />
+        {SEARCH_OR_CREATE_FAB_LABEL}
+      </Fab>
       {props.children}
     </BaseAppContainer>
   );
