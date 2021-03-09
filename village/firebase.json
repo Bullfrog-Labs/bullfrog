@@ -23,7 +23,7 @@
     ],
     "rewrites": [
       {
-        "source": "/post/l4stewar/6JgYwlNNQY7KykfGEbCa",
+        "source": "/post/**",
         "function": "prerenderProxy"
       },
       {
