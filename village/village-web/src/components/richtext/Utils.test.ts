@@ -1,7 +1,7 @@
 import { Node, Text } from "slate";
 import {
   richTextStringPreview,
-  stringToSlateNode,
+  stringToTopLevelRichText,
   slateNodeToString,
   mentionPreview,
   findMentionsInPosts,
@@ -11,7 +11,7 @@ import { doc1, userPosts2 } from "../../testing/Fixtures";
 
 test("gets the correct path for text node in editable typography", () => {
   const content = "foo bar baz";
-  const richText = stringToSlateNode(content);
+  const richText = stringToTopLevelRichText(content);
 
   const textNode = Node.get(
     { children: richText },
@@ -22,7 +22,7 @@ test("gets the correct path for text node in editable typography", () => {
 
 test("rich text string preview works for paragraph", () => {
   const content = "foo bar baz";
-  const richText = stringToSlateNode(content);
+  const richText = stringToTopLevelRichText(content);
 
   const preview = richTextStringPreview(richText);
   expect(preview).toEqual(content);
@@ -30,7 +30,7 @@ test("rich text string preview works for paragraph", () => {
 
 test("node <-> string is consistent", () => {
   const content = "foo bar baz";
-  const richText = stringToSlateNode(content);
+  const richText = stringToTopLevelRichText(content);
 
   const stringValue = slateNodeToString(richText);
   expect(stringValue).toEqual(content);

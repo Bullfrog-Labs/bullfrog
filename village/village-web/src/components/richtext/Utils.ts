@@ -24,25 +24,29 @@ export const EMPTY_RICH_TEXT: RichText = [
   },
 ];
 
-export const createLink = (s: string, url: string): RichTextNode => ({
+export const wrapInLink = (richText: RichText, url: string): RichTextNode => ({
   type: "a",
   url: url,
-  children: [{ text: s }],
+  children: richText,
 });
 
-export const stringToParagraph = (s: string): RichTextNode => ({
+export const wrapInParagraph = (richText: RichText): RichTextNode => ({
   type: "p",
-  children: [{ text: s }],
+  children: richText,
 });
 
-export const wrapInRichText = (richTextNodes: RichTextNode[]) => [
+export const wrapInTopLevelRichText = (
+  richTextNodes: RichTextNode[]
+): RichText => [
   {
     children: richTextNodes,
   },
 ];
 
-export const stringToSlateNode = (s: string): RichText =>
-  wrapInRichText([stringToParagraph(s)]);
+export const stringToRichTextNode = (s: string): RichTextNode => ({ text: s });
+
+export const stringToTopLevelRichText = (s: string): RichText =>
+  wrapInTopLevelRichText([wrapInParagraph([stringToRichTextNode(s)])]);
 
 export const slateNodeToString = (text: RichText): string =>
   Node.string(text[0]);
