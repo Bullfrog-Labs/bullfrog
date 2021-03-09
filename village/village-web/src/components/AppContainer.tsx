@@ -64,7 +64,9 @@ const useStyles = makeStyles((theme) => ({
     transform: "rotate(-90deg)",
     transformOrigin: "bottom right",
   },
-  container: {},
+  container: {
+    marginBottom: theme.spacing(6),
+  },
 }));
 
 interface BaseAppContainerProps extends React.PropsWithChildren<{}> {
