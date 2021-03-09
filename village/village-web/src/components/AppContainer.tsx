@@ -25,6 +25,7 @@ import {
   useAutocompleteSearchBoxDialog,
 } from "./search/AutocompleteSearchBox";
 import { SignupCTAButton } from "./signup/SignupCTAButton";
+import { SearchOrCreateFab } from "./search/SearchOrCreateFab";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -148,6 +149,11 @@ const AuthedAppContainer = (props: AuthedAppContainerProps) => {
     <BaseAppContainer
       autocompleteSearchBoxDialog={autocompleteSearchBox.dialog}
     >
+      {!autocompleteSearchBox.dialogOpen && (
+        <SearchOrCreateFab
+          onClick={() => autocompleteSearchBox.setDialogOpen(true)}
+        />
+      )}
       {props.children}
     </BaseAppContainer>
   );
