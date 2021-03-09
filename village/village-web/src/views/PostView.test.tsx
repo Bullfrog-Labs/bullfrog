@@ -5,7 +5,7 @@ import { MemoryRouter, Route, Router } from "react-router-dom";
 import {
   EMPTY_RICH_TEXT,
   MentionInContext,
-  stringToSlateNode,
+  stringToTopLevelRichText,
 } from "../components/richtext/Utils";
 import { postURL, postURLById } from "../routing/URLs";
 import { AppAuthContext, useIsLoggedInAsUser } from "../services/auth/AppAuth";
@@ -54,14 +54,14 @@ const posts: PostRecord[] = [
   {
     id: "def",
     authorId: author.uid,
-    body: stringToSlateNode("Non-empty"),
+    body: stringToTopLevelRichText("Non-empty"),
     title: "Bar",
     mentions: [],
   },
   {
     id: "ghi",
     authorId: viewer.uid,
-    body: stringToSlateNode("Not the author"),
+    body: stringToTopLevelRichText("Not the author"),
     title: "Baz",
     mentions: [],
   },
@@ -154,7 +154,7 @@ test("Renders PostView with no mentions for logged-out user", () => {
 const mentions0: MentionInContext[] = userPosts0.map((up) => {
   return {
     post: up,
-    text: stringToSlateNode("here i am, mr. mention!"),
+    text: stringToTopLevelRichText("here i am, mr. mention!"),
     path: [0],
     truncatedStart: false,
     truncatedEnd: false,

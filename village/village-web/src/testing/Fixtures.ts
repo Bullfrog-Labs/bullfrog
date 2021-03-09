@@ -1,4 +1,4 @@
-import { stringToSlateNode } from "../components/richtext/Utils";
+import { stringToTopLevelRichText } from "../components/richtext/Utils";
 import { AuthProvider } from "../services/auth/Auth";
 import { PostRecord, UserPost } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
@@ -24,7 +24,7 @@ export const u1: UserRecord = Object.assign({}, u0, {
 
 export const p0: PostRecord = {
   title: "Title mane",
-  body: stringToSlateNode("Body foo"),
+  body: stringToTopLevelRichText("Body foo"),
   authorId: "123",
   updatedAt: new Date(),
   id: "123",
@@ -33,7 +33,7 @@ export const p0: PostRecord = {
 export const p1: PostRecord = Object.assign({}, p0, { id: "124" });
 export const p2: PostRecord = {
   title: "Artifice",
-  body: stringToSlateNode("Body foo"),
+  body: stringToTopLevelRichText("Body foo"),
   authorId: u1.uid,
   updatedAt: new Date(),
   id: "123",

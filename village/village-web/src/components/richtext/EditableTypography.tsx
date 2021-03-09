@@ -14,7 +14,7 @@ import { Typography } from "@material-ui/core";
 import {
   EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH,
   slateNodeToString,
-  stringToSlateNode,
+  stringToTopLevelRichText,
 } from "./Utils";
 
 export type EditableTypographyImperativeHandle = {
@@ -92,7 +92,7 @@ export const EditableTypography = React.memo(
       return (
         <Slate
           editor={editor}
-          value={stringToSlateNode(props.value)}
+          value={stringToTopLevelRichText(props.value)}
           onChange={onChange}
         >
           <Editable

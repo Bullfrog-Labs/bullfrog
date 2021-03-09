@@ -24,7 +24,13 @@ import {
 import { CreatePostFn } from "../../services/store/Posts";
 import { UserRecord } from "../../services/store/Users";
 import { assertNever } from "../../utils";
-import { createLink, wrapInRichText } from "../richtext/Utils";
+import { RichText } from "../richtext/Types";
+import {
+  stringToRichTextNode,
+  wrapInLink,
+  wrapInParagraph,
+  wrapInTopLevelRichText,
+} from "../richtext/Utils";
 import { CreateNewPostSearchResult } from "./CreateNewPostSearchResult";
 import { NavigateToPostSearchResult } from "./NavigateToPostSearchResult";
 
@@ -152,6 +158,16 @@ export const useAutocompleteState = (
   return [suggestionsList, startSuggestionsRequest];
 };
 
+const linkToRichText = (link: string): RichText => {
+  return wrapInTopLevelRichText([
+    wrapInParagraph([
+      stringToRichTextNode(""),
+      wrapInLink([stringToRichTextNode(link)], link),
+      stringToRichTextNode(""),
+    ]),
+  ]);
+};
+
 export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
   const logger = log.getLogger("AutocompleteSearchBox");
   const useStyles = makeStyles((theme) => ({
@@ -235,9 +251,7 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
 
         const newBody =
           data.suggestion.action === "createNewPostFromResolvedLink"
-            ? wrapInRichText([
-                createLink(data.suggestion.link, data.suggestion.link),
-              ])
+            ? linkToRichText(data.suggestion.link)
             : undefined;
 
         const createPostResult = await props.createPost(
