@@ -98,19 +98,23 @@ export type CreatePostResult =
   | CreatePostResultSuccess
   | CreatePostResultPostNameTaken;
 
+export type CreatePostFnArgs = {
+  newTitle: PostTitle;
+  newBody?: PostBody;
+  postId?: PostId;
+};
+
 export type CreatePostFn = (
-  newTitle: PostTitle,
-  newBody?: PostBody,
-  postId?: string
+  args: CreatePostFnArgs
 ) => Promise<CreatePostResult>;
 
 export const createPost: (
   database: Database
 ) => (user: UserRecord) => CreatePostFn = (database) => (user) => async (
-  newTitle,
-  newBody,
-  postId
+  args
 ) => {
+  const { newTitle, newBody, postId } = args;
+
   // Check whether a post with the title exists, and create a new post only if
   // there is not already an existing one.
   const matches = await getPostsForTitleAndUser(database, user.uid, newTitle);

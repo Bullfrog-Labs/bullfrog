@@ -55,10 +55,7 @@ const Template: Story<EditablePostViewProps> = (args) => {
       },
     ];
   };
-  const createPost: CurriedByUser<CreatePostFn> = (user) => async (
-    newTitle,
-    postId
-  ) => {
+  const createPost: CurriedByUser<CreatePostFn> = (user) => async (args) => {
     return { state: "success", postId: "hjkhj", postUrl: "" };
   };
   const renamePost: CurriedByUser<RenamePostFn> = (user) => async (

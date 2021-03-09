@@ -254,10 +254,10 @@ export const AutocompleteSearchBox = (props: AutocompleteSearchBoxProps) => {
             ? linkToRichText(data.suggestion.link)
             : undefined;
 
-        const createPostResult = await props.createPost(
-          data.suggestion.title,
-          newBody
-        );
+        const createPostResult = await props.createPost({
+          newTitle: data.suggestion.title,
+          newBody: newBody,
+        });
         const { postId } = createPostResult;
 
         switch (createPostResult.state) {
