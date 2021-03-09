@@ -8,6 +8,8 @@ import {
   UserPost,
   GetAllPostsByTitlePrefixFn,
   CreatePostFn,
+  PostId,
+  PostTitle,
 } from "../services/store/Posts";
 
 export const useMentions = (
@@ -80,7 +82,11 @@ export const useMentions = (
           !!createPost
         ) {
           logger.debug(`adding mention ${mention.value}`);
-          await createPost(mention.value, mention.postId);
+
+          const postId: PostId = mention.postId;
+          const postTitle: PostTitle = mention.value;
+
+          await createPost({ newTitle: postTitle, postId: postId });
         } else {
           logger.debug(`not adding mention ${mention.value}; already exists`);
         }
