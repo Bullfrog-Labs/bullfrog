@@ -108,14 +108,22 @@ export const postPreviewStringFromStart = (
   body: RichText,
   maxLen: number
 ): string => {
+  if (maxLen < 2) {
+    return "";
+  }
   const [previewDoc, , truncatedByPreview] = postPreviewFromStart(body);
   let previewString = Node.string(previewDoc[0]);
   let truncatedByMaxLen = false;
-  if (previewString.length > 198) {
-    previewString = previewString.substring(0, 198);
+  const elipsisSuffix = " ⋯";
+  const maxLenWithoutSuffix = maxLen - elipsisSuffix.length;
+  if (previewString.length > maxLenWithoutSuffix) {
+    previewString = previewString.substring(0, maxLenWithoutSuffix);
     truncatedByMaxLen = true;
   }
-  return previewString + (truncatedByPreview || truncatedByMaxLen ? " ⋯" : "");
+  return (
+    previewString +
+    (truncatedByPreview || truncatedByMaxLen ? elipsisSuffix : "")
+  );
 };
 
 /**
