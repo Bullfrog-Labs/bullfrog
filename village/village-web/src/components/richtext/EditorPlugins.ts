@@ -1,6 +1,6 @@
 import { Editor } from "slate";
-import { pipe } from "@blfrg.xyz/slate-plugins";
-import { SlatePlugin } from "@blfrg.xyz/slate-plugins-core";
+import { DEFAULTS_LIST, pipe } from "@udecode/slate-plugins";
+import { SlatePlugin } from "@udecode/slate-plugins-core";
 import {
   ResetBlockTypePlugin,
   SoftBreakPlugin,
@@ -20,7 +20,7 @@ import {
   KbdPlugin,
   LinkPlugin,
   withLink,
-} from "@blfrg.xyz/slate-plugins";
+} from "@udecode/slate-plugins";
 import { withHistory } from "slate-history";
 import { ReactEditor, withReact } from "slate-react";
 import { Options } from "./EditorOptions";
@@ -33,7 +33,6 @@ export const createPlugins = (options: Options): PluginComponents => {
   const {
     paragraph,
     heading,
-    mentions,
     blockquote,
     link,
     resetBlockType,
@@ -45,13 +44,12 @@ export const createPlugins = (options: Options): PluginComponents => {
   const plugins = [
     ParagraphPlugin(paragraph),
     HeadingPlugin(heading),
-    MentionPlugin(mentions),
     BoldPlugin(),
     ItalicPlugin(),
     CodePlugin(),
     StrikethroughPlugin(),
     BlockquotePlugin(blockquote),
-    ListPlugin(),
+    ListPlugin(DEFAULTS_LIST),
     LinkPlugin(link),
     KbdPlugin(),
     ResetBlockTypePlugin(resetBlockType),
@@ -69,7 +67,7 @@ export const createPlugins = (options: Options): PluginComponents => {
         },
       })
     ),
-    withList(),
+    withList(DEFAULTS_LIST),
     withAutoformat(autoformat),
     withInlineVoid({ plugins }),
   ] as const;

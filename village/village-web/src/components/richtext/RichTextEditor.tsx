@@ -10,16 +10,16 @@ import { RichText } from "./Types";
 import { LooksOne, LooksTwo } from "@styled-icons/material";
 import * as log from "loglevel";
 import {
-  MentionSelect,
-  MentionNodeData,
+  // MentionSelect,
+  // MentionNodeData,
   HeadingToolbar,
   ToolbarElement,
-  useMention,
+  // useMention,
   pipe,
   ELEMENT_H2,
   ELEMENT_H3,
-} from "@blfrg.xyz/slate-plugins";
-import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
+} from "@udecode/slate-plugins";
+import { EditablePlugins } from "@udecode/slate-plugins-core";
 import { Typography } from "@material-ui/core";
 import * as EditorPlugins from "./EditorPlugins";
 import {
@@ -39,12 +39,7 @@ import { LogEventFn } from "../../services/Analytics";
 
 export type Body = RichText;
 
-export type RichTextEditorMentionTypeaheadComponents = {
-  mentionables: MentionNodeData[];
-  onMentionSearchChanged: (search: string) => void;
-  onMentionAdded: (option: MentionNodeData) => void;
-  mentionableElementFn?: (option: MentionNodeData) => JSX.Element;
-};
+export type RichTextEditorMentionTypeaheadComponents = {};
 
 export type RichTextEditorProps = {
   body: Body;
@@ -65,25 +60,6 @@ export type RichTextEditorImperativeHandle = {
   blurEditor: () => void;
 };
 
-const addMentionsClickHandler = (options: Options, logEvent: LogEventFn) => {
-  if (!options.mentions) {
-    options.mentions = {};
-  }
-  if (!options.mentions.mention) {
-    options.mentions.mention = {};
-  }
-  if (!options.mentions.mention.rootProps) {
-    options.mentions.mention.rootProps = {};
-  }
-  options.mentions.mention.rootProps.onClick = ({
-    value,
-  }: {
-    value: string;
-  }) => {
-    logEvent("click_inline_mention", { value });
-  };
-};
-
 const RichTextEditor = forwardRef<
   RichTextEditorImperativeHandle,
   RichTextEditorProps
@@ -100,9 +76,6 @@ const RichTextEditor = forwardRef<
   } = props;
   const editorOptions = options || postEditorOptions;
 
-  // A little hacky, but fine.
-  addMentionsClickHandler(editorOptions, logEvent);
-
   const [plugins, decorator] = useMemo(
     () => EditorPlugins.createPlugins(editorOptions),
     [editorOptions]
@@ -110,49 +83,15 @@ const RichTextEditor = forwardRef<
   const editor = useMemo(() => pipe(createEditor(), decorator), [decorator]);
   const globalClasses = useGlobalStyles();
 
-  const {
-    mentionables,
-    onMentionAdded,
-    onMentionSearchChanged,
-    mentionableElementFn,
-  } = mentionTypeaheadComponents ?? {
-    mentionables: [],
-    onMentionAdded: (option: MentionNodeData) => {},
-    onMentionSearchChanged: (search: string) => {},
-    mentionableElementFn: (option) => <Typography>{option.value}</Typography>,
-  };
-
   useImperativeHandle(ref, () => ({
     focusEditor: () => ReactEditor.focus(editor),
     blurEditor: () => ReactEditor.blur(editor),
   }));
 
-  const {
-    onAddMention,
-    onChangeMention,
-    onKeyDownMention,
-    search,
-    index,
-    target,
-    values,
-  } = useMention(mentionables, onMentionAdded, {
-    maxSuggestions: 10,
-  });
-
-  useEffect(() => {
-    onMentionSearchChanged(search);
-  }, [search, onMentionSearchChanged]);
-
   const handleChange = (newBody: Body) => {
     if (didOpsAffectContent(editor.operations)) {
       onChange(newBody);
     }
-  };
-
-  const onClickMention = (editor: ReactEditor, option: MentionNodeData) => {
-    logger.debug(`on click mention ${JSON.stringify(option)}`);
-    onAddMention(editor, option);
-    onMentionAdded(option);
   };
 
   const toolbar = (
@@ -170,7 +109,6 @@ const RichTextEditor = forwardRef<
       value={body}
       onChange={(newValue) => {
         handleChange(newValue);
-        onChangeMention(editor);
       }}
     >
       {!!enableToolbar && toolbar}
@@ -180,28 +118,12 @@ const RichTextEditor = forwardRef<
         placeholder={readOnly ? "Nothing here yet" : "Enter some text"}
         autoFocus
         spellCheck={false}
-        onKeyDown={[onKeyDownMention]}
-        onKeyDownDeps={[index, search, target, values]}
         className={
           readOnly
             ? globalClasses.readOnlyRichText
             : globalClasses.editableRichText
         }
       />
-      {!readOnly && (
-        <MentionSelect
-          at={target}
-          valueIndex={index}
-          options={values}
-          onClickMention={onClickMention}
-          rowElementFn={mentionableElementFn}
-          styles={{
-            mentionItemSelected: {
-              backgroundColor: theme.palette.action.selected,
-            },
-          }}
-        />
-      )}
     </Slate>
   );
 });

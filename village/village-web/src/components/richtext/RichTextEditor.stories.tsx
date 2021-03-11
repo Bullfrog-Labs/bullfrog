@@ -3,7 +3,6 @@ import React, { FunctionComponent, useState } from "react";
 import { MemoryRouter } from "react-router-dom";
 import RichTextEditor, { RichTextEditorProps, Body } from "./RichTextEditor";
 import { EMPTY_RICH_TEXT } from "./Utils";
-import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import delay from "delay";
 
 export default {
@@ -15,7 +14,6 @@ const RichTextEditorStateWrapper: FunctionComponent<RichTextEditorProps> = (
   props
 ) => {
   const [body, setBody] = useState<Body>(props.body);
-  const [mentionables, setMentionables] = useState<MentionNodeData[]>([]);
   const [search, setSearch] = useState<string>();
 
   const MENTIONABLES = [
@@ -24,23 +22,6 @@ const RichTextEditorStateWrapper: FunctionComponent<RichTextEditorProps> = (
     { value: "Admiral Dodd Rancit" },
     { value: "Admiral Firmus Piett" },
   ];
-
-  const onMentionSearchChanged = (newSearch: string) => {
-    const updateMentionables = async () => {
-      if (search !== newSearch) {
-        await delay(500);
-        const newMentionables = Array.from(MENTIONABLES);
-        const newMention: MentionNodeData = { value: newSearch, exists: false };
-        if (newSearch) {
-          newMentionables.splice(0, 0, newMention);
-        }
-        setMentionables(newMentionables);
-        setSearch(newSearch);
-      }
-    };
-    updateMentionables();
-  };
-
   return (
     <MemoryRouter>
       <RichTextEditor
@@ -48,11 +29,6 @@ const RichTextEditorStateWrapper: FunctionComponent<RichTextEditorProps> = (
         onChange={setBody}
         enableToolbar={props.enableToolbar}
         readOnly={props.readOnly}
-        mentionTypeaheadComponents={{
-          mentionables: mentionables,
-          onMentionSearchChanged: onMentionSearchChanged,
-          onMentionAdded: (mention: MentionNodeData) => {},
-        }}
       />
     </MemoryRouter>
   );

@@ -1,6 +1,5 @@
 import { Editor } from "slate";
 import {
-  MentionElement,
   H2Element,
   H3Element,
   ParagraphElement,
@@ -12,7 +11,6 @@ import {
   LinkElement,
 } from "./Rendering";
 import {
-  MentionPluginOptions,
   ParagraphPluginOptions,
   HeadingPluginOptions,
   BlockquotePluginOptions,
@@ -36,12 +34,11 @@ import {
   ELEMENT_BLOCKQUOTE,
   ELEMENT_LI,
   ELEMENT_UL,
-} from "@blfrg.xyz/slate-plugins";
+} from "@udecode/slate-plugins";
 
 export type Options = {
   paragraph?: ParagraphPluginOptions;
   heading?: HeadingPluginOptions;
-  mentions?: MentionPluginOptions;
   blockquote?: BlockquotePluginOptions;
   resetBlockType: ResetBlockTypePluginOptions;
   softBreak?: SoftBreakPluginOptions;
@@ -109,15 +106,6 @@ export const autoformatRules: AutoformatRule[] = [
 export const linkOptions: LinkPluginOptions = {
   link: {
     component: LinkElement,
-  },
-};
-
-export const mentionOptions: MentionPluginOptions = {
-  mention: {
-    component: MentionElement,
-    rootProps: {
-      onClick: () => {},
-    },
   },
 };
 
@@ -232,7 +220,6 @@ export const compactHeadingOptions: HeadingPluginOptions = {
 export const postEditorOptions: Options = {
   paragraph: paragraphOptions,
   heading: headingOptions,
-  mentions: mentionOptions,
   blockquote: blockquoteOptions,
   link: linkOptions,
   resetBlockType: resetBlockTypeOptions,
@@ -244,7 +231,6 @@ export const postEditorOptions: Options = {
 export const compactViewerOptions: Options = {
   paragraph: compactParagraphOptions,
   heading: compactHeadingOptions,
-  mentions: mentionOptions,
   link: linkOptions,
   blockquote: compactBlockquoteOptions,
   resetBlockType: resetBlockTypeOptions,

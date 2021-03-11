@@ -1,4 +1,3 @@
-import { MentionNodeData } from "@blfrg.xyz/slate-plugins";
 import {
   CircularProgress,
   Divider,
@@ -26,7 +25,6 @@ import {
   useSaveIndicatorState,
 } from "../components/editor/SaveIndicator";
 import { MentionsSection } from "../components/mentions/MentionsSection";
-import { MentionSuggestionLine } from "../components/mentions/MentionSuggestionLine";
 import { PostSubtitleRow } from "../components/PostSubtitleRow";
 import { DocumentTitle } from "../components/richtext/DocumentTitle";
 import { EditableTypographyImperativeHandle } from "../components/richtext/EditableTypography";
@@ -44,7 +42,6 @@ import {
   coalesceMaybeToLoadableRecord,
   useLoadableRecord,
 } from "../hooks/useLoadableRecord";
-import { useMentions } from "../hooks/useMentions";
 import { useQuery } from "../hooks/useQuery";
 import { postURL } from "../routing/URLs";
 import { LogEventFn } from "../services/Analytics";
@@ -168,12 +165,6 @@ const usePostComponents: (inputs: PostComponentInputs) => PostComponents = ({
 
   if (readOnly === !!onIdleComponents) {
     throw new Error("Idle components should be present iff editable post");
-  }
-
-  if (readOnly === !!mentionableComponents) {
-    throw new Error(
-      "Mentionable components should be present iff editable post"
-    );
   }
 
   const idleTimer = !!onIdleComponents ? (
@@ -518,15 +509,9 @@ export const EditablePostView = forwardRef<
     [setBody, setSaveStatus]
   );
 
-  const mentionableElementFn = (option: MentionNodeData): JSX.Element => {
-    return <MentionSuggestionLine uid={viewer.uid} option={option} />;
+  const mentionableElementFn = (option: any): JSX.Element => {
+    return <></>;
   };
-
-  const [mentionables, onMentionSearchChanged, onMentionAdded] = useMentions(
-    getGlobalMentions,
-    createPost(viewer),
-    viewer
-  );
 
   const {
     idleTimer,
@@ -545,13 +530,6 @@ export const EditablePostView = forwardRef<
 
     onIdleComponents: {
       buildOnIdle: buildOnIdle,
-    },
-
-    mentionableComponents: {
-      onMentionSearchChanged: onMentionSearchChanged,
-      mentionables: mentionables,
-      onMentionAdded: onMentionAdded,
-      mentionableElementFn: mentionableElementFn,
     },
 
     logEvent: props.logEvent,

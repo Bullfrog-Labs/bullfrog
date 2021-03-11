@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@blfrg.xyz/slate-plugins": "^0.71.22",
     "@material-ui/core": "^4.11.2",
     "@styled-icons/material": "^10.18.0",
     "@testing-library/jest-dom": "^5.11.4",
@@ -20,6 +19,7 @@
     "@types/react-router-hash-link": "^1.2.1",
     "@types/typeform__embed": "^0.22.2",
     "@types/uuid": "^8.3.0",
+    "@udecode/slate-plugins": "^0.75.2",
     "axios": "^0.21.1",
     "delay": "^4.4.0",
     "dotenv": "^8.2.0",

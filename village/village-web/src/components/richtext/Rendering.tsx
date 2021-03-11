@@ -6,59 +6,6 @@ import { useFocused, useSelected } from "slate-react";
 import { postURLById } from "../../routing/URLs";
 import { useGlobalStyles } from "../../styles/styles";
 import { Blockquote } from "../Blockquote";
-import { MentionElementProps } from "@blfrg.xyz/slate-plugins";
-
-export const MentionElement = ({
-  attributes,
-  children,
-  element,
-  htmlAttributes,
-  onClick,
-}: MentionElementProps) => {
-  const globalClasses = useGlobalStyles();
-  const logger = log.getLogger("MentionElement");
-  const postId = element["postId"] as string;
-  const authorId = element["authorId"] as string;
-  const authorUsername = element["authorUsername"] as string;
-  const title = element.value;
-  const selected = useSelected();
-  const focused = useFocused();
-
-  if (!postId || !authorId || !authorUsername || !element.value) {
-    logger.warn(
-      `Invalid MentionNodeData; postId=${postId}, authorId=${authorId}, ` +
-        `authorUsername=${authorUsername}, title=${title}`
-    );
-  }
-
-  const handleClick = (event: any) => {
-    if (onClick) {
-      onClick({ value: title });
-    }
-  };
-
-  const linkClassName =
-    focused && selected
-      ? globalClasses.focusedSelectedLink
-      : globalClasses.link;
-
-  return (
-    <Tooltip title={authorUsername}>
-      <Link
-        {...attributes}
-        className={`${linkClassName} ${globalClasses.alwaysBreakWord}`}
-        data-slate-value={title}
-        to={postURLById(authorId, postId)}
-        contentEditable={false}
-        onClick={handleClick}
-        {...htmlAttributes}
-      >
-        {element.value}
-        {children}
-      </Link>
-    </Tooltip>
-  );
-};
 
 export const LinkElement = ({
   attributes,

@@ -1,4 +1,4 @@
-import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
+import { ELEMENT_MENTION } from "@udecode/slate-plugins";
 import * as _ from "lodash";
 import * as log from "loglevel";
 import { createEditor, Editor, Node, Path } from "slate";
