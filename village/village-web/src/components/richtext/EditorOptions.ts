@@ -36,6 +36,7 @@ import {
   ELEMENT_BLOCKQUOTE,
   ELEMENT_LI,
   ELEMENT_UL,
+  ELEMENT_OL,
 } from "@blfrg.xyz/slate-plugins";
 
 export type Options = {
@@ -102,6 +103,14 @@ export const autoformatRules: AutoformatRule[] = [
     preFormat,
     format: (editor) => {
       toggleList(editor, { typeList: ELEMENT_UL });
+    },
+  },
+  {
+    type: ELEMENT_LI,
+    markup: ["1.", "1)"],
+    preFormat,
+    format: (editor) => {
+      toggleList(editor, { typeList: ELEMENT_OL });
     },
   },
 ];
