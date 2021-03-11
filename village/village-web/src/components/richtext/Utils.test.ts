@@ -5,6 +5,7 @@ import {
   slateNodeToString,
   mentionPreview,
   findMentionsInPosts,
+  postPreviewStringFromStart,
   EDITABLE_TYPOGRAPHY_TEXT_NODE_PATH,
 } from "./Utils";
 import { doc1, userPosts2 } from "../../testing/Fixtures";
@@ -34,6 +35,30 @@ test("node <-> string is consistent", () => {
 
   const stringValue = slateNodeToString(richText);
   expect(stringValue).toEqual(content);
+});
+
+test("string preview truncates if too long", () => {
+  const content = "foo bar baz";
+  const richText = stringToTopLevelRichText(content);
+
+  const stringValue = postPreviewStringFromStart(richText, 5);
+  expect(stringValue).toEqual("foo ⋯");
+});
+
+test("string preview truncates if min length", () => {
+  const content = "foo bar baz";
+  const richText = stringToTopLevelRichText(content);
+
+  const stringValue = postPreviewStringFromStart(richText, 2);
+  expect(stringValue).toEqual(" ⋯");
+});
+
+test("string preview doesnt truncates length ok", () => {
+  const content = "foo bar baz";
+  const richText = stringToTopLevelRichText(content);
+
+  const stringValue = postPreviewStringFromStart(richText, 20);
+  expect(stringValue).toEqual("foo bar baz");
 });
 
 test("extract preview for mention in p", () => {

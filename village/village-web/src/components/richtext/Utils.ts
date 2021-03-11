@@ -104,6 +104,28 @@ export const mentionPreview = (
   return postPreview(body, path);
 };
 
+export const postPreviewStringFromStart = (
+  body: RichText,
+  maxLen: number
+): string => {
+  if (maxLen < 2) {
+    return "";
+  }
+  const [previewDoc, , truncatedByPreview] = postPreviewFromStart(body);
+  let previewString = Node.string(previewDoc[0]);
+  let truncatedByMaxLen = false;
+  const elipsisSuffix = " ⋯";
+  const maxLenWithoutSuffix = maxLen - elipsisSuffix.length;
+  if (previewString.length > maxLenWithoutSuffix) {
+    previewString = previewString.substring(0, maxLenWithoutSuffix);
+    truncatedByMaxLen = true;
+  }
+  return (
+    previewString +
+    (truncatedByPreview || truncatedByMaxLen ? elipsisSuffix : "")
+  );
+};
+
 /**
  * V2 postPreview function, still very hacky. This only attempts to pull a
  * little more context if its *easy*. Basically it will look for the next

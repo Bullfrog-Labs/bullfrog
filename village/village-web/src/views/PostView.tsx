@@ -38,6 +38,7 @@ import {
   EMPTY_RICH_TEXT,
   findMentionsInPosts,
   MentionInContext,
+  postPreviewStringFromStart,
 } from "../components/richtext/Utils";
 import {
   coalesceMaybeToLoadableRecord,
@@ -760,17 +761,21 @@ export const PostViewController = (props: PostViewControllerProps) => {
     authorId === viewer?.uid ? "you" : authorRecord.get()?.username
   }`;
 
+  const postPreviewString = postPreviewStringFromStart(body, 200);
+  logger.debug(`Using ${postPreviewString} as og:description`);
+
   return (
     <>
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="twitter:card" content="summary"></meta>
-        <meta name="twitter:site" content="getvillageink"></meta>
+        <meta property="og:title" content={title} />
         <meta
           name="twitter:creator"
-          content={authorRecord.get().username}
+          content={`@${authorRecord.get().username}`}
         ></meta>
-        <meta property="og:title" content={title} />
+        <meta name="twitter:site" content="@getvillageink"></meta>
+        <meta name="description" content={postPreviewString}></meta>
       </Helmet>
       {loggedInAsAuthor ? (
         <EditablePostView
