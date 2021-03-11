@@ -56,6 +56,8 @@ function App() {
 
   const [user, setUser] = useState<UserRecord>();
 
+  logger.debug(`UserAgent: ${navigator.userAgent}`);
+
   useEffect(() => {
     const fetchUser = async () => {
       if (!!authProviderState) {
