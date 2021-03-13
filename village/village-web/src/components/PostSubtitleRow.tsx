@@ -16,11 +16,12 @@ import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { profileURL } from "../routing/URLs";
+import { LogEventFn } from "../services/Analytics";
 import { useWhitelistedUserFromAppAuthContext } from "../services/auth/AppAuth";
 import { DeletePostFn } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
-import { LogEventFn } from "../services/Analytics";
 import { useGlobalStyles } from "../styles/styles";
+import { FollowButton } from "./follows/FollowButton";
 
 const useStyles = makeStyles((theme) => ({
   subtitlePart: {
@@ -41,6 +42,8 @@ export type PostSubtitleRowProps = {
   postId: string;
   updatedAt: Date | undefined;
   numMentions: number;
+  isFollowedByViewer?: boolean;
+
   deletePost?: DeletePostFn;
   logEvent?: LogEventFn;
 };
@@ -70,6 +73,8 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
   if (isLoggedInAsAuthor && !deletePost) {
     throw new Error("Must provide deletePost when logged in as author");
   }
+
+  const [followed, setFollowed] = useState(false); // TODO: Get rid of this
 
   const history = useHistory();
 
@@ -116,6 +121,18 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
         </Link>
         <span className={classes.subtitlePart}>{dt.toFormat("MMM d")}</span>
         <span className={classes.subtitlePart}>
+          {!isLoggedInAsAuthor && (
+            <FollowButton
+              isFollowed={followed}
+              tooltip={{
+                followed: "Unfollow this post",
+                notFollowed: "Follow to get updates on this post",
+              }}
+              onClick={(isFollowed) => {
+                setFollowed(!isFollowed);
+              }}
+            />
+          )}
           <Tooltip title="See what others are saying about this topic">
             <Link
               className={globalClasses.link}

@@ -564,6 +564,7 @@ export const EditablePostView = forwardRef<
       postId={props.postId}
       updatedAt={props.updatedAt}
       numMentions={props.mentions.length}
+      isFollowedByViewer={false} // TODO: change this
       deletePost={deletePost}
       logEvent={props.logEvent}
     />
