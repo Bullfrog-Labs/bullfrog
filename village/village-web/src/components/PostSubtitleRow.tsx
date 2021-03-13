@@ -1,4 +1,5 @@
 import {
+  Grid,
   IconButton,
   makeStyles,
   Menu,
@@ -43,6 +44,7 @@ export type PostSubtitleRowProps = {
   updatedAt: Date | undefined;
   numMentions: number;
   isFollowedByViewer?: boolean;
+  followedByCount?: number;
 
   deletePost?: DeletePostFn;
   logEvent?: LogEventFn;
@@ -100,107 +102,128 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
   };
 
   return (
-    <Typography
-      variant="body1"
-      className={globalClasses.postSubtitle}
-      paragraph={false}
-      component="div"
+    <Grid
+      container
+      direction="column"
+      justify="flex-start"
+      alignItems="flex-start"
     >
-      <div>
-        <Link
-          className={globalClasses.link}
-          to={profileURL(author.username)}
-          onClick={() =>
-            logEvent("open_profile_from_post", {
-              title: postTitle,
-              author: author,
-            })
-          }
+      {!!props.followedByCount && props.followedByCount > 0 && (
+        <Grid>
+          <Typography
+            variant="body1"
+            className={globalClasses.postSubtitle}
+            paragraph={false}
+            component="div"
+          >
+            {props.followedByCount} follows
+          </Typography>
+        </Grid>
+      )}
+      <Grid>
+        <Typography
+          variant="body1"
+          className={globalClasses.postSubtitle}
+          paragraph={false}
+          component="div"
         >
-          <em>{author.displayName}</em>
-        </Link>
-        <span className={classes.subtitlePart}>{dt.toFormat("MMM d")}</span>
-        <span className={classes.subtitlePart}>
-          {!isLoggedInAsAuthor && (
-            <FollowButton
-              isFollowed={followed}
-              tooltip={{
-                followed: "Unfollow this post",
-                notFollowed: "Follow to get updates on this post",
-              }}
-              onClick={(isFollowed) => {
-                setFollowed(!isFollowed);
-              }}
-            />
-          )}
-          <Tooltip title="See what others are saying about this topic">
+          <div>
             <Link
               className={globalClasses.link}
-              to={stackURLPath}
+              to={profileURL(author.username)}
               onClick={() =>
-                logEvent("open_stack_from_post", {
+                logEvent("open_profile_from_post", {
                   title: postTitle,
                   author: author,
                 })
               }
             >
-              <IconButton size="small" style={{ marginLeft: "-3px" }}>
-                <LibraryBooksIcon fontSize={"inherit"} />
-              </IconButton>
+              <em>{author.displayName}</em>
             </Link>
-          </Tooltip>
-          <Tooltip title="Jump to mentions">
-            <HashLink
-              smooth
-              className={globalClasses.link}
-              to={`#mentions`}
-              onClick={() =>
-                logEvent("jump_to_mentions", {
-                  title: postTitle,
-                  author: author,
-                })
-              }
-            >
-              <IconButton
-                size="small"
-                style={{ marginLeft: "-3px" }}
-                disabled={!postHasMentions}
-              >
-                <CallReceivedIcon fontSize={"inherit"} />
-              </IconButton>
-            </HashLink>
-          </Tooltip>
-          {isLoggedInAsAuthor && (
-            <React.Fragment>
-              <Tooltip title="Delete, settings, and more...">
-                <IconButton
-                  size="small"
-                  style={{ marginLeft: "-3px" }}
-                  onClick={handleClick}
+            <span className={classes.subtitlePart}>{dt.toFormat("MMM d")}</span>
+            <span className={classes.subtitlePart}>
+              {!isLoggedInAsAuthor && (
+                <FollowButton
+                  isFollowed={followed}
+                  tooltip={{
+                    followed: "Unfollow this post",
+                    notFollowed: "Follow to get updates on this post",
+                  }}
+                  onClick={(isFollowed) => {
+                    setFollowed(!isFollowed);
+                  }}
+                />
+              )}
+              <Tooltip title="See what others are saying about this topic">
+                <Link
+                  className={globalClasses.link}
+                  to={stackURLPath}
+                  onClick={() =>
+                    logEvent("open_stack_from_post", {
+                      title: postTitle,
+                      author: author,
+                    })
+                  }
                 >
-                  <MoreHorizIcon fontSize={"inherit"} />
-                </IconButton>
+                  <IconButton size="small" style={{ marginLeft: "-3px" }}>
+                    <LibraryBooksIcon fontSize={"inherit"} />
+                  </IconButton>
+                </Link>
               </Tooltip>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-              >
-                <MenuItem dense onClick={handleDelete(deletePost!)}>
-                  <DeleteIcon
-                    fontSize="small"
-                    className={classes.subtitleMoreMenuItem}
-                  />
-                  <span className={classes.subtitleMoreMenuItemText}>
-                    Delete
-                  </span>
-                </MenuItem>
-              </Menu>
-            </React.Fragment>
-          )}
-        </span>
-      </div>
-    </Typography>
+              <Tooltip title="Jump to mentions">
+                <HashLink
+                  smooth
+                  className={globalClasses.link}
+                  to={`#mentions`}
+                  onClick={() =>
+                    logEvent("jump_to_mentions", {
+                      title: postTitle,
+                      author: author,
+                    })
+                  }
+                >
+                  <IconButton
+                    size="small"
+                    style={{ marginLeft: "-3px" }}
+                    disabled={!postHasMentions}
+                  >
+                    <CallReceivedIcon fontSize={"inherit"} />
+                  </IconButton>
+                </HashLink>
+              </Tooltip>
+              {isLoggedInAsAuthor && (
+                <React.Fragment>
+                  <Tooltip title="Delete, settings, and more...">
+                    <IconButton
+                      size="small"
+                      style={{ marginLeft: "-3px" }}
+                      onClick={handleClick}
+                    >
+                      <MoreHorizIcon fontSize={"inherit"} />
+                    </IconButton>
+                  </Tooltip>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                  >
+                    <MenuItem dense onClick={handleDelete(deletePost!)}>
+                      <DeleteIcon
+                        fontSize="small"
+                        className={classes.subtitleMoreMenuItem}
+                      />
+                      <span className={classes.subtitleMoreMenuItemText}>
+                        Delete
+                      </span>
+                    </MenuItem>
+                  </Menu>
+                </React.Fragment>
+              )}
+            </span>
+          </div>
+        </Typography>
+      </Grid>
+    </Grid>
   );
 });
