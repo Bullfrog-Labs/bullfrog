@@ -1,24 +1,34 @@
+import * as log from "loglevel";
 import React, { useEffect } from "react";
-import firebase from "firebase";
 import {
   BrowserRouter,
   Route,
   Switch,
-  useLocation,
   useHistory,
+  useLocation,
 } from "react-router-dom";
-import * as log from "loglevel";
 import AppContainer from "../components/AppContainer";
 import {
   DefaultProfileViewController,
   ProfileViewController,
 } from "../components/ProfileView";
 import { StackViewController } from "../components/StackView";
-import { CurriedByUser } from "../services/auth/AppAuth";
+import { LogEventFn, SetCurrentScreenFn } from "../services/Analytics";
+import {
+  CurriedByUser,
+  useWhitelistedUserFromAppAuthContext,
+} from "../services/auth/AppAuth";
+import {
+  FollowablePostCallbacks,
+  GetPostFollowCountFn,
+  GetUserFollowsPostFn,
+  SetPostFollowedFn,
+} from "../services/follows/Types";
 import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
 import {
   CreatePostFn,
+  DeletePostFn,
   GetAllPostsByTitlePrefixFn,
   GetMentionUserPostsFn,
   GetPostFn,
@@ -26,15 +36,13 @@ import {
   GetUserPostsFn,
   RenamePostFn,
   SyncBodyFn,
-  DeletePostFn,
 } from "../services/store/Posts";
 import { GetUserByUsernameFn, GetUserFn } from "../services/store/Users";
 import MainView from "../views/MainView";
 import { PostViewController } from "../views/PostView";
-import PrivateRoute from "./PrivateRoute";
-import { SignupView } from "../views/SignupView";
-import { LogEventFn, SetCurrentScreenFn } from "../services/Analytics";
 import { SignupClickRegisterView } from "../views/SignupClickRegisterView";
+import { SignupView } from "../views/SignupView";
+import PrivateRoute from "./PrivateRoute";
 
 const Sad404 = () => {
   let location = useLocation();
@@ -46,6 +54,28 @@ const Sad404 = () => {
       </h3>
     </div>
   );
+};
+
+export type CurriedFollowablePostCallbacks = {
+  getPostFollowCount: GetPostFollowCountFn;
+  setPostFollowed: CurriedByUser<SetPostFollowedFn>;
+  getUserFollowsPost: CurriedByUser<GetUserFollowsPostFn>;
+};
+
+const useUncurriedFollowablePostCallbacks = (
+  curried: CurriedFollowablePostCallbacks
+): FollowablePostCallbacks => {
+  const loggedInUR = useWhitelistedUserFromAppAuthContext();
+
+  return {
+    getPostFollowCount: curried.getPostFollowCount,
+    setPostFollowed: loggedInUR
+      ? curried.setPostFollowed(loggedInUR!)
+      : undefined,
+    getUserFollowsPost: loggedInUR
+      ? curried.getUserFollowsPost(loggedInUR!)
+      : undefined,
+  };
 };
 
 export type RouterProps = {
@@ -68,6 +98,8 @@ export type RouterProps = {
   logEvent: LogEventFn;
   setCurrentScreen: SetCurrentScreenFn;
 
+  curriedFollowablePostCallbacks: CurriedFollowablePostCallbacks;
+
   isSitePublic: boolean;
 };
 
@@ -89,6 +121,7 @@ export const Router = (props: RouterProps) => {
     deletePost,
     logEvent,
     setCurrentScreen,
+    curriedFollowablePostCallbacks,
     isSitePublic,
   } = props;
 
@@ -117,6 +150,10 @@ export const Router = (props: RouterProps) => {
       });
       return unlisten;
     });
+
+    const followablePostCallbacks = useUncurriedFollowablePostCallbacks(
+      curriedFollowablePostCallbacks
+    );
 
     return (
       <Switch>
@@ -166,6 +203,7 @@ export const Router = (props: RouterProps) => {
                 createPost: createPost,
                 deletePost: deletePost,
               }}
+              followablePostCallbacks={followablePostCallbacks}
               logEvent={logEvent}
             />
           </AppContainerWithProps>

@@ -16,9 +16,11 @@ import { DateTime } from "luxon";
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
+import { useIsLoggedInAsAuthor } from "../hooks/posts/useIsLoggedInAsAuthor";
+import { usePostIsFollowable } from "../hooks/posts/usePostIsFollowable";
 import { profileURL } from "../routing/URLs";
 import { LogEventFn } from "../services/Analytics";
-import { useWhitelistedUserFromAppAuthContext } from "../services/auth/AppAuth";
+import { SetPostFollowedFn } from "../services/follows/Types";
 import { DeletePostFn } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
 import { useGlobalStyles } from "../styles/styles";
@@ -37,17 +39,23 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+export type PostFollowProps = {
+  isFollowedByViewer: boolean;
+  setFollowed: SetPostFollowedFn;
+};
+
 export type PostSubtitleRowProps = {
   author: UserRecord;
   postTitle: string;
   postId: string;
   updatedAt: Date | undefined;
   numMentions: number;
-  isFollowedByViewer?: boolean;
-  followedByCount?: number;
 
   deletePost?: DeletePostFn;
   logEvent?: LogEventFn;
+
+  postFollowProps?: PostFollowProps;
+  followedByCount: number;
 };
 
 export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
@@ -62,21 +70,22 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
     postTitle,
     numMentions,
     logEvent = (eventName: string, parameters?: Object) => {},
+    postFollowProps,
   } = props;
   const dt = DateTime.fromJSDate(updatedAt || new Date());
   const stackURLPath = `/stack/${encodeURIComponent(postTitle)}`;
   const postHasMentions = numMentions;
 
-  const whitelistedUser = useWhitelistedUserFromAppAuthContext();
-  const isLoggedInAsAuthor = !!whitelistedUser
-    ? author.uid === whitelistedUser.uid
-    : false;
+  const isLoggedInAsAuthor = useIsLoggedInAsAuthor(author.uid);
 
   if (isLoggedInAsAuthor && !deletePost) {
     throw new Error("Must provide deletePost when logged in as author");
   }
 
-  const [followed, setFollowed] = useState(false); // TODO: Get rid of this
+  const postIsFollowable = usePostIsFollowable(author.uid);
+  if (postIsFollowable && !postFollowProps) {
+    throw new Error("Must provide postFollowProps when post is followable");
+  }
 
   const history = useHistory();
 
@@ -142,15 +151,15 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
             </Link>
             <span className={classes.subtitlePart}>{dt.toFormat("MMM d")}</span>
             <span className={classes.subtitlePart}>
-              {!isLoggedInAsAuthor && (
+              {postIsFollowable && (
                 <FollowButton
-                  isFollowed={followed}
+                  isFollowed={!!postFollowProps!.isFollowedByViewer}
                   tooltip={{
                     followed: "Unfollow this post",
                     notFollowed: "Follow to get updates on this post",
                   }}
                   onClick={(isFollowed) => {
-                    setFollowed(!isFollowed);
+                    postFollowProps!.setFollowed(postId, !isFollowed);
                   }}
                 />
               )}

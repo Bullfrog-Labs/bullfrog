@@ -53,6 +53,7 @@ import {
   useLoggedInUserFromAppAuthContext,
   useWhitelistedUserFromAppAuthContext,
 } from "../services/auth/AppAuth";
+import { FollowablePostCallbacks } from "../services/follows/Types";
 import {
   CreatePostFn,
   DeletePostFn,
@@ -601,6 +602,7 @@ export type PostViewControllerProps = {
   getMentionUserPosts: GetMentionUserPostsFn;
 
   editablePostCallbacks: EditablePostCallbacks;
+  followablePostCallbacks: FollowablePostCallbacks;
 
   logEvent: LogEventFn;
 };

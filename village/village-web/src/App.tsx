@@ -33,6 +33,11 @@ import { buildIsUserWhitelisted } from "./services/store/Whitelist";
 import { buildLookupTwitterUser } from "./services/Twitter";
 import { useGlobalStyles } from "./styles/styles";
 import { LoginView } from "./views/LoginView";
+import {
+  getPostFollowCount,
+  getUserFollowsPost,
+  setPostFollowed,
+} from "./services/store/Follows";
 
 Logging.configure(log);
 
@@ -124,6 +129,13 @@ function App() {
       googleAuthEnabled={process.env.REACT_APP_GOOGLE_AUTH_ENABLED === "true"}
     />
   );
+
+  const followablePostCallbacks = {
+    getPostFollowCount: getPostFollowCount(database),
+    setPostFollowed: setPostFollowed(database),
+    getUserFollowsPost: getUserFollowsPost(database),
+  };
+
   return (
     <>
       {authCompleted ? (
@@ -147,6 +159,7 @@ function App() {
             deletePost={deletePost(database)}
             logEvent={logEvent(app.analytics())}
             setCurrentScreen={setCurrentScreen(app.analytics())}
+            curriedFollowablePostCallbacks={followablePostCallbacks}
             isSitePublic={isSitePublic}
           />
         </AppAuthContext.Provider>
