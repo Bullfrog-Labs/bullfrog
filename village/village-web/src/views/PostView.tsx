@@ -288,6 +288,7 @@ type PostViewImperativeHandle = {
 
 export type ReadOnlyPostViewProps = {
   postId: PostId;
+  postRecord: PostRecord;
   author: UserRecord;
   updatedAt: Date | undefined;
   mentions: MentionInContext[];
@@ -323,6 +324,7 @@ export const ReadOnlyPostView = forwardRef<
 
   const followablePostViewState = useFollowablePostViewState(
     props.followablePostCallbacks,
+    props.postRecord.followCount,
     props.author.uid,
     props.postId
   );
@@ -363,6 +365,7 @@ export type EditablePostCallbacks = {
 
 export type EditablePostViewProps = {
   postId: PostId;
+  postRecord: PostRecord;
   author: UserRecord;
   updatedAt: Date | undefined;
   mentions: MentionInContext[];
@@ -396,6 +399,7 @@ export const EditablePostView = forwardRef<
     getPost,
     author,
     postId,
+    postRecord,
     editablePostCallbacks,
   } = props;
   const {
@@ -571,6 +575,7 @@ export const EditablePostView = forwardRef<
 
   const followablePostViewState = useFollowablePostViewState(
     props.followablePostCallbacks,
+    postRecord.followCount,
     props.author.uid,
     props.postId
   );
@@ -802,6 +807,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
         <EditablePostView
           ref={postViewRef}
           postId={postId}
+          postRecord={postRecord.get()}
           author={authorRecord.get()}
           updatedAt={updatedAt}
           title={title!}
@@ -818,6 +824,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
         <ReadOnlyPostView
           ref={postViewRef}
           postId={postId}
+          postRecord={postRecord.get()}
           author={authorRecord.get()}
           updatedAt={updatedAt}
           title={title!}

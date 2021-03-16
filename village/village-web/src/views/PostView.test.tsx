@@ -50,6 +50,7 @@ const posts: PostRecord[] = [
     body: EMPTY_RICH_TEXT,
     title: "Foo",
     mentions: [],
+    followCount: 0,
   },
   {
     id: "def",
@@ -57,6 +58,7 @@ const posts: PostRecord[] = [
     body: stringToTopLevelRichText("Non-empty"),
     title: "Bar",
     mentions: [],
+    followCount: 0,
   },
   {
     id: "ghi",
@@ -64,6 +66,7 @@ const posts: PostRecord[] = [
     body: stringToTopLevelRichText("Not the author"),
     title: "Baz",
     mentions: [],
+    followCount: 0,
   },
 ];
 
@@ -74,6 +77,15 @@ type TestPostViewProps = {
 const TestPostView = (props: TestPostViewProps) => {
   const commonPostProps = {
     postId: "foo",
+    postRecord: {
+      id: "foo",
+      authorId: author.uid,
+      body: EMPTY_RICH_TEXT,
+      title: "Foo",
+      mentions: [],
+      followCount: 0,
+    },
+
     updatedAt: new Date(),
     author: author,
     mentions: props.mentions ?? [],
@@ -86,6 +98,8 @@ const TestPostView = (props: TestPostViewProps) => {
       setPostFollowed: jest.fn(),
       getUserFollowsPost: jest.fn(),
     },
+
+    logEvent: jest.fn(),
   };
 
   const loggedInAsAuthor = useIsLoggedInAsUser(author.uid);
@@ -243,6 +257,14 @@ const testPostViewToPostViewNavigation = async (
       createPost: jest.fn(),
       deletePost: jest.fn(),
     },
+
+    followablePostCallbacks: {
+      getPostFollowCount: jest.fn(),
+      setPostFollowed: jest.fn(),
+      getUserFollowsPost: jest.fn(),
+    },
+
+    logEvent: jest.fn(),
   };
 
   render(

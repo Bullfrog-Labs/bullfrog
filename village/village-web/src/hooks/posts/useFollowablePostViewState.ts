@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FollowablePostCallbacks,
   FollowablePostViewState,
@@ -9,11 +9,29 @@ import { usePostIsFollowable } from "./usePostIsFollowable";
 
 export const useFollowablePostViewState = (
   followablePostCallbacks: FollowablePostCallbacks,
+  followCount: number,
   postAuthorId: UserId,
   postId: PostId
 ): FollowablePostViewState => {
-  const [followCount, setFollowCount] = useState(0);
   const [isFollowedByViewer, setIsFollowedByViewer] = useState(false);
+
+  useEffect(() => {
+    let isSubscribed = true;
+
+    const loadIsFollowedByViewer = async () => {
+      const result = await followablePostCallbacks.getUserFollowsPost!(postId);
+      if (!isSubscribed) {
+        return;
+      }
+      setIsFollowedByViewer(result);
+    };
+
+    loadIsFollowedByViewer();
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [followablePostCallbacks.getUserFollowsPost, postId]);
 
   return {
     followCount: followCount,

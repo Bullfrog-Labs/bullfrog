@@ -51,6 +51,7 @@ const Template: Story<EditablePostViewProps> = (args) => {
           body: EMPTY_RICH_TEXT,
           title: "foo",
           mentions: [],
+          followCount: 0,
         },
       },
     ];

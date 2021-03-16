@@ -33,11 +33,7 @@ import { buildIsUserWhitelisted } from "./services/store/Whitelist";
 import { buildLookupTwitterUser } from "./services/Twitter";
 import { useGlobalStyles } from "./styles/styles";
 import { LoginView } from "./views/LoginView";
-import {
-  getPostFollowCount,
-  getUserFollowsPost,
-  setPostFollowed,
-} from "./services/store/Follows";
+import { getUserFollowsPost, setPostFollowed } from "./services/store/Follows";
 
 Logging.configure(log);
 
@@ -131,7 +127,6 @@ function App() {
   );
 
   const followablePostCallbacks = {
-    getPostFollowCount: getPostFollowCount(database),
     setPostFollowed: setPostFollowed(database),
     getUserFollowsPost: getUserFollowsPost(database),
   };

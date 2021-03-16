@@ -20,7 +20,6 @@ import {
 } from "../services/auth/AppAuth";
 import {
   FollowablePostCallbacks,
-  GetPostFollowCountFn,
   GetUserFollowsPostFn,
   SetPostFollowedFn,
 } from "../services/follows/Types";
@@ -57,7 +56,6 @@ const Sad404 = () => {
 };
 
 export type CurriedFollowablePostCallbacks = {
-  getPostFollowCount: GetPostFollowCountFn;
   setPostFollowed: CurriedByUser<SetPostFollowedFn>;
   getUserFollowsPost: CurriedByUser<GetUserFollowsPostFn>;
 };
@@ -68,7 +66,6 @@ const useUncurriedFollowablePostCallbacks = (
   const loggedInUR = useWhitelistedUserFromAppAuthContext();
 
   return {
-    getPostFollowCount: curried.getPostFollowCount,
     setPostFollowed: loggedInUR
       ? curried.setPostFollowed(loggedInUR!)
       : undefined,

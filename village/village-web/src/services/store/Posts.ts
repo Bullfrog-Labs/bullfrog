@@ -19,6 +19,7 @@ export interface PostRecord {
   body: PostBody;
   title: PostTitle;
   mentions: string[];
+  followCount: number;
 }
 
 /**
@@ -51,6 +52,7 @@ const POST_RECORD_CONVERTER = {
       body: data.body,
       title: data.title,
       mentions: data.mentions || [],
+      followCount: data.followCount || 0,
     };
   },
 };
@@ -132,6 +134,7 @@ export const createPost: (
     body: newBody ?? EMPTY_RICH_TEXT,
     mentions: [],
     updatedAt: new Date(),
+    followCount: 0,
   };
   let newPostDoc = null;
   let newPostId = postId;
