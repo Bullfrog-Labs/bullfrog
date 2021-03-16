@@ -376,6 +376,7 @@ export type EditablePostViewProps = {
   getPost: GetPostFn;
 
   editablePostCallbacks: EditablePostCallbacks;
+  followablePostCallbacks: FollowablePostCallbacks;
 
   logEvent: LogEventFn;
 };
@@ -568,6 +569,12 @@ export const EditablePostView = forwardRef<
     logEvent: props.logEvent,
   });
 
+  const followablePostViewState = useFollowablePostViewState(
+    props.followablePostCallbacks,
+    props.author.uid,
+    props.postId
+  );
+
   const subtitleRow = (
     <PostSubtitleRow
       author={props.author}
@@ -575,7 +582,7 @@ export const EditablePostView = forwardRef<
       postId={props.postId}
       updatedAt={props.updatedAt}
       numMentions={props.mentions.length}
-      isFollowedByViewer={false} // TODO: change this
+      followablePostViewState={followablePostViewState}
       deletePost={deletePost}
       logEvent={props.logEvent}
     />
@@ -804,6 +811,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
           getPost={getPost}
           mentions={mentions!}
           editablePostCallbacks={editablePostCallbacks}
+          followablePostCallbacks={followablePostCallbacks}
           logEvent={logEvent}
         />
       ) : (

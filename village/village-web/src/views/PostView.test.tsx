@@ -80,6 +80,12 @@ const TestPostView = (props: TestPostViewProps) => {
 
     title: "bar",
     body: EMPTY_RICH_TEXT,
+
+    followablePostCallbacks: {
+      getPostFollowCount: jest.fn(),
+      setPostFollowed: jest.fn(),
+      getUserFollowsPost: jest.fn(),
+    },
   };
 
   const loggedInAsAuthor = useIsLoggedInAsUser(author.uid);

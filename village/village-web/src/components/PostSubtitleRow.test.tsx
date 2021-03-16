@@ -29,6 +29,11 @@ test("displays basic subtitle info", () => {
           }).toJSDate()}
           numMentions={1}
           deletePost={nopDeletePost}
+          followablePostViewState={{
+            followCount: 0,
+            isFollowedByViewer: false,
+            isFollowableByViewer: false,
+          }}
         />
       </MemoryRouter>
     </AppAuthContext.Provider>
@@ -55,6 +60,11 @@ test("handle delete post", () => {
           }).toJSDate()}
           numMentions={1}
           deletePost={mockDeletePost}
+          followablePostViewState={{
+            followCount: 0,
+            isFollowedByViewer: false,
+            isFollowableByViewer: false,
+          }}
         />
       </MemoryRouter>
     </AppAuthContext.Provider>
