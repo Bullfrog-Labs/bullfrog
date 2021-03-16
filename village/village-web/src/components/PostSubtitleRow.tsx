@@ -17,10 +17,9 @@ import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { useIsLoggedInAsAuthor } from "../hooks/posts/useIsLoggedInAsAuthor";
-import { usePostIsFollowable } from "../hooks/posts/usePostIsFollowable";
 import { profileURL } from "../routing/URLs";
 import { LogEventFn } from "../services/Analytics";
-import { SetPostFollowedFn } from "../services/follows/Types";
+import { FollowablePostViewState } from "../services/follows/Types";
 import { DeletePostFn } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
 import { useGlobalStyles } from "../styles/styles";
@@ -39,11 +38,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export type PostFollowProps = {
-  isFollowedByViewer: boolean;
-  setFollowed: SetPostFollowedFn;
-};
-
 export type PostSubtitleRowProps = {
   author: UserRecord;
   postTitle: string;
@@ -54,8 +48,7 @@ export type PostSubtitleRowProps = {
   deletePost?: DeletePostFn;
   logEvent?: LogEventFn;
 
-  postFollowProps?: PostFollowProps;
-  followedByCount: number;
+  followablePostViewState: FollowablePostViewState;
 };
 
 export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
@@ -70,7 +63,7 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
     postTitle,
     numMentions,
     logEvent = (eventName: string, parameters?: Object) => {},
-    postFollowProps,
+    followablePostViewState,
   } = props;
   const dt = DateTime.fromJSDate(updatedAt || new Date());
   const stackURLPath = `/stack/${encodeURIComponent(postTitle)}`;
@@ -80,11 +73,6 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
 
   if (isLoggedInAsAuthor && !deletePost) {
     throw new Error("Must provide deletePost when logged in as author");
-  }
-
-  const postIsFollowable = usePostIsFollowable(author.uid);
-  if (postIsFollowable && !postFollowProps) {
-    throw new Error("Must provide postFollowProps when post is followable");
   }
 
   const history = useHistory();
@@ -117,7 +105,7 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
       justify="flex-start"
       alignItems="flex-start"
     >
-      {!!props.followedByCount && props.followedByCount > 0 && (
+      {followablePostViewState.followCount > 0 && (
         <Grid>
           <Typography
             variant="body1"
@@ -125,7 +113,7 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
             paragraph={false}
             component="div"
           >
-            {props.followedByCount} follows
+            {followablePostViewState.followCount} follows
           </Typography>
         </Grid>
       )}
@@ -151,15 +139,15 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
             </Link>
             <span className={classes.subtitlePart}>{dt.toFormat("MMM d")}</span>
             <span className={classes.subtitlePart}>
-              {postIsFollowable && (
+              {followablePostViewState.isFollowableByViewer && (
                 <FollowButton
-                  isFollowed={!!postFollowProps!.isFollowedByViewer}
+                  isFollowed={followablePostViewState.isFollowedByViewer}
                   tooltip={{
                     followed: "Unfollow this post",
                     notFollowed: "Follow to get updates on this post",
                   }}
                   onClick={(isFollowed) => {
-                    postFollowProps!.setFollowed(postId, !isFollowed);
+                    followablePostViewState.setFollowed!(postId, !isFollowed);
                   }}
                 />
               )}

@@ -40,6 +40,7 @@ import {
   MentionInContext,
   postPreviewStringFromStart,
 } from "../components/richtext/Utils";
+import { useFollowablePostViewState } from "../hooks/posts/useFollowablePostViewState";
 import {
   coalesceMaybeToLoadableRecord,
   useLoadableRecord,
@@ -294,6 +295,8 @@ export type ReadOnlyPostViewProps = {
   title: PostTitle;
   body: PostBody;
 
+  followablePostCallbacks: FollowablePostCallbacks;
+
   logEvent: LogEventFn;
 };
 
@@ -318,6 +321,12 @@ export const ReadOnlyPostView = forwardRef<
     logEvent: props.logEvent,
   });
 
+  const followablePostViewState = useFollowablePostViewState(
+    props.followablePostCallbacks,
+    props.author.uid,
+    props.postId
+  );
+
   const subtitleRow = (
     <PostSubtitleRow
       author={props.author}
@@ -326,6 +335,7 @@ export const ReadOnlyPostView = forwardRef<
       updatedAt={props.updatedAt}
       numMentions={props.mentions.length}
       logEvent={props.logEvent}
+      followablePostViewState={followablePostViewState}
     />
   );
 
@@ -635,6 +645,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
     getPost,
     getMentionUserPosts,
     editablePostCallbacks,
+    followablePostCallbacks,
     logEvent,
   } = props;
 
@@ -804,6 +815,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
           title={title!}
           body={body!}
           mentions={mentions!}
+          followablePostCallbacks={followablePostCallbacks}
           logEvent={logEvent}
         />
       )}

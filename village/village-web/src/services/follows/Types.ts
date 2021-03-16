@@ -11,3 +11,12 @@ export type FollowablePostCallbacks = {
   setPostFollowed?: SetPostFollowedFn;
   getUserFollowsPost?: GetUserFollowsPostFn;
 };
+
+export type FollowablePostViewState = {
+  followCount: number;
+  isFollowedByViewer: boolean;
+  isFollowableByViewer: boolean;
+
+  // only available if followable by viewer
+  setFollowed?: SetPostFollowedFn;
+};
