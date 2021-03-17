@@ -1,6 +1,6 @@
 import { Tooltip, Typography } from "@material-ui/core";
 import * as log from "loglevel";
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useFocused, useSelected } from "slate-react";
 import { postURLById } from "../../routing/URLs";
@@ -67,13 +67,20 @@ export const LinkElement = ({
   htmlAttributes,
 }: any) => {
   const globalClasses = useGlobalStyles();
+  const [isEditable, setIsEditable] = useState(true);
   return (
     <a
       {...attributes}
       data-slate-value={element.url}
       className={`${globalClasses.link} ${globalClasses.alwaysBreakWord}`}
       href={element.url}
-      contentEditable={false}
+      contentEditable={isEditable}
+      onMouseEnter={() => {
+        setIsEditable(false);
+      }}
+      onMouseLeave={() => {
+        setIsEditable(true);
+      }}
       {...htmlAttributes}
     >
       {children}
