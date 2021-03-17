@@ -29,6 +29,7 @@ export const p0: PostRecord = {
   updatedAt: new Date(),
   id: "123",
   mentions: [],
+  followCount: 0,
 };
 export const p1: PostRecord = Object.assign({}, p0, { id: "124" });
 export const p2: PostRecord = {
@@ -38,6 +39,7 @@ export const p2: PostRecord = {
   updatedAt: new Date(),
   id: "123",
   mentions: [],
+  followCount: 0,
 };
 
 export const posts0: PostRecord[] = [p0];
@@ -212,6 +214,7 @@ export const userPosts2: UserPost[] = [
       updatedAt: new Date(),
       id: "123",
       mentions: [],
+      followCount: 0,
     },
   },
 ];

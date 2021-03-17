@@ -32,6 +32,11 @@ test("renders AppContainer", async () => {
     getMentionUserPosts: jest.fn(),
     fetchTitleFromOpenGraph: jest.fn(),
     logEvent: jest.fn(),
+    curriedFollowablePostCallbacks: {
+      getPostFollowCount: jest.fn(),
+      setPostFollowed: jest.fn(),
+      getUserFollowsPost: jest.fn(),
+    },
   };
 
   const appAuthState = {
