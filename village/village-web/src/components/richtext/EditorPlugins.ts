@@ -1,6 +1,6 @@
 import { Editor } from "slate";
 import { pipe } from "@blfrg.xyz/slate-plugins";
-import { SlatePlugin } from "@blfrg.xyz/slate-plugins-core";
+import { SlatePlugin } from "@udecode/slate-plugins-core";
 import {
   ResetBlockTypePlugin,
   SoftBreakPlugin,

@@ -1288,30 +1288,25 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@blfrg.xyz/slate-plugins-core@^0.71.10":
-  version "0.71.10"
-  resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins-core/-/slate-plugins-core-0.71.10.tgz#2fcbbf434dacc0a2e3c129e6df794be236c09723"
-  integrity sha512-jKlLbKKI4jzS6bVJEqK9NdAFKyaOGyiwlDuNyHjqNtQJlBuy4e4FdenhFRjO7I95gRlRlYZ1yCpiocl0GflegA==
-
-"@blfrg.xyz/slate-plugins@^0.71.22":
-  version "0.71.22"
-  resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins/-/slate-plugins-0.71.22.tgz#1365752304cdcc5f60e8adb9a1ae348a62058026"
-  integrity sha512-KpdqgnBhl+if/Q/2OIljctKE4JWYdTY/qvaVXoD/+TuaIy2SLQjLvGYPyUKO4mHCjULHq/rd4+Rhn4aYRcw2Hw==
+"@blfrg.xyz/slate-plugins@^0.75.21":
+  version "0.75.21"
+  resolved "https://registry.yarnpkg.com/@blfrg.xyz/slate-plugins/-/slate-plugins-0.75.21.tgz#53d92d3c4b2af46222607daae6f50497530b1b80"
+  integrity sha512-cyBezZt1lQB7D22L7Qw5bjLG/EZTZoNOkigjw0K2++KBaK3mst4SLb5Wbt7EvXnJV9QumyVEIXNDJXhirRW+xw==
   dependencies:
-    "@blfrg.xyz/slate-plugins-core" "^0.71.10"
     "@react-hook/merged-ref" "^1.3.0"
     "@tippyjs/react" "^4.0.2"
+    "@udecode/slate-plugins-core" "^0.75.2"
     "@uifabric/styling" "^7.12.11"
     "@uifabric/utilities" "^7.19.0"
     image-extensions "^1.1.0"
     is-hotkey "^0.1.6"
     lodash "^4.17.15"
     prismjs "^1.20.0"
-    react-dnd "^11.1.3"
-    react-dnd-html5-backend "^11.1.3"
+    react-dnd "^13.1.1"
+    react-dnd-html5-backend "^12.1.1"
     react-use "^15.1.0"
     remark-parse "^9.0.0"
-    remark-slate "^1.1.1"
+    remark-slate "^1.4.0"
     unified "^9.1.0"
     utility-types "^3.10.0"
 
@@ -3566,14 +3561,6 @@
   resolved "https://registry.yarnpkg.com/@types/history/-/history-4.7.8.tgz#49348387983075705fe8f4e02fb67f7daaec4934"
   integrity sha512-S78QIYirQcUoo6UJZx9CSP0O2ix9IaeAXwQi26Rhr/+mg7qqPy8TzaxHSUut7eGjL8WmLccT7/MXf304WjqHcA==
 
-"@types/hoist-non-react-statics@^3.3.1":
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.1.tgz#1124aafe5118cb591977aeb1ceaaed1070eb039f"
-  integrity sha512-iMIqiko6ooLrTh1joXodJK5X9xeEALT1kM5G3ZLhD3hszxBdIEd5C75U834D9mLcINgD4OyZf5uQXjkuYydWvA==
-  dependencies:
-    "@types/react" "*"
-    hoist-non-react-statics "^3.3.0"
-
 "@types/html-minifier-terser@^5.0.0":
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/@types/html-minifier-terser/-/html-minifier-terser-5.1.1.tgz#3c9ee980f1a10d6021ae6632ca3e79ca2ec4fb50"
@@ -4118,6 +4105,11 @@
   dependencies:
     "@typescript-eslint/types" "4.10.0"
     eslint-visitor-keys "^2.0.0"
+
+"@udecode/slate-plugins-core@^0.75.2":
+  version "0.75.2"
+  resolved "https://registry.yarnpkg.com/@udecode/slate-plugins-core/-/slate-plugins-core-0.75.2.tgz#f2d9a2be4809a8a117d549082815439ddedd5c5a"
+  integrity sha512-H+1ftpy0KAEe/1POqlCyYDbnpe+9JiFwfGuNpO9UcN60wyIdN819jAOfNYWrEKmZiYqmMPdwF7sv3unlRfRg2g==
 
 "@uifabric/merge-styles@^7.19.1":
   version "7.19.1"
@@ -7481,14 +7473,14 @@ direction@^1.0.3:
   resolved "https://registry.yarnpkg.com/direction/-/direction-1.0.4.tgz#2b86fb686967e987088caf8b89059370d4837442"
   integrity sha512-GYqKi1aH7PJXxdhTeZBFrg8vUBeKXi+cNprXsC1kpJcbcVnV9wBsrOu1cQEdG0WeQwlfHiy3XvnKfIrJ2R0NzQ==
 
-dnd-core@^11.1.3:
-  version "11.1.3"
-  resolved "https://registry.yarnpkg.com/dnd-core/-/dnd-core-11.1.3.tgz#f92099ba7245e49729d2433157031a6267afcc98"
-  integrity sha512-QugF55dNW+h+vzxVJ/LSJeTeUw9MCJ2cllhmVThVPEtF16ooBkxj0WBE5RB+AceFxMFo1rO6bJKXtqKl+JNnyA==
+dnd-core@12.0.1:
+  version "12.0.1"
+  resolved "https://registry.yarnpkg.com/dnd-core/-/dnd-core-12.0.1.tgz#2263391d6de218801770df4d345294a5f1eccc48"
+  integrity sha512-KzfKXQM9t9uSBO7DFmrILVgXUCShpY3/MbnLPF9/wg1Wcvq2KblbeT72GhjcrplS9cz0DFXilE1NXy43n8plag==
   dependencies:
     "@react-dnd/asap" "^4.0.0"
     "@react-dnd/invariant" "^2.0.0"
-    redux "^4.0.4"
+    redux "^4.0.5"
 
 dns-equal@^1.0.0:
   version "1.0.0"
@@ -15724,22 +15716,22 @@ react-devtools-core@^4.0.6:
     shell-quote "^1.6.1"
     ws "^7"
 
-react-dnd-html5-backend@^11.1.3:
-  version "11.1.3"
-  resolved "https://registry.yarnpkg.com/react-dnd-html5-backend/-/react-dnd-html5-backend-11.1.3.tgz#2749f04f416ec230ea193f5c1fbea2de7dffb8f7"
-  integrity sha512-/1FjNlJbW/ivkUxlxQd7o3trA5DE33QiRZgxent3zKme8DwF4Nbw3OFVhTRFGaYhHFNL1rZt6Rdj1D78BjnNLw==
+react-dnd-html5-backend@^12.1.1:
+  version "12.1.1"
+  resolved "https://registry.yarnpkg.com/react-dnd-html5-backend/-/react-dnd-html5-backend-12.1.1.tgz#73aa9043f5a2da5b192503593d620d30c0bd7348"
+  integrity sha512-cQZgfuSGQEwHdvdoPtfUOvcrS8rye/V0hU046LjY/BLSgcrdjtQVviE2d/81QQaeJpvK00JizctsZqVY7IvHgA==
   dependencies:
-    dnd-core "^11.1.3"
+    dnd-core "12.0.1"
 
-react-dnd@^11.1.3:
-  version "11.1.3"
-  resolved "https://registry.yarnpkg.com/react-dnd/-/react-dnd-11.1.3.tgz#f9844f5699ccc55dfc81462c2c19f726e670c1af"
-  integrity sha512-8rtzzT8iwHgdSC89VktwhqdKKtfXaAyC4wiqp0SywpHG12TTLvfOoL6xNEIUWXwIEWu+CFfDn4GZJyynCEuHIQ==
+react-dnd@^13.1.1:
+  version "13.1.1"
+  resolved "https://registry.yarnpkg.com/react-dnd/-/react-dnd-13.1.1.tgz#ea6d3f15cccf542a3ebfb978c097b2e3b1d1c962"
+  integrity sha512-oxQW8846omV1l3Pm2zY/atvNxryx+blW1rxnSmoGvFMgmxXpOHulaXrlXgxRH+OLRvLt2cfVTSxZ4ykbzBypaw==
   dependencies:
+    "@react-dnd/invariant" "^2.0.0"
     "@react-dnd/shallowequal" "^2.0.0"
-    "@types/hoist-non-react-statics" "^3.3.1"
-    dnd-core "^11.1.3"
-    hoist-non-react-statics "^3.3.0"
+    dnd-core "12.0.1"
+    hoist-non-react-statics "^3.3.2"
 
 react-docgen-typescript-plugin@^0.6.2:
   version "0.6.3"
@@ -16361,7 +16353,7 @@ redent@^3.0.0:
     indent-string "^4.0.0"
     strip-indent "^3.0.0"
 
-redux@^4.0.4:
+redux@^4.0.5:
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/redux/-/redux-4.0.5.tgz#4db5de5816e17891de8a80c424232d06f051d93f"
   integrity sha512-VSz1uMAH24DM6MF72vcojpYPtrTUu3ByVWfPL1nPfVRb5mZVTve5GnNCUV53QM/BZ66xfWrm0CTWoM+Xlz8V1w==
@@ -16521,10 +16513,10 @@ remark-parse@^9.0.0:
   dependencies:
     mdast-util-from-markdown "^0.8.0"
 
-remark-slate@^1.1.1:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/remark-slate/-/remark-slate-1.2.2.tgz#86b2487fe5ffdcf2c39072ed29727daa94e8358d"
-  integrity sha512-2m8BVNUypma1PZ5H/XBrh160hndBEXgRSqTTG/DUKEeaZBwBWiYcCCjkDse7PDjIwiRYVALQxhABWA2nbhVXYw==
+remark-slate@^1.4.0:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/remark-slate/-/remark-slate-1.5.1.tgz#29edd4fab837cd272d4ff27c854c18f11be00904"
+  integrity sha512-ihiT5nRC/gm0viHTZ219y9q9YtNuRu9KRCgO8j9gWiTv31q63nGybP0LeC/gsyXDcSZU5IRHYiZ5tYNhZaCliw==
   dependencies:
     "@types/escape-html" "^1.0.0"
     escape-html "^1.0.3"
