@@ -130,7 +130,7 @@ function App() {
   );
 
   const followablePostCallbacks = {
-    setPostFollowed: setPostFollowed(database),
+    setPostFollowed: setPostFollowed(functions),
     listenForUserPostFollow: listenForUserPostFollow(database),
   };
 

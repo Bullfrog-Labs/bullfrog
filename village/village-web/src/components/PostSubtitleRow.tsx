@@ -147,7 +147,11 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
                     notFollowed: "Follow to get updates on this post",
                   }}
                   onClick={(isFollowed) => {
-                    followablePostViewState.setFollowed!(postId, !isFollowed);
+                    followablePostViewState.setFollowed!(
+                      author.uid,
+                      postId,
+                      !isFollowed
+                    );
                   }}
                 />
               )}

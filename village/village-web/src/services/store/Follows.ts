@@ -40,40 +40,42 @@ const FOLLOW_RECORD_CONVERTER = {
 // The follows collection for a user is stored under their user object.
 const FOLLOWS_COLLECTION = "follows";
 
-export const addPostToUserFollows = (database: Database) => (
-  uid: UserId
-) => async (postId: PostId) => {
-  await database
-    .getHandle()
-    .collection(USERS_COLLECTION)
-    .doc(uid)
-    .collection(FOLLOWS_COLLECTION)
-    .doc(postId)
-    .withConverter(FOLLOW_RECORD_CONVERTER)
-    .set({
-      followType: "post",
-      followedOn: new Date(),
+export const addPostToUserFollows = (
+  functions: firebase.functions.Functions
+) => {
+  const followPost = functions.httpsCallable("followPost");
+  return (uid: UserId) => async (authorId: UserId, postId: PostId) => {
+    const result = await followPost({
+      uid: uid,
+      postId: postId,
+      authorId: authorId,
     });
+  };
 };
 
-export const removePostFromUserFollows = (database: Database) => (
-  uid: UserId
-) => async (postId: PostId) => {
-  await database
-    .getHandle()
-    .collection(USERS_COLLECTION)
-    .doc(uid)
-    .collection(FOLLOWS_COLLECTION)
-    .doc(postId)
-    .delete();
+export const removePostFromUserFollows = (
+  functions: firebase.functions.Functions
+) => {
+  const unfollowPost = functions.httpsCallable("unfollowPost");
+
+  return (uid: UserId) => async (authorId: UserId, postId: PostId) => {
+    const result = await unfollowPost({
+      uid: uid,
+      postId: postId,
+      authorId: authorId,
+    });
+  };
 };
 
-export const setPostFollowed = (database: Database) => (
+export const setPostFollowed = (functions: firebase.functions.Functions) => (
   ur: UserRecord
-): SetPostFollowedFn => (postId, isFollowed) => {
-  const addFollow = addPostToUserFollows(database)(ur.uid);
-  const removeFollow = removePostFromUserFollows(database)(ur.uid);
-  return isFollowed ? addFollow(postId) : removeFollow(postId);
+): SetPostFollowedFn => async (authorId, postId, isFollowed) => {
+  const addFollow = addPostToUserFollows(functions)(ur.uid);
+  const removeFollow = removePostFromUserFollows(functions)(ur.uid);
+  const result = isFollowed
+    ? addFollow(authorId, postId)
+    : removeFollow(authorId, postId);
+  await result;
 };
 
 export const getUserFollowsPost = (database: Database) => (

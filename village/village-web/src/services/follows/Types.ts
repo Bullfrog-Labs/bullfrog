@@ -1,9 +1,14 @@
 import firebase from "firebase";
 import { PostId } from "../store/Posts";
+import { UserId } from "../store/Users";
 
 export type ListenerUnsubscribeFn = () => void;
 
-export type SetPostFollowedFn = (postId: PostId, isFollowed: boolean) => void;
+export type SetPostFollowedFn = (
+  authorId: UserId,
+  postId: PostId,
+  isFollowed: boolean
+) => Promise<void>;
 export type GetUserFollowsPostFn = (postId: PostId) => Promise<boolean>;
 export type ListenForUserPostFollowFn = (
   postId: PostId,
