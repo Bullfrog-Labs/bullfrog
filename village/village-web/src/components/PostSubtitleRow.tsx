@@ -91,7 +91,13 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
       title: postTitle,
       author: author,
     });
-    history.push("/");
+
+    if (history.length > 2) {
+      console.log(`${history.length}`);
+      history.goBack();
+    } else {
+      history.push("/profile");
+    }
   };
 
   return (
