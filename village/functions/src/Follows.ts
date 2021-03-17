@@ -2,15 +2,26 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { HttpsError } from "firebase-functions/lib/providers/https";
 
-export type PostFollowResponse = {};
-export type PostUnfollowResponse = {};
+type PostFollowFailAlreadyFollowed = "already-followed";
+type PostFollowFailReason = PostFollowFailAlreadyFollowed;
+
+type PostFollowFail = {
+  state: "failure";
+  reason: PostFollowFailReason;
+};
+
+type PostFollowSuccess = {
+  state: "success";
+};
+
+type PostFollowResponse = PostFollowSuccess | PostFollowFail;
 
 export const handlePostFollow = async (
   db: admin.firestore.Firestore,
   uid: string,
   authorId: string,
   postId: string
-) => {
+): Promise<PostFollowResponse> => {
   const postFollowTransaction = async (
     transaction: admin.firestore.Transaction
   ) => {
@@ -30,7 +41,11 @@ export const handlePostFollow = async (
 
     if (userPostFollow.exists) {
       functions.logger.info(`${postId} already followed by ${uid}, skipping`);
-      return;
+      const result: PostFollowFail = {
+        state: "failure",
+        reason: "already-followed",
+      };
+      return result;
     }
 
     // Reads
@@ -49,24 +64,40 @@ export const handlePostFollow = async (
 
     // Write: Increment follow count on followed post
     transaction.update(followedPostDocRef, { followCount: newFollowCount });
+
+    return {
+      state: "success",
+    } as PostFollowSuccess;
   };
 
   try {
-    await db.runTransaction(postFollowTransaction);
-    const response: PostFollowResponse = {};
-    return response;
+    return await db.runTransaction(postFollowTransaction);
   } catch (e) {
     functions.logger.warn(`Encountered unknown error during post follow, ${e}`);
     throw new HttpsError("unknown", "Unknown error in post follow");
   }
 };
 
+type PostUnfollowFailAlreadyFollowed = "already-unfollowed";
+type PostUnfollowFailReason = PostUnfollowFailAlreadyFollowed;
+
+type PostUnfollowFail = {
+  state: "failure";
+  reason: PostUnfollowFailReason;
+};
+
+type PostUnfollowSuccess = {
+  state: "success";
+};
+
+export type PostUnfollowResponse = PostUnfollowSuccess | PostUnfollowFail;
+
 export const handlePostUnfollow = async (
   db: admin.firestore.Firestore,
   uid: string,
   authorId: string,
   postId: string
-) => {
+): Promise<PostUnfollowResponse> => {
   const postUnfollowTransaction = async (
     transaction: admin.firestore.Transaction
   ) => {
@@ -83,7 +114,10 @@ export const handlePostUnfollow = async (
       functions.logger.info(
         `${postId} already not followed by ${uid}, skipping`
       );
-      return;
+      return {
+        state: "failure",
+        reason: "already-unfollowed",
+      } as PostUnfollowFail;
     }
 
     if (!followedPost.exists) {
@@ -101,12 +135,14 @@ export const handlePostUnfollow = async (
 
     // Write: Decrement follow count on followed post
     transaction.update(followedPostDocRef, { followCount: newFollowCount });
+
+    return {
+      state: "success",
+    } as PostUnfollowSuccess;
   };
 
   try {
-    await db.runTransaction(postUnfollowTransaction);
-    const response: PostUnfollowResponse = {};
-    return response;
+    return await db.runTransaction(postUnfollowTransaction);
   } catch (e) {
     functions.logger.warn(
       `Encountered unknown error during post unfollow, ${e}`

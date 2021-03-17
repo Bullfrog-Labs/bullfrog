@@ -45,7 +45,7 @@ export const addPostToUserFollows = (
 ) => {
   const followPost = functions.httpsCallable("followPost");
   return (uid: UserId) => async (authorId: UserId, postId: PostId) => {
-    const result = await followPost({
+    await followPost({
       uid: uid,
       postId: postId,
       authorId: authorId,
@@ -59,7 +59,7 @@ export const removePostFromUserFollows = (
   const unfollowPost = functions.httpsCallable("unfollowPost");
 
   return (uid: UserId) => async (authorId: UserId, postId: PostId) => {
-    const result = await unfollowPost({
+    await unfollowPost({
       uid: uid,
       postId: postId,
       authorId: authorId,
