@@ -6,7 +6,7 @@ import { useFocused, useSelected } from "slate-react";
 import { postURLById } from "../../routing/URLs";
 import { useGlobalStyles } from "../../styles/styles";
 import { Blockquote } from "../Blockquote";
-import { MentionElementProps } from "@blfrg.xyz/slate-plugins";
+import { MentionElementProps, MentionNode } from "@blfrg.xyz/slate-plugins";
 
 export const MentionElement = ({
   attributes,
@@ -33,7 +33,7 @@ export const MentionElement = ({
 
   const handleClick = (event: any) => {
     if (onClick) {
-      onClick({ value: title });
+      onClick({ value: title, children: [] });
     }
   };
 
