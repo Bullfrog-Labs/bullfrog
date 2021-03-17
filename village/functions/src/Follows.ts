@@ -2,13 +2,11 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { HttpsError } from "firebase-functions/lib/providers/https";
 
-admin.initializeApp();
-const db = admin.firestore();
-
 export type PostFollowResponse = {};
 export type PostUnfollowResponse = {};
 
 export const handlePostFollow = async (
+  db: admin.firestore.Firestore,
   uid: string,
   authorId: string,
   postId: string
@@ -64,6 +62,7 @@ export const handlePostFollow = async (
 };
 
 export const handlePostUnfollow = async (
+  db: admin.firestore.Firestore,
   uid: string,
   authorId: string,
   postId: string

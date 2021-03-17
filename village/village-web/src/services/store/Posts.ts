@@ -1,12 +1,12 @@
-import * as log from "loglevel";
-import { Database } from "./Database";
-import firebase from "firebase";
-import { UserRecord, UserId, USERS_COLLECTION, getUsersForIds } from "./Users";
-import { RichText } from "../../components/richtext/Types";
-import { Node } from "slate";
 import { ELEMENT_MENTION } from "@blfrg.xyz/slate-plugins";
-import { postURL } from "../../routing/URLs";
+import firebase from "firebase";
+import * as log from "loglevel";
+import { Node } from "slate";
+import { RichText } from "../../components/richtext/Types";
 import { EMPTY_RICH_TEXT } from "../../components/richtext/Utils";
+import { postURL } from "../../routing/URLs";
+import { Database } from "./Database";
+import { getUsersForIds, UserId, UserRecord, USERS_COLLECTION } from "./Users";
 
 export type PostId = string;
 export type PostTitle = string;
@@ -438,20 +438,15 @@ export const getMentionUserPosts = (database: Database) => async (
 
 export type GetMentionUserPostsFn = ReturnType<typeof getMentionUserPosts>;
 
-export const deletePost = (database: Database) => async (
+export const deletePost = (functions: firebase.functions.Functions) => async (
   userId: UserId,
   postId: PostId
 ): Promise<void> => {
+  const deletePostCall = functions.httpsCallable("deletePost");
   const logger = log.getLogger("deletePost");
-
   logger.debug(`Deleting post with id ${postId}`);
-  await database
-    .getHandle()
-    .collection(USERS_COLLECTION)
-    .doc(userId)
-    .collection(POSTS_COLLECTION)
-    .doc(postId)
-    .delete();
+
+  await deletePostCall({ userId: userId, postId: postId });
 };
 
 export type DeletePostFn = ReturnType<typeof deletePost>;

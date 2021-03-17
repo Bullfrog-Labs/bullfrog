@@ -1,7 +1,12 @@
+import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-import { lookupTwitterUserById } from "./Twitter";
-import { buildPrerenderProxyApp } from "./PrerenderProxy";
 import { handlePostFollow, handlePostUnfollow } from "./Follows";
+import { handlePostDelete } from "./Posts";
+import { buildPrerenderProxyApp } from "./PrerenderProxy";
+import { lookupTwitterUserById } from "./Twitter";
+
+admin.initializeApp();
+const db: admin.firestore.Firestore = admin.firestore();
 
 export const lookupTwitterUser = functions.https.onCall(
   async (data, context) => {
@@ -41,7 +46,7 @@ export const followPost = functions.https.onCall(async (data, context) => {
     throw new Error("postId not provided");
   }
 
-  const result = await handlePostFollow(uid, authorId, postId);
+  const result = await handlePostFollow(db, uid, authorId, postId);
   return result;
 });
 
@@ -62,6 +67,22 @@ export const unfollowPost = functions.https.onCall(async (data, context) => {
     throw new Error("postId not provided");
   }
 
-  const result = await handlePostUnfollow(uid, authorId, postId);
+  const result = await handlePostUnfollow(db, uid, authorId, postId);
+  return result;
+});
+
+export const deletePost = functions.https.onCall(async (data, context) => {
+  const userId = context.auth?.uid;
+  const postId = data.postId;
+
+  if (!userId) {
+    throw new Error("uid not provided");
+  }
+
+  if (!postId) {
+    throw new Error("postId not provided");
+  }
+
+  const result = await handlePostDelete(db, userId, postId);
   return result;
 });

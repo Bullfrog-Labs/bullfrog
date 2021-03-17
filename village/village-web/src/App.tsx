@@ -154,7 +154,7 @@ function App() {
               database
             )}
             fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
-            deletePost={deletePost(database)}
+            deletePost={deletePost(functions)}
             logEvent={logEvent(app.analytics())}
             setCurrentScreen={setCurrentScreen(app.analytics())}
             curriedFollowablePostCallbacks={followablePostCallbacks}
