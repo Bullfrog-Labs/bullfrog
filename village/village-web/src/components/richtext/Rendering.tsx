@@ -33,7 +33,7 @@ export const MentionElement = ({
 
   const handleClick = (event: any) => {
     if (onClick) {
-      onClick({ value: title });
+      onClick({ value: title, children: [] });
     }
   };
 

@@ -19,7 +19,7 @@ import {
   ELEMENT_H2,
   ELEMENT_H3,
 } from "@blfrg.xyz/slate-plugins";
-import { EditablePlugins } from "@blfrg.xyz/slate-plugins-core";
+import { EditablePlugins } from "@udecode/slate-plugins-core";
 import { Typography } from "@material-ui/core";
 import * as EditorPlugins from "./EditorPlugins";
 import {
