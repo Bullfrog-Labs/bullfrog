@@ -47,11 +47,25 @@ const cleanupPostFollows = async (
   await batchDelete();
 };
 
+type PostDeleteFailReasonPostDoesNotExist = "post-does-not-exist";
+type PostDeleteFailReason = PostDeleteFailReasonPostDoesNotExist;
+
+type PostDeleteFail = {
+  state: "failure";
+  reason: PostDeleteFailReason;
+};
+
+type PostDeleteSuccess = {
+  state: "success";
+};
+
+type PostDeleteResponse = PostDeleteSuccess | PostDeleteFail;
+
 const postDelete = async (
   db: admin.firestore.Firestore,
   userId: string,
   postId: string
-) => {
+): Promise<PostDeleteResponse> => {
   // This GCF deletes the post's follows and then deletes the post itself. If
   // the number of post follows is particularly large, it may timeout before
   // completion. It would have to be pretty big to timeout with the default 1
@@ -71,7 +85,10 @@ const postDelete = async (
 
   if (!followedPost.exists) {
     functions.logger.info(`${postId} by ${userId} does not exist, skipping`);
-    return {};
+    return {
+      state: "failure",
+      reason: "post-does-not-exist",
+    };
   }
 
   // clean up the post
@@ -80,18 +97,16 @@ const postDelete = async (
   // clean up follows
   await cleanupPostFollows(db, userId, postId);
 
-  return {};
+  return { state: "success" };
 };
 
 export const handlePostDelete = async (
   db: admin.firestore.Firestore,
   userId: string,
   postId: string
-) => {
+): Promise<PostDeleteResponse> => {
   try {
-    await postDelete(db, userId, postId);
-    const response = {};
-    return response;
+    return await postDelete(db, userId, postId);
   } catch (e) {
     functions.logger.warn(
       `Encountered unknown error during post unfollow, ${e}`
