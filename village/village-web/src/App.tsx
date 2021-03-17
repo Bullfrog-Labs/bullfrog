@@ -3,6 +3,7 @@ import { Logging } from "kmgmt-common";
 import * as log from "loglevel";
 import { useEffect, useState } from "react";
 import { Router } from "./routing/Router";
+import { logEvent, setCurrentScreen } from "./services/Analytics";
 import { AppAuthContext } from "./services/auth/AppAuth";
 import { getUserId, useAuthState } from "./services/auth/Auth";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
@@ -10,7 +11,10 @@ import { initializeFirebaseApp } from "./services/Firebase";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
 import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
 import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
-import { logEvent, setCurrentScreen } from "./services/Analytics";
+import {
+  listenForUserPostFollow,
+  setPostFollowed,
+} from "./services/store/Follows";
 import {
   createPost,
   deletePost,
@@ -124,6 +128,12 @@ function App() {
       googleAuthEnabled={process.env.REACT_APP_GOOGLE_AUTH_ENABLED === "true"}
     />
   );
+
+  const followablePostCallbacks = {
+    setPostFollowed: setPostFollowed(functions),
+    listenForUserPostFollow: listenForUserPostFollow(database),
+  };
+
   return (
     <>
       {authCompleted ? (
@@ -144,9 +154,10 @@ function App() {
               database
             )}
             fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
-            deletePost={deletePost(database)}
+            deletePost={deletePost(functions)}
             logEvent={logEvent(app.analytics())}
             setCurrentScreen={setCurrentScreen(app.analytics())}
+            curriedFollowablePostCallbacks={followablePostCallbacks}
             isSitePublic={isSitePublic}
           />
         </AppAuthContext.Provider>

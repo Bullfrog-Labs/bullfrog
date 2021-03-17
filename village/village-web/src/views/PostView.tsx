@@ -40,6 +40,7 @@ import {
   MentionInContext,
   postPreviewStringFromStart,
 } from "../components/richtext/Utils";
+import { useFollowablePostViewState } from "../hooks/posts/useFollowablePostViewState";
 import {
   coalesceMaybeToLoadableRecord,
   useLoadableRecord,
@@ -53,6 +54,7 @@ import {
   useLoggedInUserFromAppAuthContext,
   useWhitelistedUserFromAppAuthContext,
 } from "../services/auth/AppAuth";
+import { FollowablePostCallbacks } from "../services/follows/Types";
 import {
   CreatePostFn,
   DeletePostFn,
@@ -286,12 +288,15 @@ type PostViewImperativeHandle = {
 
 export type ReadOnlyPostViewProps = {
   postId: PostId;
+  postRecord: PostRecord;
   author: UserRecord;
   updatedAt: Date | undefined;
   mentions: MentionInContext[];
 
   title: PostTitle;
   body: PostBody;
+
+  followablePostCallbacks: FollowablePostCallbacks;
 
   logEvent: LogEventFn;
 };
@@ -317,6 +322,13 @@ export const ReadOnlyPostView = forwardRef<
     logEvent: props.logEvent,
   });
 
+  const followablePostViewState = useFollowablePostViewState(
+    props.postRecord.followCount,
+    props.author.uid,
+    props.postId,
+    props.followablePostCallbacks
+  );
+
   const subtitleRow = (
     <PostSubtitleRow
       author={props.author}
@@ -325,6 +337,7 @@ export const ReadOnlyPostView = forwardRef<
       updatedAt={props.updatedAt}
       numMentions={props.mentions.length}
       logEvent={props.logEvent}
+      followablePostViewState={followablePostViewState}
     />
   );
 
@@ -352,6 +365,7 @@ export type EditablePostCallbacks = {
 
 export type EditablePostViewProps = {
   postId: PostId;
+  postRecord: PostRecord;
   author: UserRecord;
   updatedAt: Date | undefined;
   mentions: MentionInContext[];
@@ -365,6 +379,7 @@ export type EditablePostViewProps = {
   getPost: GetPostFn;
 
   editablePostCallbacks: EditablePostCallbacks;
+  followablePostCallbacks: FollowablePostCallbacks;
 
   logEvent: LogEventFn;
 };
@@ -384,6 +399,7 @@ export const EditablePostView = forwardRef<
     getPost,
     author,
     postId,
+    postRecord,
     editablePostCallbacks,
   } = props;
   const {
@@ -557,6 +573,13 @@ export const EditablePostView = forwardRef<
     logEvent: props.logEvent,
   });
 
+  const followablePostViewState = useFollowablePostViewState(
+    postRecord.followCount,
+    props.author.uid,
+    props.postId,
+    props.followablePostCallbacks
+  );
+
   const subtitleRow = (
     <PostSubtitleRow
       author={props.author}
@@ -564,6 +587,7 @@ export const EditablePostView = forwardRef<
       postId={props.postId}
       updatedAt={props.updatedAt}
       numMentions={props.mentions.length}
+      followablePostViewState={followablePostViewState}
       deletePost={deletePost}
       logEvent={props.logEvent}
     />
@@ -600,6 +624,7 @@ export type PostViewControllerProps = {
   getMentionUserPosts: GetMentionUserPostsFn;
 
   editablePostCallbacks: EditablePostCallbacks;
+  followablePostCallbacks: FollowablePostCallbacks;
 
   logEvent: LogEventFn;
 };
@@ -632,6 +657,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
     getPost,
     getMentionUserPosts,
     editablePostCallbacks,
+    followablePostCallbacks,
     logEvent,
   } = props;
 
@@ -781,6 +807,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
         <EditablePostView
           ref={postViewRef}
           postId={postId}
+          postRecord={postRecord.get()}
           author={authorRecord.get()}
           updatedAt={updatedAt}
           title={title!}
@@ -790,17 +817,20 @@ export const PostViewController = (props: PostViewControllerProps) => {
           getPost={getPost}
           mentions={mentions!}
           editablePostCallbacks={editablePostCallbacks}
+          followablePostCallbacks={followablePostCallbacks}
           logEvent={logEvent}
         />
       ) : (
         <ReadOnlyPostView
           ref={postViewRef}
           postId={postId}
+          postRecord={postRecord.get()}
           author={authorRecord.get()}
           updatedAt={updatedAt}
           title={title!}
           body={body!}
           mentions={mentions!}
+          followablePostCallbacks={followablePostCallbacks}
           logEvent={logEvent}
         />
       )}
