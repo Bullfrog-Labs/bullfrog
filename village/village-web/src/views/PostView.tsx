@@ -323,10 +323,10 @@ export const ReadOnlyPostView = forwardRef<
   });
 
   const followablePostViewState = useFollowablePostViewState(
-    props.followablePostCallbacks,
     props.postRecord.followCount,
     props.author.uid,
-    props.postId
+    props.postId,
+    props.followablePostCallbacks
   );
 
   const subtitleRow = (
@@ -574,10 +574,10 @@ export const EditablePostView = forwardRef<
   });
 
   const followablePostViewState = useFollowablePostViewState(
-    props.followablePostCallbacks,
     postRecord.followCount,
     props.author.uid,
-    props.postId
+    props.postId,
+    props.followablePostCallbacks
   );
 
   const subtitleRow = (

@@ -141,7 +141,7 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
             <span className={classes.subtitlePart}>
               {followablePostViewState.isFollowableByViewer && (
                 <FollowButton
-                  isFollowed={followablePostViewState.isFollowedByViewer}
+                  isFollowed={followablePostViewState.isFollowedByViewer!}
                   tooltip={{
                     followed: "Unfollow this post",
                     notFollowed: "Follow to get updates on this post",

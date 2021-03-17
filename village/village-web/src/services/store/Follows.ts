@@ -1,6 +1,10 @@
 import firebase from "firebase";
 import { assertNever } from "../../utils";
-import { GetUserFollowsPostFn, SetPostFollowedFn } from "../follows/Types";
+import {
+  GetUserFollowsPostFn,
+  ListenForUserPostFollowFn,
+  SetPostFollowedFn,
+} from "../follows/Types";
 import { Database } from "./Database";
 import { PostId } from "./Posts";
 import { UserId, UserRecord, USERS_COLLECTION } from "./Users";
@@ -71,4 +75,17 @@ export const getUserFollowsPost = (database: Database) => (
     default:
       assertNever(followRecord.followType);
   }
+};
+
+export const listenForUserPostFollow = (database: Database) => (
+  ur: UserRecord
+): ListenForUserPostFollowFn => (postId, onNext, onError) => {
+  return database
+    .getHandle()
+    .collection(USERS_COLLECTION)
+    .doc(ur.uid)
+    .collection(FOLLOWS_COLLECTION)
+    .doc(postId)
+    .withConverter(FOLLOW_RECORD_CONVERTER)
+    .onSnapshot(onNext, onError);
 };

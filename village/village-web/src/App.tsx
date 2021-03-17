@@ -3,6 +3,7 @@ import { Logging } from "kmgmt-common";
 import * as log from "loglevel";
 import { useEffect, useState } from "react";
 import { Router } from "./routing/Router";
+import { logEvent, setCurrentScreen } from "./services/Analytics";
 import { AppAuthContext } from "./services/auth/AppAuth";
 import { getUserId, useAuthState } from "./services/auth/Auth";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
@@ -10,7 +11,10 @@ import { initializeFirebaseApp } from "./services/Firebase";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
 import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
 import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
-import { logEvent, setCurrentScreen } from "./services/Analytics";
+import {
+  listenForUserPostFollow,
+  setPostFollowed,
+} from "./services/store/Follows";
 import {
   createPost,
   deletePost,
@@ -33,7 +37,6 @@ import { buildIsUserWhitelisted } from "./services/store/Whitelist";
 import { buildLookupTwitterUser } from "./services/Twitter";
 import { useGlobalStyles } from "./styles/styles";
 import { LoginView } from "./views/LoginView";
-import { getUserFollowsPost, setPostFollowed } from "./services/store/Follows";
 
 Logging.configure(log);
 
@@ -128,7 +131,7 @@ function App() {
 
   const followablePostCallbacks = {
     setPostFollowed: setPostFollowed(database),
-    getUserFollowsPost: getUserFollowsPost(database),
+    listenForUserPostFollow: listenForUserPostFollow(database),
   };
 
   return (

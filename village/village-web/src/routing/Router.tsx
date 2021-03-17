@@ -20,7 +20,7 @@ import {
 } from "../services/auth/AppAuth";
 import {
   FollowablePostCallbacks,
-  GetUserFollowsPostFn,
+  ListenForUserPostFollowFn,
   SetPostFollowedFn,
 } from "../services/follows/Types";
 import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
@@ -57,7 +57,7 @@ const Sad404 = () => {
 
 export type CurriedFollowablePostCallbacks = {
   setPostFollowed: CurriedByUser<SetPostFollowedFn>;
-  getUserFollowsPost: CurriedByUser<GetUserFollowsPostFn>;
+  listenForUserPostFollow: CurriedByUser<ListenForUserPostFollowFn>;
 };
 
 const useUncurriedFollowablePostCallbacks = (
@@ -69,8 +69,8 @@ const useUncurriedFollowablePostCallbacks = (
     setPostFollowed: loggedInUR
       ? curried.setPostFollowed(loggedInUR!)
       : undefined,
-    getUserFollowsPost: loggedInUR
-      ? curried.getUserFollowsPost(loggedInUR!)
+    listenForUserPostFollow: loggedInUR
+      ? curried.listenForUserPostFollow(loggedInUR!)
       : undefined,
   };
 };

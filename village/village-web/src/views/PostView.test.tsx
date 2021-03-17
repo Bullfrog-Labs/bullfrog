@@ -94,9 +94,8 @@ const TestPostView = (props: TestPostViewProps) => {
     body: EMPTY_RICH_TEXT,
 
     followablePostCallbacks: {
-      getPostFollowCount: jest.fn(),
       setPostFollowed: jest.fn(),
-      getUserFollowsPost: jest.fn(),
+      listenForUserPostFollow: jest.fn(),
     },
 
     logEvent: jest.fn(),
@@ -259,9 +258,8 @@ const testPostViewToPostViewNavigation = async (
     },
 
     followablePostCallbacks: {
-      getPostFollowCount: jest.fn(),
       setPostFollowed: jest.fn(),
-      getUserFollowsPost: jest.fn(),
+      listenForUserPostFollow: jest.fn(),
     },
 
     logEvent: jest.fn(),
