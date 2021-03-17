@@ -6,7 +6,10 @@ import { useFocused, useSelected } from "slate-react";
 import { postURLById } from "../../routing/URLs";
 import { useGlobalStyles } from "../../styles/styles";
 import { Blockquote } from "../Blockquote";
-import { MentionElementProps } from "@blfrg.xyz/slate-plugins";
+import {
+  LinkElementProps,
+  MentionElementProps,
+} from "@blfrg.xyz/slate-plugins";
 
 export const MentionElement = ({
   attributes,
@@ -60,14 +63,19 @@ export const MentionElement = ({
   );
 };
 
-export const LinkElement = ({
-  attributes,
-  children,
-  element,
-  htmlAttributes,
-}: any) => {
+export const ReadonlyLinkElement = (props: LinkElementProps) =>
+  LinkElement(props, true);
+
+export const EditableLinkElement = (props: LinkElementProps) =>
+  LinkElement(props, false);
+
+const LinkElement = (
+  { attributes, children, element, htmlAttributes }: LinkElementProps,
+  readonly: boolean = false
+) => {
   const globalClasses = useGlobalStyles();
-  const [isEditable, setIsEditable] = useState(true);
+  const [isEditable, setIsEditable] = useState(!readonly);
+  console.log(`ro: ${readonly}, ${element.url}`);
   return (
     <a
       {...attributes}
@@ -76,10 +84,10 @@ export const LinkElement = ({
       href={element.url}
       contentEditable={isEditable}
       onMouseEnter={() => {
-        setIsEditable(false);
+        !readonly && setIsEditable(false);
       }}
       onMouseLeave={() => {
-        setIsEditable(true);
+        !readonly && setIsEditable(true);
       }}
       {...htmlAttributes}
     >

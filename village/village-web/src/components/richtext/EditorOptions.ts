@@ -9,7 +9,8 @@ import {
   CompactH3Element,
   CompactParagraphElement,
   CompactBlockquoteElement,
-  LinkElement,
+  EditableLinkElement,
+  ReadonlyLinkElement,
 } from "./Rendering";
 import {
   MentionPluginOptions,
@@ -117,7 +118,13 @@ export const autoformatRules: AutoformatRule[] = [
 
 export const linkOptions: LinkPluginOptions = {
   link: {
-    component: LinkElement,
+    component: EditableLinkElement,
+  },
+};
+
+export const readonlyLinkOptions: LinkPluginOptions = {
+  link: {
+    component: ReadonlyLinkElement,
   },
 };
 
@@ -254,8 +261,20 @@ export const compactViewerOptions: Options = {
   paragraph: compactParagraphOptions,
   heading: compactHeadingOptions,
   mentions: mentionOptions,
-  link: linkOptions,
+  link: readonlyLinkOptions,
   blockquote: compactBlockquoteOptions,
+  resetBlockType: resetBlockTypeOptions,
+  softBreak: softBreakOptions,
+  exitBreak: exitBreakOptions,
+  autoformat: autoformatOptions,
+};
+
+export const postViewerOptions: Options = {
+  paragraph: paragraphOptions,
+  heading: headingOptions,
+  mentions: mentionOptions,
+  blockquote: blockquoteOptions,
+  link: readonlyLinkOptions,
   resetBlockType: resetBlockTypeOptions,
   softBreak: softBreakOptions,
   exitBreak: exitBreakOptions,
