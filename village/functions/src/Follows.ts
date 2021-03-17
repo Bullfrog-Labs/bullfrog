@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { HttpsError } from "firebase-functions/lib/providers/https";
+import { getPostFollowEntryPaths, postPath } from "./FirestoreSchema";
 
 type PostFollowFailAlreadyFollowed = "already-followed";
 type PostFollowFailReason = PostFollowFailAlreadyFollowed;
@@ -25,13 +26,23 @@ export const handlePostFollow = async (
   const postFollowTransaction = async (
     transaction: admin.firestore.Transaction
   ) => {
-    const userPostFollowDocRef = db.doc(`/users/${uid}/follows/${postId}`);
-    const followedPostDocRef = db.doc(`/users/${authorId}/posts/${postId}`);
-    const followedPostFollowEntryDocRef = db.doc(
-      `/users/${authorId}/posts/${postId}/follows/${uid}`
+    const postFollowEntryPaths = getPostFollowEntryPaths({
+      followerId: uid,
+      authorId: authorId,
+      postId: postId,
+    });
+    const postFollowEntryDocRef = db.doc(postFollowEntryPaths.postFollowEntry);
+    const followerPostFollowEntryDocRef = db.doc(
+      postFollowEntryPaths.followerPostFollowEntry
     );
 
-    const userPostFollow = await transaction.get(userPostFollowDocRef);
+    const followedPostDocRef = db.doc(
+      postPath({ authorId: authorId, postId: postId })
+    );
+
+    const followerPostFollowEntry = await transaction.get(
+      followerPostFollowEntryDocRef
+    );
     const followedPost = await transaction.get(followedPostDocRef);
     const followedOn = new Date();
 
@@ -39,7 +50,7 @@ export const handlePostFollow = async (
       throw new Error("Tried to follow non-existent post!");
     }
 
-    if (userPostFollow.exists) {
+    if (followerPostFollowEntry.exists) {
       functions.logger.info(`${postId} already followed by ${uid}, skipping`);
       const result: PostFollowFail = {
         state: "failure",
@@ -52,13 +63,13 @@ export const handlePostFollow = async (
     const newFollowCount = followedPost.data()!.followCount + 1;
 
     // Write: Add follow entry for user
-    transaction.create(userPostFollowDocRef, {
+    transaction.create(followerPostFollowEntryDocRef, {
       followType: "post",
       followedOn: followedOn,
     });
 
     // Write: Add follow entry on followed post
-    transaction.create(followedPostFollowEntryDocRef, {
+    transaction.create(postFollowEntryDocRef, {
       followedOn: followedOn,
     });
 
@@ -101,16 +112,27 @@ export const handlePostUnfollow = async (
   const postUnfollowTransaction = async (
     transaction: admin.firestore.Transaction
   ) => {
-    const userPostFollowDocRef = db.doc(`/users/${uid}/follows/${postId}`);
-    const followedPostDocRef = db.doc(`/users/${authorId}/posts/${postId}`);
-    const followedPostFollowEntryDocRef = db.doc(
-      `/users/${authorId}/posts/${postId}/follows/${uid}`
+    const postFollowEntryPaths = getPostFollowEntryPaths({
+      followerId: uid,
+      authorId: authorId,
+      postId: postId,
+    });
+
+    const followerPostFollowEntryDocRef = db.doc(
+      postFollowEntryPaths.followerPostFollowEntry
+    );
+    const postFollowEntryDocRef = db.doc(postFollowEntryPaths.postFollowEntry);
+
+    const followedPostDocRef = db.doc(
+      postPath({ authorId: authorId, postId: postId })
     );
 
-    const userPostFollow = await transaction.get(userPostFollowDocRef);
+    const followerPostFollowEntry = await transaction.get(
+      followerPostFollowEntryDocRef
+    );
     const followedPost = await transaction.get(followedPostDocRef);
 
-    if (!userPostFollow.exists) {
+    if (!followerPostFollowEntry.exists) {
       functions.logger.info(
         `${postId} already not followed by ${uid}, skipping`
       );
@@ -128,10 +150,10 @@ export const handlePostUnfollow = async (
     const newFollowCount = followedPost.data()!.followCount - 1;
 
     // Write: Remove follow entry for user
-    transaction.delete(userPostFollowDocRef);
+    transaction.delete(followerPostFollowEntryDocRef);
 
     // Write: Remove follow entry on followed post
-    transaction.delete(followedPostFollowEntryDocRef);
+    transaction.delete(postFollowEntryDocRef);
 
     // Write: Decrement follow count on followed post
     transaction.update(followedPostDocRef, { followCount: newFollowCount });

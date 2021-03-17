@@ -1,6 +1,11 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import { HttpsError } from "firebase-functions/lib/providers/https";
+import {
+  followerPostFollowEntryPath,
+  postFollowsCollPath,
+  postPath,
+} from "./FirestoreSchema";
 
 const cleanupPostFollows = async (
   db: admin.firestore.Firestore,
@@ -10,7 +15,7 @@ const cleanupPostFollows = async (
   // taken from https://firebase.google.com/docs/firestore/manage-data/delete-data#node.js_2.
   const batchSize = 100;
   const followsCollRef = db.collection(
-    `/users/${userId}/posts/${postId}/follows`
+    postFollowsCollPath({ userId: userId, postId: postId })
   );
   const query = followsCollRef.orderBy("__name__").limit(batchSize);
 
@@ -27,7 +32,7 @@ const cleanupPostFollows = async (
     snapshot.docs.forEach((doc) => {
       const followerId = doc.id;
       const followerPostFollowDocRef = db.doc(
-        `/users/${followerId}/follows/${postId}`
+        followerPostFollowEntryPath({ followerId: followerId, postId: postId })
       );
       batch.delete(followerPostFollowDocRef); // delete the follow on the follower
       batch.delete(doc.ref); // delete the follow on the post
@@ -59,7 +64,9 @@ const postDelete = async (
   // long time.
 
   // check that post exists
-  const followedPostDocRef = db.doc(`/users/${userId}/posts/${postId}`);
+  const followedPostDocRef = db.doc(
+    postPath({ authorId: userId, postId: postId })
+  );
   const followedPost = await followedPostDocRef.get();
 
   if (!followedPost.exists) {
