@@ -60,7 +60,7 @@ export const handlePostFollow = async (
     }
 
     // Reads
-    const newFollowCount = followedPost.data()!.followCount + 1;
+    const newFollowCount = (followedPost.data()!.followCount ?? 0) + 1;
 
     // Write: Add follow entry for user
     transaction.create(followerPostFollowEntryDocRef, {
