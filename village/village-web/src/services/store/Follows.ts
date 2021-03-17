@@ -40,17 +40,41 @@ const FOLLOW_RECORD_CONVERTER = {
 // The follows collection for a user is stored under their user object.
 const FOLLOWS_COLLECTION = "follows";
 
-export const addPostToUserFollows = (database: Database) => (uid: UserId) => (
-  postId: PostId
-) => {};
+export const addPostToUserFollows = (database: Database) => (
+  uid: UserId
+) => async (postId: PostId) => {
+  await database
+    .getHandle()
+    .collection(USERS_COLLECTION)
+    .doc(uid)
+    .collection(FOLLOWS_COLLECTION)
+    .doc(postId)
+    .withConverter(FOLLOW_RECORD_CONVERTER)
+    .set({
+      followType: "post",
+      followedOn: new Date(),
+    });
+};
 
 export const removePostFromUserFollows = (database: Database) => (
   uid: UserId
-) => (postId: PostId) => {};
+) => async (postId: PostId) => {
+  await database
+    .getHandle()
+    .collection(USERS_COLLECTION)
+    .doc(uid)
+    .collection(FOLLOWS_COLLECTION)
+    .doc(postId)
+    .delete();
+};
 
 export const setPostFollowed = (database: Database) => (
   ur: UserRecord
-): SetPostFollowedFn => (postId, isFollowed) => {};
+): SetPostFollowedFn => (postId, isFollowed) => {
+  const addFollow = addPostToUserFollows(database)(ur.uid);
+  const removeFollow = removePostFromUserFollows(database)(ur.uid);
+  return isFollowed ? addFollow(postId) : removeFollow(postId);
+};
 
 export const getUserFollowsPost = (database: Database) => (
   ur: UserRecord
