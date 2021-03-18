@@ -82,6 +82,7 @@ const LinkElement = (
       className={`${globalClasses.link} ${globalClasses.alwaysBreakWord}`}
       href={element.url}
       contentEditable={isEditable}
+      suppressContentEditableWarning={true}
       onMouseEnter={() => {
         !readonly && setIsEditable(false);
       }}
