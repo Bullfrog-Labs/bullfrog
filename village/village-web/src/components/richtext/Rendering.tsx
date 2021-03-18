@@ -75,7 +75,6 @@ const LinkElement = (
 ) => {
   const globalClasses = useGlobalStyles();
   const [isEditable, setIsEditable] = useState(!readonly);
-  console.log(`ro: ${readonly}, ${element.url}`);
   return (
     <a
       {...attributes}
