@@ -1,6 +1,11 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-import { handlePostFollow, handlePostUnfollow } from "./Follows";
+import { allPostFollowsWildcard } from "./FirestoreSchema";
+import {
+  buildNewPostFollowEntryHandler,
+  handlePostFollow,
+  handlePostUnfollow,
+} from "./Follows";
 import { handlePostDelete } from "./Posts";
 import { buildPrerenderProxyApp } from "./PrerenderProxy";
 import { lookupTwitterUserById } from "./Twitter";
@@ -49,6 +54,10 @@ export const followPost = functions.https.onCall(async (data, context) => {
   const result = await handlePostFollow(db, uid, authorId, postId);
   return result;
 });
+
+export const newPostFollowEntryHandler = functions.firestore
+  .document(allPostFollowsWildcard)
+  .onCreate(buildNewPostFollowEntryHandler(db));
 
 export const unfollowPost = functions.https.onCall(async (data, context) => {
   const uid = context.auth?.uid;

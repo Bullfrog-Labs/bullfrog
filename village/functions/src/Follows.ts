@@ -1,6 +1,16 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import { EventContext } from "firebase-functions";
+import { QueryDocumentSnapshot } from "firebase-functions/lib/providers/firestore";
 import { HttpsError } from "firebase-functions/lib/providers/https";
+import { postFollowActivity, UserRecord } from "./Activities";
+import { isActivityPresent, pushActivity } from "./FirestoreFeedWriter";
+import {
+  getPostFollowEntryPaths,
+  notificationFeedPathForUser,
+  postPath,
+  userPath,
+} from "./FirestoreSchema";
 import { getPostFollowEntryPaths, postPath } from "./FirestoreSchema";
 
 type PostFollowFailAlreadyFollowed = "already-followed";
@@ -171,4 +181,64 @@ export const handlePostUnfollow = async (
     );
     throw new HttpsError("unknown", "Unknown error in post unfollow");
   }
+};
+
+export const buildNewPostFollowEntryHandler = (
+  db: admin.firestore.Firestore
+) => async (
+  snapshot: QueryDocumentSnapshot,
+  context: EventContext
+): Promise<void> => {
+  const { authorId, postId, followerId } = context.params;
+  const activityId = context.eventId;
+
+  if (!authorId || !postId || !followerId) {
+    throw new Error("authorId, postId or followerId not provided");
+  }
+
+  const notificationFeedPath = notificationFeedPathForUser(authorId);
+
+  // Check that the event has not been processed yet, since this function must
+  // be idempotent. Idempotence depends on eventId.
+  if (await isActivityPresent(db, notificationFeedPath, activityId)) {
+    functions.logger.info(
+      `Activity with id ${activityId} already handled, skipping.`
+    );
+    return;
+  }
+
+  // Read PostRecord and UserRecord to populate activity content.
+  const [postRecordDoc, userRecordDoc] = await Promise.all([
+    db.doc(postPath({ authorId: authorId, postId: postId })).get(),
+    db.doc(userPath(followerId)).get(),
+  ]);
+
+  if (!postRecordDoc.exists) {
+    functions.logger.warn(
+      `Post follow activity with id ${activityId} has non-existent post ${postId}`
+    );
+    return;
+  }
+
+  if (!userRecordDoc.exists) {
+    functions.logger.warn(
+      `Post follow activity with id ${activityId} has non-existent follower ${followerId}`
+    );
+    return;
+  }
+
+  const followerUserRecord = userRecordDoc.data() as UserRecord;
+
+  // Write: Add activity to author's notification feed
+  const activity = postFollowActivity({
+    followerId: followerId,
+    authorId: authorId,
+    postId: postId,
+    content: {
+      title: postRecordDoc.data()!.title,
+      follower: followerUserRecord,
+    },
+  });
+
+  await pushActivity(db, notificationFeedPath, activityId, activity);
 };
