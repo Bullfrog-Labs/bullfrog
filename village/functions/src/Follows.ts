@@ -11,7 +11,6 @@ import {
   postPath,
   userPath,
 } from "./FirestoreSchema";
-import { getPostFollowEntryPaths, postPath } from "./FirestoreSchema";
 
 type PostFollowFailAlreadyFollowed = "already-followed";
 type PostFollowFailReason = PostFollowFailAlreadyFollowed;
@@ -50,10 +49,11 @@ export const handlePostFollow = async (
       postPath({ authorId: authorId, postId: postId })
     );
 
-    const followerPostFollowEntry = await transaction.get(
-      followerPostFollowEntryDocRef
-    );
-    const followedPost = await transaction.get(followedPostDocRef);
+    const [followerPostFollowEntry, followedPost] = await Promise.all([
+      transaction.get(followerPostFollowEntryDocRef),
+      transaction.get(followedPostDocRef),
+    ]);
+
     const followedOn = new Date();
 
     if (!followedPost.exists) {
@@ -137,10 +137,10 @@ export const handlePostUnfollow = async (
       postPath({ authorId: authorId, postId: postId })
     );
 
-    const followerPostFollowEntry = await transaction.get(
-      followerPostFollowEntryDocRef
-    );
-    const followedPost = await transaction.get(followedPostDocRef);
+    const [followerPostFollowEntry, followedPost] = await Promise.all([
+      transaction.get(followerPostFollowEntryDocRef),
+      transaction.get(followedPostDocRef),
+    ]);
 
     if (!followerPostFollowEntry.exists) {
       functions.logger.info(
