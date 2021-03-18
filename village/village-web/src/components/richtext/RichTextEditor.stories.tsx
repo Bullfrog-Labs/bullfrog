@@ -46,7 +46,6 @@ const RichTextEditorStateWrapper: FunctionComponent<RichTextEditorProps> = (
       <RichTextEditor
         body={body}
         onChange={setBody}
-        enableToolbar={props.enableToolbar}
         readOnly={props.readOnly}
         mentionTypeaheadComponents={{
           mentionables: mentionables,
@@ -66,7 +65,6 @@ export const BasicRTEReadOnly = Template.bind({});
 BasicRTEReadOnly.args = {
   body: EMPTY_RICH_TEXT,
   onChange: (newBody: Body) => {}, // this does not get used
-  enableToolbar: false,
   readOnly: true,
 };
 
@@ -74,14 +72,12 @@ export const BasicRTE = Template.bind({});
 BasicRTE.args = {
   body: EMPTY_RICH_TEXT,
   onChange: (newBody: Body) => {},
-  enableToolbar: false,
   readOnly: false,
 };
 export const RTEWithToolbar = Template.bind({});
 RTEWithToolbar.args = {
   body: EMPTY_RICH_TEXT,
   onChange: (newBody: Body) => {},
-  enableToolbar: true,
   readOnly: false,
 };
 
@@ -142,6 +138,5 @@ export const RTEWithContent = Template.bind({});
 RTEWithContent.args = {
   body: TEST_STATE.body,
   onChange: (newBody: Body) => {},
-  enableToolbar: true,
   readOnly: false,
 };
