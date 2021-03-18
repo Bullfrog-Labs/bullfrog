@@ -40,7 +40,8 @@ import { LoginView } from "./views/LoginView";
 
 Logging.configure(log);
 
-const useEmulator = window.location.hostname === "localhost";
+const isRunningLocally = window.location.hostname === "localhost";
+const useEmulator = isRunningLocally && false;
 
 const [app, auth, functions] = initializeFirebaseApp(useEmulator);
 const authProvider = FirebaseAuthProvider.create(app, auth);
