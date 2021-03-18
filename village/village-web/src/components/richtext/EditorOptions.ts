@@ -1,8 +1,6 @@
 import { Editor } from "slate";
 import {
   MentionElement,
-  MentionElement2,
-  MentionElement3,
   H2Element,
   H3Element,
   ParagraphElement,
