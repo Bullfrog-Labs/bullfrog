@@ -25,6 +25,7 @@ import * as EditorPlugins from "./EditorPlugins";
 import {
   Options,
   postEditorOptions,
+  postViewerOptions,
   compactViewerOptions,
 } from "./EditorOptions";
 import { useGlobalStyles } from "../../styles/styles";
@@ -98,7 +99,8 @@ const RichTextEditor = forwardRef<
     readOnly,
     enableToolbar,
   } = props;
-  const editorOptions = options || postEditorOptions;
+  const editorOptions =
+    options || (readOnly ? postViewerOptions : postEditorOptions);
 
   // A little hacky, but fine.
   addMentionsClickHandler(editorOptions, logEvent);

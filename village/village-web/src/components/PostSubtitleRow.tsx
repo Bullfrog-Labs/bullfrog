@@ -95,7 +95,7 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
       title: postTitle,
       author: author,
     });
-    history.push("/");
+    history.push("/profile");
   };
 
   return (

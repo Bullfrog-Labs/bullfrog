@@ -14,6 +14,7 @@ import React, {
   SetStateAction,
   useCallback,
   useEffect,
+  useMemo,
   useImperativeHandle,
   useRef,
   useState,
@@ -758,6 +759,11 @@ export const PostViewController = (props: PostViewControllerProps) => {
     };
   }, [getMentionUserPosts, postId, setMentionPosts]);
 
+  const postPreviewString = useMemo(
+    () => postPreviewStringFromStart(body, 200),
+    [body]
+  );
+
   const progressIndicator = (
     <CircularProgress className={globalClasses.loadingIndicator} />
   );
@@ -787,7 +793,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
     authorId === viewer?.uid ? "you" : authorRecord.get()?.username
   }`;
 
-  const postPreviewString = postPreviewStringFromStart(body, 200);
   logger.debug(`Using ${postPreviewString} as og:description`);
 
   return (
