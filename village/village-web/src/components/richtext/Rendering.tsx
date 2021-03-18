@@ -6,12 +6,16 @@ import { useFocused, useSelected } from "slate-react";
 import { postURLById } from "../../routing/URLs";
 import { useGlobalStyles } from "../../styles/styles";
 import { Blockquote } from "../Blockquote";
+import { classNamesFunction, styled } from "@uifabric/utilities";
 import {
+  getMentionElementStyles,
   LinkElementProps,
   MentionElementProps,
+  MentionElementStyleProps,
+  MentionElementStyles,
 } from "@blfrg.xyz/slate-plugins";
 
-export const MentionElement = ({
+export const MentionElementBase = ({
   attributes,
   children,
   element,
@@ -49,19 +53,30 @@ export const MentionElement = ({
     <Tooltip title={authorUsername}>
       <Link
         {...attributes}
+        contentEditable={false}
         className={`${linkClassName} ${globalClasses.alwaysBreakWord}`}
         data-slate-value={title}
         to={postURLById(authorId, postId)}
-        contentEditable={false}
         onClick={handleClick}
         {...htmlAttributes}
       >
-        {element.value}
         {children}
+        {element.value}
       </Link>
     </Tooltip>
   );
 };
+
+/**
+ * MentionElement
+ */
+export const MentionElement = styled<
+  MentionElementProps,
+  MentionElementStyleProps,
+  MentionElementStyles
+>(MentionElementBase, getMentionElementStyles, undefined, {
+  scope: "MentionElement",
+});
 
 export const ReadonlyLinkElement = (props: LinkElementProps) =>
   LinkElement(props, true);
