@@ -1,10 +1,9 @@
 import { Activity } from "../../services/activities/Types";
 
 export type ActivityNotificationProps = {
-  // activity: Activity;
-  activity: number;
+  activity: Activity;
 };
 
 export const ActivityNotification = (props: ActivityNotificationProps) => {
-  return <>Row {props.activity}</>;
+  return <>Row {props.activity.createdAt}</>;
 };

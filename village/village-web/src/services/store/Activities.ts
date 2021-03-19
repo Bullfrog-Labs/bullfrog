@@ -21,9 +21,11 @@ export const listenForNewActivities = () => {};
 // Pagination
 // https://firebase.google.com/docs/firestore/query-data/query-cursors
 
-export type ActivityFeedCursor = firebase.firestore.DocumentSnapshot;
+// export type ActivityFeedCursor = firebase.firestore.DocumentSnapshot;
+export type ActivityFeedCursor = number;
 export type CursoredActivity = {
-  activity: Activity;
+  // activity: Activity;
+  activity: number;
   cursor: ActivityFeedCursor;
 };
 
@@ -32,9 +34,17 @@ export type CursoredActivity = {
 // can't use numerical indices for pagination.
 // use document snapshot as query cursor: https://firebase.google.com/docs/firestore/query-data/query-cursors#use_a_document_snapshot_to_define_the_query_cursor
 
-export const getActivitiesFromFeed = async (
-  startAt: ActivityFeedCursor,
-  limit: number
+let nActivitiesToReturn = 100;
+
+export const getCursoredActivitiesFromFeed = async (
+  limit: number,
+  startAt?: ActivityFeedCursor
 ): Promise<CursoredActivity[]> => {
-  return [];
+  const result = [];
+  for (let index = 0; nActivitiesToReturn > 0 && index < limit; ++index) {
+    result.push({ activity: index, cursor: index });
+    --nActivitiesToReturn;
+  }
+
+  return result;
 };
