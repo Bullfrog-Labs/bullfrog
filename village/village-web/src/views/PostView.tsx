@@ -204,7 +204,6 @@ const usePostComponents: (inputs: PostComponentInputs) => PostComponents = ({
       readOnly={readOnly}
       body={body}
       onChange={onBodyChange}
-      enableToolbar={false}
       mentionTypeaheadComponents={mentionableComponents}
       logEvent={logEvent}
     />
