@@ -5,7 +5,7 @@ import { FixedSizeList } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import {
   CursoredActivity,
-  getCursoredActivitiesFromFeed,
+  GetCursoredActivitiesFromFeedFn,
 } from "../../services/store/Activities";
 
 const useStyles = makeStyles((theme) => ({
@@ -36,7 +36,8 @@ type NotificationListState = {
 };
 
 const useNotificationsListState = (
-  minimumBatchSize: number
+  minimumBatchSize: number,
+  getCursoredActivitiesFromFeed: GetCursoredActivitiesFromFeedFn
 ): NotificationListState => {
   const [cursoredActivities, setCursoredActivities] = useState<
     CursoredActivity[]
@@ -94,7 +95,7 @@ const useNotificationsListState = (
         setHasNextPage(false);
       }
     },
-    [cursoredActivities, minimumBatchSize]
+    [cursoredActivities, getCursoredActivitiesFromFeed, minimumBatchSize]
   );
 
   return {
@@ -105,7 +106,9 @@ const useNotificationsListState = (
   };
 };
 
-export type NotificationsListProps = {};
+export type NotificationsListProps = {
+  getCursoredActivitiesFromFeed: GetCursoredActivitiesFromFeedFn;
+};
 
 export const NotificationsList = (props: NotificationsListProps) => {
   const classes = useStyles();
@@ -116,7 +119,10 @@ export const NotificationsList = (props: NotificationsListProps) => {
     isItemLoaded,
     itemCount,
     loadMoreItems,
-  } = useNotificationsListState(minimumBatchSize);
+  } = useNotificationsListState(
+    minimumBatchSize,
+    props.getCursoredActivitiesFromFeed
+  );
 
   const Foo = (args: { index: number; style: CSSProperties }) => {
     if (!isItemLoaded(args.index)) {
@@ -128,7 +134,8 @@ export const NotificationsList = (props: NotificationsListProps) => {
     } else {
       return (
         <div style={args.style}>
-          Row {cursoredActivities[args.index].activity} {args.index}
+          Row {cursoredActivities[args.index].activity.createdAt.toString()}{" "}
+          {args.index}
         </div>
       );
     }

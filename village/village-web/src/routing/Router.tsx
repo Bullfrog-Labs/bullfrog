@@ -25,6 +25,7 @@ import {
 } from "../services/follows/Types";
 import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
+import { GetCursoredActivitiesFromFeedFn } from "../services/store/Activities";
 import {
   CreatePostFn,
   DeletePostFn,
@@ -98,6 +99,8 @@ export type RouterProps = {
 
   curriedFollowablePostCallbacks: CurriedFollowablePostCallbacks;
 
+  getCursoredActivitiesFromFeed: CurriedByUser<GetCursoredActivitiesFromFeedFn>;
+
   isSitePublic: boolean;
 };
 
@@ -120,6 +123,7 @@ export const Router = (props: RouterProps) => {
     logEvent,
     setCurrentScreen,
     curriedFollowablePostCallbacks,
+    getCursoredActivitiesFromFeed,
     isSitePublic,
   } = props;
 
@@ -208,7 +212,9 @@ export const Router = (props: RouterProps) => {
         </MaybePrivateRoute>
         <PrivateRoute exact path="/notifications">
           <AppContainerWithProps>
-            <NotificationsViewController />
+            <NotificationsViewController
+              getCursoredActivitiesFromFeed={getCursoredActivitiesFromFeed}
+            />
           </AppContainerWithProps>
         </PrivateRoute>
         <Route path="*">

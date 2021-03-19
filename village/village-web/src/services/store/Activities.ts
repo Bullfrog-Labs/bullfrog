@@ -1,15 +1,27 @@
 import firebase from "firebase";
-import { UserRecord } from "kmgmt-common";
-import { assertNever } from "../../utils";
 import { Activity } from "../activities/Types";
 import { Database } from "./Database";
-import { PostId } from "./Posts";
-import { UserId } from "./Users";
+import { UserId, UserRecord } from "./Users";
 
 export const notificationFeedPathForUser = (userId: UserId) =>
   `/users/${userId}/notifications`;
 
-const ACTIVITY_RECORD_CONVERTER = {};
+const ACTIVITY_RECORD_CONVERTER = {
+  toFirestore: (record: Activity): firebase.firestore.DocumentData => {
+    const firestoreRecord: firebase.firestore.DocumentData = Object.assign(
+      {},
+      record
+    );
+    return firestoreRecord;
+  },
+  fromFirestore: (
+    snapshot: firebase.firestore.QueryDocumentSnapshot,
+    options: firebase.firestore.SnapshotOptions
+  ): Activity => {
+    const data = snapshot.data(options);
+    return data as Activity;
+  },
+};
 
 // Listen for new activities, paginate through old ones
 
@@ -21,30 +33,34 @@ export const listenForNewActivities = () => {};
 // Pagination
 // https://firebase.google.com/docs/firestore/query-data/query-cursors
 
-// export type ActivityFeedCursor = firebase.firestore.DocumentSnapshot;
-export type ActivityFeedCursor = number;
+export type ActivityFeedCursor = firebase.firestore.DocumentSnapshot;
 export type CursoredActivity = {
-  // activity: Activity;
-  activity: number;
+  activity: Activity;
   cursor: ActivityFeedCursor;
 };
-
-// loadMoreItems = (startIndex: number, stopIndex: number) => Promise<void>
-// ordering on Firestore does not match up with ordering in the web client, so
-// can't use numerical indices for pagination.
-// use document snapshot as query cursor: https://firebase.google.com/docs/firestore/query-data/query-cursors#use_a_document_snapshot_to_define_the_query_cursor
-
-let nActivitiesToReturn = 100;
-
-export const getCursoredActivitiesFromFeed = async (
+export type GetCursoredActivitiesFromFeedFn = (
   limit: number,
-  startAt?: ActivityFeedCursor
-): Promise<CursoredActivity[]> => {
-  const result = [];
-  for (let index = 0; nActivitiesToReturn > 0 && index < limit; ++index) {
-    result.push({ activity: index, cursor: index });
-    --nActivitiesToReturn;
-  }
+  startAfter?: ActivityFeedCursor
+) => Promise<CursoredActivity[]>;
 
+export const getCursoredActivitiesFromFeed = (db: Database) => (
+  userRecord: UserRecord
+): GetCursoredActivitiesFromFeedFn => async (limit, startAfter?) => {
+  const notificationFeedPath = notificationFeedPathForUser(userRecord.uid);
+  let notificationsCollRef = db
+    .getHandle()
+    .collection(notificationFeedPath)
+    .orderBy("createdAt", "desc")
+    .withConverter(ACTIVITY_RECORD_CONVERTER);
+  if (!!startAfter) {
+    notificationsCollRef = notificationsCollRef.startAfter(startAfter);
+  }
+  notificationsCollRef = notificationsCollRef.limit(limit);
+
+  const querySnapshot = await notificationsCollRef.get();
+  const result: CursoredActivity[] = [];
+  querySnapshot.forEach((doc) => {
+    result.push({ activity: doc.data(), cursor: doc });
+  });
   return result;
 };

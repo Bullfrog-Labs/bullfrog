@@ -5,11 +5,12 @@ import { useEffect, useState } from "react";
 import { Router } from "./routing/Router";
 import { logEvent, setCurrentScreen } from "./services/Analytics";
 import { AppAuthContext } from "./services/auth/AppAuth";
-import { getUserId, useAuthState, isWhitelisted } from "./services/auth/Auth";
+import { isWhitelisted, useAuthState } from "./services/auth/Auth";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
 import { initializeFirebaseApp } from "./services/Firebase";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
 import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
+import { getCursoredActivitiesFromFeed } from "./services/store/Activities";
 import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
 import {
   listenForUserPostFollow,
@@ -160,6 +161,9 @@ function App() {
             logEvent={logEvent(app.analytics())}
             setCurrentScreen={setCurrentScreen(app.analytics())}
             curriedFollowablePostCallbacks={followablePostCallbacks}
+            getCursoredActivitiesFromFeed={getCursoredActivitiesFromFeed(
+              database
+            )}
             isSitePublic={isSitePublic}
           />
         </AppAuthContext.Provider>
