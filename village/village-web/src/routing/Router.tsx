@@ -38,6 +38,7 @@ import {
 } from "../services/store/Posts";
 import { GetUserByUsernameFn, GetUserFn } from "../services/store/Users";
 import MainView from "../views/MainView";
+import { NotificationsViewController } from "../views/NotificationsView";
 import { PostViewController } from "../views/PostView";
 import { SignupClickRegisterView } from "../views/SignupClickRegisterView";
 import { SignupView } from "../views/SignupView";
@@ -205,6 +206,11 @@ export const Router = (props: RouterProps) => {
             />
           </AppContainerWithProps>
         </MaybePrivateRoute>
+        <PrivateRoute exact path="/notifications">
+          <AppContainerWithProps>
+            <NotificationsViewController />
+          </AppContainerWithProps>
+        </PrivateRoute>
         <Route path="*">
           <Sad404 />
         </Route>
