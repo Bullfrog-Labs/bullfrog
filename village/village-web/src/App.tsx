@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Router } from "./routing/Router";
 import { logEvent, setCurrentScreen } from "./services/Analytics";
 import { AppAuthContext } from "./services/auth/AppAuth";
-import { getUserId, useAuthState } from "./services/auth/Auth";
+import { getUserId, useAuthState, isWhitelisted } from "./services/auth/Auth";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
 import { initializeFirebaseApp } from "./services/Firebase";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
@@ -48,7 +48,7 @@ const authProvider = FirebaseAuthProvider.create(app, auth);
 const database = FirestoreDatabase.fromApp(app, useEmulator);
 
 const lookupTwitterUser = buildLookupTwitterUser(functions);
-const isUserWhitelisted = buildIsUserWhitelisted(database);
+const checkIsUserWhitelisted = buildIsUserWhitelisted(database);
 
 function App() {
   const logger = log.getLogger("App");
@@ -67,10 +67,11 @@ function App() {
     const fetchUser = async () => {
       if (!!authProviderState) {
         logger.debug(`Checking whitelist for ${authProviderState.uid}`);
-        const isWhitelisted = await isUserWhitelisted(
-          getUserId(authProviderState)
+        const isUserWhitelisted = await isWhitelisted(
+          authProviderState,
+          checkIsUserWhitelisted
         );
-        setWhitelisted(isWhitelisted, "exists");
+        setWhitelisted(isUserWhitelisted, "exists");
 
         if (!isWhitelisted) {
           logger.debug(`User ${authProviderState.uid} is not whitelisted`);

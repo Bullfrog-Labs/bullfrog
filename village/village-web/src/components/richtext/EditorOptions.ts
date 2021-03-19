@@ -38,6 +38,7 @@ import {
   ELEMENT_LI,
   ELEMENT_UL,
   ELEMENT_OL,
+  MentionNode,
 } from "@blfrg.xyz/slate-plugins";
 
 export type Options = {
@@ -132,7 +133,7 @@ export const mentionOptions: MentionPluginOptions = {
   mention: {
     component: MentionElement,
     rootProps: {
-      onClick: () => {},
+      onClick: (mentionNode: MentionNode) => {},
     },
   },
 };

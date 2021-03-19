@@ -6,18 +6,30 @@ import React, {
 } from "react";
 import { ReactEditor, Slate } from "slate-react";
 import { createEditor, Operation } from "slate";
+import { CodeAlt } from "@styled-icons/boxicons-regular/CodeAlt";
 import { RichText } from "./Types";
-import { LooksOne, LooksTwo } from "@styled-icons/material";
+import {
+  FormatBold,
+  FormatItalic,
+  LooksOne,
+  LooksTwo,
+  FormatQuote,
+} from "@styled-icons/material";
 import * as log from "loglevel";
 import {
   MentionSelect,
   MentionNodeData,
-  HeadingToolbar,
   ToolbarElement,
   useMention,
   pipe,
   ELEMENT_H2,
   ELEMENT_H3,
+  BalloonToolbar,
+  MARK_CODE,
+  MARK_BOLD,
+  MARK_ITALIC,
+  ToolbarMark,
+  ELEMENT_BLOCKQUOTE,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@udecode/slate-plugins-core";
 import { Typography } from "@material-ui/core";
@@ -49,7 +61,6 @@ export type RichTextEditorMentionTypeaheadComponents = {
 
 export type RichTextEditorProps = {
   body: Body;
-  enableToolbar?: boolean;
   readOnly?: boolean;
   options?: Options;
   onChange: (newBody: Body) => void;
@@ -97,7 +108,6 @@ const RichTextEditor = forwardRef<
     onChange,
     body,
     readOnly,
-    enableToolbar,
   } = props;
   const editorOptions =
     options || (readOnly ? postViewerOptions : postEditorOptions);
@@ -157,15 +167,6 @@ const RichTextEditor = forwardRef<
     onMentionAdded(option);
   };
 
-  const toolbar = (
-    <React.Fragment>
-      <HeadingToolbar>
-        <ToolbarElement type={ELEMENT_H2} icon={<LooksOne />} />
-        <ToolbarElement type={ELEMENT_H3} icon={<LooksTwo />} />
-      </HeadingToolbar>
-    </React.Fragment>
-  );
-
   return (
     <Slate
       editor={editor}
@@ -175,7 +176,14 @@ const RichTextEditor = forwardRef<
         onChangeMention(editor);
       }}
     >
-      {!!enableToolbar && toolbar}
+      <BalloonToolbar direction="top" hiddenDelay={500}>
+        <ToolbarElement type={ELEMENT_H2} icon={<LooksOne />} />
+        <ToolbarElement type={ELEMENT_H3} icon={<LooksTwo />} />
+        <ToolbarElement type={ELEMENT_BLOCKQUOTE} icon={<FormatQuote />} />
+        <ToolbarMark type={MARK_BOLD} icon={<FormatBold />} />
+        <ToolbarMark type={MARK_ITALIC} icon={<FormatItalic />} />
+        <ToolbarMark type={MARK_CODE} icon={<CodeAlt />} />
+      </BalloonToolbar>
       <EditablePlugins
         plugins={plugins}
         readOnly={readOnly ?? false}
@@ -213,7 +221,6 @@ export const RichTextCompactViewer = (props: { body: RichText }) => {
     <RichTextEditor
       readOnly={true}
       body={props.body}
-      enableToolbar={false}
       options={compactViewerOptions}
       onChange={(newBody: Body) => {}}
     />
