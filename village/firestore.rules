@@ -4,7 +4,10 @@ service cloud.firestore {
     function userIsWhitelisted() {
       let twitterId = request.auth.token.firebase.identities["twitter.com"][0];
       let googleId = request.auth.token.firebase.identities["google.com"][0];
-      return exists(/databases/$(database)/documents/whitelist/$(twitterId)) || exists(/databases/$(database)/documents/whitelist/$(googleId));
+      let email = request.auth.token.email;
+      return exists(/databases/$(database)/documents/whitelist/$(twitterId)) ||
+        exists(/databases/$(database)/documents/whitelist/$(googleId)) ||
+        exists(/databases/$(database)/documents/whitelist/$(email));
     }
 
     function userIsAuthd() {
@@ -36,8 +39,10 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if userIsAuthdAndWhitelisted() || siteIsPublic();
     }
-    match /whitelist/{userId} {
-      allow read: if request.auth.token.firebase.identities["twitter.com"][0] == userId || request.auth.token.firebase.identities["google.com"][0] == userId;
+    match /whitelist/{whitelistId} {
+      allow read: if request.auth.token.firebase.identities["twitter.com"][0] == whitelistId ||
+        request.auth.token.firebase.identities["google.com"][0] == whitelistId ||
+        request.auth.token.email == whitelistId;
     }
     match /{document=**} {
       allow read, write: if false;

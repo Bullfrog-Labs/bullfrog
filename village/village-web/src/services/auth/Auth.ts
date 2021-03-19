@@ -7,6 +7,7 @@ import {
   useLoadableRecord,
 } from "../../hooks/useLoadableRecord";
 import { UserId } from "../store/Users";
+import { IsUserWhiteListedFn } from "../store/Whitelist";
 
 export interface FederatedAuthProviderData {
   providerType: "federated";
@@ -112,4 +113,21 @@ export const getGoogleEmail = (
   )?.email;
 
   return email;
+};
+
+export const isWhitelisted = async (
+  authProviderState: AuthProviderState,
+  isUserWhitelisted: IsUserWhiteListedFn
+): Promise<boolean> => {
+  const isUidWhitelisted = await isUserWhitelisted(
+    getUserId(authProviderState)
+  );
+  if (isUidWhitelisted) {
+    return true;
+  }
+  const email = getGoogleEmail(authProviderState);
+  if (email) {
+    return await isUserWhitelisted(email);
+  }
+  return false;
 };
