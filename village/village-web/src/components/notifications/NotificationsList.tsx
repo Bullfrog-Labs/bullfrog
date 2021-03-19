@@ -7,26 +7,13 @@ import {
   CursoredActivity,
   GetCursoredActivitiesFromFeedFn,
 } from "../../services/store/Activities";
+import { ActivityNotificationMatcher } from "./ActivityNotificationMatcher";
 
 const useStyles = makeStyles((theme) => ({
   container: {
     height: "100vh",
   },
 }));
-
-const NotificationListRow = (args: { index: number; style: CSSProperties }) => {
-  /*
-  const activity = cursoredActivities[args.index].activity;
-
-  return (
-    <div style={args.style}>
-      <ActivityNotification activity={activity} />
-    </div>
-  );
-  */
-  console.log(args.index);
-  return <div style={args.style}>Row {args.index}</div>;
-};
 
 type NotificationListState = {
   isItemLoaded: (index: number) => boolean;
@@ -124,7 +111,7 @@ export const NotificationsList = (props: NotificationsListProps) => {
     props.getCursoredActivitiesFromFeed
   );
 
-  const Foo = (args: { index: number; style: CSSProperties }) => {
+  const NotificationRow = (args: { index: number; style: CSSProperties }) => {
     if (!isItemLoaded(args.index)) {
       return (
         <div style={args.style}>
@@ -132,10 +119,10 @@ export const NotificationsList = (props: NotificationsListProps) => {
         </div>
       );
     } else {
+      const activity = cursoredActivities[args.index].activity;
       return (
         <div style={args.style}>
-          Row {cursoredActivities[args.index].activity.createdAt.toString()}{" "}
-          {args.index}
+          <ActivityNotificationMatcher activity={activity} />
         </div>
       );
     }
@@ -160,7 +147,7 @@ export const NotificationsList = (props: NotificationsListProps) => {
                   width={width}
                   onItemsRendered={onItemsRendered}
                 >
-                  {Foo}
+                  {NotificationRow}
                 </FixedSizeList>
               )}
             </InfiniteLoader>
