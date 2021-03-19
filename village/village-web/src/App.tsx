@@ -67,9 +67,9 @@ function App() {
     const fetchUser = async () => {
       if (!!authProviderState) {
         logger.debug(`Checking whitelist for ${authProviderState.uid}`);
-        const isWhitelisted = await isUserWhitelisted(
-          getUserId(authProviderState)
-        );
+        const isWhitelisted =
+          (await isUserWhitelisted(getUserId(authProviderState))) ||
+          (await isUserWhitelisted(authProviderState.uid));
         setWhitelisted(isWhitelisted, "exists");
 
         if (!isWhitelisted) {
