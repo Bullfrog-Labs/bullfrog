@@ -13,9 +13,6 @@ import {
   FormatItalic,
   LooksOne,
   LooksTwo,
-  Link as LinkIcon,
-  FormatListBulleted,
-  FormatListNumbered,
   FormatQuote,
 } from "@styled-icons/material";
 import * as log from "loglevel";
@@ -32,11 +29,7 @@ import {
   MARK_BOLD,
   MARK_ITALIC,
   ToolbarMark,
-  ToolbarLink,
-  ELEMENT_OL,
   ELEMENT_BLOCKQUOTE,
-  ELEMENT_UL,
-  ToolbarList,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@udecode/slate-plugins-core";
 import { Typography } from "@material-ui/core";
@@ -186,12 +179,9 @@ const RichTextEditor = forwardRef<
       <BalloonToolbar direction="top" hiddenDelay={500}>
         <ToolbarElement type={ELEMENT_H2} icon={<LooksOne />} />
         <ToolbarElement type={ELEMENT_H3} icon={<LooksTwo />} />
+        <ToolbarElement type={ELEMENT_BLOCKQUOTE} icon={<FormatQuote />} />
         <ToolbarMark type={MARK_BOLD} icon={<FormatBold />} />
         <ToolbarMark type={MARK_ITALIC} icon={<FormatItalic />} />
-        <ToolbarLink icon={<LinkIcon />} />
-        <ToolbarList typeList={ELEMENT_UL} icon={<FormatListBulleted />} />
-        <ToolbarList typeList={ELEMENT_OL} icon={<FormatListNumbered />} />
-        <ToolbarElement type={ELEMENT_BLOCKQUOTE} icon={<FormatQuote />} />
         <ToolbarMark type={MARK_CODE} icon={<CodeAlt />} />
       </BalloonToolbar>
       <EditablePlugins
