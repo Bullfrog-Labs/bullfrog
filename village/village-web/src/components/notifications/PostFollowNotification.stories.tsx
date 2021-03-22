@@ -12,7 +12,9 @@ export default {
   decorators: [
     (Story) => (
       <MemoryRouter>
-        <Story />
+        <div style={{ width: "632px" }}>
+          <Story />
+        </div>
       </MemoryRouter>
     ),
   ],
@@ -35,6 +37,24 @@ Main.args = {
         uid: "456",
         username: "follower",
         displayName: "A follower",
+      },
+    },
+  },
+};
+
+export const Overflow = Template.bind({});
+Overflow.args = {
+  activity: {
+    createdAt: new Date(),
+    verb: { type: "follow" },
+    target: { type: "post", postId: "abc", authorId: "123" },
+    actor: "456",
+    content: {
+      title: "A followed post with a very long name",
+      follower: {
+        uid: "456",
+        username: "followerwithaverylongusername",
+        displayName: "A follower with a very long name",
       },
     },
   },

@@ -11,11 +11,13 @@ import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
 const useStyles = makeStyles((theme) => ({
   container: {
     margin: theme.spacing(1),
+    flexWrap: "nowrap",
   },
   icon: {
     marginLeft: theme.spacing(3),
     marginRight: theme.spacing(10),
   },
+  body: {},
 }));
 
 export type PostFollowNotificationProps = {
@@ -47,7 +49,7 @@ export const PostFollowNotification = (props: PostFollowNotificationProps) => {
       <Grid item className={classes.icon}>
         <LibraryAddCheckIcon fontSize={"large"} />
       </Grid>
-      <Grid item>
+      <Grid item className={classes.body}>
         <Link
           className={globalClasses.link}
           to={followerProfileURL}
@@ -60,8 +62,21 @@ export const PostFollowNotification = (props: PostFollowNotificationProps) => {
           }
         >
           <em>{follower.username} </em>
+        </Link>{" "}
+        followed your post{" "}
+        <Link
+          className={globalClasses.link}
+          to={followedPostURL}
+          onClick={() =>
+            !!logEvent &&
+            logEvent("open_post_from_post_follow_notification", {
+              title: title,
+              follower: follower,
+            })
+          }
+        >
+          {title}
         </Link>
-        followed your post {title}
       </Grid>
     </Grid>
   );
