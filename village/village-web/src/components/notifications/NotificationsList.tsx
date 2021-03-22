@@ -1,4 +1,4 @@
-import { CircularProgress, makeStyles } from "@material-ui/core";
+import { CircularProgress, Grid, makeStyles } from "@material-ui/core";
 import React, { CSSProperties, useCallback, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
@@ -12,6 +12,19 @@ import { ActivityNotificationMatcher } from "./ActivityNotificationMatcher";
 const useStyles = makeStyles((theme) => ({
   container: {
     height: "100vh",
+
+    borderLeftWidth: "1px",
+    borderLeftColor: "rgb(235, 238, 240)",
+    borderLeftStyle: "solid",
+
+    borderRightWidth: "1px",
+    borderRightColor: "rgb(235, 238, 240)",
+    borderRightStyle: "solid",
+  },
+  notificationRow: {
+    borderBottomWidth: "1px",
+    borderBottomColor: "rgb(235, 238, 240)",
+    borderBottomStyle: "solid",
   },
 }));
 
@@ -112,20 +125,28 @@ export const NotificationsList = (props: NotificationsListProps) => {
   );
 
   const NotificationRow = (args: { index: number; style: CSSProperties }) => {
-    if (!isItemLoaded(args.index)) {
-      return (
-        <div style={args.style}>
-          <CircularProgress />
-        </div>
-      );
-    } else {
-      const activity = cursoredActivities[args.index].activity;
-      return (
-        <div style={args.style}>
-          <ActivityNotificationMatcher activity={activity} />
-        </div>
-      );
-    }
+    const content = isItemLoaded(args.index) ? (
+      <div className={classes.notificationRow}>
+        <ActivityNotificationMatcher
+          activity={cursoredActivities[args.index].activity}
+        />
+      </div>
+    ) : (
+      <CircularProgress />
+    );
+
+    return (
+      <div style={args.style}>
+        <Grid
+          container
+          direction="column"
+          justify="center"
+          alignItems="stretch"
+        >
+          <Grid item>{content}</Grid>
+        </Grid>
+      </div>
+    );
   };
 
   return (

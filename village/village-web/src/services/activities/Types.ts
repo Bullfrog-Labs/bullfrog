@@ -1,6 +1,5 @@
-import { UserRecord } from "kmgmt-common";
 import { PostId } from "../store/Posts";
-import { UserId } from "../store/Users";
+import { UserId, UserRecord } from "../store/Users";
 
 export type PostTarget = {
   type: "post";
