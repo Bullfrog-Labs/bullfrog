@@ -9,24 +9,24 @@ import {
 } from "../../services/store/Activities";
 import { ActivityNotificationMatcher } from "./ActivityNotificationMatcher";
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    height: "100vh",
+const useStyles = makeStyles((theme) => {
+  const borderColor = theme.palette.grey[200];
+  return {
+    container: {
+      height: "calc(100vh - 100px)",
 
-    borderLeftWidth: "1px",
-    borderLeftColor: "rgb(235, 238, 240)",
-    borderLeftStyle: "solid",
-
-    borderRightWidth: "1px",
-    borderRightColor: "rgb(235, 238, 240)",
-    borderRightStyle: "solid",
-  },
-  notificationRow: {
-    borderBottomWidth: "1px",
-    borderBottomColor: "rgb(235, 238, 240)",
-    borderBottomStyle: "solid",
-  },
-}));
+      borderWidth: "0px 1px",
+      borderLeftColor: borderColor,
+      borderRightColor: borderColor,
+      borderStyle: "solid solid",
+    },
+    notificationRow: {
+      borderBottomWidth: "1px",
+      borderBottomColor: borderColor,
+      borderBottomStyle: "solid",
+    },
+  };
+});
 
 type NotificationListState = {
   isItemLoaded: (index: number) => boolean;
@@ -126,11 +126,9 @@ export const NotificationsList = (props: NotificationsListProps) => {
 
   const NotificationRow = (args: { index: number; style: CSSProperties }) => {
     const content = isItemLoaded(args.index) ? (
-      <div className={classes.notificationRow}>
-        <ActivityNotificationMatcher
-          activity={cursoredActivities[args.index].activity}
-        />
-      </div>
+      <ActivityNotificationMatcher
+        activity={cursoredActivities[args.index].activity}
+      />
     ) : (
       <CircularProgress />
     );
@@ -143,7 +141,9 @@ export const NotificationsList = (props: NotificationsListProps) => {
           justify="center"
           alignItems="stretch"
         >
-          <Grid item>{content}</Grid>
+          <Grid item>
+            <div className={classes.notificationRow}>{content}</div>
+          </Grid>
         </Grid>
       </div>
     );

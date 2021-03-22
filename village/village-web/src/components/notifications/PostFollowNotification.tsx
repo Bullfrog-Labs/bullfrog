@@ -1,12 +1,11 @@
 import { Grid, makeStyles } from "@material-ui/core";
+import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
 import React from "react";
 import { Link } from "react-router-dom";
 import { postURLById, profileURL } from "../../routing/URLs";
 import { Activity } from "../../services/activities/Types";
 import { LogEventFn } from "../../services/Analytics";
 import { useGlobalStyles } from "../../styles/styles";
-import LibraryAddIcon from "@material-ui/icons/LibraryAdd";
-import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -14,8 +13,14 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: "nowrap",
   },
   icon: {
-    marginLeft: theme.spacing(3),
-    marginRight: theme.spacing(10),
+    [theme.breakpoints.down("sm")]: {
+      marginLeft: theme.spacing(2),
+      marginRight: theme.spacing(3),
+    },
+    [theme.breakpoints.up("sm")]: {
+      marginLeft: theme.spacing(3),
+      marginRight: theme.spacing(11),
+    },
   },
   body: {},
 }));
