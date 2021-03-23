@@ -23,16 +23,6 @@ const ACTIVITY_RECORD_CONVERTER = {
   },
 };
 
-// Listen for new activities, paginate through old ones
-
-// Listening to query
-// https://firebase.google.com/docs/firestore/query-data/listen#listen_to_multiple_documents_in_a_collection
-
-export const listenForNewActivities = () => {};
-
-// Pagination
-// https://firebase.google.com/docs/firestore/query-data/query-cursors
-
 export type ActivityFeedCursor = firebase.firestore.DocumentSnapshot;
 export type CursoredActivity = {
   activity: Activity;
