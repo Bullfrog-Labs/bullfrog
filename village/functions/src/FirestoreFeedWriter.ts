@@ -1,5 +1,5 @@
-import { Activity, ActivityId, TimestampedActivity } from "./Activities";
 import * as admin from "firebase-admin";
+import { Activity, ActivityId, TimestampedActivity } from "./Activities";
 
 const activityPathFromFeedPath = (feedPath: string, activityId: ActivityId) =>
   `${feedPath}/${activityId}`;

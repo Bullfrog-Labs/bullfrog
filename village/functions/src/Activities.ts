@@ -1,5 +1,5 @@
-import { PostId, UserId } from "./Types";
 import * as admin from "firebase-admin";
+import { PostId, UserId } from "./Types";
 
 export type PostTarget = {
   type: "post";
