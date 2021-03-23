@@ -19,10 +19,12 @@ const useStyles = makeStyles((theme) => ({
     },
     [theme.breakpoints.up("sm")]: {
       marginLeft: theme.spacing(3),
-      marginRight: theme.spacing(11),
+      marginRight: theme.spacing(9),
     },
   },
-  body: {},
+  body: {
+    marginBottom: theme.spacing(1),
+  },
 }));
 
 export type PostFollowNotificationProps = {
@@ -48,7 +50,7 @@ export const PostFollowNotification = (props: PostFollowNotificationProps) => {
       container
       direction="row"
       justify="flex-start"
-      alignItems="flex-start"
+      alignItems="center"
       className={classes.container}
     >
       <Grid item className={classes.icon}>
