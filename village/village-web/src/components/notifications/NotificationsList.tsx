@@ -73,7 +73,8 @@ const useNotificationsListState = (
 
       // indexing between startIndex and stopIndex is inclusive of both endpoints.
       // if the startIndex is zero, there is no cursor to use, because it is the
-      // first query.
+      // first query. if the startIndex is non-zero, the cursor to be used is in
+      // startIndex-1 (the last previously-fetched record).
 
       // stopIndex passed in to this function will never be greater than
       // itemCount. However, we don't know how many items there are left to read,
