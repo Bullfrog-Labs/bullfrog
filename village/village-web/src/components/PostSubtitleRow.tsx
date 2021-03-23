@@ -19,7 +19,7 @@ import { HashLink } from "react-router-hash-link";
 import { useIsLoggedInAsAuthor } from "../hooks/posts/useIsLoggedInAsAuthor";
 import { profileURL } from "../routing/URLs";
 import { LogEventFn } from "../services/Analytics";
-import { useLoggedInUserFromAppAuthContext } from "../services/auth/AppAuth";
+import { useWhitelistedUserFromAppAuthContext } from "../services/auth/AppAuth";
 import { FollowablePostViewState } from "../services/follows/Types";
 import { DeletePostFn } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
@@ -99,7 +99,7 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
     history.push("/profile");
   };
 
-  const viewer = useLoggedInUserFromAppAuthContext();
+  const viewer = useWhitelistedUserFromAppAuthContext();
 
   return (
     <Grid
@@ -153,7 +153,7 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
                     logEvent(!isFollowed ? "follow_post" : "unfollow_post", {
                       title: postTitle,
                       author: author,
-                      follower: viewer,
+                      follower: viewer!,
                     });
                     followablePostViewState.setFollowed!(
                       author.uid,
