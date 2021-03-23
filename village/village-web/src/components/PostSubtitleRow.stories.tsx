@@ -44,6 +44,10 @@ const Template: Story<PostSubtitleRowProps> = (args) => {
 export const AuthorIsViewer = Template.bind({});
 AuthorIsViewer.args = {
   author: viewer,
+  followablePostViewState: {
+    followCount: 10,
+    isFollowableByViewer: false,
+  },
 };
 
 export const AuthorIsNotViewer = Template.bind({});
@@ -52,5 +56,9 @@ AuthorIsNotViewer.args = {
     uid: "456",
     displayName: "bar",
     username: "bar",
+  },
+  followablePostViewState: {
+    followCount: 10,
+    isFollowableByViewer: true,
   },
 };

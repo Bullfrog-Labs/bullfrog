@@ -14,3 +14,6 @@ ui-debug.log
 
 **/node_modules
 village-web/build/static/js
+
+# Firebase Emulator data exports
+saved-data/
