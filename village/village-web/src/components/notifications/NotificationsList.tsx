@@ -3,6 +3,7 @@ import React, { CSSProperties, useCallback, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
+import { LogEventFn } from "../../services/Analytics";
 import {
   CursoredActivity,
   GetCursoredActivitiesFromFeedFn,
@@ -108,6 +109,7 @@ const useNotificationsListState = (
 
 export type NotificationsListProps = {
   getCursoredActivitiesFromFeed: GetCursoredActivitiesFromFeedFn;
+  logEvent: LogEventFn;
 };
 
 export const NotificationsList = (props: NotificationsListProps) => {
@@ -128,6 +130,7 @@ export const NotificationsList = (props: NotificationsListProps) => {
     const content = isItemLoaded(args.index) ? (
       <ActivityNotificationMatcher
         activity={cursoredActivities[args.index].activity}
+        logEvent={props.logEvent}
       />
     ) : (
       <CircularProgress />

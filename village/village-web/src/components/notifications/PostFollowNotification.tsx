@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
 
 export type PostFollowNotificationProps = {
   activity: Activity;
-  logEvent?: LogEventFn;
+  logEvent: LogEventFn;
 };
 
 export const PostFollowNotification = (props: PostFollowNotificationProps) => {
@@ -61,9 +61,9 @@ export const PostFollowNotification = (props: PostFollowNotificationProps) => {
           className={globalClasses.link}
           to={followerProfileURL}
           onClick={() =>
-            !!logEvent &&
             logEvent("open_profile_from_post_follow_notification", {
               title: title,
+              postId: postId,
               follower: follower,
             })
           }
@@ -75,9 +75,9 @@ export const PostFollowNotification = (props: PostFollowNotificationProps) => {
           className={globalClasses.link}
           to={followedPostURL}
           onClick={() =>
-            !!logEvent &&
             logEvent("open_post_from_post_follow_notification", {
               title: title,
+              postId: postId,
               follower: follower,
             })
           }

@@ -214,6 +214,7 @@ export const Router = (props: RouterProps) => {
           <AppContainerWithProps>
             <NotificationsViewController
               getCursoredActivitiesFromFeed={getCursoredActivitiesFromFeed}
+              logEvent={logEvent}
             />
           </AppContainerWithProps>
         </PrivateRoute>
