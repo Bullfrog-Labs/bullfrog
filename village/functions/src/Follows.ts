@@ -199,7 +199,8 @@ export const buildNewPostFollowEntryHandler = (
   const notificationFeedPath = notificationFeedPathForUser(authorId);
 
   // Check that the event has not been processed yet, since this function must
-  // be idempotent. Idempotence depends on eventId.
+  // be idempotent. Idempotence depends on eventId, which is used here for
+  // activityId.
   if (await isActivityPresent(db, notificationFeedPath, activityId)) {
     functions.logger.info(
       `Activity with id ${activityId} already handled, skipping.`
@@ -208,7 +209,7 @@ export const buildNewPostFollowEntryHandler = (
   }
 
   // Read PostRecord and UserRecord to populate activity content.
-  const [postRecordDoc, userRecordDoc] = await Promise.all([
+  const [postRecordDoc, followerUserRecordDoc] = await Promise.all([
     db.doc(postPath({ authorId: authorId, postId: postId })).get(),
     db.doc(userPath(followerId)).get(),
   ]);
@@ -220,14 +221,14 @@ export const buildNewPostFollowEntryHandler = (
     return;
   }
 
-  if (!userRecordDoc.exists) {
+  if (!followerUserRecordDoc.exists) {
     functions.logger.warn(
       `Post follow activity with id ${activityId} has non-existent follower ${followerId}`
     );
     return;
   }
 
-  const followerUserRecord = userRecordDoc.data() as UserRecord;
+  const followerUserRecord = followerUserRecordDoc.data() as UserRecord;
 
   // Write: Add activity to author's notification feed
   const activity = postFollowActivity({
