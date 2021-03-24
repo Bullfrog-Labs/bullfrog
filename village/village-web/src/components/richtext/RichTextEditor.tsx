@@ -30,6 +30,7 @@ import {
   MARK_ITALIC,
   ToolbarMark,
   ELEMENT_BLOCKQUOTE,
+  getText,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@udecode/slate-plugins-core";
 import { Typography } from "@material-ui/core";
@@ -43,6 +44,7 @@ import {
 import { useGlobalStyles } from "../../styles/styles";
 import theme from "../../styles/theme";
 import { LogEventFn } from "../../services/Analytics";
+import { isEmptyDoc } from "./Utils";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -112,6 +114,11 @@ const RichTextEditor = forwardRef<
   const editorOptions =
     options || (readOnly ? postViewerOptions : postEditorOptions);
 
+  // The reason we don't show toolbar for an empty doc is that there is some bug
+  // which causes the doc to crash if the doc is empty, because the toolbar can't
+  // handle it. See this issue for details: shorturl.at/dyJP5
+  const showToolbar = !isEmptyDoc(body) && !readOnly;
+
   // A little hacky, but fine.
   addMentionsClickHandler(editorOptions, logEvent);
 
@@ -176,14 +183,16 @@ const RichTextEditor = forwardRef<
         onChangeMention(editor);
       }}
     >
-      <BalloonToolbar direction="top" hiddenDelay={500}>
-        <ToolbarElement type={ELEMENT_H2} icon={<LooksOne />} />
-        <ToolbarElement type={ELEMENT_H3} icon={<LooksTwo />} />
-        <ToolbarElement type={ELEMENT_BLOCKQUOTE} icon={<FormatQuote />} />
-        <ToolbarMark type={MARK_BOLD} icon={<FormatBold />} />
-        <ToolbarMark type={MARK_ITALIC} icon={<FormatItalic />} />
-        <ToolbarMark type={MARK_CODE} icon={<CodeAlt />} />
-      </BalloonToolbar>
+      {showToolbar && (
+        <BalloonToolbar direction="top" hiddenDelay={500}>
+          <ToolbarElement type={ELEMENT_H2} icon={<LooksOne />} />
+          <ToolbarElement type={ELEMENT_H3} icon={<LooksTwo />} />
+          <ToolbarElement type={ELEMENT_BLOCKQUOTE} icon={<FormatQuote />} />
+          <ToolbarMark type={MARK_BOLD} icon={<FormatBold />} />
+          <ToolbarMark type={MARK_ITALIC} icon={<FormatItalic />} />
+          <ToolbarMark type={MARK_CODE} icon={<CodeAlt />} />
+        </BalloonToolbar>
+      )}
       <EditablePlugins
         plugins={plugins}
         readOnly={readOnly ?? false}
