@@ -109,6 +109,12 @@ function App() {
           throw new Error("Could not find user record");
         }
         setAuthCompleted(true);
+
+        if (!userExists && window.location.pathname === "/login") {
+          // This page load occurred from login for a new user. Redirect to the
+          // starting location for new users.
+          window.location.pathname = "/";
+        }
       }
     };
     fetchUser();
