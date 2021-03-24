@@ -1,11 +1,12 @@
 import React, {
   useEffect,
   useMemo,
+  useRef,
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { ReactEditor, Slate } from "slate-react";
-import { createEditor, Operation } from "slate";
+import { ReactEditor, Slate, useFocused } from "slate-react";
+import { createEditor, Operation, Transforms } from "slate";
 import { CodeAlt } from "@styled-icons/boxicons-regular/CodeAlt";
 import { RichText } from "./Types";
 import {
@@ -119,7 +120,16 @@ const RichTextEditor = forwardRef<
     () => EditorPlugins.createPlugins(editorOptions),
     [editorOptions]
   );
-  const editor = useMemo(() => pipe(createEditor(), decorator), [decorator]);
+
+  // We use a ref here because the editor instance must not change across reloads, but
+  // hot reload in react will force even useMemo to reload.
+  const editorRef = useRef<ReactEditor>();
+  if (!editorRef.current) {
+    editorRef.current = pipe(createEditor(), decorator);
+  }
+
+  const editor = editorRef.current;
+
   const globalClasses = useGlobalStyles();
 
   const {
@@ -167,6 +177,32 @@ const RichTextEditor = forwardRef<
     onMentionAdded(option);
   };
 
+  /**
+   * There's a bug - in slate i think - where the selection and content of
+   * the doc are not always kept in sync. When plugins like this one try to
+   * perform operations that depend on both the content and the selection
+   * they sometimes crash when you ex. navigate between pages. For the
+   * toolbar we can avoid issues by not enabling unless we have Focus. Focus
+   * seems to reset the selection.
+   */
+  const Toolbar = () => {
+    const focused = useFocused();
+    if (focused) {
+      return (
+        <BalloonToolbar direction="top" hiddenDelay={500}>
+          <ToolbarElement type={ELEMENT_H2} icon={<LooksOne />} />
+          <ToolbarElement type={ELEMENT_H3} icon={<LooksTwo />} />
+          <ToolbarElement type={ELEMENT_BLOCKQUOTE} icon={<FormatQuote />} />
+          <ToolbarMark type={MARK_BOLD} icon={<FormatBold />} />
+          <ToolbarMark type={MARK_ITALIC} icon={<FormatItalic />} />
+          <ToolbarMark type={MARK_CODE} icon={<CodeAlt />} />
+        </BalloonToolbar>
+      );
+    } else {
+      return <></>;
+    }
+  };
+
   return (
     <Slate
       editor={editor}
@@ -176,14 +212,6 @@ const RichTextEditor = forwardRef<
         onChangeMention(editor);
       }}
     >
-      <BalloonToolbar direction="top" hiddenDelay={500}>
-        <ToolbarElement type={ELEMENT_H2} icon={<LooksOne />} />
-        <ToolbarElement type={ELEMENT_H3} icon={<LooksTwo />} />
-        <ToolbarElement type={ELEMENT_BLOCKQUOTE} icon={<FormatQuote />} />
-        <ToolbarMark type={MARK_BOLD} icon={<FormatBold />} />
-        <ToolbarMark type={MARK_ITALIC} icon={<FormatItalic />} />
-        <ToolbarMark type={MARK_CODE} icon={<CodeAlt />} />
-      </BalloonToolbar>
       <EditablePlugins
         plugins={plugins}
         readOnly={readOnly ?? false}
@@ -212,6 +240,7 @@ const RichTextEditor = forwardRef<
           }}
         />
       )}
+      <Toolbar />
     </Slate>
   );
 });
