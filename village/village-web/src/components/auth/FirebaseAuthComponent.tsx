@@ -1,9 +1,11 @@
+import { Button, Grid } from "@material-ui/core";
 import firebase from "firebase/app";
 import firebaseui from "firebaseui";
 import * as log from "loglevel";
 import React, { FunctionComponent } from "react";
 import { StyledFirebaseAuth } from "react-firebaseui";
 import { useLocation } from "react-router-dom";
+import { useWhitelistedUserFromAppAuthContext } from "../../services/auth/AppAuth";
 import FirebaseAuthProvider from "../../services/auth/FirebaseAuthProvider";
 
 interface LocationState {
@@ -64,7 +66,24 @@ export const FirebaseAuthComponent: FunctionComponent<FirebaseAuthComponentProps
     signInSuccessUrl: postLoginRedirect.from.pathname,
   };
 
+  const loggedInUserRecord = useWhitelistedUserFromAppAuthContext();
+
   return (
-    <StyledFirebaseAuth uiConfig={config} firebaseAuth={authProvider.auth} />
+    <Grid container direction="column" alignItems="center" justify="center">
+      <Grid item>
+        <StyledFirebaseAuth
+          uiConfig={config}
+          firebaseAuth={authProvider.auth}
+        />
+      </Grid>
+
+      {!!loggedInUserRecord && (
+        <Grid item>
+          <Button color="primary" variant="contained" href="/profile">
+            Click here to go to your profile, {loggedInUserRecord.username}
+          </Button>
+        </Grid>
+      )}
+    </Grid>
   );
 };
