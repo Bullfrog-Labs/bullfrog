@@ -6,30 +6,13 @@ import React, {
 } from "react";
 import { ReactEditor, Slate } from "slate-react";
 import { createEditor, Operation } from "slate";
-import { CodeAlt } from "@styled-icons/boxicons-regular/CodeAlt";
 import { RichText } from "./Types";
-import {
-  FormatBold,
-  FormatItalic,
-  LooksOne,
-  LooksTwo,
-  FormatQuote,
-} from "@styled-icons/material";
 import * as log from "loglevel";
 import {
   MentionSelect,
   MentionNodeData,
-  ToolbarElement,
   useMention,
   pipe,
-  ELEMENT_H2,
-  ELEMENT_H3,
-  BalloonToolbar,
-  MARK_CODE,
-  MARK_BOLD,
-  MARK_ITALIC,
-  ToolbarMark,
-  ELEMENT_BLOCKQUOTE,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@udecode/slate-plugins-core";
 import { Typography } from "@material-ui/core";
@@ -176,14 +159,6 @@ const RichTextEditor = forwardRef<
         onChangeMention(editor);
       }}
     >
-      <BalloonToolbar direction="top" hiddenDelay={500}>
-        <ToolbarElement type={ELEMENT_H2} icon={<LooksOne />} />
-        <ToolbarElement type={ELEMENT_H3} icon={<LooksTwo />} />
-        <ToolbarElement type={ELEMENT_BLOCKQUOTE} icon={<FormatQuote />} />
-        <ToolbarMark type={MARK_BOLD} icon={<FormatBold />} />
-        <ToolbarMark type={MARK_ITALIC} icon={<FormatItalic />} />
-        <ToolbarMark type={MARK_CODE} icon={<CodeAlt />} />
-      </BalloonToolbar>
       <EditablePlugins
         plugins={plugins}
         readOnly={readOnly ?? false}
