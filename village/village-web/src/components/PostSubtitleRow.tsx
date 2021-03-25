@@ -126,9 +126,8 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
       <Grid item>
         <Grid
           container
-          direction={matchesUpSmBreakpoint ? "row" : "column"}
-          alignItems={matchesUpSmBreakpoint ? "center" : "flex-start"}
-          spacing={matchesUpSmBreakpoint ? 5 : 0}
+          alignItems="center"
+          spacing={matchesUpSmBreakpoint ? 5 : 1}
         >
           <Grid item>
             <Grid
@@ -275,18 +274,3 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
     </Grid>
   );
 });
-
-/*
- 
-        <Typography
-          variant="body1"
-          className={globalClasses.postSubtitle}
-          paragraph={false}
-          component="div"
-        >
-          <div>
-            <span className={classes.subtitlePart}>
-           </span>
-          </div>
-        </Typography>
-        */
