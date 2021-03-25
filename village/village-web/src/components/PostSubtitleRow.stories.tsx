@@ -60,5 +60,12 @@ AuthorIsNotViewer.args = {
   followablePostViewState: {
     followCount: 10,
     isFollowableByViewer: true,
+    setFollowed: async () => {
+      return new Promise((resolve) =>
+        setTimeout(() => {
+          resolve();
+        }, 2000)
+      );
+    },
   },
 };

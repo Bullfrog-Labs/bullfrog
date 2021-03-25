@@ -149,13 +149,13 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
                     followed: "Unfollow this post",
                     notFollowed: "Follow to get updates on this post",
                   }}
-                  onClick={(isFollowed) => {
+                  onClick={async (isFollowed) => {
                     logEvent(!isFollowed ? "follow_post" : "unfollow_post", {
                       title: postTitle,
                       author: author,
                       follower: viewer!,
                     });
-                    followablePostViewState.setFollowed!(
+                    await followablePostViewState.setFollowed!(
                       author.uid,
                       postId,
                       !isFollowed
