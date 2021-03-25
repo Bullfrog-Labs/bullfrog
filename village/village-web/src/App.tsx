@@ -5,11 +5,12 @@ import { useEffect, useState } from "react";
 import { Router } from "./routing/Router";
 import { logEvent, setCurrentScreen } from "./services/Analytics";
 import { AppAuthContext } from "./services/auth/AppAuth";
-import { getUserId, useAuthState, isWhitelisted } from "./services/auth/Auth";
+import { isWhitelisted, useAuthState } from "./services/auth/Auth";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
 import { initializeFirebaseApp } from "./services/Firebase";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
 import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
+import { getCursoredActivitiesFromFeed } from "./services/store/Activities";
 import { FirestoreDatabase } from "./services/store/FirestoreDatabase";
 import {
   listenForUserPostFollow,
@@ -108,6 +109,12 @@ function App() {
           throw new Error("Could not find user record");
         }
         setAuthCompleted(true);
+
+        if (!userExists && window.location.pathname === "/login") {
+          // This page load occurred from login for a new user. Redirect to the
+          // starting location for new users.
+          window.location.pathname = "/";
+        }
       }
     };
     fetchUser();
@@ -160,6 +167,9 @@ function App() {
             logEvent={logEvent(app.analytics())}
             setCurrentScreen={setCurrentScreen(app.analytics())}
             curriedFollowablePostCallbacks={followablePostCallbacks}
+            getCursoredActivitiesFromFeed={getCursoredActivitiesFromFeed(
+              database
+            )}
             isSitePublic={isSitePublic}
           />
         </AppAuthContext.Provider>

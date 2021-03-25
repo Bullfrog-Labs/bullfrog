@@ -25,6 +25,7 @@ import {
 } from "../services/follows/Types";
 import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
+import { GetCursoredActivitiesFromFeedFn } from "../services/store/Activities";
 import {
   CreatePostFn,
   DeletePostFn,
@@ -38,6 +39,7 @@ import {
 } from "../services/store/Posts";
 import { GetUserByUsernameFn, GetUserFn } from "../services/store/Users";
 import MainView from "../views/MainView";
+import { NotificationsViewController } from "../views/NotificationsView";
 import { PostViewController } from "../views/PostView";
 import { SignupClickRegisterView } from "../views/SignupClickRegisterView";
 import { SignupView } from "../views/SignupView";
@@ -97,6 +99,8 @@ export type RouterProps = {
 
   curriedFollowablePostCallbacks: CurriedFollowablePostCallbacks;
 
+  getCursoredActivitiesFromFeed: CurriedByUser<GetCursoredActivitiesFromFeedFn>;
+
   isSitePublic: boolean;
 };
 
@@ -119,6 +123,7 @@ export const Router = (props: RouterProps) => {
     logEvent,
     setCurrentScreen,
     curriedFollowablePostCallbacks,
+    getCursoredActivitiesFromFeed,
     isSitePublic,
   } = props;
 
@@ -205,6 +210,14 @@ export const Router = (props: RouterProps) => {
             />
           </AppContainerWithProps>
         </MaybePrivateRoute>
+        <PrivateRoute exact path="/notifications">
+          <AppContainerWithProps>
+            <NotificationsViewController
+              getCursoredActivitiesFromFeed={getCursoredActivitiesFromFeed}
+              logEvent={logEvent}
+            />
+          </AppContainerWithProps>
+        </PrivateRoute>
         <Route path="*">
           <Sad404 />
         </Route>
