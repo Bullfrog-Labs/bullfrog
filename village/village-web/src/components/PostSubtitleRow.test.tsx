@@ -80,7 +80,7 @@ test("handle delete post", () => {
 });
 
 describe("follow button is handled correctly", () => {
-  const renderComponent = (
+  const setupMocksAndRenderComponent = (
     isFollowableByViewer: boolean,
     state: {
       isFollowedByViewer: boolean;
@@ -129,7 +129,9 @@ describe("follow button is handled correctly", () => {
   };
 
   test("unfollowable posts do not display follow button", () => {
-    const testSetup = renderComponent(false, { isFollowedByViewer: false });
+    const testSetup = setupMocksAndRenderComponent(false, {
+      isFollowedByViewer: false,
+    });
     expect(
       testSetup.screen.queryByRole("button", { name: /^Unfollow/ })
     ).not.toBeInTheDocument();
@@ -140,7 +142,7 @@ describe("follow button is handled correctly", () => {
 
   test("Follow works for unfollowed post", async () => {
     const state = { isFollowedByViewer: false };
-    const testSetup = renderComponent(true, state);
+    const testSetup = setupMocksAndRenderComponent(true, state);
     const { screen, mockSetFollowed } = testSetup;
 
     const followElement = screen.getByRole("button", {
@@ -156,7 +158,7 @@ describe("follow button is handled correctly", () => {
 
   test("unfollow works for followed post", async () => {
     const state = { isFollowedByViewer: true };
-    const testSetup = renderComponent(true, state);
+    const testSetup = setupMocksAndRenderComponent(true, state);
     const { screen, mockSetFollowed } = testSetup;
 
     const unfollowElement = screen.getByRole("button", {
