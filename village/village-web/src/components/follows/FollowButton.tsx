@@ -1,12 +1,21 @@
 import {
   CircularProgress,
   IconButton,
+  makeStyles,
   Tooltip,
   useTheme,
 } from "@material-ui/core";
 import LibraryAddIcon from "@material-ui/icons/LibraryAdd";
 import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
 import React, { useState } from "react";
+
+const useStyles = makeStyles((theme) => ({
+  progressIndicator: {
+    marginLeft: theme.spacing(0.5),
+    marginRight: theme.spacing(0.5),
+    marginTop: theme.spacing(0.5),
+  },
+}));
 
 export type FollowButtonProps = {
   isFollowed: boolean;
@@ -18,7 +27,9 @@ export type FollowButtonProps = {
 };
 
 export const FollowButton = (props: FollowButtonProps) => {
+  const classes = useStyles();
   const theme = useTheme();
+
   const tooltip = props.isFollowed
     ? props.tooltip.followed
     : props.tooltip.notFollowed;
@@ -31,12 +42,16 @@ export const FollowButton = (props: FollowButtonProps) => {
   };
 
   if (isWaitingOnAPICall) {
-    return <CircularProgress size={theme.spacing(2.25)} />;
+    return (
+      <div className={classes.progressIndicator}>
+        <CircularProgress size={theme.spacing(2)} />
+      </div>
+    );
   }
 
   return (
     <Tooltip title={tooltip}>
-      <IconButton size="small" style={{ marginLeft: "-3px" }} onClick={onClick}>
+      <IconButton size="small" onClick={onClick}>
         {props.isFollowed ? (
           <LibraryAddCheckIcon fontSize={"inherit"} />
         ) : (
