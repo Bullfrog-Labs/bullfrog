@@ -122,6 +122,15 @@ const RichTextEditor = forwardRef<
     blurEditor: () => ReactEditor.blur(editor),
   }));
 
+  let initialMentionSelectIndex = 0;
+  if (
+    mentionables.length > 0 &&
+    mentionables[0].hasOwnProperty("exists") &&
+    mentionables[0].exists === false
+  ) {
+    initialMentionSelectIndex = 1;
+  }
+
   const {
     onAddMention,
     onChangeMention,
@@ -130,9 +139,14 @@ const RichTextEditor = forwardRef<
     index,
     target,
     values,
-  } = useMention(mentionables, onMentionAdded, {
-    maxSuggestions: 10,
-  });
+  } = useMention(
+    mentionables,
+    onMentionAdded,
+    {
+      maxSuggestions: 10,
+    },
+    initialMentionSelectIndex
+  );
 
   useEffect(() => {
     onMentionSearchChanged(search);
