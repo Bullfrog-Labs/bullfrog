@@ -207,8 +207,11 @@ export const exitBreakOptions: ExitBreakPluginOptions = {
       query: {
         start: true,
         end: true,
-        allow: headingTypes,
+        allow: [...headingTypes],
       },
+    },
+    {
+      hotkey: "enter",
     },
   ],
 };
