@@ -6,6 +6,8 @@ import {
   MenuItem,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@material-ui/core";
 import CallReceivedIcon from "@material-ui/icons/CallReceived";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -52,6 +54,8 @@ export type PostSubtitleRowProps = {
 export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
   const globalClasses = useGlobalStyles();
   const classes = useStyles();
+  const theme = useTheme();
+
   const logger = log.getLogger("PostSubtitleRow");
   const {
     deletePost,
@@ -98,6 +102,8 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
 
   const viewer = useWhitelistedUserFromAppAuthContext();
 
+  const matchesUpSmBreakpoint = useMediaQuery(theme.breakpoints.up("sm"));
+
   return (
     <Grid
       container
@@ -118,7 +124,12 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
         </Grid>
       )}
       <Grid item>
-        <Grid container alignItems="center" spacing={5}>
+        <Grid
+          container
+          direction={matchesUpSmBreakpoint ? "row" : "column"}
+          alignItems={matchesUpSmBreakpoint ? "center" : "flex-start"}
+          spacing={matchesUpSmBreakpoint ? 5 : 0}
+        >
           <Grid item>
             <Grid
               container
