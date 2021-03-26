@@ -1,22 +1,25 @@
 import {
-  Drawer,
-  Divider,
-  makeStyles,
   createStyles,
-  useTheme,
+  Divider,
+  Drawer,
+  Grid,
   IconButton,
   List,
+  ListItem,
   ListItemIcon,
   ListItemText,
-  ListItem,
-  Grid,
-  Box,
+  makeStyles,
+  useTheme,
 } from "@material-ui/core";
-import React, { useState } from "react";
-import clsx from "clsx";
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import NotificationsIcon from "@material-ui/icons/Notifications";
+import clsx from "clsx";
+import React, { useState } from "react";
+import { useHistory } from "react-router";
+import { notificationsURL, profileURL } from "../../routing/URLs";
+import { useLoggedInUserFromAppAuthContext } from "../../services/auth/AppAuth";
 
 const drawerWidth = 30;
 
@@ -73,6 +76,9 @@ export const AuthedAppDrawer = (props: AuthedAppDrawerProps) => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
 
+  const history = useHistory();
+  const viewer = useLoggedInUserFromAppAuthContext();
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -115,19 +121,59 @@ export const AuthedAppDrawer = (props: AuthedAppDrawerProps) => {
       <Grid
         container
         direction="column"
-        justify="flex-end"
+        justify="space-between"
         alignItems="stretch"
         className={classes.drawerPaper}
       >
         <Grid item>
-          <List>
-            <ListItem button key={"Notifications"}>
-              <ListItemIcon>
-                <NotificationsIcon />
-              </ListItemIcon>
-              <ListItemText primary="Notifications" />
-            </ListItem>
-          </List>
+          <Grid
+            container
+            direction="column"
+            justify="flex-start"
+            alignItems="stretch"
+          >
+            <Grid item>
+              <List>
+                <ListItem
+                  button
+                  key={"Notifications"}
+                  onClick={() => history.push(notificationsURL)}
+                >
+                  <ListItemIcon>
+                    <NotificationsIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Notifications" />
+                </ListItem>
+              </List>
+            </Grid>
+          </Grid>
+          <Divider />
+        </Grid>
+
+        <Grid item>
+          <Divider />
+
+          <Grid
+            container
+            direction="column"
+            justify="flex-end"
+            alignItems="stretch"
+          >
+            <Grid item>
+              <List>
+                <ListItem
+                  button
+                  key={"Profile"}
+                  onClick={() => history.push(profileURL(viewer.username))}
+                >
+                  <ListItemIcon>
+                    <AccountCircleIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={viewer.username} />
+                </ListItem>
+              </List>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </Drawer>

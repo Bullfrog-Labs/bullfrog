@@ -9,3 +9,5 @@ export const postURLById = (authorId: UserId, postId: PostId): Path =>
   `/post/${authorId}/${postId}?byId=1`;
 
 export const profileURL = (username: string): Path => `/profile/${username}`;
+
+export const notificationsURL = "/notifications";
