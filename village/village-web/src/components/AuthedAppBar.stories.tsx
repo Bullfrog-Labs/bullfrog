@@ -2,7 +2,7 @@ import { Meta, Story } from "@storybook/react/types-6-0";
 import { AuthedAppBar, AuthedAppBarProps } from "./AuthedAppBar";
 
 export default {
-  title: "AppBar/AuthedAppBar",
+  title: "Navigation/AuthedAppBar",
   component: AuthedAppBar,
 } as Meta;
 

@@ -1,11 +1,11 @@
 import {
   Container,
   CssBaseline,
-  Divider,
-  Drawer,
   Grid,
   makeStyles,
   MuiThemeProvider,
+  useMediaQuery,
+  useTheme,
 } from "@material-ui/core";
 import React, { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -20,28 +20,20 @@ import { CreatePostFn } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
 import { SIGNUP_TYPEFORM_URL } from "../services/Typeform";
 import theme from "../styles/theme";
+import { AuthedAppBar } from "./AuthedAppBar";
+import { AuthedAppDrawer } from "./navigation/AuthedAppDrawer";
 import {
   AUTOCOMPLETE_SEARCH_BOX_ESCKEY,
   AUTOCOMPLETE_SEARCH_BOX_HOTKEY,
   useAutocompleteSearchBoxDialog,
 } from "./search/AutocompleteSearchBox";
-import { SignupCTAButton } from "./signup/SignupCTAButton";
 import { SearchOrCreateFab } from "./search/SearchOrCreateFab";
-import { AuthedAppBar } from "./AuthedAppBar";
+import { SignupCTAButton } from "./signup/SignupCTAButton";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
     flexGrow: 1,
-  },
-  drawer: {
-    flexShrink: 0,
-  },
-  drawerPaper: {},
-  // necessary for content to be below app bar
-  toolbar: theme.mixins.toolbar,
-  drawerIcon: {
-    minWidth: "0px",
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -75,6 +67,7 @@ const useStyles = makeStyles((theme) => ({
 interface BaseAppContainerProps extends React.PropsWithChildren<{}> {
   autocompleteSearchBoxDialog?: React.ReactChild;
   appBar?: React.ReactChild;
+  appDrawer?: React.ReactChild;
 }
 
 const BaseAppContainer = (props: BaseAppContainerProps) => {
@@ -85,20 +78,9 @@ const BaseAppContainer = (props: BaseAppContainerProps) => {
       <CssBaseline />
       {!!props.autocompleteSearchBoxDialog && props.autocompleteSearchBoxDialog}
       <div className={classes.root}>
-        <Drawer
-          className={classes.drawer}
-          variant="permanent"
-          classes={{
-            paper: classes.drawerPaper,
-          }}
-          anchor="left"
-        >
-          <div className={classes.toolbar} />
-          <Divider />
-        </Drawer>
+        {!!props.appDrawer && props.appDrawer}
         <Grid container direction="column">
           {!!props.appBar && <Grid item>{props.appBar}</Grid>}
-
           <Grid item>
             <main className={classes.content}>
               <Container maxWidth="sm" className={classes.container}>
@@ -157,10 +139,17 @@ const AuthedAppContainer = (props: AuthedAppContainerProps) => {
     autocompleteSearchBox.setDialogOpen(false);
   });
 
+  const theme = useTheme();
+
+  const [appDrawer, appBar] = useMediaQuery(theme.breakpoints.up("sm"))
+    ? [<AuthedAppDrawer />, undefined]
+    : [undefined, <AuthedAppBar />];
+
   return (
     <BaseAppContainer
       autocompleteSearchBoxDialog={autocompleteSearchBox.dialog}
-      appBar={<AuthedAppBar />}
+      appDrawer={appDrawer}
+      appBar={appBar}
     >
       {!autocompleteSearchBox.dialogOpen && (
         <SearchOrCreateFab
