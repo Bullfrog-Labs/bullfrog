@@ -1,25 +1,60 @@
 import {
   AppBar,
-  Button,
+  CssBaseline,
   IconButton,
+  makeStyles,
+  Slide,
   Toolbar,
-  Typography,
+  useScrollTrigger,
 } from "@material-ui/core";
-import React from "react";
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import MenuIcon from "@material-ui/icons/Menu";
+import NotificationsIcon from "@material-ui/icons/Notifications";
+import React from "react";
+import { useHistory } from "react-router";
+import { notificationsURL, profileURL } from "../routing/URLs";
+import { useLoggedInUserFromAppAuthContext } from "../services/auth/AppAuth";
+
+const useStyles = makeStyles((theme) => ({
+  grow: {
+    flexGrow: 1,
+  },
+}));
 
 export type AuthedAppBarProps = {};
 
 export const AuthedAppBar = (props: AuthedAppBarProps) => {
+  const classes = useStyles();
+  const trigger = useScrollTrigger();
+  const history = useHistory();
+  const viewer = useLoggedInUserFromAppAuthContext();
+
   return (
-    <AppBar position="static" color="primary">
-      <Toolbar>
-        <IconButton edge="start" color="inherit" aria-label="menu">
-          <MenuIcon />
-        </IconButton>
-        <Typography variant="h6">News</Typography>
-        <Button color="inherit">Login</Button>
-      </Toolbar>
-    </AppBar>
+    <React.Fragment>
+      <CssBaseline />
+      <Slide appear={false} direction="down" in={!trigger}>
+        <AppBar color="primary">
+          <Toolbar>
+            <IconButton edge="start" color="inherit" aria-label="menu">
+              <MenuIcon />
+            </IconButton>
+            <div className={classes.grow} />
+            <IconButton
+              color="inherit"
+              onClick={() => history.push(notificationsURL)}
+            >
+              <NotificationsIcon />
+            </IconButton>
+            <IconButton
+              edge="end"
+              color="inherit"
+              onClick={() => history.push(profileURL(viewer.username))}
+            >
+              <AccountCircleIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+      </Slide>
+    </React.Fragment>
   );
 };
