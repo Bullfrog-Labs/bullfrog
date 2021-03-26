@@ -390,6 +390,7 @@ export const EditablePostView = forwardRef<
   PostViewImperativeHandle,
   EditablePostViewProps
 >((props, ref) => {
+  const globalClasses = useGlobalStyles();
   const logger = log.getLogger("EditablePostView");
 
   const {
@@ -405,7 +406,6 @@ export const EditablePostView = forwardRef<
   const {
     getGlobalMentions,
     createPost,
-    deletePost,
     syncBody,
     renamePost,
   } = editablePostCallbacks;
@@ -433,6 +433,13 @@ export const EditablePostView = forwardRef<
   const saveIndicatorState = useSaveIndicatorState();
   const [saveStatus, setSaveStatus] = saveIndicatorState.saveStatus;
   const [saveIndicatorOpen, setSaveIndicatorOpen] = saveIndicatorState.open;
+
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deletePost: DeletePostFn = async (...args) => {
+    setIsDeleting(true);
+    await editablePostCallbacks.deletePost(...args);
+    setIsDeleting(false);
+  };
 
   const buildOnIdle = (
     documentTitleRef: RefObject<EditableTypographyImperativeHandle>
@@ -614,7 +621,11 @@ export const EditablePostView = forwardRef<
     blurBody: () => richTextEditorRef.current?.blurEditor(),
   }));
 
-  return <BasePostView postView={postView} mentions={props.mentions} />;
+  return isDeleting ? (
+    <CircularProgress className={globalClasses.loadingIndicator} />
+  ) : (
+    <BasePostView postView={postView} mentions={props.mentions} />
+  );
 });
 
 export type PostViewControllerProps = {
