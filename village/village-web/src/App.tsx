@@ -38,6 +38,7 @@ import { buildIsUserWhitelisted } from "./services/store/Whitelist";
 import { buildLookupTwitterUser } from "./services/Twitter";
 import { useGlobalStyles } from "./styles/styles";
 import { LoginView } from "./views/LoginView";
+import { ONBOARDING_POST_BODY } from "./content/onboarding";
 
 Logging.configure(log);
 
@@ -92,11 +93,18 @@ function App() {
             `User record does not exist for user ${authProviderState.uid}`
           );
 
-          await createNewUserRecord(
+          const user = await createNewUserRecord(
             database,
             lookupTwitterUser,
             authProviderState
           );
+
+          const result = await createPost(database)(user)({
+            newTitle: "Welcome to Village!",
+            newBody: ONBOARDING_POST_BODY,
+          });
+
+          logger.debug(`create post result ${result}`);
         }
 
         const user = await getUser(database)(authProviderState.uid);

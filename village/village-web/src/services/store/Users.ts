@@ -155,7 +155,7 @@ export const createNewUserRecord = async (
   database: Database,
   lookupTwitterUser: LookupTwitterUserFn,
   authProviderState: AuthProviderState
-): Promise<void> => {
+): Promise<UserRecord> => {
   const logger = log.getLogger("createNewUserRecord");
   logger.debug(`creating new user record for user ${authProviderState.uid}`);
 
@@ -173,4 +173,5 @@ export const createNewUserRecord = async (
   logger.debug(
     `done creating new user record for user ${authProviderState.uid}`
   );
+  return newUserRecord;
 };
