@@ -3,6 +3,7 @@ import {
   CssBaseline,
   Divider,
   Drawer,
+  Grid,
   makeStyles,
   MuiThemeProvider,
 } from "@material-ui/core";
@@ -26,10 +27,12 @@ import {
 } from "./search/AutocompleteSearchBox";
 import { SignupCTAButton } from "./signup/SignupCTAButton";
 import { SearchOrCreateFab } from "./search/SearchOrCreateFab";
+import { AuthedAppBar } from "./AuthedAppBar";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
+    flexGrow: 1,
   },
   drawer: {
     flexShrink: 0,
@@ -71,6 +74,7 @@ const useStyles = makeStyles((theme) => ({
 
 interface BaseAppContainerProps extends React.PropsWithChildren<{}> {
   autocompleteSearchBoxDialog?: React.ReactChild;
+  appBar?: React.ReactChild;
 }
 
 const BaseAppContainer = (props: BaseAppContainerProps) => {
@@ -92,12 +96,18 @@ const BaseAppContainer = (props: BaseAppContainerProps) => {
           <div className={classes.toolbar} />
           <Divider />
         </Drawer>
-        <main className={classes.content}>
-          <Container maxWidth="sm" className={classes.container}>
-            <div />
-            {props.children}
-          </Container>
-        </main>
+        <Grid container direction="column">
+          {!!props.appBar && <Grid item>{props.appBar}</Grid>}
+
+          <Grid item>
+            <main className={classes.content}>
+              <Container maxWidth="sm" className={classes.container}>
+                <div />
+                {props.children}
+              </Container>
+            </main>
+          </Grid>
+        </Grid>
       </div>
     </MuiThemeProvider>
   );
@@ -150,6 +160,7 @@ const AuthedAppContainer = (props: AuthedAppContainerProps) => {
   return (
     <BaseAppContainer
       autocompleteSearchBoxDialog={autocompleteSearchBox.dialog}
+      appBar={<AuthedAppBar />}
     >
       {!autocompleteSearchBox.dialogOpen && (
         <SearchOrCreateFab
