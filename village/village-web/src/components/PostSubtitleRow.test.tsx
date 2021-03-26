@@ -79,13 +79,21 @@ test("handle delete post", () => {
   expect(mockDeletePost).toHaveBeenCalled();
 });
 
-test("handle follow post", async () => {
-  const mockDeletePost = jest.fn();
-
-  const renderComponent = (
-    isFollowedByViewer: boolean,
-    isFollowableByViewer: boolean
+describe("follow button is handled correctly", () => {
+  const setupMocksAndRenderComponent = (
+    isFollowableByViewer: boolean,
+    state: {
+      isFollowedByViewer: boolean;
+    }
   ) => {
+    const mockDeletePost = jest.fn();
+
+    const mockSetFollowed = jest.fn(
+      async (authorId: UserId, postId: PostId, isFollowed: boolean) => {
+        state.isFollowedByViewer = isFollowed;
+      }
+    );
+
     const screen = render(
       <AppAuthContext.Provider value={userToAppAuthState(u0)}>
         <MemoryRouter initialEntries={["/"]} initialIndex={0}>
@@ -102,7 +110,7 @@ test("handle follow post", async () => {
             deletePost={mockDeletePost}
             followablePostViewState={{
               followCount: 0,
-              isFollowedByViewer: isFollowedByViewer,
+              isFollowedByViewer: state.isFollowedByViewer,
               isFollowableByViewer: isFollowableByViewer,
               setFollowed: mockSetFollowed,
             }}
@@ -110,45 +118,57 @@ test("handle follow post", async () => {
         </MemoryRouter>
       </AppAuthContext.Provider>
     );
-    return screen;
+
+    return {
+      screen: screen,
+      mockDeletePost: jest.fn(),
+      mockSetFollowed: mockSetFollowed,
+      isFollowableByViewer: isFollowableByViewer,
+      isFollowedByViewer: state.isFollowedByViewer,
+    };
   };
 
-  let isFollowedByViewer = false;
-  const mockSetFollowed = jest.fn(
-    async (authorId: UserId, postId: PostId, isFollowed: boolean) => {
-      isFollowedByViewer = isFollowed;
-    }
-  );
-
-  const screenNotFollowed = renderComponent(isFollowedByViewer, true);
-
-  const followElement = screenNotFollowed.getByRole("button", {
-    name: /^Follow/,
-  });
-  userEvent.click(followElement);
-
-  await waitFor(() => {
-    expect(mockSetFollowed).toBeCalled();
-    expect(isFollowedByViewer).toBeTruthy();
+  test("unfollowable posts do not display follow button", () => {
+    const testSetup = setupMocksAndRenderComponent(false, {
+      isFollowedByViewer: false,
+    });
+    expect(
+      testSetup.screen.queryByRole("button", { name: /^Unfollow/ })
+    ).not.toBeInTheDocument();
+    expect(
+      testSetup.screen.queryByRole("button", { name: /^Follow/ })
+    ).not.toBeInTheDocument();
   });
 
-  const screenFollowed = renderComponent(isFollowedByViewer, true);
+  test("Follow works for unfollowed post", async () => {
+    const state = { isFollowedByViewer: false };
+    const testSetup = setupMocksAndRenderComponent(true, state);
+    const { screen, mockSetFollowed } = testSetup;
 
-  const unfollowElement = screenFollowed.getByRole("button", {
-    name: /^Unfollow/,
+    const followElement = screen.getByRole("button", {
+      name: /^Follow/,
+    });
+    userEvent.click(followElement);
+
+    await waitFor(() => {
+      expect(mockSetFollowed).toBeCalled();
+      expect(state.isFollowedByViewer).toBeTruthy();
+    });
   });
-  userEvent.click(unfollowElement);
 
-  await waitFor(() => {
-    expect(mockSetFollowed).toBeCalled();
-    expect(isFollowedByViewer).toBeFalsy();
+  test("unfollow works for followed post", async () => {
+    const state = { isFollowedByViewer: true };
+    const testSetup = setupMocksAndRenderComponent(true, state);
+    const { screen, mockSetFollowed } = testSetup;
+
+    const unfollowElement = screen.getByRole("button", {
+      name: /^Unfollow/,
+    });
+    userEvent.click(unfollowElement);
+
+    await waitFor(() => {
+      expect(mockSetFollowed).toBeCalled();
+      expect(state.isFollowedByViewer).toBeFalsy();
+    });
   });
-
-  const screenUnfollowable = renderComponent(false, false);
-  expect(
-    screenUnfollowable.queryByRole("button", { name: /^Unfollow/ })
-  ).not.toBeInTheDocument();
-  expect(
-    screenUnfollowable.queryByRole("button", { name: /^Follow/ })
-  ).not.toBeInTheDocument();
 });
