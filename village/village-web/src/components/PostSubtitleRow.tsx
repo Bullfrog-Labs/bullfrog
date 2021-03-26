@@ -100,6 +100,7 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
     history.push("/profile");
   };
 
+  const matchesUpSmBreakpoint = useMediaQuery(theme.breakpoints.up("sm"));
   const viewer = useWhitelistedUserFromAppAuthContext();
 
   return (
@@ -122,12 +123,12 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
         </Grid>
       )}
       <Grid item>
-        <Grid container alignItems="center" spacing={1}>
-          <Grid item>
+        <Grid container alignItems="flex-start" spacing={1}>
+          <Grid item xs={!matchesUpSmBreakpoint ? 12 : undefined}>
             <Grid
               container
               justify="flex-start"
-              alignItems="center"
+              alignItems="flex-start"
               spacing={1}
             >
               <Grid item>
