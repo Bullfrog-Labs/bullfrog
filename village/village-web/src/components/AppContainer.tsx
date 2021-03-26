@@ -1,9 +1,9 @@
 import {
   Container,
   CssBaseline,
-  Grid,
   makeStyles,
   MuiThemeProvider,
+  Toolbar,
   useMediaQuery,
   useTheme,
 } from "@material-ui/core";
@@ -79,17 +79,18 @@ const BaseAppContainer = (props: BaseAppContainerProps) => {
       {!!props.autocompleteSearchBoxDialog && props.autocompleteSearchBoxDialog}
       <div className={classes.root}>
         {!!props.appDrawer && props.appDrawer}
-        <Grid container direction="column">
-          {!!props.appBar && <Grid item>{props.appBar}</Grid>}
-          <Grid item>
-            <main className={classes.content}>
-              <Container maxWidth="sm" className={classes.container}>
-                <div />
-                {props.children}
-              </Container>
-            </main>
-          </Grid>
-        </Grid>
+        <main className={classes.content}>
+          {!!props.appBar && (
+            <>
+              {props.appBar}
+              <Toolbar />
+            </>
+          )}
+          <Container maxWidth="sm" className={classes.container}>
+            <div />
+            {props.children}
+          </Container>
+        </main>
       </div>
     </MuiThemeProvider>
   );
