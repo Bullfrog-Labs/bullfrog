@@ -102,8 +102,6 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
 
   const viewer = useWhitelistedUserFromAppAuthContext();
 
-  const matchesUpSmBreakpoint = useMediaQuery(theme.breakpoints.up("sm"));
-
   return (
     <Grid
       container
@@ -124,11 +122,7 @@ export const PostSubtitleRow = React.memo((props: PostSubtitleRowProps) => {
         </Grid>
       )}
       <Grid item>
-        <Grid
-          container
-          alignItems="center"
-          spacing={matchesUpSmBreakpoint ? 5 : 1}
-        >
+        <Grid container alignItems="center" spacing={1}>
           <Grid item>
             <Grid
               container
