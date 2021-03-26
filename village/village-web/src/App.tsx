@@ -38,7 +38,7 @@ import { buildIsUserWhitelisted } from "./services/store/Whitelist";
 import { buildLookupTwitterUser } from "./services/Twitter";
 import { useGlobalStyles } from "./styles/styles";
 import { LoginView } from "./views/LoginView";
-import { ONBOARDING_POST_BODY } from "./content/onboarding";
+import { ONBOARDING_POST_BODY } from "./services/Onboarding";
 
 Logging.configure(log);
 
@@ -99,10 +99,14 @@ function App() {
             authProviderState
           );
 
+          logger.debug(`created user`);
+
           const result = await createPost(database)(user)({
             newTitle: "Welcome to Village!",
             newBody: ONBOARDING_POST_BODY,
           });
+
+          logger.debug(`created welcome post`);
 
           logger.debug(`create post result ${result}`);
         }
