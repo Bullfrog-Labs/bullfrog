@@ -46,7 +46,7 @@ export const useGlobalStyles = makeStyles((theme) => {
       paddingLeft: "0px",
       paddingTop: "4px",
       paddingRight: "0px",
-      paddingBottom: "4px",
+      paddingBottom: "8px",
     },
     editableRichText: {
       "&:hover:not(:focus)": {
