@@ -44,7 +44,9 @@ export const useGlobalStyles = makeStyles((theme) => {
     },
     cardListItem: {
       paddingLeft: "0px",
+      paddingTop: "4px",
       paddingRight: "0px",
+      paddingBottom: "4px",
     },
     editableRichText: {
       "&:hover:not(:focus)": {
