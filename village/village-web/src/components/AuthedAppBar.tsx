@@ -33,7 +33,7 @@ export const AuthedAppBar = (props: AuthedAppBarProps) => {
     <React.Fragment>
       <CssBaseline />
       <Slide appear={false} direction="down" in={!trigger}>
-        <AppBar color="primary">
+        <AppBar color="primary" elevation={0}>
           <Toolbar>
             <IconButton edge="start" color="inherit" aria-label="menu">
               <MenuIcon />
