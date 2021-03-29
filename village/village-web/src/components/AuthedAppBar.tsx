@@ -5,6 +5,7 @@ import {
   makeStyles,
   Slide,
   Toolbar,
+  Tooltip,
   useScrollTrigger,
 } from "@material-ui/core";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
@@ -35,32 +36,39 @@ export const AuthedAppBar = (props: AuthedAppBarProps) => {
       <Slide appear={false} direction="down" in={!trigger}>
         <AppBar color="primary" elevation={0}>
           <Toolbar>
-            <IconButton
-              edge="end"
-              color="inherit"
-              aria-label="help"
-              onClick={() => history.push(helpURL)}
-            >
-              <HelpIcon />
-            </IconButton>
+            <Tooltip title="Help">
+              <IconButton
+                edge="end"
+                color="inherit"
+                aria-label="help"
+                onClick={() => history.push(helpURL)}
+              >
+                <HelpIcon />
+              </IconButton>
+            </Tooltip>
 
             <div className={classes.grow} />
 
-            <IconButton
-              color="inherit"
-              aria-label="notifications"
-              onClick={() => history.push(notificationsURL)}
-            >
-              <NotificationsIcon />
-            </IconButton>
-            <IconButton
-              edge="end"
-              color="inherit"
-              aria-label="go to your profile"
-              onClick={() => history.push(profileURL(viewer.username))}
-            >
-              <AccountCircleIcon />
-            </IconButton>
+            <Tooltip title="Notifications">
+              <IconButton
+                color="inherit"
+                aria-label="notifications"
+                onClick={() => history.push(notificationsURL)}
+              >
+                <NotificationsIcon />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Go to your profile">
+              <IconButton
+                edge="end"
+                color="inherit"
+                aria-label="go to your profile"
+                onClick={() => history.push(profileURL(viewer.username))}
+              >
+                <AccountCircleIcon />
+              </IconButton>
+            </Tooltip>
           </Toolbar>
         </AppBar>
       </Slide>
