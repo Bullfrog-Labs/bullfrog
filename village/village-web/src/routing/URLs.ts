@@ -11,3 +11,5 @@ export const postURLById = (authorId: UserId, postId: PostId): Path =>
 export const profileURL = (username: string): Path => `/profile/${username}`;
 
 export const notificationsURL = "/notifications";
+
+export const helpURL = "/post/getvillageink/L0SdDtT3OwdXMOGymI4f";
