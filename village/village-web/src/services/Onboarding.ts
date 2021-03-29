@@ -12,40 +12,49 @@ export const ONBOARDING_POST_BODY: RichText = [
   {
     children: [
       {
+        type: "p",
         children: [{ text: "Hello and welcome to Village 🎉🎉🎉!" }],
+      },
+      {
+        children: [
+          {
+            text:
+              "Village is a multi-player digital garden built with connection in mind.",
+          },
+        ],
         type: "p",
       },
       {
-        type: "p",
         children: [
           { text: "For information on how to get started, check out " },
           {
-            type: "mention",
-            children: [{ text: "" }],
-            value: "Getting Started in Village",
             postId: "iUJS6XHlr57lkYsfTpxn",
+            value: "Getting Started in Village",
             authorId: "XIyXiG6v38Ru7sQarPqYtlIGolC3",
+            type: "mention",
             authorUsername: "getvillageink",
             exists: true,
+            children: [{ text: "" }],
           },
           { text: "." },
         ],
+        type: "p",
       },
       {
-        type: "p",
         children: [
           { text: "For other help & support, have a look at " },
           {
-            type: "mention",
+            authorId: "XIyXiG6v38Ru7sQarPqYtlIGolC3",
             children: [{ text: "" }],
+            exists: true,
             value: "Help & Support",
             postId: "L0SdDtT3OwdXMOGymI4f",
-            authorId: "XIyXiG6v38Ru7sQarPqYtlIGolC3",
+            type: "mention",
             authorUsername: "getvillageink",
-            exists: true,
           },
           { text: "." },
         ],
+        type: "p",
       },
     ],
   },
