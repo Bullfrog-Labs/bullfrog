@@ -1,8 +1,12 @@
-import { CircularProgress, Grid, makeStyles } from "@material-ui/core";
-import React, { CSSProperties, useCallback, useState } from "react";
+import {
+  CircularProgress,
+  Grid,
+  makeStyles,
+  Typography,
+} from "@material-ui/core";
+import { useCallback, useEffect, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList } from "react-window";
-import InfiniteLoader from "react-window-infinite-loader";
+import { Virtuoso } from "react-virtuoso";
 import { LogEventFn } from "../../services/Analytics";
 import {
   CursoredActivity,
@@ -22,18 +26,71 @@ const useStyles = makeStyles((theme) => {
       borderStyle: "solid solid",
     },
     notificationRow: {
+      flexGrow: 1,
       borderBottomWidth: "1px",
       borderBottomColor: borderColor,
       borderBottomStyle: "solid",
+      margin: theme.spacing(1),
+    },
+    footer: {
+      display: "block",
+      marginLeft: "auto",
+      marginRight: "auto",
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+      textAlign: "center",
     },
   };
 });
 
+type NotificationListFooterProps = {
+  hasNextPage: boolean;
+};
+
+const NotificationListFooter = (props: NotificationListFooterProps) => {
+  const classes = useStyles();
+  return (
+    <div className={classes.notificationRow}>
+      {props.hasNextPage ? (
+        <CircularProgress className={classes.footer} />
+      ) : (
+        <div className={classes.footer}>
+          <Typography variant="body1">
+            That's it. You've reached the end.
+          </Typography>
+        </div>
+      )}
+    </div>
+  );
+};
+
+type NotificationRowProps = {
+  index: number;
+  data: CursoredActivity;
+  logEvent: LogEventFn;
+};
+
+const NotificationRow = (props: NotificationRowProps) => {
+  const classes = useStyles();
+
+  return (
+    <Grid container direction="column" justify="center" alignItems="stretch">
+      <Grid item>
+        <div className={classes.notificationRow}>
+          <ActivityNotificationMatcher
+            activity={props.data.activity}
+            logEvent={props.logEvent}
+          />
+        </div>
+      </Grid>
+    </Grid>
+  );
+};
+
 type NotificationListState = {
-  isItemLoaded: (index: number) => boolean;
   cursoredActivities: CursoredActivity[];
-  itemCount: number;
-  loadMoreItems: (startIndex: number, stopIndex: number) => Promise<void>;
+  loadMoreItems: (lastItemIndex: number) => Promise<void>;
+  hasNextPage: boolean;
 };
 
 const useNotificationsListState = (
@@ -44,56 +101,25 @@ const useNotificationsListState = (
     CursoredActivity[]
   >([]);
   const [hasNextPage, setHasNextPage] = useState(true);
-  const itemCount = hasNextPage
-    ? cursoredActivities.length + 1
-    : cursoredActivities.length;
-
-  const isItemLoaded = useCallback(
-    (index: number): boolean => {
-      if (!hasNextPage) {
-        return true;
-      }
-      return index < cursoredActivities.length;
-    },
-    [cursoredActivities.length, hasNextPage]
-  );
 
   const loadMoreItems = useCallback(
-    async (startIndex: number, stopIndex: number) => {
-      // This function only loads from the bottom of the list, so that
-      // cursoredActivities must only be prepended to, so that everything works
-      // correctly, even if items are being prepended onto the start of the list
-      // (due to new notifications coming in via the listener.)
-
-      if (startIndex !== cursoredActivities.length) {
-        throw new Error(
-          `loadMoreItems called for non-append load: startIndex ${startIndex}, nCursoredActivities ${cursoredActivities.length}`
-        );
-      }
-
-      // indexing between startIndex and stopIndex is inclusive of both endpoints.
-      // if the startIndex is zero, there is no cursor to use, because it is the
-      // first query. if the startIndex is non-zero, the cursor to be used is in
-      // startIndex-1 (the last previously-fetched record).
-
-      // stopIndex passed in to this function will never be greater than
-      // itemCount. However, we don't know how many items there are left to read,
-      // until we actually read them from the database. Therefore, we ensure that
-      // the number of items we read here is large enough (rather than just
-      // requesting the single next item). Hence the usage of minimumBatchSize.
-
+    // load from end
+    async (lastItemIndex: number) => {
       const cursor =
-        startIndex === 0
+        lastItemIndex === 0
           ? undefined
-          : cursoredActivities[startIndex - 1].cursor;
-      const limit = Math.max(stopIndex - startIndex + 1, minimumBatchSize);
-      const result = await getCursoredActivitiesFromFeed(limit, cursor);
+          : cursoredActivities[lastItemIndex].cursor;
+
+      const result = await getCursoredActivitiesFromFeed(
+        minimumBatchSize,
+        cursor
+      );
 
       // Append to results
       setCursoredActivities([...cursoredActivities].concat(result));
 
-      const nReadActiviites = result.length;
-      if (nReadActiviites === 0) {
+      const nReadActivities = result.length;
+      if (nReadActivities === 0) {
         setHasNextPage(false);
       }
     },
@@ -102,9 +128,8 @@ const useNotificationsListState = (
 
   return {
     cursoredActivities: cursoredActivities,
-    isItemLoaded: isItemLoaded,
-    itemCount: itemCount,
     loadMoreItems: loadMoreItems,
+    hasNextPage: hasNextPage,
   };
 };
 
@@ -119,63 +144,44 @@ export const NotificationsList = (props: NotificationsListProps) => {
 
   const {
     cursoredActivities,
-    isItemLoaded,
-    itemCount,
     loadMoreItems,
+    hasNextPage,
   } = useNotificationsListState(
     minimumBatchSize,
     props.getCursoredActivitiesFromFeed
   );
 
-  const NotificationRow = (args: { index: number; style: CSSProperties }) => {
-    const content = isItemLoaded(args.index) ? (
-      <ActivityNotificationMatcher
-        activity={cursoredActivities[args.index].activity}
-        logEvent={props.logEvent}
-      />
-    ) : (
-      <CircularProgress />
-    );
-
-    return (
-      <div style={args.style}>
-        <Grid
-          container
-          direction="column"
-          justify="center"
-          alignItems="stretch"
-        >
-          <Grid item>
-            <div className={classes.notificationRow}>{content}</div>
-          </Grid>
-        </Grid>
-      </div>
-    );
-  };
+  useEffect(() => {
+    if (cursoredActivities.length === 0 && hasNextPage) {
+      loadMoreItems(0);
+    }
+  });
 
   return (
     <div className={classes.container}>
       <AutoSizer>
         {({ height, width }) => {
           return (
-            <InfiniteLoader
-              isItemLoaded={isItemLoaded}
-              itemCount={itemCount}
-              loadMoreItems={loadMoreItems}
-            >
-              {({ onItemsRendered, ref }) => (
-                <FixedSizeList
-                  ref={ref}
-                  itemSize={60}
-                  itemCount={itemCount}
-                  height={height}
-                  width={width}
-                  onItemsRendered={onItemsRendered}
-                >
-                  {NotificationRow}
-                </FixedSizeList>
+            <Virtuoso
+              style={{ height: height, width: width }}
+              data={cursoredActivities}
+              endReached={async (index) => {
+                await loadMoreItems(index);
+              }}
+              overscan={15}
+              itemContent={(index, data) => (
+                <NotificationRow
+                  index={index}
+                  data={data}
+                  logEvent={props.logEvent}
+                />
               )}
-            </InfiniteLoader>
+              components={{
+                Footer: () => (
+                  <NotificationListFooter hasNextPage={hasNextPage} />
+                ),
+              }}
+            />
           );
         }}
       </AutoSizer>
