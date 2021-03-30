@@ -1,4 +1,5 @@
 import { Story, Meta } from "@storybook/react/types-6-0";
+import { useState } from "react";
 import { SaveIndicator, SaveIndicatorProps } from "./SaveIndicator";
 
 export default {
@@ -6,9 +7,10 @@ export default {
   component: SaveIndicator,
 } as Meta;
 
-const Template: Story<SaveIndicatorProps> = (args) => (
-  <SaveIndicator {...args} />
-);
+const Template: Story<SaveIndicatorProps> = (args) => {
+  const [open, setOpen] = useState(args.open);
+  return <SaveIndicator open={open} setOpen={setOpen} state={args.state} />;
+};
 
 export const AllChangesSaved = Template.bind({});
 AllChangesSaved.args = {
