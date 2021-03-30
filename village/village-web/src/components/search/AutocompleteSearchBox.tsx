@@ -23,6 +23,7 @@ import {
 } from "../../services/search/Suggestions";
 import { CreatePostFn } from "../../services/store/Posts";
 import { UserRecord } from "../../services/store/Users";
+import { useGlobalStyles } from "../../styles/styles";
 import { assertNever } from "../../utils";
 import { RichText } from "../richtext/Types";
 import {
@@ -356,6 +357,8 @@ export const useAutocompleteSearchBoxDialog = (
   getSuggestions: SearchSuggestionFetchFn,
   fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn
 ) => {
+  const globalClasses = useGlobalStyles();
+
   const [open, setOpen] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const onClose = () => setOpen(false);
@@ -370,7 +373,7 @@ export const useAutocompleteSearchBoxDialog = (
       style={{ minHeight: "100px" }}
     >
       <Grid item>
-        <CircularProgress />
+        <CircularProgress className={globalClasses.circularProgress} />
       </Grid>
     </Grid>
   ) : (

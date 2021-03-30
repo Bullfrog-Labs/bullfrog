@@ -90,6 +90,7 @@ export const useGlobalStyles = makeStyles((theme) => {
       position: "fixed",
       top: "30%",
       left: "50%",
+      color: theme.palette.secondary.dark,
     },
     searchSuggestionLine: {
       fontWeight: "bold",
@@ -106,6 +107,9 @@ export const useGlobalStyles = makeStyles((theme) => {
       overflowWrap: "break-word",
       wordWrap: "break-word",
       wordBreak: "break-word",
+    },
+    circularProgress: {
+      color: theme.palette.secondary.dark,
     },
   };
 });
