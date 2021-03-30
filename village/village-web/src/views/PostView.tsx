@@ -80,6 +80,10 @@ import {
 } from "../services/store/Users";
 import { useGlobalStyles } from "../styles/styles";
 import { assertNever } from "../utils";
+import { serialize } from "remark-slate";
+import { RichText } from "../components/richtext/Types";
+import { NodeTypes } from "remark-slate/dist/deserialize";
+import { BlockType, LeafType } from "remark-slate/dist/serialize";
 
 const useStyles = makeStyles((theme) => ({
   postView: {
@@ -96,6 +100,41 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const DEFAULT_IDLE_TIME = 1 * 1000;
+
+const NODE_TYPES: NodeTypes = {
+  paragraph: "p",
+  block_quote: "blockquote",
+  code_block: "code_block",
+  link: "a",
+  ul_list: "ul",
+  ol_list: "ol",
+  listItem: "li",
+  heading: {
+    1: "h1",
+    2: "h2",
+    3: "h3",
+    4: "h4",
+    5: "h5",
+    6: "h6",
+  },
+  emphasis_mark: "italic",
+  strong_mark: "bold",
+  delete_mark: "strikethrough",
+  thematic_break: "thematic_break",
+};
+
+const TO_MARKDOWN_OPTIONS = { nodeTypes: NODE_TYPES };
+
+const toMarkdown = (richText: RichText) => {
+  console.log(richText);
+  const result = richText
+    .map((chunk) =>
+      serialize(chunk as BlockType | LeafType, TO_MARKDOWN_OPTIONS)
+    )
+    .join("");
+  console.log(result);
+  return result;
+};
 
 export type BasePostViewProps = {
   postView: React.ReactChild;
@@ -660,6 +699,8 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
   const [updatedAt, setUpdatedAt] = useState<Date>();
 
+  const [markdown, setMarkdown] = useState<string | undefined>();
+
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
   const {
@@ -741,6 +782,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
           setTitle(record!.title);
           setBody(record!.body);
           setUpdatedAt(record!.updatedAt);
+          setMarkdown(toMarkdown(record!.body));
           break;
         default:
           assertNever(existence);

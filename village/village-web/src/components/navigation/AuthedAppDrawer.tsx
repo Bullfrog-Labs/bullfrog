@@ -164,7 +164,7 @@ export const AuthedAppDrawer = (props: AuthedAppDrawerProps) => {
               <List>
                 <ListItem
                   button
-                  key={"Profile"}
+                  key={"Help"}
                   onClick={() => history.push(helpURL)}
                 >
                   <ListItemIcon>
