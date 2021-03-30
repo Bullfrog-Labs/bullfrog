@@ -10,6 +10,7 @@ import {
 import CheckIcon from "@material-ui/icons/Check";
 import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty";
 import React, { useState } from "react";
+import { useGlobalStyles } from "../../styles/styles";
 import { assertNever } from "../../utils";
 
 export type AllChangesSaved = "all-changes-saved";
@@ -34,6 +35,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const SaveIndicatorSnackbarMessage = (props: SaveIndicatorProps) => {
+  const globalClasses = useGlobalStyles();
   const classes = useStyles();
   const theme = useTheme();
 
@@ -47,7 +49,7 @@ const SaveIndicatorSnackbarMessage = (props: SaveIndicatorProps) => {
         return (
           <CircularProgress
             size={theme.spacing(ICON_SIZE_SPACES)}
-            color="secondary"
+            className={globalClasses.circularProgress}
           />
         );
       default:

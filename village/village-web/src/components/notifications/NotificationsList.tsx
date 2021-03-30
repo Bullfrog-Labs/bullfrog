@@ -12,6 +12,7 @@ import {
   CursoredActivity,
   GetCursoredActivitiesFromFeedFn,
 } from "../../services/store/Activities";
+import { useGlobalStyles } from "../../styles/styles";
 import { ActivityNotificationMatcher } from "./ActivityNotificationMatcher";
 
 const useStyles = makeStyles((theme) => {
@@ -48,11 +49,14 @@ type NotificationListFooterProps = {
 };
 
 const NotificationListFooter = (props: NotificationListFooterProps) => {
+  const globalClasses = useGlobalStyles();
   const classes = useStyles();
   return (
     <div className={classes.notificationRow}>
       {props.hasNextPage ? (
-        <CircularProgress className={classes.footer} />
+        <div className={classes.footer}>
+          <CircularProgress className={globalClasses.circularProgress} />
+        </div>
       ) : (
         <div className={classes.footer}>
           <Typography variant="body1">

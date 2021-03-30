@@ -8,6 +8,7 @@ import {
 import LibraryAddIcon from "@material-ui/icons/LibraryAdd";
 import LibraryAddCheckIcon from "@material-ui/icons/LibraryAddCheck";
 import React, { useState } from "react";
+import { useGlobalStyles } from "../../styles/styles";
 
 const useStyles = makeStyles((theme) => ({
   progressIndicator: {
@@ -27,6 +28,7 @@ export type FollowButtonProps = {
 };
 
 export const FollowButton = (props: FollowButtonProps) => {
+  const globalClasses = useGlobalStyles();
   const classes = useStyles();
   const theme = useTheme();
 
@@ -44,7 +46,10 @@ export const FollowButton = (props: FollowButtonProps) => {
   if (isWaitingOnAPICall) {
     return (
       <div className={classes.progressIndicator}>
-        <CircularProgress size={theme.spacing(2)} />
+        <CircularProgress
+          size={theme.spacing(2)}
+          className={globalClasses.circularProgress}
+        />
       </div>
     );
   }
