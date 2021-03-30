@@ -40,7 +40,6 @@ import {
   findMentionsInPosts,
   MentionInContext,
   postPreviewStringFromStart,
-  richTextToMarkdown,
 } from "../components/richtext/Utils";
 import { useFollowablePostViewState } from "../hooks/posts/useFollowablePostViewState";
 import {
@@ -661,8 +660,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
   const [body, setBody] = useState<PostBody>(EMPTY_RICH_TEXT);
   const [updatedAt, setUpdatedAt] = useState<Date>();
 
-  const [markdown, setMarkdown] = useState<string | undefined>();
-
   const postViewRef = useRef<PostViewImperativeHandle>(null);
 
   const {
@@ -744,7 +741,6 @@ export const PostViewController = (props: PostViewControllerProps) => {
           setTitle(record!.title);
           setBody(record!.body);
           setUpdatedAt(record!.updatedAt);
-          setMarkdown(richTextToMarkdown(record!.body));
           break;
         default:
           assertNever(existence);
