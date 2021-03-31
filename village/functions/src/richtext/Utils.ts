@@ -30,6 +30,18 @@ const NODE_TYPES: NodeTypes = {
 
 const TO_MARKDOWN_OPTIONS = { nodeTypes: NODE_TYPES };
 
+export const MD_FILENAME_SUFFIX = ".md";
+
+export const mentionValueToFilename = (value: string): string => {
+  const sanitized = sanitize(value);
+
+  // Mac OS only allows up to 255 chars in the filename
+  return sanitized.substring(0, 255 - MD_FILENAME_SUFFIX.length);
+};
+
+const isEmptyTextNode = (node: RichTextNode): boolean =>
+  Text.isText(node) && node.text.length === 0;
+
 const mentionsToBracketedRefs = (richText: RichText) => {
   type QueueElement = [Element | undefined, number, RichTextNode];
   type Queue = QueueElement[];
@@ -87,11 +99,17 @@ const mentionsToBracketedRefs = (richText: RichText) => {
     // not handled as link because the existing links would be invalid
     // off-platform.
     parent!.children[idx] = {
-      text: `[[${sanitize(mention.value as string)}]]`,
+      text: `[[${mentionValueToFilename(mention.value as string)}]]`,
     } as Text;
+
     // remove the "" added for cursor on either side of mention
-    parent!.children.splice(idx - 1, 1);
-    parent!.children.splice(idx, 1);
+    if (isEmptyTextNode(parent!.children[idx + 1])) {
+      parent!.children.splice(idx + 1, 1);
+    }
+
+    if (isEmptyTextNode(parent!.children[idx - 1])) {
+      parent!.children.splice(idx - 1, 1);
+    }
   });
 };
 
@@ -103,7 +121,7 @@ export const richTextToMarkdown = (richText: RichText) => {
   // serialize.
   mentionsToBracketedRefs(rtClone);
 
-  const result = rtClone
+  const result = (rtClone[0].children as RichText)
     .map((chunk) =>
       serialize(chunk as BlockType | LeafType, TO_MARKDOWN_OPTIONS)
     )

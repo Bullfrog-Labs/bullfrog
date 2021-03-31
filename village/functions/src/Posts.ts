@@ -4,14 +4,17 @@ import * as functions from "firebase-functions";
 import { QueryDocumentSnapshot } from "firebase-functions/lib/providers/firestore";
 import { HttpsError } from "firebase-functions/lib/providers/https";
 import fs from "fs";
-import sanitize from "sanitize-filename";
 import {
   followerPostFollowEntryPath,
   postFollowsCollPath,
   postPath,
   postsCollPath,
 } from "./FirestoreSchema";
-import { richTextToMarkdown } from "./richtext/Utils";
+import {
+  MD_FILENAME_SUFFIX,
+  mentionValueToFilename,
+  richTextToMarkdown,
+} from "./richtext/Utils";
 
 const cleanupPostFollows = async (
   db: admin.firestore.Firestore,
@@ -163,9 +166,12 @@ export const downloadAllPostsAsMD = async (
       startAfter = querySnapshot.docs.slice(-1)[0];
       querySnapshot.forEach((doc) => {
         // Write exported post to disk.
-        const filename = `${exportsDir}/${sanitize(doc.data().title)}.md`;
+        const filename = `${mentionValueToFilename(
+          doc.data().title
+        )}${MD_FILENAME_SUFFIX}`;
+        const filepath = `${exportsDir}/${filename}`;
         const content = richTextToMarkdown(doc.data().body);
-        writeResults.push(fs.promises.writeFile(filename, content));
+        writeResults.push(fs.promises.writeFile(filepath, content));
       });
     }
 

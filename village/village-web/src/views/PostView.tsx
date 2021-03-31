@@ -740,6 +740,7 @@ export const PostViewController = (props: PostViewControllerProps) => {
           postViewRef.current?.blurBody();
           setTitle(record!.title);
           setBody(record!.body);
+          console.log(record!.body);
           setUpdatedAt(record!.updatedAt);
           break;
         default:
