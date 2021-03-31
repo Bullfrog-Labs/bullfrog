@@ -1,12 +1,13 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import { HttpsError } from "firebase-functions/lib/providers/https";
 import { allPostFollowsWildcard } from "./FirestoreSchema";
 import {
   buildNewPostFollowEntryHandler,
   handlePostFollow,
   handlePostUnfollow,
 } from "./Follows";
-import { handlePostDelete } from "./Posts";
+import { downloadAllPostsAsMD, handlePostDelete } from "./Posts";
 import { buildPrerenderProxyApp } from "./PrerenderProxy";
 import { lookupTwitterUserById } from "./Twitter";
 
@@ -95,3 +96,24 @@ export const deletePost = functions.https.onCall(async (data, context) => {
   const result = await handlePostDelete(db, userId, postId);
   return result;
 });
+
+export const exportAllPostsAsMD = functions.https.onCall(
+  async (data, context) => {
+    const userId = context.auth?.uid;
+    if (!userId) {
+      throw new Error("uid not provided");
+    }
+
+    try {
+      return await downloadAllPostsAsMD(db, userId);
+    } catch (e) {
+      functions.logger.warn(
+        `Encountered unknown error during export all posts, ${e}`
+      );
+      throw new HttpsError(
+        "unknown",
+        `Unknown error in exporting all posts, ${e}`
+      );
+    }
+  }
+);

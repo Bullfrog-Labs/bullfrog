@@ -14,6 +14,7 @@ import {
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import HelpIcon from "@material-ui/icons/Help";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import clsx from "clsx";
@@ -21,6 +22,7 @@ import React, { useState } from "react";
 import { useHistory } from "react-router";
 import { helpURL, notificationsURL, profileURL } from "../../routing/URLs";
 import { useLoggedInUserFromAppAuthContext } from "../../services/auth/AppAuth";
+import { ExportAllPostsFn } from "../../services/store/Posts";
 
 const drawerWidth = 30;
 
@@ -70,7 +72,9 @@ const useStyles = makeStyles((theme) =>
   })
 );
 
-export type AuthedAppDrawerProps = {};
+export type AuthedAppDrawerProps = {
+  exportAllPosts: ExportAllPostsFn;
+};
 
 export const AuthedAppDrawer = (props: AuthedAppDrawerProps) => {
   const classes = useStyles();
@@ -164,13 +168,24 @@ export const AuthedAppDrawer = (props: AuthedAppDrawerProps) => {
               <List>
                 <ListItem
                   button
-                  key={"Profile"}
+                  key={"Help"}
                   onClick={() => history.push(helpURL)}
                 >
                   <ListItemIcon>
                     <HelpIcon />
                   </ListItemIcon>
                   <ListItemText primary="Help" />
+                </ListItem>
+
+                <ListItem
+                  button
+                  key={"Export all posts"}
+                  onClick={() => props.exportAllPosts(viewer.uid)}
+                >
+                  <ListItemIcon>
+                    <CloudDownloadIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={"Export all posts"} />
                 </ListItem>
 
                 <ListItem

@@ -29,6 +29,7 @@ import { GetCursoredActivitiesFromFeedFn } from "../services/store/Activities";
 import {
   CreatePostFn,
   DeletePostFn,
+  ExportAllPostsFn,
   GetAllPostsByTitlePrefixFn,
   GetMentionUserPostsFn,
   GetPostFn,
@@ -102,6 +103,8 @@ export type RouterProps = {
   getCursoredActivitiesFromFeed: CurriedByUser<GetCursoredActivitiesFromFeedFn>;
 
   isSitePublic: boolean;
+
+  exportAllPosts: ExportAllPostsFn;
 };
 
 export const Router = (props: RouterProps) => {
@@ -125,6 +128,7 @@ export const Router = (props: RouterProps) => {
     curriedFollowablePostCallbacks,
     getCursoredActivitiesFromFeed,
     isSitePublic,
+    exportAllPosts,
   } = props;
 
   const logger = log.getLogger("Router");
@@ -134,6 +138,7 @@ export const Router = (props: RouterProps) => {
       createPost={createPost}
       getSearchBoxSuggestions={getSearchSuggestionsByTitlePrefix}
       fetchTitleFromOpenGraph={fetchTitleFromOpenGraph}
+      exportAllPosts={exportAllPosts}
     >
       {props.children}
     </AppContainer>
