@@ -6,6 +6,7 @@ import {
   postFollowsCollPath,
   postPath,
 } from "./FirestoreSchema";
+import { Storage } from "@google-cloud/storage";
 
 const cleanupPostFollows = async (
   db: admin.firestore.Firestore,
@@ -113,4 +114,33 @@ export const handlePostDelete = async (
     );
     throw new HttpsError("unknown", `Unknown error in post unfollow, ${e}`);
   }
+};
+
+export type AllPostsReadyForDownload = {
+  status: "ready-for-download";
+  downloadURL: string;
+};
+
+export type DownloadAllPostsResponse = AllPostsReadyForDownload;
+
+// TODO: Set timeout to 9 minutes
+export const downloadAllPostsAsMD = async (
+  db: admin.firestore.Firestore,
+  storage: Storage,
+  userId: string
+): Promise<DownloadAllPostsResponse> => {
+  // Scan through Firestore and convert post to Markdown.
+  // Write exported post to disk.
+
+  // Take all exported posts on disk and zip them up.
+
+  // Upload zipped archive to GCS (or somewhere on local disk if running locally).
+
+  // Clean-up: Delete temp files
+
+  const bucketName = "foo";
+  return {
+    status: "ready-for-download",
+    downloadURL: "https://foo.com",
+  };
 };

@@ -40,7 +40,6 @@
     "react-virtualized-auto-sizer": "^1.0.5",
     "react-virtuoso": "^1.5.14",
     "regenerator-runtime": "^0.13.7",
-    "remark-slate": "^1.5.1",
     "slate": "^0.59.0",
     "slate-react": "^0.59.0",
     "styled-components": "^5.2.1",
