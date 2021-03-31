@@ -126,10 +126,13 @@ export type DownloadAllPostsResponse = AllPostsReadyForDownload;
 // TODO: Set timeout to 9 minutes
 export const downloadAllPostsAsMD = async (
   db: admin.firestore.Firestore,
-  storage: Storage,
+  // storage: Storage,
   userId: string
 ): Promise<DownloadAllPostsResponse> => {
   // Scan through Firestore and convert post to Markdown.
+
+  console.log("Foo");
+
   // Write exported post to disk.
 
   // Take all exported posts on disk and zip them up.

@@ -8,6 +8,7 @@ import { AppAuthContext } from "./services/auth/AppAuth";
 import { isWhitelisted, useAuthState } from "./services/auth/Auth";
 import FirebaseAuthProvider from "./services/auth/FirebaseAuthProvider";
 import { initializeFirebaseApp } from "./services/Firebase";
+import { ONBOARDING_POST_BODY } from "./services/Onboarding";
 import { fetchTitleFromOpenGraph } from "./services/OpenGraph";
 import { getSearchSuggestionsByTitlePrefix } from "./services/search/Suggestions";
 import { getCursoredActivitiesFromFeed } from "./services/store/Activities";
@@ -19,6 +20,7 @@ import {
 import {
   createPost,
   deletePost,
+  exportAllPostsAsMD,
   getAllPostsByTitlePrefix,
   getMentionUserPosts,
   getPost,
@@ -38,7 +40,6 @@ import { buildIsUserWhitelisted } from "./services/store/Whitelist";
 import { buildLookupTwitterUser } from "./services/Twitter";
 import { useGlobalStyles } from "./styles/styles";
 import { LoginView } from "./views/LoginView";
-import { ONBOARDING_POST_BODY } from "./services/Onboarding";
 
 Logging.configure(log);
 
@@ -183,6 +184,7 @@ function App() {
               database
             )}
             isSitePublic={isSitePublic}
+            exportAllPosts={exportAllPostsAsMD(functions)}
           />
         </AppAuthContext.Provider>
       ) : (

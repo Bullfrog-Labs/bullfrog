@@ -450,3 +450,16 @@ export const deletePost = (functions: firebase.functions.Functions) => async (
 };
 
 export type DeletePostFn = ReturnType<typeof deletePost>;
+
+export const exportAllPostsAsMD = (
+  functions: firebase.functions.Functions
+) => async (userId: UserId): Promise<string> => {
+  const exportAllPostsAsMDCall = functions.httpsCallable("exportAllPostsAsMD");
+  const logger = log.getLogger("exportAllPostsAsMD");
+  logger.debug(`Exporting all posts for user ${userId}`);
+
+  const result = await exportAllPostsAsMDCall({ userId: userId });
+  return result.data.downloadURL;
+};
+
+export type ExportAllPostsFn = ReturnType<typeof exportAllPostsAsMD>;

@@ -6,7 +6,7 @@ import {
   handlePostFollow,
   handlePostUnfollow,
 } from "./Follows";
-import { handlePostDelete } from "./Posts";
+import { downloadAllPostsAsMD, handlePostDelete } from "./Posts";
 import { buildPrerenderProxyApp } from "./PrerenderProxy";
 import { lookupTwitterUserById } from "./Twitter";
 
@@ -95,3 +95,15 @@ export const deletePost = functions.https.onCall(async (data, context) => {
   const result = await handlePostDelete(db, userId, postId);
   return result;
 });
+
+export const exportAllPostsAsMD = functions.https.onCall(
+  async (data, context) => {
+    const userId = context.auth?.uid;
+    if (!userId) {
+      throw new Error("uid not provided");
+    }
+
+    const result = await downloadAllPostsAsMD(db, userId);
+    return result;
+  }
+);

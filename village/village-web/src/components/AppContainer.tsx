@@ -16,7 +16,7 @@ import {
 } from "../services/auth/AppAuth";
 import { FetchTitleFromOpenGraphFn } from "../services/OpenGraph";
 import { SearchSuggestionFetchFn } from "../services/search/Suggestions";
-import { CreatePostFn } from "../services/store/Posts";
+import { CreatePostFn, ExportAllPostsFn } from "../services/store/Posts";
 import { UserRecord } from "../services/store/Users";
 import { SIGNUP_TYPEFORM_URL } from "../services/Typeform";
 import theme from "../styles/theme";
@@ -100,6 +100,7 @@ export interface AppContainerProps extends React.PropsWithChildren<{}> {
   createPost: CurriedByUser<CreatePostFn>;
   getSearchBoxSuggestions: CurriedByUser<SearchSuggestionFetchFn>;
   fetchTitleFromOpenGraph: FetchTitleFromOpenGraphFn;
+  exportAllPosts: ExportAllPostsFn;
 }
 
 export const AppContainer = (props: AppContainerProps) => {
@@ -143,7 +144,7 @@ const AuthedAppContainer = (props: AuthedAppContainerProps) => {
   const theme = useTheme();
 
   const [appDrawer, appBar] = useMediaQuery(theme.breakpoints.up("sm"))
-    ? [<AuthedAppDrawer />, undefined]
+    ? [<AuthedAppDrawer exportAllPosts={props.exportAllPosts} />, undefined]
     : [undefined, <AuthedAppBar />];
 
   return (
