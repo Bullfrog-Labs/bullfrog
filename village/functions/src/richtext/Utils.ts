@@ -1,9 +1,10 @@
+import ld from "lodash";
 import { serialize } from "remark-slate";
 import { NodeTypes } from "remark-slate/dist/deserialize";
 import { BlockType, LeafType } from "remark-slate/dist/serialize";
+import sanitize from "sanitize-filename";
 import { Element, Text } from "slate";
 import { RichText, RichTextNode } from "./Types";
-import ld from "lodash";
 
 const NODE_TYPES: NodeTypes = {
   paragraph: "p",
@@ -85,7 +86,9 @@ const mentionsToBracketedRefs = (richText: RichText) => {
     const [parent, idx, mention] = element;
     // not handled as link because the existing links would be invalid
     // off-platform.
-    parent!.children[idx] = { text: `[[${mention.value}]]` } as Text;
+    parent!.children[idx] = {
+      text: `[[${sanitize(mention.value as string)}]]`,
+    } as Text;
     // remove the "" added for cursor on either side of mention
     parent!.children.splice(idx - 1, 1);
     parent!.children.splice(idx, 1);

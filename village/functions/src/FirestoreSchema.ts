@@ -2,6 +2,8 @@ import { PostId, UserId } from "./Types";
 
 export const userPath = (userId: UserId) => `/users/${userId}`;
 
+export const postsCollPath = (userId: UserId) => `${userPath(userId)}/posts`;
+
 export const postPath = (args: { authorId: UserId; postId: PostId }) =>
   `/users/${args.authorId}/posts/${args.postId}`;
 

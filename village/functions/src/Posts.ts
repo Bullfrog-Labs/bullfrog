@@ -1,12 +1,17 @@
+import archiver from "archiver";
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import { QueryDocumentSnapshot } from "firebase-functions/lib/providers/firestore";
 import { HttpsError } from "firebase-functions/lib/providers/https";
+import fs from "fs";
+import sanitize from "sanitize-filename";
 import {
   followerPostFollowEntryPath,
   postFollowsCollPath,
   postPath,
+  postsCollPath,
 } from "./FirestoreSchema";
-import { Storage } from "@google-cloud/storage";
+import { richTextToMarkdown } from "./richtext/Utils";
 
 const cleanupPostFollows = async (
   db: admin.firestore.Firestore,
@@ -129,19 +134,56 @@ export const downloadAllPostsAsMD = async (
   // storage: Storage,
   userId: string
 ): Promise<DownloadAllPostsResponse> => {
-  // Scan through Firestore and convert post to Markdown.
+  const batchSize = 1;
+  const outputDir = "/tmp";
+  const exportsDir = `${outputDir}/exported`;
+  const archiveFilename = `${outputDir}/archived-village-posts.zip`;
+  const writeResults: Promise<void>[] = [];
 
-  console.log("Foo");
+  try {
+    fs.mkdirSync(exportsDir);
 
-  // Write exported post to disk.
+    // Scan through Firestore and convert post to Markdown.
+    const postsCollRef = db.collection(postsCollPath(userId));
 
-  // Take all exported posts on disk and zip them up.
+    let startAfter: QueryDocumentSnapshot | undefined = undefined;
+    while (true) {
+      let query = postsCollRef.orderBy("updatedAt");
+      if (!!startAfter) {
+        query = query.startAfter(startAfter!);
+      }
+      query = query.limit(batchSize);
 
-  // Upload zipped archive to GCS (or somewhere on local disk if running locally).
+      const querySnapshot = await query.get();
 
-  // Clean-up: Delete temp files
+      if (querySnapshot.size === 0) {
+        break;
+      }
 
-  const bucketName = "foo";
+      startAfter = querySnapshot.docs.slice(-1)[0];
+      querySnapshot.forEach((doc) => {
+        // Write exported post to disk.
+        const filename = `${exportsDir}/${sanitize(doc.data().title)}.md`;
+        const content = richTextToMarkdown(doc.data().body);
+        writeResults.push(fs.promises.writeFile(filename, content));
+      });
+    }
+
+    // Wait for all exported posts to finish writing
+    await Promise.all(writeResults);
+
+    // Take all exported posts on disk and zip them up.
+    const archive = archiver("zip");
+    archive.pipe(fs.createWriteStream(archiveFilename));
+    archive.directory(exportsDir, "Village archive");
+    await archive.finalize();
+
+    // Upload zipped archive to GCS (or somewhere on local disk if running locally).
+  } finally {
+    // Clean-up: Delete temp files
+    fs.rmdirSync(exportsDir, { recursive: true });
+  }
+
   return {
     status: "ready-for-download",
     downloadURL: "https://foo.com",

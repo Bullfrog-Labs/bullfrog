@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import { HttpsError } from "firebase-functions/lib/providers/https";
 import { allPostFollowsWildcard } from "./FirestoreSchema";
 import {
   buildNewPostFollowEntryHandler,
@@ -103,7 +104,16 @@ export const exportAllPostsAsMD = functions.https.onCall(
       throw new Error("uid not provided");
     }
 
-    const result = await downloadAllPostsAsMD(db, userId);
-    return result;
+    try {
+      return await downloadAllPostsAsMD(db, userId);
+    } catch (e) {
+      functions.logger.warn(
+        `Encountered unknown error during export all posts, ${e}`
+      );
+      throw new HttpsError(
+        "unknown",
+        `Unknown error in exporting all posts, ${e}`
+      );
+    }
   }
 );
