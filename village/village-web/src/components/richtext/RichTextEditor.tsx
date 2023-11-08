@@ -1,11 +1,13 @@
 import React, {
   useEffect,
   useMemo,
+  useRef,
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { ReactEditor, Slate } from "slate-react";
-import { createEditor, Operation } from "slate";
+import { ReactEditor, Slate, useSlate } from "slate-react";
+import { createEditor, Operation, Node } from "slate";
+import { CodeAlt } from "@styled-icons/boxicons-regular/CodeAlt";
 import { RichText } from "./Types";
 import * as log from "loglevel";
 import {
@@ -13,6 +15,15 @@ import {
   MentionNodeData,
   useMention,
   pipe,
+  BalloonToolbar,
+  ELEMENT_BLOCKQUOTE,
+  ELEMENT_H2,
+  ELEMENT_H3,
+  MARK_BOLD,
+  MARK_CODE,
+  MARK_ITALIC,
+  ToolbarElement,
+  ToolbarMark,
 } from "@blfrg.xyz/slate-plugins";
 import { EditablePlugins } from "@udecode/slate-plugins-core";
 import { Typography } from "@material-ui/core";
@@ -26,6 +37,13 @@ import {
 import { useGlobalStyles } from "../../styles/styles";
 import theme from "../../styles/theme";
 import { LogEventFn } from "../../services/Analytics";
+import {
+  LooksOne,
+  LooksTwo,
+  FormatQuote,
+  FormatBold,
+  FormatItalic,
+} from "@styled-icons/material";
 
 // TODO: Figure out why navigation within text using arrow keys does not work
 // properly, whereas using control keys works fine.
@@ -102,7 +120,16 @@ const RichTextEditor = forwardRef<
     () => EditorPlugins.createPlugins(editorOptions),
     [editorOptions]
   );
-  const editor = useMemo(() => pipe(createEditor(), decorator), [decorator]);
+
+  // We use a ref here because the editor instance must not change across reloads, but
+  // hot reload in react will force even useMemo to reload.
+  const editorRef = useRef<ReactEditor>();
+  if (!editorRef.current) {
+    editorRef.current = pipe(createEditor(), decorator);
+  }
+
+  const editor = editorRef.current;
+
   const globalClasses = useGlobalStyles();
 
   const {
@@ -164,6 +191,39 @@ const RichTextEditor = forwardRef<
     onMentionAdded(option);
   };
 
+  /**
+   * There's a bug - in slate i think - where the selection and content of
+   * the doc are not always kept in sync. When plugins like this one try to
+   * perform operations that depend on both the content and the selection
+   * they sometimes crash when you ex. navigate between pages. For the
+   * toolbar we can avoid issues by not enabling unless we have a valid selection.
+   * Selection seems to be reinitialized when the new editor is focused.
+   */
+  const Toolbar = () => {
+    // Important to use useSlate (not useEditor) since useSlate always has up to
+    // date editor state.
+    const editor = useSlate();
+    const { selection } = editor;
+
+    const validSelection =
+      !selection || Node.has(editor, selection.anchor.path);
+
+    if (validSelection) {
+      return (
+        <BalloonToolbar direction="top" hiddenDelay={500}>
+          <ToolbarElement type={ELEMENT_H2} icon={<LooksOne />} />
+          <ToolbarElement type={ELEMENT_H3} icon={<LooksTwo />} />
+          <ToolbarElement type={ELEMENT_BLOCKQUOTE} icon={<FormatQuote />} />
+          <ToolbarMark type={MARK_BOLD} icon={<FormatBold />} />
+          <ToolbarMark type={MARK_ITALIC} icon={<FormatItalic />} />
+          <ToolbarMark type={MARK_CODE} icon={<CodeAlt />} />
+        </BalloonToolbar>
+      );
+    } else {
+      return <></>;
+    }
+  };
+
   return (
     <Slate
       editor={editor}
@@ -201,6 +261,7 @@ const RichTextEditor = forwardRef<
           }}
         />
       )}
+      <Toolbar />
     </Slate>
   );
 });
